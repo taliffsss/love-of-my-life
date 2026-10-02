@@ -1,0 +1,321 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const exts = /\.(jpe?g|png|webp|gif|avif)$/i;
+
+// Every image dropped into public/photos becomes a slide (natural filename order).
+const dir = path.resolve('public/photos');
+const photos = (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
+  .filter((f) => exts.test(f))
+  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+  .map((f) => `${base}/photos/${encodeURIComponent(f)}`);
+
+// Song: first audio file found in public/music (janice.mp3 expected).
+const musicDir = path.resolve('public/music');
+const song = (fs.existsSync(musicDir) ? fs.readdirSync(musicDir) : []).find((f) =>
+  /\.(mp3|m4a|ogg|wav)$/i.test(f),
+);
+const music = song ? `${base}/music/${encodeURIComponent(song)}` : '';
+
+// Soft gradient placeholders until real photos are added.
+const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fbeee9" />
+    <meta name="robots" content="noindex" />
+    <title>For My Love</title>
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="petals" aria-hidden="true"></div>
+
+    <!-- Password gate -->
+    <main id="gate" class="gate">
+      <form id="form" class="card" autocomplete="off">
+        <div class="lock" id="lock" aria-hidden="true">
+          <svg viewBox="0 0 64 72" width="56" height="63">
+            <path class="shackle" d="M20 32V22a12 12 0 0 1 24 0v10" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+            <rect x="10" y="30" width="44" height="34" rx="9" fill="currentColor"/>
+            <path d="M32 55s-9-5.5-9-11.2c0-3 2.3-5 4.8-5 1.7 0 3.4.9 4.2 2.4.8-1.5 2.500-2.400 4.200-2.400 2.500 0 4.800 2 4.800 5C41 49.500 32 55 32 55z" fill="#fff" opacity=".92"/>
+          </svg>
+        </div>
+        <label for="pw" class="question">What is your endearment?</label>
+        <input
+          id="pw"
+          type="password"
+          inputmode="text"
+          autocapitalize="none"
+          autocorrect="off"
+          spellcheck="false"
+          placeholder="• • •"
+          aria-describedby="err"
+          required
+        />
+        <button type="submit">Unlock</button>
+        <p id="err" class="err" role="alert" aria-live="polite"></p>
+      </form>
+    </main>
+
+    <!-- Slideshow -->
+    <section id="show" class="show" aria-label="Photo slideshow" hidden>
+      <div class="stage" id="stage">
+        {
+          (photos.length ? photos : placeholders).map((src, i) => (
+            <figure class="slide" data-i={i}>
+              {photos.length ? (
+                <>
+                  <img class="bg" src={src} alt="" loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                  <img class="fg" src={src} alt={`Memory ${i + 1}`} loading={i < 2 ? 'eager' : 'lazy'} decoding="async" />
+                </>
+              ) : (
+                <div class="ph" style={`background:linear-gradient(135deg,${src})`}>
+                  <span>Add your photos to <code>public/photos</code></span>
+                </div>
+              )}
+            </figure>
+          ))
+        }
+      </div>
+      <div class="vignette"></div>
+      <button class="nav prev" id="prev" aria-label="Previous photo">‹</button>
+      <button class="nav next" id="next" aria-label="Next photo">›</button>
+      <button class="mute" id="mute" aria-label="Toggle music" hidden>♪</button>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </section>
+
+    {music && <audio id="song" src={music} loop preload="auto"></audio>}
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --blush: #fbeee9;
+    --rose: #c9607a;
+    --rose-deep: #9d3f5b;
+    --ink: #4a2c37;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--ink);
+    background: radial-gradient(120% 90% at 50% 0%, #fff6f2 0%, var(--blush) 45%, #f4d3d9 100%);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  [hidden] { display: none !important; }
+
+  /* floating petals */
+  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+  .petal {
+    position: absolute; top: -8vh; left: var(--x);
+    width: var(--s); height: var(--s);
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #f3a9b8 60%, #e27c96 100%);
+    border-radius: 100% 0 100% 0; opacity: 0;
+    animation: fall var(--d) linear var(--delay) infinite;
+  }
+  @keyframes fall {
+    0% { transform: translate3d(0, 0, 0) rotate(0); opacity: 0; }
+    10% { opacity: .7; }
+    100% { transform: translate3d(var(--dx), 112vh, 0) rotate(540deg); opacity: 0; }
+  }
+
+  /* gate */
+  .gate {
+    position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+    transition: opacity 1.4s ease, filter 1.4s ease, transform 1.4s var(--ease);
+  }
+  .card {
+    width: min(92vw, 400px); padding: 2.4rem 1.8rem 2rem; text-align: center;
+    background: rgba(255, 255, 255, .62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, .8); border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(201, 96, 122, .22);
+    animation: rise 1.2s var(--ease) both;
+    transition: transform 1s var(--ease), opacity .9s ease, box-shadow 1s ease;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px) scale(.97); } }
+  .lock { color: var(--rose); display: inline-block; margin-bottom: .6rem; animation: beat 2.8s ease-in-out infinite; }
+  .shackle { transform-origin: 44px 32px; transition: transform .8s var(--ease); }
+  @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  .question { display: block; font-size: clamp(1.7rem, 6.5vw, 2.1rem); font-style: italic; line-height: 1.2; margin-bottom: 1.3rem; }
+  #pw {
+    width: 100%; padding: .85rem 1rem; font: inherit; font-size: 1.4rem; text-align: center; letter-spacing: .25em;
+    color: var(--ink); background: rgba(255, 255, 255, .85); border: 1.5px solid #ecc3cd; border-radius: 14px; outline: none;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  #pw:focus { border-color: var(--rose); box-shadow: 0 0 0 4px rgba(201, 96, 122, .16); }
+  button[type='submit'] {
+    margin-top: 1rem; width: 100%; padding: .85rem; font: inherit; font-size: 1.3rem; font-weight: 600; letter-spacing: .08em;
+    color: #fff; border: 0; border-radius: 14px; cursor: pointer;
+    background: linear-gradient(135deg, #dd7a93, var(--rose-deep));
+    box-shadow: 0 8px 20px rgba(157, 63, 91, .3); transition: transform .2s, box-shadow .2s;
+  }
+  button[type='submit']:active { transform: scale(.98); }
+  .err { min-height: 1.4em; margin: .8rem 0 0; color: var(--rose-deep); font-style: italic; }
+  .card.shake { animation: shake .5s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
+
+  /* unlock sequence */
+  .gate.unlocking .shackle { transform: translateY(-9px) rotate(28deg); }
+  .gate.unlocking .card { transform: scale(1.04); box-shadow: 0 0 90px 24px rgba(255, 190, 205, .8); }
+  .gate.leaving { opacity: 0; filter: blur(14px); transform: scale(1.12); pointer-events: none; }
+  .gate.leaving .card { opacity: 0; }
+
+  /* slideshow */
+  .show { position: fixed; inset: 0; z-index: 5; background: #1d0f14; opacity: 0; transition: opacity 1.6s ease; }
+  .show.on { opacity: 1; }
+  .stage, .slide { position: absolute; inset: 0; margin: 0; }
+  .slide { opacity: 0; transition: opacity 2s ease; overflow: hidden; }
+  .slide.active { opacity: 1; z-index: 2; }
+  .slide.out { opacity: 0; z-index: 1; }
+  .slide .bg { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(32px) brightness(.7) saturate(1.2); }
+  .slide .fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 40px rgba(0, 0, 0, .35)); }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 2rem; color: #fff; font-size: 1.5rem; font-style: italic; text-shadow: 0 2px 12px rgba(0,0,0,.2); }
+  .ph code { font-style: normal; background: rgba(255,255,255,.3); padding: .1em .4em; border-radius: 6px; }
+  .vignette { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(40, 10, 20, .45) 100%); }
+
+  /* gentle entrance effects, cycled per slide */
+  .slide.active.fx0 .fg, .slide.active.fx0 .ph { animation: zoomIn 9s ease-out both; }
+  .slide.active.fx1 .fg, .slide.active.fx1 .ph { animation: slideIn 2.4s var(--ease) both, drift 9s linear both; }
+  .slide.active.fx2 .fg, .slide.active.fx2 .ph { animation: riseIn 2.4s var(--ease) both, zoomOut 9s ease-out both; }
+  .slide.active.fx3 .fg, .slide.active.fx3 .ph { animation: slideInL 2.4s var(--ease) both, drift 9s linear both; }
+  @keyframes zoomIn { from { transform: scale(1.12); } to { transform: scale(1); } }
+  @keyframes zoomOut { from { transform: scale(1); } to { transform: scale(1.06); } }
+  @keyframes slideIn { from { transform: translateX(7%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes slideInL { from { transform: translateX(-7%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes riseIn { from { transform: translateY(5%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes drift { from { translate: 0 0; } to { translate: -1.2% 0; } }
+
+  .nav { position: absolute; top: 0; bottom: 0; z-index: 6; width: 22%; border: 0; background: transparent; color: rgba(255,255,255,.0); font-size: 3rem; cursor: pointer; transition: color .3s; }
+  .nav.prev { left: 0; } .nav.next { right: 0; }
+  .nav:hover { color: rgba(255,255,255,.7); }
+  .mute {
+    position: absolute; z-index: 7; top: max(14px, env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px;
+    border-radius: 50%; border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.15); color: #fff; font-size: 1.3rem; cursor: pointer;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .mute.off { opacity: .55; text-decoration: line-through; }
+  .dots { position: absolute; z-index: 6; bottom: max(18px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; padding: 0 20px; pointer-events: none; }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.4); transition: all .6s; }
+  .dots i.on { background: #fff; width: 18px; border-radius: 6px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .petal, .lock { animation: none; }
+    .slide.active .fg, .slide.active .ph { animation: none !important; }
+  }
+</style>
+
+<script>
+  const PASSWORD = 'yam';
+  const SLIDE_MS = 7000;
+
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const gate = $('gate'), form = $<HTMLFormElement>('form'), pw = $<HTMLInputElement>('pw');
+  const err = $('err'), show = $('show'), muteBtn = $('mute'), dotsEl = $('dots');
+  const audio = document.getElementById('song') as HTMLAudioElement | null;
+  const slides = Array.from(document.querySelectorAll<HTMLElement>('.slide'));
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // petals
+  const petals = document.querySelector('.petals')!;
+  for (let i = 0; i < (innerWidth < 600 ? 12 : 22); i++) {
+    const p = document.createElement('span');
+    p.className = 'petal';
+    p.style.cssText = `--x:${Math.random() * 100}vw;--s:${8 + Math.random() * 12}px;--d:${9 + Math.random() * 10}s;--delay:${-Math.random() * 18}s;--dx:${(Math.random() - 0.5) * 30}vw`;
+    petals.appendChild(p);
+  }
+
+  // slideshow
+  let cur = -1, timer = 0, started = false;
+  dotsEl.innerHTML = slides.map(() => '<i></i>').join('');
+  const dots = Array.from(dotsEl.children);
+
+  function go(n: number) {
+    const next = (n + slides.length) % slides.length;
+    if (next === cur) return;
+    const prev = slides[cur];
+    if (prev) { prev.classList.remove('active'); prev.classList.add('out'); setTimeout(() => prev.classList.remove('out'), 2100); }
+    const s = slides[next];
+    s.className = s.className.replace(/\bfx\d\b/g, '').trim() + ` active fx${next % 4}`;
+    dots.forEach((d, i) => d.classList.toggle('on', i === next));
+    cur = next;
+    restart();
+  }
+  function restart() {
+    clearInterval(timer);
+    if (slides.length > 1) timer = window.setInterval(() => go(cur + 1), SLIDE_MS);
+  }
+  $('next').onclick = () => go(cur + 1);
+  $('prev').onclick = () => go(cur - 1);
+  let tx = 0;
+  show.addEventListener('touchstart', (e) => (tx = e.touches[0].clientX), { passive: true });
+  show.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
+  });
+  addEventListener('keydown', (e) => {
+    if (!started) return;
+    if (e.key === 'ArrowRight') go(cur + 1);
+    if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+
+  // music
+  function fadeIn() {
+    if (!audio) return;
+    let v = 0;
+    const t = setInterval(() => {
+      v = Math.min(0.8, v + 0.02);
+      audio.volume = v;
+      if (v >= 0.8) clearInterval(t);
+    }, 120);
+  }
+  muteBtn.onclick = () => {
+    if (!audio) return;
+    if (audio.paused) { audio.play(); muteBtn.classList.remove('off'); }
+    else { audio.pause(); muteBtn.classList.add('off'); }
+  };
+
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (started) return;
+    if (pw.value.trim().toLowerCase() !== PASSWORD) {
+      err.textContent = 'Not quite, my love. Try again.';
+      form.classList.remove('shake'); void form.offsetWidth; form.classList.add('shake');
+      pw.select();
+      return;
+    }
+    started = true;
+    pw.blur();
+    err.textContent = '';
+    // start playback inside the tap (mobile browsers require it), silent until the reveal
+    if (audio) { audio.volume = 0; audio.play().catch(() => {}); }
+
+    gate.classList.add('unlocking');
+    await wait(1100);
+    gate.classList.add('leaving');
+    show.hidden = false;
+    go(0);
+    void show.offsetWidth;
+    show.classList.add('on');
+    if (audio) { muteBtn.hidden = false; fadeIn(); }
+    await wait(1500);
+    gate.remove();
+  });
+</script>
