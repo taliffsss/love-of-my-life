@@ -280,21 +280,61 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
 
   go(0); // slideshow plays behind the modal from the start
 
-  // music
-  function fadeIn() {
-    if (!audio) return;
-    let v = 0;
-    const t = setInterval(() => {
-      v = Math.min(0.8, v + 0.02);
-      audio.volume = v;
-      if (v >= 0.8) clearInterval(t);
-    }, 120);
+  // music: a local file in public/music wins, otherwise the song streams from YouTube's official embed
+  type Music = { start(): void; toggle(): boolean; fadeIn(): void };
+  const YT_ID = '-sNgBet587k';
+  const TARGET = 80;
+
+  function localMusic(a: HTMLAudioElement): Music {
+    return {
+      start() { a.volume = 0; a.play().catch(() => {}); },
+      toggle() { if (a.paused) { a.play(); return true; } a.pause(); return false; },
+      fadeIn() {
+        let v = 0;
+        const t = setInterval(() => { v = Math.min(TARGET, v + 2); a.volume = v / 100; if (v >= TARGET) clearInterval(t); }, 120);
+      },
+    };
   }
-  muteBtn.onclick = () => {
-    if (!audio) return;
-    if (audio.paused) { audio.play(); muteBtn.classList.remove('off'); }
-    else { audio.pause(); muteBtn.classList.add('off'); }
-  };
+
+  function youtubeMusic(): Music {
+    let player: any = null, ready = false, wantPlay = false, playing = false;
+    const holder = document.createElement('div');
+    holder.id = 'yt';
+    holder.style.cssText = 'position:fixed;left:-9999px;top:0;width:200px;height:200px;opacity:0;pointer-events:none';
+    document.body.appendChild(holder);
+    (window as any).onYouTubeIframeAPIReady = () => {
+      player = new (window as any).YT.Player('yt', {
+        width: 200, height: 200, videoId: YT_ID,
+        playerVars: { controls: 0, loop: 1, playlist: YT_ID, playsinline: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: () => { ready = true; player.setVolume(0); if (wantPlay) player.playVideo(); },
+          onError: () => { muteBtn.hidden = true; },
+        },
+      });
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+    return {
+      start() { wantPlay = true; playing = true; if (ready) { player.setVolume(0); player.playVideo(); } },
+      toggle() {
+        if (!ready) return playing;
+        if (playing) { player.pauseVideo(); playing = false; } else { player.playVideo(); playing = true; }
+        return playing;
+      },
+      fadeIn() {
+        let v = 0;
+        const t = setInterval(() => {
+          v = Math.min(TARGET, v + 2);
+          if (ready) player.setVolume(v);
+          if (v >= TARGET) clearInterval(t);
+        }, 120);
+      },
+    };
+  }
+
+  const music: Music = audio ? localMusic(audio) : youtubeMusic();
+  muteBtn.onclick = () => muteBtn.classList.toggle('off', !music.toggle());
 
   const wait = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
 
@@ -311,13 +351,14 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     pw.blur();
     err.textContent = '';
     // start playback inside the tap (mobile browsers require it), silent until the reveal
-    if (audio) { audio.volume = 0; audio.play().catch(() => {}); }
+    music.start();
 
     gate.classList.add('unlocking');
     await wait(1100);
     gate.classList.add('leaving');
     show.classList.remove('locked');
-    if (audio) { muteBtn.hidden = false; fadeIn(); }
+    muteBtn.hidden = false;
+    music.fadeIn();
     await wait(1500);
     gate.remove();
   });
