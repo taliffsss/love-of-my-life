@@ -368,10 +368,9 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   }
   .letter-text { padding: 1.4rem .2rem 0; will-change: transform; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.2rem; line-height: 1.75; color: rgba(251, 238, 240, .9); text-align: center; }
   .letter-text p { margin: 0 0 1.4em; text-wrap: pretty; }
-  .letter-text.run { animation: readFirst var(--d1) linear forwards; }
+  .letter-text { transform: translate3d(0, 110%, 0); } /* parked below the panel until the scroll starts */
   .letter-text.loop { animation: readLoop var(--d2) linear infinite; }
   .letter-view:hover .letter-text, .letter-view:active .letter-text { animation-play-state: paused; }
-  @keyframes readFirst { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(0, calc(var(--th) * -1), 0); } }
   @keyframes readLoop { from { transform: translate3d(0, var(--vh), 0); } to { transform: translate3d(0, calc(var(--th) * -1), 0); } }
   .letter-view.manual { overflow-y: auto; -webkit-mask-image: none; mask-image: none; }
 
@@ -517,19 +516,13 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   const letterView = $('letterView'), letterText = $('letterText');
   function startReading() {
     show.classList.add('reading');
-    if (reduced) { letterView.classList.add('manual'); return; }
+    if (reduced) { letterView.classList.add('manual'); letterText.style.transform = 'none'; return; }
     const vh = letterView.clientHeight, th = letterText.scrollHeight, speed = 12; // px per second
     letterText.style.setProperty('--vh', `${vh}px`);
     letterText.style.setProperty('--th', `${th}px`);
-    letterText.style.setProperty('--d1', `${th / speed}s`);
     letterText.style.setProperty('--d2', `${(th + vh) / speed}s`);
-    letterText.classList.add('run');
+    letterText.classList.add('loop'); // starts just below the panel, so the first line rises in from the bottom
   }
-  letterText.addEventListener('animationend', (e) => {
-    if (e.animationName !== 'readFirst') return;
-    letterText.classList.remove('run');
-    letterText.classList.add('loop');
-  });
 
   const wait = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
 
