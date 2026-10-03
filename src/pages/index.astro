@@ -118,6 +118,13 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
         <span class="count" id="count" aria-hidden="true">01 / 01</span>
         <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
       </div>
+      <div class="nowplaying" id="nowplaying" hidden aria-live="polite">
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span class="np-text">
+          <span class="np-label">Now playing</span>
+          <span class="np-title">Palagi <span class="np-by">· TJ Monterde</span></span>
+        </span>
+      </div>
       <button class="mute" id="mute" aria-label="Toggle music" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
       </button>
@@ -369,8 +376,10 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   .letter-text { padding: 1.4rem .2rem 0; will-change: transform; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.2rem; line-height: 1.75; color: rgba(251, 238, 240, .9); text-align: center; }
   .letter-text p { margin: 0 0 1.4em; text-wrap: pretty; }
   .letter-text { transform: translate3d(0, 110%, 0); } /* parked below the panel until the scroll starts */
+  .letter-text.run { animation: readIn var(--d1) linear forwards; }
   .letter-text.loop { animation: readLoop var(--d2) linear infinite; }
   .letter-view:hover .letter-text, .letter-view:active .letter-text { animation-play-state: paused; }
+  @keyframes readIn { from { transform: translate3d(0, calc(var(--vh) * .72), 0); } to { transform: translate3d(0, calc(var(--th) * -1), 0); } }
   @keyframes readLoop { from { transform: translate3d(0, var(--vh), 0); } to { transform: translate3d(0, calc(var(--th) * -1), 0); } }
   .letter-view.manual { overflow-y: auto; -webkit-mask-image: none; mask-image: none; }
 
@@ -381,7 +390,30 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     .letter-text { font-size: 1.35rem; }
   }
 
+  /* ---------- now playing ---------- */
+  .nowplaying {
+    position: absolute; z-index: 8; top: max(16px, env(safe-area-inset-top)); left: 16px; max-width: calc(100% - 92px);
+    display: flex; align-items: center; gap: 12px; padding: 9px 16px 9px 13px; border-radius: 999px;
+    background: rgba(22, 8, 20, .55); border: 1px solid rgba(255, 255, 255, .2);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    animation: npIn 1.4s var(--ease) both; transition: opacity .5s var(--soft);
+  }
+  .nowplaying.paused { opacity: .6; }
+  @keyframes npIn { from { opacity: 0; transform: translate3d(-14px, 0, 0); } }
+  .np-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+  .np-label { font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+  .np-title { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.1rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .np-by { font-family: 'Inter', system-ui, sans-serif; font-style: normal; font-size: .72rem; letter-spacing: .04em; color: var(--muted); }
+  .eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 16px; }
+  .eq i { display: block; width: 3px; height: 100%; border-radius: 2px; background: linear-gradient(to top, var(--rose), var(--gold)); transform-origin: bottom; animation: eq 1.1s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-duration: .85s; animation-delay: -.3s; }
+  .eq i:nth-child(3) { animation-duration: 1.3s; animation-delay: -.6s; }
+  .eq i:nth-child(4) { animation-duration: .95s; animation-delay: -.15s; }
+  .nowplaying.paused .eq i { animation-play-state: paused; }
+  @keyframes eq { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+
   @media (prefers-reduced-motion: reduce) {
+    .eq i { animation: none; transform: scaleY(.6); }
     .heart, .glow, .lock { animation: none; }
     .slide.play .fg, .slide.play .ph { animation: none !important; }
     .slide { transition-duration: 1s; }
@@ -484,7 +516,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
         playerVars: { controls: 0, loop: 1, playlist: YT_ID, playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
           onReady: () => { ready = true; player.setVolume(0); if (wantPlay) player.playVideo(); },
-          onError: () => { muteBtn.hidden = true; },
+          onError: () => { muteBtn.hidden = true; nowPlaying.hidden = true; },
         },
       });
     };
@@ -510,7 +542,12 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   }
 
   const music: Music = audio ? localMusic(audio) : youtubeMusic();
-  muteBtn.onclick = () => muteBtn.classList.toggle('off', !music.toggle());
+  const nowPlaying = $('nowplaying');
+  muteBtn.onclick = () => {
+    const on = music.toggle();
+    muteBtn.classList.toggle('off', !on);
+    nowPlaying.classList.toggle('paused', !on);
+  };
 
   // letter panel: slow credits-style scroll, pauses while hovered or pressed
   const letterView = $('letterView'), letterText = $('letterText');
@@ -520,9 +557,16 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     const vh = letterView.clientHeight, th = letterText.scrollHeight, speed = 12; // px per second
     letterText.style.setProperty('--vh', `${vh}px`);
     letterText.style.setProperty('--th', `${th}px`);
+    letterText.style.setProperty('--d1', `${(th + vh * 0.72) / speed}s`);
     letterText.style.setProperty('--d2', `${(th + vh) / speed}s`);
-    letterText.classList.add('loop'); // starts just below the panel, so the first line rises in from the bottom
+    letterText.classList.add('run'); // first pass starts low in the panel, so the letter rises in from the bottom
   }
+
+  letterText.addEventListener('animationend', (e) => {
+    if (e.animationName !== 'readIn') return;
+    letterText.classList.remove('run');
+    letterText.classList.add('loop'); // later passes restart fully below the panel
+  });
 
   const wait = (ms: number) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
 
@@ -546,6 +590,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     gate.classList.add('leaving');
     show.classList.remove('locked');
     muteBtn.hidden = false;
+    nowPlaying.hidden = false;
     music.fadeIn();
     await wait(1500);
     startReading();
