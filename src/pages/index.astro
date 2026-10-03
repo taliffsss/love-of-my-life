@@ -28,48 +28,21 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#fbeee9" />
+    <meta name="theme-color" content="#1a0d17" />
     <meta name="robots" content="noindex" />
     <title>For My Love</title>
     <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
   </head>
   <body>
-    <div class="petals" aria-hidden="true"></div>
+    <div class="hearts" aria-hidden="true"></div>
 
-    <!-- Password gate -->
-    <main id="gate" class="gate">
-      <form id="form" class="card" autocomplete="off">
-        <div class="lock" id="lock" aria-hidden="true">
-          <svg viewBox="0 0 64 72" width="56" height="63">
-            <path class="shackle" d="M20 32V22a12 12 0 0 1 24 0v10" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-            <rect x="10" y="30" width="44" height="34" rx="9" fill="currentColor"/>
-            <path d="M32 55s-9-5.5-9-11.2c0-3 2.3-5 4.8-5 1.7 0 3.4.9 4.2 2.4.8-1.5 2.500-2.400 4.200-2.400 2.500 0 4.800 2 4.800 5C41 49.500 32 55 32 55z" fill="#fff" opacity=".92"/>
-          </svg>
-        </div>
-        <label for="pw" class="question">What is your endearment?</label>
-        <input
-          id="pw"
-          type="password"
-          inputmode="text"
-          autocapitalize="none"
-          autocorrect="off"
-          spellcheck="false"
-          placeholder="• • •"
-          aria-describedby="err"
-          required
-        />
-        <button type="submit">Unlock</button>
-        <p id="err" class="err" role="alert" aria-live="polite"></p>
-      </form>
-    </main>
-
-    <!-- Slideshow -->
+    <!-- Slideshow (plays from the start, blurred behind the modal) -->
     <section id="show" class="show on locked" aria-label="Photo slideshow">
       <div class="stage" id="stage">
         {
@@ -90,11 +63,50 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
         }
       </div>
       <div class="vignette"></div>
-      <button class="nav prev" id="prev" aria-label="Previous photo">‹</button>
-      <button class="nav next" id="next" aria-label="Next photo">›</button>
-      <button class="mute" id="mute" aria-label="Toggle music" hidden>♪</button>
-      <div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="glow"></div>
+      <button class="nav prev" id="prev" aria-label="Previous photo"></button>
+      <button class="nav next" id="next" aria-label="Next photo"></button>
+      <div class="hud">
+        <span class="count" id="count" aria-hidden="true">01 / 01</span>
+        <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
+      </div>
+      <button class="mute" id="mute" aria-label="Toggle music" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
+      </button>
     </section>
+
+    <!-- Password modal -->
+    <main id="gate" class="gate">
+      <form id="form" class="card" autocomplete="off">
+        <div class="lock" id="lock" aria-hidden="true">
+          <svg viewBox="0 0 64 72" width="34" height="38">
+            <path class="shackle" d="M20 32V22a12 12 0 0 1 24 0v10" fill="none" stroke="currentColor" stroke-width="4.500" stroke-linecap="round"/>
+            <rect x="10" y="30" width="44" height="34" rx="10" fill="currentColor"/>
+            <path d="M32 55s-9-5.500-9-11.200c0-3 2.300-5 4.800-5 1.700 0 3.400.9 4.200 2.400.8-1.500 2.500-2.400 4.200-2.400 2.500 0 4.800 2 4.800 5C41 49.500 32 55 32 55z" fill="#2a1220" opacity=".85"/>
+          </svg>
+        </div>
+        <p class="eyebrow">For my love</p>
+        <label for="pw" class="question">What is your endearment?</label>
+        <div class="field">
+          <input
+            id="pw"
+            type="password"
+            inputmode="text"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
+            placeholder="Type it here"
+            aria-describedby="err"
+            required
+          />
+          <button type="submit" aria-label="Unlock">
+            <svg class="i-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <svg class="i-heart" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 21s-8-4.900-8-11.100C4 6.700 6.300 5 8.600 5c1.500 0 2.900.8 3.400 2 .5-1.200 1.900-2 3.400-2C17.700 5 20 6.700 20 9.900 20 16.100 12 21 12 21z"/></svg>
+          </button>
+        </div>
+        <p id="err" class="err" role="alert" aria-live="polite"></p>
+      </form>
+    </main>
 
     {music && <audio id="song" src={music} loop preload="auto"></audio>}
   </body>
@@ -102,182 +114,250 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
 
 <style is:global>
   :root {
-    --blush: #fbeee9;
-    --rose: #c9607a;
-    --rose-deep: #9d3f5b;
-    --ink: #4a2c37;
+    --bg: #160a14;
+    --plum: #2a1220;
+    --rose: #f2a7b8;
+    --rose-deep: #d9728c;
+    --gold: #f0cfa8;
+    --text: #fbeef0;
+    --muted: rgba(251, 238, 240, .62);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --soft: cubic-bezier(0.45, 0, 0.2, 1);
+    --slide-ms: 8000ms;
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    color: var(--ink);
-    background: radial-gradient(120% 90% at 50% 0%, #fff6f2 0%, var(--blush) 45%, #f4d3d9 100%);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background: var(--bg);
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
   [hidden] { display: none !important; }
+  button { font: inherit; }
 
-  /* floating petals */
-  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 12; }
-  .petal {
-    position: absolute; top: -8vh; left: var(--x);
-    width: var(--s); height: var(--s);
-    background: radial-gradient(circle at 30% 30%, #fff 0%, #f3a9b8 60%, #e27c96 100%);
-    border-radius: 100% 0 100% 0; opacity: 0;
-    animation: fall var(--d) linear var(--delay) infinite;
+  /* ---------- floating hearts ---------- */
+  .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 12; }
+  .heart {
+    position: absolute; bottom: -8vh; left: var(--x);
+    font-size: var(--s); line-height: 1; color: var(--rose);
+    opacity: 0; filter: drop-shadow(0 0 8px rgba(242, 167, 184, .55));
+    animation: rise var(--d) var(--soft) var(--delay) infinite;
+    will-change: transform, opacity;
   }
-  @keyframes fall {
-    0% { transform: translate3d(0, 0, 0) rotate(0); opacity: 0; }
-    10% { opacity: .7; }
-    100% { transform: translate3d(var(--dx), 112vh, 0) rotate(540deg); opacity: 0; }
+  @keyframes rise {
+    0%   { transform: translate3d(0, 0, 0) scale(.7); opacity: 0; }
+    12%  { opacity: var(--o); }
+    35%  { transform: translate3d(calc(var(--sway) * 1), -38vh, 0) scale(.95); }
+    65%  { transform: translate3d(calc(var(--sway) * -1), -78vh, 0) scale(1.05); }
+    100% { transform: translate3d(calc(var(--sway) * .4), -118vh, 0) scale(1.1); opacity: 0; }
   }
 
-  /* gate */
+  /* ---------- slideshow ---------- */
+  .show {
+    position: fixed; inset: 0; z-index: 5; background: var(--bg); overflow: hidden;
+    opacity: 0; transition: opacity 1.4s ease, filter 2.6s var(--soft), transform 2.8s var(--ease);
+    will-change: filter, transform;
+  }
+  .show.on { opacity: 1; }
+  .show.locked { filter: blur(16px) brightness(.72) saturate(1.15); transform: scale(1.08); }
+  .stage, .slide { position: absolute; inset: 0; margin: 0; }
+  .slide { opacity: 0; transition: opacity 2.4s var(--soft); overflow: hidden; }
+  .slide.active { opacity: 1; z-index: 2; }
+  .slide.out { z-index: 1; }
+  .slide .bg {
+    position: absolute; inset: -8%; width: 116%; height: 116%; object-fit: cover;
+    filter: blur(34px) brightness(.62) saturate(1.25);
+  }
+  .slide .fg {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+    will-change: transform; transform-origin: 50% 45%;
+  }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 2rem; color: #fff; font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-style: italic; }
+  .ph code { font-family: Inter, sans-serif; font-style: normal; font-size: .8em; background: rgba(255,255,255,.22); padding: .1em .45em; border-radius: 6px; }
+
+  /* slow drifting zoom; stays on while the slide fades out, so nothing snaps */
+  .slide.play.fx0 .fg, .slide.play.fx0 .ph { animation: kb0 14s var(--soft) both; }
+  .slide.play.fx1 .fg, .slide.play.fx1 .ph { animation: kb1 14s var(--soft) both; }
+  .slide.play.fx2 .fg, .slide.play.fx2 .ph { animation: kb2 14s var(--soft) both; }
+  .slide.play.fx3 .fg, .slide.play.fx3 .ph { animation: kb3 14s var(--soft) both; }
+  @keyframes kb0 { from { transform: scale(1.1); } to { transform: scale(1.01); } }
+  @keyframes kb1 { from { transform: scale(1.02) translate3d(2.5%, 0, 0); } to { transform: scale(1.09) translate3d(-1.5%, 0, 0); } }
+  @keyframes kb2 { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+  @keyframes kb3 { from { transform: scale(1.02) translate3d(-2.5%, 0, 0); } to { transform: scale(1.09) translate3d(1.5%, 0, 0); } }
+
+  .vignette { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(22, 8, 20, .55) 100%), linear-gradient(to top, rgba(22, 8, 20, .55), transparent 28%); }
+  .glow {
+    position: absolute; inset: -20%; z-index: 3; pointer-events: none; mix-blend-mode: soft-light;
+    background: radial-gradient(40% 35% at 20% 15%, rgba(255, 190, 150, .55), transparent 70%), radial-gradient(45% 40% at 85% 90%, rgba(242, 130, 170, .5), transparent 70%);
+    animation: glow 12s ease-in-out infinite alternate;
+  }
+  @keyframes glow { from { transform: translate3d(-3%, -2%, 0) scale(1); opacity: .7; } to { transform: translate3d(3%, 2%, 0) scale(1.08); opacity: 1; } }
+
+  .nav { position: absolute; top: 0; bottom: 0; z-index: 6; width: 28%; border: 0; background: transparent; cursor: pointer; }
+  .nav.prev { left: 0; } .nav.next { right: 0; }
+
+  .hud { position: absolute; z-index: 7; left: 24px; right: 24px; bottom: max(22px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 14px; pointer-events: none; }
+  .count { font-size: .72rem; letter-spacing: .22em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .bar { flex: 1; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .2); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 100%; transform-origin: left; transform: scaleX(0); background: linear-gradient(90deg, var(--rose), var(--gold)); }
+  .bar i.run { animation: fill var(--slide-ms) linear forwards; }
+  @keyframes fill { to { transform: scaleX(1); } }
+
+  .mute {
+    position: absolute; z-index: 8; top: max(16px, env(safe-area-inset-top)); right: 16px; width: 44px; height: 44px; display: grid; place-items: center;
+    border-radius: 50%; border: 1px solid rgba(255, 255, 255, .22); background: rgba(255, 255, 255, .1); color: #fff; cursor: pointer;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform .3s var(--ease), background .3s, opacity .3s;
+    animation: pop .9s var(--ease) both;
+  }
+  .mute:hover { background: rgba(255, 255, 255, .18); }
+  .mute:active { transform: scale(.94); }
+  .mute.off { opacity: .5; }
+  @keyframes pop { from { opacity: 0; transform: scale(.7); } }
+
+  /* ---------- password modal ---------- */
   .gate {
     position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
     padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
-    background: rgba(255, 240, 238, .28);
-    backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
-    transition: opacity 1.6s ease, backdrop-filter 1.6s ease, -webkit-backdrop-filter 1.6s ease, background 1.6s ease;
+    background: linear-gradient(160deg, rgba(34, 12, 30, .55), rgba(110, 36, 70, .32));
+    transition: opacity 1.8s var(--soft), background 1.8s var(--soft);
+  }
+  .gate::after {            /* soft bloom of light at the moment of unlocking */
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 226, 214, .85), rgba(242, 167, 184, .35) 38%, transparent 68%);
   }
   .card {
-    width: min(92vw, 400px); padding: 2.4rem 1.8rem 2rem; text-align: center;
-    background: rgba(255, 255, 255, .62); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, .8); border-radius: 28px;
-    box-shadow: 0 20px 60px rgba(201, 96, 122, .22);
-    animation: rise 1.2s var(--ease) both;
-    transition: transform 1s var(--ease), opacity .9s ease, box-shadow 1s ease;
+    position: relative; width: min(92vw, 380px); padding: 2.2rem 1.7rem 1.7rem; text-align: center;
+    background: linear-gradient(160deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .06));
+    border: 1px solid rgba(255, 255, 255, .22); border-radius: 30px;
+    backdrop-filter: blur(22px) saturate(1.3); -webkit-backdrop-filter: blur(22px) saturate(1.3);
+    box-shadow: 0 30px 80px rgba(10, 2, 10, .5), inset 0 1px 0 rgba(255, 255, 255, .25);
+    animation: cardIn 1.5s var(--ease) both;
+    transition: transform 1.5s var(--ease), opacity 1.2s var(--soft), filter 1.4s var(--soft), box-shadow 1.2s var(--soft);
   }
-  @keyframes rise { from { opacity: 0; transform: translateY(24px) scale(.97); } }
-  .lock { color: var(--rose); display: inline-block; margin-bottom: .6rem; animation: beat 2.8s ease-in-out infinite; }
-  .shackle { transform-origin: 44px 32px; transition: transform .8s var(--ease); }
-  @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-  .question { display: block; font-size: clamp(1.7rem, 6.5vw, 2.1rem); font-style: italic; line-height: 1.2; margin-bottom: 1.3rem; }
+  @keyframes cardIn { from { opacity: 0; transform: translate3d(0, 28px, 0) scale(.96); filter: blur(8px); } }
+  .card > * { animation: fadeUp 1.2s var(--ease) both; }
+  .card > .lock { animation-delay: .25s; } .card > .eyebrow { animation-delay: .4s; }
+  .card > .question { animation-delay: .55s; } .card > .field { animation-delay: .7s; } .card > .err { animation-delay: .8s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translate3d(0, 12px, 0); } }
+
+  .lock { display: inline-grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; color: var(--rose); margin-bottom: 1rem;
+    background: radial-gradient(circle, rgba(242, 167, 184, .22), rgba(242, 167, 184, .04) 70%); border: 1px solid rgba(242, 167, 184, .3);
+    animation: fadeUp 1.2s var(--ease) .25s both, breathe 4s ease-in-out 1.5s infinite; }
+  .shackle { transform-origin: 44px 32px; transition: transform 1s var(--ease); }
+  @keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 rgba(242, 167, 184, .35); } 50% { box-shadow: 0 0 0 14px rgba(242, 167, 184, 0); } }
+
+  .eyebrow { margin: 0 0 .5rem; font-size: .68rem; letter-spacing: .38em; text-transform: uppercase; color: var(--gold); }
+  .question {
+    display: block; margin-bottom: 1.6rem; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 400;
+    font-size: clamp(1.9rem, 8.5vw, 2.4rem); line-height: 1.12; color: var(--text);
+  }
+  .field { position: relative; }
   #pw {
-    width: 100%; padding: .85rem 1rem; font: inherit; font-size: 1.4rem; text-align: center; letter-spacing: .25em;
-    color: var(--ink); background: rgba(255, 255, 255, .85); border: 1.5px solid #ecc3cd; border-radius: 14px; outline: none;
-    transition: border-color .3s, box-shadow .3s;
+    width: 100%; height: 56px; padding: 0 64px 0 22px; font: inherit; font-size: 1rem; letter-spacing: .12em; color: var(--text);
+    background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .22); border-radius: 999px; outline: none;
+    transition: border-color .4s var(--soft), box-shadow .4s var(--soft), background .4s var(--soft);
   }
-  #pw:focus { border-color: var(--rose); box-shadow: 0 0 0 4px rgba(201, 96, 122, .16); }
-  button[type='submit'] {
-    margin-top: 1rem; width: 100%; padding: .85rem; font: inherit; font-size: 1.3rem; font-weight: 600; letter-spacing: .08em;
-    color: #fff; border: 0; border-radius: 14px; cursor: pointer;
-    background: linear-gradient(135deg, #dd7a93, var(--rose-deep));
-    box-shadow: 0 8px 20px rgba(157, 63, 91, .3); transition: transform .2s, box-shadow .2s;
+  #pw::placeholder { color: rgba(251, 238, 240, .42); letter-spacing: .04em; }
+  #pw:focus { border-color: rgba(242, 167, 184, .8); background: rgba(255, 255, 255, .13); box-shadow: 0 0 0 5px rgba(242, 167, 184, .16), 0 0 30px rgba(242, 167, 184, .25); }
+  .field button {
+    position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; cursor: pointer; color: #2a1220;
+    background: linear-gradient(135deg, var(--gold), var(--rose)); box-shadow: 0 6px 18px rgba(217, 114, 140, .45); transition: transform .35s var(--ease), box-shadow .35s;
   }
-  button[type='submit']:active { transform: scale(.98); }
-  .err { min-height: 1.4em; margin: .8rem 0 0; color: var(--rose-deep); font-style: italic; }
-  .card.shake { animation: shake .5s; }
-  @keyframes shake { 20%, 60% { transform: translateX(-9px); } 40%, 80% { transform: translateX(9px); } }
+  .field button:hover { transform: scale(1.06); }
+  .field button:active { transform: scale(.94); }
+  .field button svg { grid-area: 1 / 1; transition: opacity .5s var(--soft), transform .6s var(--ease); }
+  .i-heart { opacity: 0; transform: scale(.4); }
+  .err { min-height: 1.3em; margin: .9rem 0 0; font-size: .82rem; color: var(--rose); letter-spacing: .02em; }
+  .card.shake { animation: shake .55s var(--soft); }
+  @keyframes shake { 15%, 55% { transform: translateX(-8px); } 35%, 75% { transform: translateX(8px); } }
 
-  /* unlock sequence */
-  .gate.unlocking .shackle { transform: translateY(-9px) rotate(28deg); }
-  .gate.unlocking .card { transform: scale(1.04); box-shadow: 0 0 90px 24px rgba(255, 190, 205, .8); }
-  .gate.leaving { opacity: 0; background: rgba(255, 240, 238, 0); backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); pointer-events: none; }
-  .gate.leaving .card { opacity: 0; transform: translateY(-30px) scale(1.08); }
-
-  /* slideshow */
-  .show { position: fixed; inset: 0; z-index: 5; background: #1d0f14; opacity: 0; transition: opacity 1.6s ease; }
-  .show.on { opacity: 1; }
-  .show { transition: opacity 1.6s ease, filter 2s ease, transform 2s var(--ease); }
-  .show.locked { filter: blur(14px) brightness(.9) saturate(1.1); transform: scale(1.06); }
-  .stage, .slide { position: absolute; inset: 0; margin: 0; }
-  .slide { opacity: 0; transition: opacity 2s ease; overflow: hidden; }
-  .slide.active { opacity: 1; z-index: 2; }
-  .slide.out { opacity: 0; z-index: 1; }
-  .slide .bg { position: absolute; inset: -6%; width: 112%; height: 112%; object-fit: cover; filter: blur(32px) brightness(.7) saturate(1.2); }
-  .slide .fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 40px rgba(0, 0, 0, .35)); }
-  .ph { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 2rem; color: #fff; font-size: 1.5rem; font-style: italic; text-shadow: 0 2px 12px rgba(0,0,0,.2); }
-  .ph code { font-style: normal; background: rgba(255,255,255,.3); padding: .1em .4em; border-radius: 6px; }
-  .vignette { position: absolute; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(40, 10, 20, .45) 100%); }
-
-  /* gentle entrance effects, cycled per slide */
-  .slide.active.fx0 .fg, .slide.active.fx0 .ph { animation: zoomIn 9s ease-out both; }
-  .slide.active.fx1 .fg, .slide.active.fx1 .ph { animation: slideIn 2.4s var(--ease) both, drift 9s linear both; }
-  .slide.active.fx2 .fg, .slide.active.fx2 .ph { animation: riseIn 2.4s var(--ease) both, zoomOut 9s ease-out both; }
-  .slide.active.fx3 .fg, .slide.active.fx3 .ph { animation: slideInL 2.4s var(--ease) both, drift 9s linear both; }
-  @keyframes zoomIn { from { transform: scale(1.12); } to { transform: scale(1); } }
-  @keyframes zoomOut { from { transform: scale(1); } to { transform: scale(1.06); } }
-  @keyframes slideIn { from { transform: translateX(7%); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes slideInL { from { transform: translateX(-7%); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes riseIn { from { transform: translateY(5%); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes drift { from { translate: 0 0; } to { translate: -1.2% 0; } }
-
-  .nav { position: absolute; top: 0; bottom: 0; z-index: 6; width: 22%; border: 0; background: transparent; color: rgba(255,255,255,.0); font-size: 3rem; cursor: pointer; transition: color .3s; }
-  .nav.prev { left: 0; } .nav.next { right: 0; }
-  .nav:hover { color: rgba(255,255,255,.7); }
-  .mute {
-    position: absolute; z-index: 7; top: max(14px, env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px;
-    border-radius: 50%; border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.15); color: #fff; font-size: 1.3rem; cursor: pointer;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  }
-  .mute.off { opacity: .55; text-decoration: line-through; }
-  .dots { position: absolute; z-index: 6; bottom: max(18px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; padding: 0 20px; pointer-events: none; }
-  .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.4); transition: all .6s; }
-  .dots i.on { background: #fff; width: 18px; border-radius: 6px; }
+  /* ---------- unlock sequence ---------- */
+  .gate.unlocking .shackle { transform: translateY(-9px) rotate(30deg); }
+  .gate.unlocking .i-arrow { opacity: 0; transform: scale(.4); }
+  .gate.unlocking .i-heart { opacity: 1; transform: scale(1); animation: beat .9s var(--ease) both; }
+  .gate.unlocking .card { transform: scale(1.03); box-shadow: 0 0 80px 10px rgba(242, 167, 184, .45), 0 30px 80px rgba(10, 2, 10, .5), inset 0 1px 0 rgba(255, 255, 255, .25); }
+  @keyframes beat { 0% { transform: scale(.4); } 55% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  .gate.leaving { opacity: 0; background: rgba(34, 12, 30, 0); pointer-events: none; }
+  .gate.leaving::after { animation: bloom 2.2s var(--soft) both; }
+  .gate.leaving .card { opacity: 0; transform: translate3d(0, -26px, 0) scale(1.07); filter: blur(10px); }
+  @keyframes bloom { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .petal, .lock { animation: none; }
-    .slide.active .fg, .slide.active .ph { animation: none !important; }
+    .heart, .glow, .lock { animation: none; }
+    .slide.play .fg, .slide.play .ph { animation: none !important; }
+    .slide { transition-duration: 1s; }
   }
 </style>
 
 <script>
   const PASSWORD = 'yam';
-  const SLIDE_MS = 7000;
+  const SLIDE_MS = 8000;
 
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const gate = $('gate'), form = $<HTMLFormElement>('form'), pw = $<HTMLInputElement>('pw');
-  const err = $('err'), show = $('show'), muteBtn = $('mute'), dotsEl = $('dots');
+  const err = $('err'), show = $('show'), muteBtn = $('mute');
+  const countEl = $('count'), barFill = $('barfill');
   const audio = document.getElementById('song') as HTMLAudioElement | null;
   const slides = Array.from(document.querySelectorAll<HTMLElement>('.slide'));
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // petals
-  const petals = document.querySelector('.petals')!;
-  for (let i = 0; i < (innerWidth < 600 ? 12 : 22); i++) {
-    const p = document.createElement('span');
-    p.className = 'petal';
-    p.style.cssText = `--x:${Math.random() * 100}vw;--s:${8 + Math.random() * 12}px;--d:${9 + Math.random() * 10}s;--delay:${-Math.random() * 18}s;--dx:${(Math.random() - 0.5) * 30}vw`;
-    petals.appendChild(p);
+  // floating hearts
+  const hearts = document.querySelector('.hearts')!;
+  const heartCount = reduced ? 0 : innerWidth < 600 ? 10 : 18;
+  for (let i = 0; i < heartCount; i++) {
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.textContent = '\u2665';
+    h.style.cssText = `--x:${Math.random() * 96}vw;--s:${10 + Math.random() * 16}px;--d:${16 + Math.random() * 14}s;--delay:${-Math.random() * 30}s;--sway:${12 + Math.random() * 22}px;--o:${0.25 + Math.random() * 0.4}`;
+    hearts.appendChild(h);
   }
 
   // slideshow
   let cur = -1, timer = 0, started = false;
-  dotsEl.innerHTML = slides.map(() => '<i></i>').join('');
-  const dots = Array.from(dotsEl.children);
+  const pad = (n: number) => String(n).padStart(2, '0');
 
   function go(n: number) {
     const next = (n + slides.length) % slides.length;
     if (next === cur) return;
     const prev = slides[cur];
-    if (prev) { prev.classList.remove('active'); prev.classList.add('out'); setTimeout(() => prev.classList.remove('out'), 2100); }
+    if (prev) {
+      prev.classList.remove('active');
+      prev.classList.add('out');
+      setTimeout(() => prev.classList.remove('out', 'play'), 2600);
+    }
     const s = slides[next];
-    s.className = s.className.replace(/\bfx\d\b/g, '').trim() + ` active fx${next % 4}`;
-    dots.forEach((d, i) => d.classList.toggle('on', i === next));
+    s.className = s.className.replace(/\b(fx\d|out|play)\b/g, '').trim();
+    void s.offsetWidth; // restart the drift animation from its first frame
+    s.classList.add('play', `fx${next % 4}`, 'active');
+    countEl.textContent = `${pad(next + 1)} / ${pad(slides.length)}`;
     cur = next;
     restart();
   }
   function restart() {
     clearInterval(timer);
-    if (slides.length > 1) timer = window.setInterval(() => go(cur + 1), SLIDE_MS);
+    barFill.classList.remove('run');
+    void barFill.offsetWidth;
+    if (slides.length > 1) {
+      barFill.classList.add('run');
+      timer = window.setInterval(() => go(cur + 1), SLIDE_MS);
+    }
   }
-  $('next').onclick = () => go(cur + 1);
-  $('prev').onclick = () => go(cur - 1);
+  $('next').onclick = () => started && go(cur + 1);
+  $('prev').onclick = () => started && go(cur - 1);
   let tx = 0;
   show.addEventListener('touchstart', (e) => (tx = e.touches[0].clientX), { passive: true });
   show.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
+    if (started && Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1));
   });
   addEventListener('keydown', (e) => {
     if (!started) return;
     if (e.key === 'ArrowRight') go(cur + 1);
     if (e.key === 'ArrowLeft') go(cur - 1);
   });
-
   go(0); // slideshow plays behind the modal from the start
 
   // music: a local file in public/music wins, otherwise the song streams from YouTube's official embed
@@ -354,12 +434,12 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     music.start();
 
     gate.classList.add('unlocking');
-    await wait(1100);
+    await wait(1200);
     gate.classList.add('leaving');
     show.classList.remove('locked');
     muteBtn.hidden = false;
     music.fadeIn();
-    await wait(1500);
+    await wait(2200);
     gate.remove();
   });
 </script>
