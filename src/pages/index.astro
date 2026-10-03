@@ -70,7 +70,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     </main>
 
     <!-- Slideshow -->
-    <section id="show" class="show" aria-label="Photo slideshow" hidden>
+    <section id="show" class="show on locked" aria-label="Photo slideshow">
       <div class="stage" id="stage">
         {
           (photos.length ? photos : placeholders).map((src, i) => (
@@ -120,7 +120,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   [hidden] { display: none !important; }
 
   /* floating petals */
-  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
+  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 12; }
   .petal {
     position: absolute; top: -8vh; left: var(--x);
     width: var(--s); height: var(--s);
@@ -138,7 +138,9 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   .gate {
     position: fixed; inset: 0; z-index: 10; display: grid; place-items: center;
     padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
-    transition: opacity 1.4s ease, filter 1.4s ease, transform 1.4s var(--ease);
+    background: rgba(255, 240, 238, .28);
+    backdrop-filter: blur(16px) saturate(1.1); -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    transition: opacity 1.6s ease, backdrop-filter 1.6s ease, -webkit-backdrop-filter 1.6s ease, background 1.6s ease;
   }
   .card {
     width: min(92vw, 400px); padding: 2.4rem 1.8rem 2rem; text-align: center;
@@ -173,12 +175,14 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   /* unlock sequence */
   .gate.unlocking .shackle { transform: translateY(-9px) rotate(28deg); }
   .gate.unlocking .card { transform: scale(1.04); box-shadow: 0 0 90px 24px rgba(255, 190, 205, .8); }
-  .gate.leaving { opacity: 0; filter: blur(14px); transform: scale(1.12); pointer-events: none; }
-  .gate.leaving .card { opacity: 0; }
+  .gate.leaving { opacity: 0; background: rgba(255, 240, 238, 0); backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); pointer-events: none; }
+  .gate.leaving .card { opacity: 0; transform: translateY(-30px) scale(1.08); }
 
   /* slideshow */
   .show { position: fixed; inset: 0; z-index: 5; background: #1d0f14; opacity: 0; transition: opacity 1.6s ease; }
   .show.on { opacity: 1; }
+  .show { transition: opacity 1.6s ease, filter 2s ease, transform 2s var(--ease); }
+  .show.locked { filter: blur(14px) brightness(.9) saturate(1.1); transform: scale(1.06); }
   .stage, .slide { position: absolute; inset: 0; margin: 0; }
   .slide { opacity: 0; transition: opacity 2s ease; overflow: hidden; }
   .slide.active { opacity: 1; z-index: 2; }
@@ -274,6 +278,8 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     if (e.key === 'ArrowLeft') go(cur - 1);
   });
 
+  go(0); // slideshow plays behind the modal from the start
+
   // music
   function fadeIn() {
     if (!audio) return;
@@ -310,10 +316,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     gate.classList.add('unlocking');
     await wait(1100);
     gate.classList.add('leaving');
-    show.hidden = false;
-    go(0);
-    void show.offsetWidth;
-    show.classList.add('on');
+    show.classList.remove('locked');
     if (audio) { muteBtn.hidden = false; fadeIn(); }
     await wait(1500);
     gate.remove();
