@@ -518,7 +518,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   function startReading() {
     show.classList.add('reading');
     if (reduced) { letterView.classList.add('manual'); return; }
-    const vh = letterView.clientHeight, th = letterText.scrollHeight, speed = 20; // px per second
+    const vh = letterView.clientHeight, th = letterText.scrollHeight, speed = 12; // px per second
     letterText.style.setProperty('--vh', `${vh}px`);
     letterText.style.setProperty('--th', `${th}px`);
     letterText.style.setProperty('--d1', `${th / speed}s`);
