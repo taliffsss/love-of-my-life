@@ -38,7 +38,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
     ) {
         $parts = parse_url($endpoint);
         if (!is_array($parts) || empty($parts['host'])) {
-            throw new \InvalidArgumentException('SPACES_ENDPOINT_URL must be a URL such as https://nyc3.digitaloceanspaces.com');
+            throw new \InvalidArgumentException('SPACES_ENDPOINT_URL must be a valid URL (the storage endpoint, without the bucket name).');
         }
         $this->scheme = $parts['scheme'] ?? 'https';
         $host = $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
@@ -69,7 +69,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
             'x-amz-acl' => $acl,
         ]);
         if ($response['status'] !== 200) {
-            throw new StorageException('Spaces rejected the upload (HTTP ' . $response['status'] . $this->errorCode($response['body']) . ').');
+            throw new StorageException('Storage rejected the upload (HTTP ' . $response['status'] . $this->errorCode($response['body']) . ').');
         }
     }
 
@@ -77,7 +77,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
     {
         $response = $this->send('GET', $path);
         if ($response['status'] !== 200) {
-            throw new StorageException('Spaces could not read the file (HTTP ' . $response['status'] . ').');
+            throw new StorageException('Storage could not read the file (HTTP ' . $response['status'] . ').');
         }
         return $response['body'];
     }
@@ -117,22 +117,22 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
 
     public function copy(string $from, string $to): void
     {
-        throw new StorageException('copy() is not supported by the Spaces disk.');
+        throw new StorageException('copy() is not supported by this storage disk.');
     }
 
     public function move(string $from, string $to): void
     {
-        throw new StorageException('move() is not supported by the Spaces disk.');
+        throw new StorageException('move() is not supported by this storage disk.');
     }
 
     public function files(string $directory = ''): array
     {
-        throw new StorageException('files() is not supported by the Spaces disk.');
+        throw new StorageException('files() is not supported by this storage disk.');
     }
 
     public function directories(string $directory = ''): array
     {
-        throw new StorageException('directories() is not supported by the Spaces disk.');
+        throw new StorageException('directories() is not supported by this storage disk.');
     }
 
     public function makeDirectory(string $path): void
@@ -142,7 +142,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
 
     public function deleteDirectory(string $path): bool
     {
-        throw new StorageException('deleteDirectory() is not supported by the Spaces disk.');
+        throw new StorageException('deleteDirectory() is not supported by this storage disk.');
     }
 
     /** @return array<string,list<string>> */
@@ -150,7 +150,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
     {
         $response = $this->send('HEAD', $path);
         if ($response['status'] !== 200) {
-            throw new StorageException('File not found on Spaces.');
+            throw new StorageException('File not found in storage.');
         }
         return $response['headers'];
     }
@@ -198,7 +198,7 @@ final class SpacesFilesystem implements Filesystem, PrivateWriter
                 'http_errors' => false,
             ]);
         } catch (\Throwable $e) {
-            throw new StorageException('Could not reach Spaces.', 0, $e);
+            throw new StorageException('Could not reach storage.', 0, $e);
         }
 
         return [

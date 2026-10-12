@@ -150,6 +150,16 @@ final class SiteTest extends TestCase
         $this->assertStringContainsString('www.youtube.com', $response->getHeaderLine('Content-Security-Policy'));
     }
 
+    public function testNothingShownToVisitorsMentionsTheStorageProvider(): void
+    {
+        $root = dirname(__DIR__, 2);
+        $served = (string) $this->get('/')->getBody()
+            . (string) file_get_contents($root . '/public/assets/app.js')
+            . (string) file_get_contents($root . '/public/assets/app.css');
+
+        $this->assertDoesNotMatchRegularExpression('/digital\s*ocean|spaces/i', preg_replace('/letter-spacing|white-space/i', '', $served));
+    }
+
     public function testApiListsTheStoredPhotos(): void
     {
         $this->app->make(CarouselStore::class)->add('k', 'https://cdn.test/k.jpg');
@@ -204,7 +214,7 @@ final class SiteTest extends TestCase
             }
             public function put(string $path, mixed $contents): void
             {
-                throw new \Naluz\Storage\StorageException('Spaces rejected the upload (HTTP 403, AccessDenied).');
+                throw new \Naluz\Storage\StorageException('Storage rejected the upload (HTTP 403, AccessDenied).');
             }
             public function delete(string $path): bool
             {
@@ -395,7 +405,7 @@ final class SiteTest extends TestCase
             }
             public function put(string $path, mixed $contents): void
             {
-                throw new \Naluz\Storage\StorageException('Spaces rejected the upload (HTTP 403, AccessDenied).');
+                throw new \Naluz\Storage\StorageException('Storage rejected the upload (HTTP 403, AccessDenied).');
             }
             public function delete(string $path): bool
             {

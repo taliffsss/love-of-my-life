@@ -28,15 +28,15 @@ final class PhotoController
         try {
             $disk = storage('spaces');
         } catch (\InvalidArgumentException) {
-            throw new HttpException(503, 'DigitalOcean Spaces is not configured. Set the SPACES_* values in .env.');
+            throw new HttpException(503, 'Photo storage is not configured. Check the storage settings in .env.');
         }
 
         $folder = trim((string) config('filesystems.disks.spaces.folder'), '/');
         try {
             $key = Uploads::store($file, $disk, $folder, Uploads::IMAGES, (int) config('site.max_upload_bytes'));
         } catch (StorageException $e) {
-            error_log('[photos] Spaces upload failed: ' . $e->getMessage() . ($e->getPrevious() ? ' / ' . $e->getPrevious()->getMessage() : ''));
-            return Response::json(['message' => $e->getMessage() . ' Check the SPACES_* values in .env.'], 502);
+            error_log('[photos] storage upload failed: ' . $e->getMessage() . ($e->getPrevious() ? ' / ' . $e->getPrevious()->getMessage() : ''));
+            return Response::json(['message' => $e->getMessage() . ' Check the storage settings in .env.'], 502);
         }
 
         $url = $disk->url($key);

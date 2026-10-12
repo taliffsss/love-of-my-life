@@ -348,7 +348,7 @@ if (letterDialog) {
       } else {
         showLetter(data.paragraphs);
         letterMsg.value = data.paragraphs.join("\n\n");
-        letterStatus.textContent = data.archivedTo === "spaces" ? "Saved. The old message was uploaded to Spaces as a file." : "Saved. The old message was kept as a file on the server.";
+        letterStatus.textContent = "Saved. The old message was kept as a backup file.";
       }
     } catch (e) {
       letterStatus.textContent = e.message;

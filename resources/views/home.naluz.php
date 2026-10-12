@@ -173,7 +173,7 @@
     <dialog id="letterDialog" class="uploader">
       <form method="dialog" id="letterForm">
         <h3>Change the message</h3>
-        <p class="up-note">Write the new message. Leave a blank line between paragraphs. The current message is saved as a file in DigitalOcean Spaces before the new one appears.</p>
+        <p class="up-note">Write the new message. Leave a blank line between paragraphs. The current message is saved as a backup file before the new one appears.</p>
         <label for="letterKey">Upload key</label>
         <input id="letterKey" type="password" autocomplete="off" spellcheck="false" />
         <label for="letterMsg">Message</label>

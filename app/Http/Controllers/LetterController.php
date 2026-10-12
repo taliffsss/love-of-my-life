@@ -36,7 +36,7 @@ final class LetterController
             [$archivedKey, $where] = $this->archive($old);
         } catch (StorageException $e) {
             error_log('[letter] archiving the old message failed: ' . $e->getMessage());
-            return Response::json(['message' => $e->getMessage() . ' The message was not changed. Check the SPACES_* values in .env.'], 502);
+            return Response::json(['message' => $e->getMessage() . ' The message was not changed. Check the storage settings in .env.'], 502);
         }
 
         // 2. Only then show the new one.
