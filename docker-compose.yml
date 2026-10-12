@@ -1,0 +1,17 @@
+# Local run of the production image, no Traefik:
+#   cp deploy/.env.production.example .env.production   (set APP_KEY, JWT_SECRET, UPLOAD_KEY, ...; APP_URL=http://localhost:8080)
+#   docker compose up --build        ->  http://localhost:8080
+# Production uses deploy/docker-stack.yml (Swarm + Traefik).
+services:
+  web:
+    build: .
+    image: taliffsss/love-of-my-life:local
+    env_file:
+      - .env.production
+    ports:
+      - "8080:80"
+    volumes:
+      - lom_storage:/var/www/html/storage
+
+volumes:
+  lom_storage:

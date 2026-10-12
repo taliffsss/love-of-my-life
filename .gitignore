@@ -1,4 +1,14 @@
-node_modules/
-dist/
-.astro/
+/vendor/
+.env
+.phpunit.result.cache
+.phpunit.cache/
+/storage/database.sqlite
+/storage/app/carousel.json
+.idea/
+.vscode/
 .DS_Store
+/storage/app/song.json
+/deploy/.env.production
+/.env.production
+/storage/app/letter.json
+/storage/app/letters/

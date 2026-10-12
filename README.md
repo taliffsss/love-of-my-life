@@ -1,26 +1,39 @@
 # Love of My Life
 
-A romantic, password-protected photo slideshow built with [Astro](https://astro.build).
+A romantic, password-protected photo slideshow with a love letter, built on the
+[NaluzPHP framework](https://github.com/taliffsss/naluzphp-framework). Photos can be uploaded from the page itself; they
+are stored in DigitalOcean Spaces and appear in the carousel straight away.
 
-## Add your content
+## Run it locally
 
-- **Photos** → drop them in `public/photos/` (jpg, png, webp, gif, avif). They play in filename order, so `01.jpg`, `02.jpg`, … works well.
-- **Photos via DigitalOcean Spaces** → drop images in `uploads/` and push to `main` (or run the *Upload photos to Spaces* workflow). It uploads them to Spaces, records the URLs in `src/data/carousel.json`, removes them from the repo and redeploys; they appear after the local photos in the carousel. Needs the repo secrets `SPACES_ACCESS_KEY`, `SPACES_SECRET_KEY`, `SPACES_BUCKET`, `SPACES_REGION`, `SPACES_ENDPOINT_URL`, `SPACES_FOLDER`, `SPACES_CDN_URL`.
-- **Song** → put your audio file in `public/music/` (e.g. `janice.mp3`). The first audio file found is used.
+```sh
+composer install
+cp .env.example .env && php naluz key:generate --jwt
+php naluz run:server        # http://127.0.0.1:8000
+```
 
-Password: `yam` (change `PASSWORD` in `src/pages/index.astro`).
+Password: `yam` (change `PASSWORD` in `public/assets/app.js`).
+
+## Content
+
+- **Photos** → drop files in `public/photos/` (jpg, png, webp, gif, avif); they play in filename order, before the uploaded ones.
+- **Song** → open the upload dialog and paste a YouTube link under *Change the song*; it becomes the new default (`storage/app/song.json`). Without one, an audio file in `public/music/` is used, else the song in `config/site.php`.
+- **Letter and names** → the pen button in the page replaces the message (the old one is archived as a file in Spaces first); the starting text and names are in `config/site.php`.
+
+## Uploading photos
+
+Set `UPLOAD_KEY` and the `SPACES_*` values in `.env` (see `.env.example`). After unlocking the page an upload button
+appears; enter the upload key, pick photos, and they are sent to Spaces. Every uploaded URL is recorded in
+`storage/app/carousel.json`, which the carousel reads (`GET /api/photos` returns the same list).
+
+## Deploy
+
+Docker Swarm + Traefik at <https://jinelin-basela.markanthonynaluz.com>: see [DEPLOY.md](DEPLOY.md) (`Dockerfile`, `deploy/docker-stack.yml`, `.github/workflows/release.yml`). A bare-metal nginx example is in `deploy/nginx.conf`.
 
 ## Develop
 
 ```sh
-npm install
-npm run dev
+composer check     # coding standard + tests
 ```
 
-## Deploy
-
-Pushing to `main` runs `.github/workflows/deploy.yml`, which publishes to GitHub Pages
-(repo **Settings → Pages → Source: GitHub Actions**).
-Live at https://taliffsss.github.io/love-of-my-life/
-
-> The password is a client-side gate for a sweet surprise, not real security: anyone who inspects the page source or the repo can find the photos.
+> The unlock password is a client-side gate for a sweet surprise, not real security. The upload key is checked on the server.

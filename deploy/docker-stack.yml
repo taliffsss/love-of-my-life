@@ -1,0 +1,92 @@
+# ============================================================
+# deploy/docker-stack.yml  —  Love of My Life  (Swarm + shared Traefik)
+#
+#   https://jinelin-basela.markanthonynaluz.com
+#
+# Same pattern as hris-api / dink: the one shared Traefik (Swarm provider, certresolver `letsencrypt`, file middleware
+# `redirect-to-https@file`) routes by Host() across the external `app_network`.
+#
+#   docker build -t taliffsss/love-of-my-life:latest .
+#   LOM_VERSION=latest docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+#
+# `.env.production` (next to this file, on the server only) holds the secrets: see deploy/.env.production.example.
+# The release workflow (.github/workflows/release.yml) does all of this for a version tag.
+# ============================================================
+
+services:
+  web:
+    image: taliffsss/love-of-my-life:${LOM_VERSION:-latest}
+    networks:
+      - app_network
+    env_file:
+      - .env.production
+    volumes:
+      # photos list (carousel.json), the chosen song (song.json), logs and sessions survive redeploys
+      - lom_storage:/var/www/html/storage
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first   # the new container must pass its health check before the old one stops
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=app_network"
+
+        # ── HTTPS router ──────────────────────────────────────────────────
+        - "traefik.http.routers.jinelin-basela.rule=Host(`jinelin-basela.markanthonynaluz.com`)"
+        - "traefik.http.routers.jinelin-basela.entrypoints=websecure"
+        - "traefik.http.routers.jinelin-basela.tls=true"
+        - "traefik.http.routers.jinelin-basela.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.jinelin-basela.middlewares=jinelin-compress,jinelin-secure"
+        - "traefik.http.routers.jinelin-basela.service=jinelin-basela"
+
+        # ── HTTP → HTTPS redirect ─────────────────────────────────────────
+        # redirect-to-https is defined in the main Traefik stack (file provider),
+        # shared by every service on the same Swarm.
+        - "traefik.http.routers.jinelin-basela-http.rule=Host(`jinelin-basela.markanthonynaluz.com`)"
+        - "traefik.http.routers.jinelin-basela-http.entrypoints=web"
+        - "traefik.http.routers.jinelin-basela-http.middlewares=redirect-to-https@file"
+        - "traefik.http.routers.jinelin-basela-http.service=jinelin-basela"
+
+        # ── Service ───────────────────────────────────────────────────────
+        - "traefik.http.services.jinelin-basela.loadbalancer.server.port=80"
+        # health check path must be a relative URL; /api/ping answers {"status":"ok"}
+        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.path=/api/ping"
+        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.interval=30s"
+        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.timeout=10s"
+
+        # ── Middlewares ───────────────────────────────────────────────────
+        # gzip/brotli at the edge, and tell the app the request arrived over HTTPS (Traefik terminates TLS).
+        - "traefik.http.middlewares.jinelin-compress.compress=true"
+        - "traefik.http.middlewares.jinelin-compress.compress.minresponsebodybytes=1024"
+        - "traefik.http.middlewares.jinelin-secure.headers.sslProxyHeaders.X-Forwarded-Proto=https"
+
+        # ── Logging labels ─────────────────────────────────────────────────
+        - "logging.service=jinelin-basela"
+        - "logging.environment=production"
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        labels: "logging.service,logging.environment"
+        tag: "{{.Name}}"
+
+networks:
+  app_network:
+    external: true
+    attachable: true
+
+volumes:
+  lom_storage:

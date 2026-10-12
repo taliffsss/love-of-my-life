@@ -1,0 +1,86 @@
+# CI is the final authority. Reused by release.yml so a version tag is built only if the same checks pass.
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, openssl, sodium, fileinfo, curl
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer cs
+      - run: vendor/bin/phpunit
+
+  # Builds the production image and checks that it really serves the site (nginx + PHP-FPM + the HTTPS-behind-proxy logic).
+  image:
+    name: Docker image smoke test
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: love-of-my-life:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Start the container
+        run: |
+          docker run -d --name lom -p 8080:80 \
+            -e APP_ENV=production -e APP_DEBUG=false \
+            -e APP_URL=https://jinelin-basela.markanthonynaluz.com \
+            -e APP_KEY="base64:$(head -c 32 /dev/urandom | base64)" \
+            -e JWT_SECRET="$(head -c 32 /dev/urandom | xxd -p -c 64)" \
+            -e UPLOAD_KEY="jinelin basela" \
+            love-of-my-life:ci
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:8080/api/ping >/dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          docker logs lom
+          exit 1
+      - name: The site and the API answer
+        run: |
+          curl -fsS http://127.0.0.1:8080/api/ping | grep -q '"status":"ok"'
+          curl -fsS http://127.0.0.1:8080/ | grep -q 'For Jinelin Basela'
+          curl -fsS http://127.0.0.1:8080/assets/app.js | grep -q 'songGo'
+          curl -fsS http://127.0.0.1:8080/api/photos | grep -q '"photos"'
+      - name: Behind Traefik the app sees HTTPS (Secure cookie + HSTS)
+        run: |
+          headers=$(curl -fsS -D - -o /dev/null -H 'X-Forwarded-Proto: https' -H 'Host: jinelin-basela.markanthonynaluz.com' http://127.0.0.1:8080/)
+          echo "$headers"
+          echo "$headers" | grep -qi '^strict-transport-security:'
+          echo "$headers" | grep -i '^set-cookie:' | grep -qi 'secure'
+      - name: Uploads reach the app (404 here would mean nginx swallowed the route)
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/upload)
+          test "$code" = "419"
+      - name: Project files are not served
+        run: |
+          for path in /composer.json /.env /vendor/autoload.php /storage/app/carousel.json; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$path")
+            echo "$path -> $code"
+            test "$code" != "200"
+          done
+      - if: failure()
+        run: docker logs lom
