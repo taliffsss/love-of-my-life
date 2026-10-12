@@ -152,7 +152,10 @@ final class SiteTest extends TestCase
 
     public function testUploadRejectsTheWrongKey(): void
     {
-        $this->assertSame(403, $this->upload($this->csrf(), 'nope', $this->png())->getStatusCode());
+        $response = $this->upload($this->csrf(), 'nope', $this->png());
+
+        $this->assertSame(403, $response->getStatusCode());
+        $this->assertStringContainsString('Hint: your complete full name.', (string) $response->getBody());
     }
 
     public function testUploadStoresThePhotoAndRecordsItsUrl(): void

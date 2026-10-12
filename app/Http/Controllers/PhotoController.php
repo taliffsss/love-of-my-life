@@ -24,7 +24,7 @@ final class PhotoController
         }
         $given = (string) (Request::body($request)['key'] ?? '');
         if (!hash_equals($expected, $given)) {
-            throw new HttpException(403, 'Wrong upload key.');
+            throw new HttpException(403, 'Wrong upload key. ' . config('site.upload_hint'));
         }
 
         $file = $request->getUploadedFiles()['photo'] ?? null;

@@ -8,6 +8,8 @@ return [
 
     // Shared secret that unlocks photo uploads (the "upload key" in the Add photos dialog). Uploads are disabled while empty.
     'upload_key' => env('UPLOAD_KEY', ''),
+    // Shown when the wrong upload key is entered.
+    'upload_hint' => 'Hint: your complete full name.',
     'max_upload_bytes' => 12_000_000,
 
     // The letter shown (and slowly scrolled) in the right-hand panel.
