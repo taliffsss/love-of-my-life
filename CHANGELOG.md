@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+
+- The first photo is now the first thing seen after the password. The slideshow used to start its 8-second timer when the page loaded, behind the blurred password screen, so by the time `yam` was typed it had moved on (after 20 seconds it was on photo 3 and then 4, and photo 1 was never shown). Now the first photo waits, still, behind the blur; when the blur starts to clear its slow zoom is replayed from the beginning and the timer starts, delayed by the 2.8 seconds the blur takes, so photo 1 stays fully clear for the full 8 seconds before the carousel moves on. The same applies to the reload after a saved change.
+
 ## 2.2.1
 
 - **Root cause of the outage found and fixed.** The framework's `throttle` middleware reads a rate-limit counter back from the file cache without checking whether its window has ended, so the count only ever grows. With `storage/` in a persistent volume, the counters of `/api/ping` (probed every 30 seconds by the Docker and the Traefik health checks) passed 60 and the probe was answered with HTTP 429 for good: Swarm stopped the "unhealthy" container, and later Traefik answered 503. The app now uses its own limiter (`App\Http\Middleware\RateLimit`, registered as `throttle`) whose counter starts again every window, and `/api/ping` is never rate-limited. Counter files left on a server by the old limiter are ignored once their window has ended, so nothing has to be cleaned up by hand.

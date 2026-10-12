@@ -16,7 +16,8 @@ for (let i = 0; i < heartCount; i++) {
   h.style.cssText = `--x:${Math.random() * 96}vw;--s:${10 + Math.random() * 16}px;--d:${16 + Math.random() * 14}s;--delay:${-Math.random() * 30}s;--sway:${12 + Math.random() * 22}px;--o:${0.25 + Math.random() * 0.4}`;
   hearts.appendChild(h);
 }
-let cur = -1, timer = 0, started = false;
+let cur = -1, timer = 0, delayTimer = 0, started = false, running = false;
+const BLUR_CLEAR_MS = 2800;
 const pad = (n) => String(n).padStart(2, "0");
 function go(n) {
   const next = (n + slides.length) % slides.length;
@@ -35,14 +36,28 @@ function go(n) {
   cur = next;
   restart();
 }
-function restart() {
+function restart(delay = 0) {
   clearInterval(timer);
+  clearTimeout(delayTimer);
   barFill.classList.remove("run");
   void barFill.offsetWidth;
-  if (slides.length > 1) {
+  if (!running || slides.length < 2) return;
+  const begin = () => {
     barFill.classList.add("run");
     timer = window.setInterval(() => go(cur + 1), SLIDE_MS);
+  };
+  if (delay > 0) delayTimer = window.setTimeout(begin, delay);
+  else begin();
+}
+function startSlideshow() {
+  running = true;
+  const first = slides[cur];
+  if (first) {
+    first.classList.remove("play");
+    void first.offsetWidth;
+    first.classList.add("play");
   }
+  restart(BLUR_CLEAR_MS);
 }
 $("next").onclick = () => started && go(cur + 1);
 $("prev").onclick = () => started && go(cur - 1);
@@ -180,6 +195,7 @@ letterText.addEventListener("animationend", (e) => {
 });
 function revealControls() {
   show.classList.remove("locked");
+  startSlideshow();
   muteBtn.hidden = false;
   for (const id of ["addBtn", "songBtn", "letterBtn"]) document.getElementById(id)?.removeAttribute("hidden");
   nowPlaying.hidden = false;
