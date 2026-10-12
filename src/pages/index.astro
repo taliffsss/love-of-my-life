@@ -128,6 +128,9 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
           <span class="np-title">Palagi <span class="np-by">· TJ Monterde</span></span>
         </span>
       </div>
+      <button class="mute add" id="addBtn" aria-label="Add photos" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+      </button>
       <button class="mute" id="mute" aria-label="Toggle music" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
       </button>
@@ -177,6 +180,22 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
         <p id="err" class="err" role="alert" aria-live="polite"></p>
       </form>
     </main>
+
+    <dialog id="uploader" class="uploader">
+      <form method="dialog" id="upForm">
+        <h3>Add photos</h3>
+        <p class="up-note">Photos are saved to the repo, uploaded to DigitalOcean Spaces by GitHub Actions, then appear in the carousel after the site redeploys (a couple of minutes).</p>
+        <label for="upToken">GitHub token <small>(fine-grained, this repo only, Contents: read &amp; write)</small></label>
+        <input id="upToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_..." />
+        <label for="upFiles">Photos</label>
+        <input id="upFiles" type="file" accept="image/*" multiple />
+        <p id="upStatus" class="up-status" role="status" aria-live="polite"></p>
+        <div class="up-actions">
+          <button type="button" id="upGo">Upload</button>
+          <button type="submit" value="close">Close</button>
+        </div>
+      </form>
+    </dialog>
 
     {music && <audio id="song" src={music} loop preload="auto"></audio>}
   </body>
@@ -285,6 +304,18 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
   .mute:hover { background: rgba(255, 255, 255, .18); }
   .mute:active { transform: scale(.94); }
   .mute.off { opacity: .5; }
+
+  .add { right: 70px; }
+  .uploader { border: 1px solid rgba(255,255,255,.22); border-radius: 18px; background: rgba(42,18,32,.94); color: var(--text); padding: 22px; width: min(92vw, 420px); }
+  .uploader::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
+  .uploader h3 { margin: 0 0 8px; font-weight: 500; }
+  .uploader label { display: block; margin: 14px 0 6px; font-size: .9rem; }
+  .uploader small, .up-note { color: var(--muted); font-size: .8rem; }
+  .uploader input { width: 100%; color: var(--text); background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 9px 10px; font: inherit; }
+  .up-status { min-height: 1.3em; font-size: .85rem; color: var(--gold); }
+  .up-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .up-actions button { font: inherit; color: #2a1220; background: var(--rose); border: 0; border-radius: 999px; padding: 9px 20px; cursor: pointer; }
+  .up-actions button[value="close"] { background: rgba(255,255,255,.14); color: var(--text); }
   @keyframes pop { from { opacity: 0; transform: scale(.7); } }
 
   /* ---------- password modal ---------- */
@@ -593,6 +624,7 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     gate.classList.add('leaving');
     show.classList.remove('locked');
     muteBtn.hidden = false;
+    addBtn.hidden = false;
     nowPlaying.hidden = false;
     music.fadeIn();
     await wait(1500);
@@ -600,4 +632,50 @@ const placeholders = ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '
     await wait(700);
     gate.remove();
   });
+  // photo uploader: commits images to uploads/ with the visitor's own GitHub token;
+  // the "Upload photos to Spaces" workflow then moves them to DigitalOcean Spaces.
+  const REPO = 'taliffsss/love-of-my-life';
+  const addBtn = $('addBtn'), uploader = $<HTMLDialogElement>('uploader');
+  const upToken = $<HTMLInputElement>('upToken'), upFiles = $<HTMLInputElement>('upFiles');
+  const upStatus = $('upStatus'), upGo = $<HTMLButtonElement>('upGo');
+  try { upToken.value = localStorage.getItem('gh-token') || ''; } catch {}
+  addBtn.onclick = () => uploader.showModal();
+
+  async function shrink(file: File): Promise<string> {
+    const bmp = await createImageBitmap(file);
+    const k = Math.min(1, 2200 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.88).split(',')[1];
+  }
+
+  upGo.onclick = async () => {
+    const token = upToken.value.trim();
+    const files = Array.from(upFiles.files || []);
+    if (!token || !files.length) { upStatus.textContent = 'Add your token and pick at least one photo.'; return; }
+    try { localStorage.setItem('gh-token', token); } catch {}
+    upGo.disabled = true;
+    let ok = 0;
+    for (const [i, f] of files.entries()) {
+      upStatus.textContent = `Uploading ${i + 1} / ${files.length}…`;
+      try {
+        const name = `${Date.now()}-${i}-${f.name.replace(/\.[^.]+$/, '').replace(/[^\w-]+/g, '-')}.jpg`;
+        const res = await fetch(`https://api.github.com/repos/${REPO}/contents/uploads/${name}`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+          body: JSON.stringify({ message: `Add photo ${name}`, content: await shrink(f), branch: 'main' }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        ok++;
+      } catch (e) {
+        upStatus.textContent = `Failed on ${f.name} (${(e as Error).message}). Check the token and its permissions.`;
+        upGo.disabled = false;
+        return;
+      }
+    }
+    upGo.disabled = false;
+    upFiles.value = '';
+    upStatus.textContent = `Done: ${ok} photo${ok > 1 ? 's' : ''} sent. They show up after the site redeploys (about 2 to 3 minutes).`;
+  };
 </script>
