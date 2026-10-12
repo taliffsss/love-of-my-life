@@ -10,5 +10,8 @@
   },
   "dependencies": {
     "astro": "^7.2.8"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1149.0"
   }
 }
