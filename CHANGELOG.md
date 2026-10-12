@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.2
 
 - The upload key defaults to `jinelin basela` when `UPLOAD_KEY` is missing or empty, and quotes or a carriage return around the configured key are ignored (Docker's `env_file` keeps quotes literally, so `UPLOAD_KEY="jinelin basela"` used to be rejected).
 - SEO: image sitemap, `robots.txt` that hides the action endpoints, richer structured data (`WebSite`, `WebPage`, `Person`, `ImageGallery`), `hreflang`, web manifest, PNG icons and Apple touch icon, first-photo preload, descriptive alt text and `noindex` headers on the JSON endpoints.
