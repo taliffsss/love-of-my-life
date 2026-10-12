@@ -19,6 +19,37 @@ for (let i = 0; i < heartCount; i++) {
 let cur = -1, timer = 0, delayTimer = 0, started = false, running = false;
 const BLUR_CLEAR_MS = 2800;
 const pad = (n) => String(n).padStart(2, "0");
+const READY_MAX_MS = 6e3;
+function ready(slide) {
+  const imgs = Array.from(slide.querySelectorAll("img.fg"));
+  if (!imgs.length) return Promise.resolve(true);
+  const img = imgs[0];
+  img.loading = "eager";
+  const decoded = img.decode ? img.decode().then(() => true, () => img.complete && img.naturalWidth > 0) : Promise.resolve(true);
+  return Promise.race([decoded, new Promise((r) => setTimeout(() => r(img.complete && img.naturalWidth > 0), READY_MAX_MS))]);
+}
+function warm(from) {
+  for (const k of [1, 2]) {
+    const s = slides[(from + k) % slides.length];
+    if (s && s !== slides[from]) void ready(s);
+  }
+}
+let stepping = false;
+async function advance() {
+  if (stepping) return;
+  stepping = true;
+  try {
+    for (let k = 1; k <= slides.length; k++) {
+      const idx = (cur + k) % slides.length;
+      if (await ready(slides[idx])) {
+        go(idx);
+        return;
+      }
+    }
+  } finally {
+    stepping = false;
+  }
+}
 function go(n) {
   const next = (n + slides.length) % slides.length;
   if (next === cur) return;
@@ -34,6 +65,7 @@ function go(n) {
   s.classList.add("play", `fx${next % 4}`, "active");
   countEl.textContent = `${pad(next + 1)} / ${pad(slides.length)}`;
   cur = next;
+  warm(next);
   restart();
 }
 function restart(delay = 0) {
@@ -44,7 +76,7 @@ function restart(delay = 0) {
   if (!running || slides.length < 2) return;
   const begin = () => {
     barFill.classList.add("run");
-    timer = window.setInterval(() => go(cur + 1), SLIDE_MS);
+    timer = window.setInterval(advance, SLIDE_MS);
   };
   if (delay > 0) delayTimer = window.setTimeout(begin, delay);
   else begin();
@@ -104,7 +136,7 @@ function localMusic(a) {
   };
 }
 function youtubeMusic() {
-  let player = null, ready = false, wantPlay = false, playing = false;
+  let player = null, ready2 = false, wantPlay = false, playing = false;
   const holder = document.createElement("div");
   holder.id = "yt";
   holder.style.cssText = "position:fixed;left:-9999px;top:0;width:200px;height:200px;opacity:0;pointer-events:none";
@@ -117,7 +149,7 @@ function youtubeMusic() {
       playerVars: { controls: 0, loop: 1, playlist: YT_ID, playsinline: 1, rel: 0, modestbranding: 1 },
       events: {
         onReady: () => {
-          ready = true;
+          ready2 = true;
           player.setVolume(0);
           if (wantPlay) player.playVideo();
         },
@@ -135,13 +167,13 @@ function youtubeMusic() {
     start() {
       wantPlay = true;
       playing = true;
-      if (ready) {
+      if (ready2) {
         player.setVolume(0);
         player.playVideo();
       }
     },
     toggle() {
-      if (!ready) return playing;
+      if (!ready2) return playing;
       if (playing) {
         player.pauseVideo();
         playing = false;
@@ -153,14 +185,14 @@ function youtubeMusic() {
     },
     // after a reload the browser may refuse to autoplay: report what the player is really doing
     sync() {
-      playing = ready && [1, 3].includes(player.getPlayerState());
+      playing = ready2 && [1, 3].includes(player.getPlayerState());
       return playing;
     },
     fadeIn() {
       let v = 0;
       const t = setInterval(() => {
         v = Math.min(TARGET, v + 2);
-        if (ready) player.setVolume(v);
+        if (ready2) player.setVolume(v);
         if (v >= TARGET) clearInterval(t);
       }, 120);
     }

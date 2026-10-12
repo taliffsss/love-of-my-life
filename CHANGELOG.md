@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.1
+
+- Fix for the carousel going black: a slide used to fade in when its timer fired even if its photo had not finished loading (a big photo on a slow connection, a photo that is gone, or one the browser had dropped from memory while hidden), so the screen stayed black until the photo arrived. Now the next two photos are prepared while the current one is shown, a slide only fades in once its photo is loaded and decoded, and a photo that is still not ready after 6 seconds, or that fails to load, is skipped (the next one plays; it comes back on the next round). Measured in a browser with photo 2 delayed 25 seconds and with photo 2 answering 404: the old script showed it (black), the new one goes straight to photo 3.
+
 ## 2.3.0
 
 - `bin/migrate-photos.php` copies the 14 photos of `public/photos` to Spaces (public-read, key `<folder>/legacy-NN.jpg`) and lists them in `storage/app/carousel.json`, so they are served from Spaces and render exactly like uploaded photos. Run it once on the server (`--dry-run` shows what it would do); running it again skips photos already migrated. The carousel hides a `public/photos` file once its copy is listed, so nothing shows twice, and the order stays: new uploads first (newest on top), then the migrated photos in filename order.

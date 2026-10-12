@@ -825,6 +825,14 @@ final class SiteTest extends TestCase
         $this->assertSame(\App\Http\Middleware\RateLimit::class, $aliases['throttle']);
     }
 
+    public function testASlideOnlyFadesInOnceItsPhotoIsReady(): void
+    {
+        $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
+        $this->assertStringContainsString('decode()', $js, 'the next photo is decoded before it is shown');
+        $this->assertMatchesRegularExpression('/setInterval\(advance,/', $js, 'the timer goes through the ready check');
+        $this->assertDoesNotMatchRegularExpression('/setInterval\(\(\) => go\(/', $js, 'the timer must not show a slide unchecked');
+    }
+
     public function testTheCarouselWaitsBehindTheBlurAndStartsWithTheFirstPhoto(): void
     {
         $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
