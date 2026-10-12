@@ -58,7 +58,7 @@ final class SpacesFilesystem implements Filesystem
             'x-amz-acl' => 'public-read',
         ]);
         if ($response['status'] !== 200) {
-            throw new StorageException('Spaces rejected the upload (HTTP ' . $response['status'] . ').');
+            throw new StorageException('Spaces rejected the upload (HTTP ' . $response['status'] . $this->errorCode($response['body']) . ').');
         }
     }
 
@@ -195,6 +195,12 @@ final class SpacesFilesystem implements Filesystem
             'body' => (string) $response->getBody(),
             'headers' => array_change_key_case($response->getHeaders(), CASE_LOWER),
         ];
+    }
+
+    /** Spaces answers errors with XML such as <Code>SignatureDoesNotMatch</Code>; surface the code to help diagnose. */
+    private function errorCode(string $body): string
+    {
+        return preg_match('#<Code>([A-Za-z0-9]+)</Code>#', $body, $m) === 1 ? ', ' . $m[1] : '';
     }
 
     private function guard(string $path): string

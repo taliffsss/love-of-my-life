@@ -8,6 +8,7 @@ use App\Services\CarouselStore;
 use Naluz\Http\HttpException;
 use Naluz\Http\Request;
 use Naluz\Http\Response;
+use Naluz\Storage\StorageException;
 use Naluz\Storage\Uploads;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -38,9 +39,20 @@ final class PhotoController
         }
 
         $folder = trim((string) config('filesystems.disks.spaces.folder'), '/');
-        $key = Uploads::store($file, $disk, $folder, Uploads::IMAGES, (int) config('site.max_upload_bytes'));
+        try {
+            $key = Uploads::store($file, $disk, $folder, Uploads::IMAGES, (int) config('site.max_upload_bytes'));
+        } catch (StorageException $e) {
+            error_log('[photos] Spaces upload failed: ' . $e->getMessage() . ($e->getPrevious() ? ' / ' . $e->getPrevious()->getMessage() : ''));
+            return Response::json(['message' => $e->getMessage() . ' Check the SPACES_* values in .env.'], 502);
+        }
+
         $url = $disk->url($key);
-        $store->add($key, $url);
+        try {
+            $store->add($key, $url);
+        } catch (\RuntimeException $e) {
+            error_log('[photos] ' . $e->getMessage());
+            return Response::json(['message' => 'The photo was uploaded but storage/app is not writable, so it was not added to the carousel.'], 500);
+        }
 
         return Response::json(['key' => $key, 'url' => $url], 201);
     }

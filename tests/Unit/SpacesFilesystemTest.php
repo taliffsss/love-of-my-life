@@ -63,6 +63,13 @@ final class SpacesFilesystemTest extends TestCase
         $this->disk([new Response(403)])->put('yam/a.jpg', 'x');
     }
 
+    public function testRejectedUploadReportsTheSpacesErrorCode(): void
+    {
+        $this->expectException(StorageException::class);
+        $this->expectExceptionMessage('HTTP 403, SignatureDoesNotMatch');
+        $this->disk([new Response(403, [], '<Error><Code>SignatureDoesNotMatch</Code></Error>')])->put('yam/a.jpg', 'x');
+    }
+
     public function testUrlUsesTheCdnWhenConfigured(): void
     {
         $this->assertSame('https://cdn.example.com/yam/a.jpg', $this->disk([], cdn: 'https://cdn.example.com/')->url('yam/a.jpg'));

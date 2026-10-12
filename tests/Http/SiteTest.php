@@ -169,6 +169,71 @@ final class SiteTest extends TestCase
         $this->assertSame([$body['url']], $this->app->make(CarouselStore::class)->urls());
     }
 
+    public function testSpacesFailureIsReportedAs502WithTheReason(): void
+    {
+        $disk = new class implements Filesystem {
+            public function exists(string $path): bool
+            {
+                return false;
+            }
+            public function get(string $path): string
+            {
+                return '';
+            }
+            public function put(string $path, mixed $contents): void
+            {
+                throw new \Naluz\Storage\StorageException('Spaces rejected the upload (HTTP 403, AccessDenied).');
+            }
+            public function delete(string $path): bool
+            {
+                return true;
+            }
+            public function copy(string $from, string $to): void
+            {
+            }
+            public function move(string $from, string $to): void
+            {
+            }
+            public function size(string $path): int
+            {
+                return 0;
+            }
+            public function lastModified(string $path): int
+            {
+                return 0;
+            }
+            public function mimeType(string $path): string
+            {
+                return '';
+            }
+            public function files(string $directory = ''): array
+            {
+                return [];
+            }
+            public function directories(string $directory = ''): array
+            {
+                return [];
+            }
+            public function makeDirectory(string $path): void
+            {
+            }
+            public function deleteDirectory(string $path): bool
+            {
+                return true;
+            }
+            public function url(string $path): string
+            {
+                return $path;
+            }
+        };
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+
+        $response = $this->upload($this->csrf(), 'secret-key', $this->png());
+
+        $this->assertSame(502, $response->getStatusCode());
+        $this->assertStringContainsString('AccessDenied', (string) $response->getBody());
+    }
+
     public function testUploadRefusesNonImages(): void
     {
         $this->app->make(StorageManager::class)->extend('spaces', $this->memoryDisk());
