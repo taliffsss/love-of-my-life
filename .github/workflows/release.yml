@@ -9,7 +9,7 @@
 # One-time setup (repo → Settings):
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
-#   Variables DOCKER_IMAGE (default taliffsss/love-of-my-life)
+#   Variables DOCKER_IMAGE (default taliffsss/jinelin-basela)
 #             DEPLOY_PATH  (dir on the server holding deploy/.env.production; default /opt/love-of-my-life; may also be a secret)
 #             AUTO_DEPLOY  ("true" turns the deploy job on; keep it off until you trust the pipeline)
 #   Environment `production` → add required reviewers so a human approves every deploy.
@@ -34,7 +34,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE: ${{ vars.DOCKER_IMAGE || 'taliffsss/love-of-my-life' }}
+  IMAGE: ${{ vars.DOCKER_IMAGE || 'taliffsss/jinelin-basela' }}
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
   STACK: jinelin
 
@@ -164,5 +164,25 @@ jobs:
         run: |
           $SSH "$HOST" "set -euo pipefail; cd '$DIR'
             docker pull '${IMAGE}:${TAG#v}'
-            LOM_VERSION='${TAG#v}' docker stack deploy -c deploy/docker-stack.yml --with-registry-auth '${STACK}'
+            LOM_IMAGE='${IMAGE}' LOM_VERSION='${TAG#v}' docker stack deploy -c deploy/docker-stack.yml --with-registry-auth '${STACK}'
             docker service ls --filter 'name=${STACK}_'"
+
+      - name: Wait until the new version is running
+        run: |
+          $SSH "$HOST" "set -u
+            svc='${STACK}_web'
+            want='${IMAGE}:${TAG#v}'
+            for i in \$(seq 1 36); do
+              state=\$(docker service inspect \"\$svc\" --format '{{if .UpdateStatus}}{{.UpdateStatus.State}}{{end}}')
+              image=\$(docker service inspect \"\$svc\" --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' | cut -d@ -f1)
+              replicas=\$(docker service ls --filter name=\"\$svc\" --format '{{.Replicas}}')
+              echo \"[\$i] image=\$image update=\${state:-none} replicas=\$replicas\"
+              case \"\$state\" in rollback_*|paused) docker service ps \"\$svc\" --no-trunc | head -5; exit 1;; esac
+              if [ \"\$image\" = \"\$want\" ] && [ \"\$replicas\" = '1/1' ] && { [ -z \"\$state\" ] || [ \"\$state\" = completed ]; }; then
+                echo 'The new version is running.'; exit 0
+              fi
+              sleep 5
+            done
+            echo 'Timed out waiting for '\$svc' to run '\$want >&2
+            docker service ps \"\$svc\" --no-trunc | head -5
+            exit 1"

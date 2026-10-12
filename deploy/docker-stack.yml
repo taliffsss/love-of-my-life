@@ -6,8 +6,8 @@
 # Same pattern as hris-api / dink: the one shared Traefik (Swarm provider, certresolver `letsencrypt`, file middleware
 # `redirect-to-https@file`) routes by Host() across the external `app_network`.
 #
-#   docker build -t taliffsss/love-of-my-life:latest .
-#   LOM_VERSION=latest docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+#   docker build -t taliffsss/jinelin-basela:latest .
+#   LOM_IMAGE=taliffsss/jinelin-basela LOM_VERSION=latest docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
 #
 # `.env.production` (next to this file, on the server only) holds the secrets: see deploy/.env.production.example.
 # The release workflow (.github/workflows/release.yml) does all of this for a version tag.
@@ -15,7 +15,8 @@
 
 services:
   web:
-    image: taliffsss/love-of-my-life:${LOM_VERSION:-latest}
+    # LOM_IMAGE must be the image the release workflow pushed (its DOCKER_IMAGE variable)
+    image: ${LOM_IMAGE:-taliffsss/jinelin-basela}:${LOM_VERSION:-latest}
     networks:
       - app_network
     env_file:
