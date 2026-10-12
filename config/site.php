@@ -6,8 +6,9 @@ return [
     'name' => 'Jinelin Basela',
     'first_name' => 'Jinelin',
 
-    // Shared secret that unlocks photo uploads (the "upload key" in the Add photos dialog). Uploads are disabled while empty.
-    'upload_key' => env('UPLOAD_KEY', ''),
+    // Secret that unlocks every change made from the page (photos, song, message). Set UPLOAD_KEY in .env to change it;
+    // when it is missing or empty the key is the default below (compared ignoring case, spaces and surrounding quotes).
+    'upload_key' => env('UPLOAD_KEY') ?: 'jinelin basela',
     // The song until one is chosen from the page (then storage/app/song.json takes over). Any YouTube video id.
     'song' => ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde'],
 

@@ -615,4 +615,53 @@ final class SiteTest extends TestCase
         $this->assertSame('noindex, nofollow', $same->getHeaderLine('X-Robots-Tag'));
         $this->assertSame('', $this->get('/')->getHeaderLine('X-Robots-Tag'), 'the home page itself stays indexable');
     }
+
+    /** @return array<string,mixed> */
+    private function siteConfig(?string $uploadKeyEnv): array
+    {
+        $previous = getenv('UPLOAD_KEY');
+        $uploadKeyEnv === null ? putenv('UPLOAD_KEY') : putenv('UPLOAD_KEY=' . $uploadKeyEnv);
+        \Naluz\Support\Env::flush();
+        try {
+            return require dirname(__DIR__, 2) . '/config/site.php';
+        } finally {
+            $previous === false ? putenv('UPLOAD_KEY') : putenv('UPLOAD_KEY=' . $previous);
+        }
+    }
+
+    public function testTheUploadKeyDefaultsToJinelinBasela(): void
+    {
+        $this->assertSame('jinelin basela', $this->siteConfig(null)['upload_key'], 'UPLOAD_KEY not set');
+        $this->assertSame('jinelin basela', $this->siteConfig('')['upload_key'], 'UPLOAD_KEY= (empty) in .env');
+        $this->assertSame('another key', $this->siteConfig('another key')['upload_key'], 'a key set in .env wins');
+    }
+
+    public function testTheDefaultKeyAcceptsTheNameHoweverItIsTyped(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', 'jinelin basela');
+
+        foreach (['jinelin basela', 'Jinelin Basela', '  JINELIN   BASELA ', "Jinelin Basela\r"] as $typed) {
+            $response = $this->changeMessage($this->csrf(), $typed, "Old first.\n\nOld second.");
+            $this->assertSame(200, $response->getStatusCode(), 'rejected: ' . json_encode($typed));
+        }
+        $this->assertSame(403, $this->changeMessage($this->csrf(), 'jinelin', 'x')->getStatusCode());
+    }
+
+    public function testQuotesAndLineEndingsInTheConfiguredKeyAreIgnored(): void
+    {
+        // Docker's env_file keeps quotes literally, and a Windows-edited file leaves a carriage return
+        foreach (['"jinelin basela"', "'Jinelin Basela'", "jinelin basela\r", '"Jinelin  Basela"' . "\r"] as $configured) {
+            $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', $configured);
+            $response = $this->changeMessage($this->csrf(), 'jinelin basela', "Old first.\n\nOld second.");
+            $this->assertSame(200, $response->getStatusCode(), 'configured as ' . json_encode($configured));
+        }
+    }
+
+    public function testTheSongFormUsesTheSameKeyRules(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', '"jinelin basela"');
+        $this->fakeYouTube(200, ['title' => 'T', 'author_name' => 'A']);
+
+        $this->assertSame(200, $this->changeSong($this->csrf(), 'Jinelin Basela', 'https://youtu.be/dQw4w9WgXcQ')->getStatusCode());
+    }
 }
