@@ -12,7 +12,7 @@ cp .env.example .env && php naluz key:generate --jwt
 php naluz run:server        # http://127.0.0.1:8000
 ```
 
-Password: `yam` (change `PASSWORD` in `public/assets/app.js`).
+Password: `yam` (change `PASSWORD` in `public/assets/app.js`). After you save photos, a song or a message the page reloads and skips the password screen once.
 
 ## Content
 

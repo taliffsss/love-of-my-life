@@ -664,4 +664,16 @@ final class SiteTest extends TestCase
 
         $this->assertSame(200, $this->changeSong($this->csrf(), 'Jinelin Basela', 'https://youtu.be/dQw4w9WgXcQ')->getStatusCode());
     }
+
+    public function testSavedChangesReloadThePageWithoutAskingForThePasswordAgain(): void
+    {
+        $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
+
+        // all three actions end with the same reload, which leaves a short-lived, one-shot hint for the next page load
+        $this->assertSame(3, substr_count($js, 'reloadAfterSuccess()'), 'photos, song and message each reload on success');
+        $this->assertStringContainsString('sessionStorage.setItem(SKIP_GATE', $js);
+        $this->assertStringContainsString('sessionStorage.removeItem(SKIP_GATE);', $js, 'the hint is removed as soon as it is read');
+        $this->assertStringContainsString('SKIP_GATE_MS = 3e4', $js, 'the hint expires after 30 seconds');
+        $this->assertStringContainsString('if (consumeSkipGate())', $js);
+    }
 }

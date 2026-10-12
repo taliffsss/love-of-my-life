@@ -75,6 +75,9 @@ function localMusic(a) {
       a.pause();
       return false;
     },
+    sync() {
+      return !a.paused;
+    },
     fadeIn() {
       let v = 0;
       const t = setInterval(() => {
@@ -101,10 +104,6 @@ function youtubeMusic() {
         onReady: () => {
           ready = true;
           player.setVolume(0);
-          if (holder.dataset.next) {
-            player.loadPlaylist({ playlist: [holder.dataset.next] });
-            player.setLoop(true);
-          }
           if (wantPlay) player.playVideo();
         },
         onError: () => {
@@ -137,14 +136,10 @@ function youtubeMusic() {
       }
       return playing;
     },
-    change(id) {
-      if (ready) {
-        player.loadPlaylist({ playlist: [id] });
-        player.setLoop(true);
-        if (!playing) player.pauseVideo();
-      } else {
-        holder.dataset.next = id;
-      }
+    // after a reload the browser may refuse to autoplay: report what the player is really doing
+    sync() {
+      playing = ready && [1, 3].includes(player.getPlayerState());
+      return playing;
     },
     fadeIn() {
       let v = 0;
@@ -183,6 +178,29 @@ letterText.addEventListener("animationend", (e) => {
   letterText.classList.remove("run");
   letterText.classList.add("loop");
 });
+function revealControls() {
+  show.classList.remove("locked");
+  muteBtn.hidden = false;
+  for (const id of ["addBtn", "songBtn", "letterBtn"]) document.getElementById(id)?.removeAttribute("hidden");
+  nowPlaying.hidden = false;
+}
+const SKIP_GATE = "skip-gate", SKIP_GATE_MS = 3e4;
+function reloadAfterSuccess(delay = 1400) {
+  try {
+    sessionStorage.setItem(SKIP_GATE, String(Date.now()));
+  } catch {
+  }
+  setTimeout(() => location.reload(), delay);
+}
+function consumeSkipGate() {
+  try {
+    const at = Number(sessionStorage.getItem(SKIP_GATE));
+    sessionStorage.removeItem(SKIP_GATE);
+    return at > 0 && Date.now() - at < SKIP_GATE_MS;
+  } catch {
+    return false;
+  }
+}
 const wait = (ms) => new Promise((r) => setTimeout(r, reduced ? Math.min(ms, 150) : ms));
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -202,12 +220,7 @@ form.addEventListener("submit", async (e) => {
   gate.classList.add("unlocking");
   await wait(1200);
   gate.classList.add("leaving");
-  show.classList.remove("locked");
-  muteBtn.hidden = false;
-  document.getElementById("addBtn")?.removeAttribute("hidden");
-  document.getElementById("songBtn")?.removeAttribute("hidden");
-  document.getElementById("letterBtn")?.removeAttribute("hidden");
-  nowPlaying.hidden = false;
+  revealControls();
   music.fadeIn();
   await wait(1500);
   startReading();
@@ -257,7 +270,6 @@ if (uploader) {
         const data = await res.json().catch(() => ({}));
         if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
         if (!res.ok) throw new Error(data.message || `Upload failed (HTTP ${res.status}).`);
-        addSlide(data.url);
         ok++;
       } catch (e) {
         upStatus.textContent = e.message;
@@ -267,7 +279,8 @@ if (uploader) {
     }
     upGo.disabled = false;
     upFiles.value = "";
-    upStatus.textContent = `Done: ${ok} photo${ok > 1 ? "s" : ""} added to the carousel.`;
+    upStatus.textContent = `Done: ${ok} photo${ok > 1 ? "s" : ""} added. Reloading\u2026`;
+    reloadAfterSuccess();
   };
 }
 const songDialog = document.getElementById("songDialog");
@@ -298,16 +311,9 @@ if (songDialog) {
       const data = await res.json().catch(() => ({}));
       if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
       if (!res.ok) throw new Error(data.message || `Could not save the song (HTTP ${res.status}).`);
-      $("npTitle").textContent = data.title;
-      $("npBy").textContent = data.artist ? `\xB7 ${data.artist}` : "";
       songUrl.value = "";
-      if (music.change) {
-        music.change(data.id);
-        songStatus.textContent = `Saved: ${data.title}. It is now the default song.`;
-      } else {
-        songStatus.textContent = `Saved: ${data.title}. Reloading to play it\u2026`;
-        setTimeout(() => location.reload(), 1200);
-      }
+      songStatus.textContent = `Saved: ${data.title}. It is now the default song. Reloading\u2026`;
+      reloadAfterSuccess();
     } catch (e) {
       songStatus.textContent = e.message;
     } finally {
@@ -363,9 +369,9 @@ if (letterDialog) {
       if (!data.changed) {
         letterStatus.textContent = "That is already the current message.";
       } else {
-        showLetter(data.paragraphs);
         letterMsg.value = "";
-        letterStatus.textContent = "Saved. The old message was kept as a backup file.";
+        letterStatus.textContent = "Saved. The old message was kept as a backup file. Reloading\u2026";
+        reloadAfterSuccess();
       }
     } catch (e) {
       letterStatus.textContent = e.message;
@@ -374,29 +380,16 @@ if (letterDialog) {
     }
   };
 }
-function showLetter(paragraphs) {
-  letterText.replaceChildren(...paragraphs.map((text) => {
-    const p = document.createElement("p");
-    p.textContent = text;
-    return p;
-  }));
-  letterText.classList.remove("run", "loop");
-  void letterText.offsetWidth;
+if (consumeSkipGate()) {
+  started = true;
+  gate.remove();
+  revealControls();
+  music.start();
+  music.fadeIn();
   startReading();
-}
-function addSlide(url) {
-  const fig = document.createElement("figure");
-  fig.className = "slide";
-  fig.dataset.i = String(slides.length);
-  for (const cls of ["bg", "fg"]) {
-    const img = document.createElement("img");
-    img.className = cls;
-    img.src = url;
-    img.alt = cls === "fg" ? "Photo memory" : "";
-    img.decoding = "async";
-    fig.appendChild(img);
-  }
-  document.getElementById("stage").appendChild(fig);
-  slides.push(fig);
-  countEl.textContent = `${pad(cur + 1)} / ${pad(slides.length)}`;
+  setTimeout(() => {
+    const on = music.sync();
+    muteBtn.classList.toggle("off", !on);
+    nowPlaying.classList.toggle("paused", !on);
+  }, 2500);
 }
