@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Providers;
+
+use App\Services\CarouselStore;
+use App\Services\SpacesFilesystem;
+use Naluz\Config\Repository;
+use Naluz\Foundation\ServiceProvider;
+use Naluz\Storage\StorageManager;
+
+final class AppServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->singleton(CarouselStore::class, fn () => new CarouselStore(
+            storage_path('app/carousel.json'),
+            base_path('database/carousel.seed.json'),
+        ));
+    }
+
+    public function boot(): void
+    {
+        $config = $this->app->make(Repository::class);
+        $spaces = (array) $config->get('filesystems.disks.spaces', []);
+
+        // The Spaces disk exists only once the credentials are in .env; until then uploads answer 503.
+        if (($spaces['key'] ?? '') !== '' && ($spaces['secret'] ?? '') !== '' && ($spaces['bucket'] ?? '') !== '') {
+            $this->app->make(StorageManager::class)->extend('spaces', new SpacesFilesystem(
+                (string) $spaces['endpoint'],
+                (string) $spaces['region'],
+                (string) $spaces['bucket'],
+                (string) $spaces['key'],
+                (string) $spaces['secret'],
+                (string) ($spaces['cdn_url'] ?? ''),
+            ));
+        }
+    }
+}

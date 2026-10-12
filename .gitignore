@@ -1,4 +1,9 @@
-node_modules/
-dist/
-.astro/
+/vendor/
+.env
+.phpunit.result.cache
+.phpunit.cache/
+/storage/database.sqlite
+/storage/app/carousel.json
+.idea/
+.vscode/
 .DS_Store

@@ -1,0 +1,12 @@
+/vendor/
+.env
+.phpunit.result.cache
+/storage/logs/*
+/storage/cache/*
+/storage/sessions/*
+/storage/*.sqlite
+!/storage/**/.gitignore
+.idea/
+.vscode/
+.phpunit.cache/
+/composer.lock
