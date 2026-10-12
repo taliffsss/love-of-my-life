@@ -9,6 +9,7 @@ use Naluz\Storage\Filesystem;
 use Naluz\Storage\StorageManager;
 use Naluz\Tests\TestCase;
 use Nyholm\Psr7\ServerRequest;
+use Nyholm\Psr7\Stream;
 use Nyholm\Psr7\UploadedFile;
 
 final class SiteTest extends TestCase
@@ -73,7 +74,7 @@ final class SiteTest extends TestCase
         $request = (new ServerRequest('POST', '/photos', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
             ->withParsedBody(['key' => $key]);
         if ($bytes !== null) {
-            $request = $request->withUploadedFiles(['photo' => new UploadedFile($bytes, strlen($bytes), UPLOAD_ERR_OK, 'x.png', 'image/png')]);
+            $request = $request->withUploadedFiles(['photo' => new UploadedFile(Stream::create($bytes), strlen($bytes), UPLOAD_ERR_OK, 'x.png', 'image/png')]);
         }
         return $this->send($request);
     }
