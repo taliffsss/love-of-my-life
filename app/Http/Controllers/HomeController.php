@@ -29,7 +29,6 @@ final class HomeController
             'description' => $description,
             'siteUrl' => $siteUrl,
             'ogImage' => $siteUrl . 'og-image.png',
-            'canUpload' => (string) config('site.upload_key') !== '',
             'jsonLd' => json_encode([
                 '@context' => 'https://schema.org',
                 '@type' => 'WebPage',

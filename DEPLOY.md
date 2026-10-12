@@ -18,6 +18,8 @@ chmod -R u+rwX storage
 
 Point the web server at **`public/`** (see `deploy/nginx.conf`, or use the bundled `public/.htaccess` on Apache) and
 reload it. Then open the site, enter the password, and the upload button appears next to the music button.
+If `UPLOAD_KEY` or the `SPACES_*` values are missing, the button still shows but uploading answers with a message
+saying what to set in `.env`.
 
 ## Photo uploads to DigitalOcean Spaces
 
@@ -31,7 +33,7 @@ reload it. Then open the site, enter the password, and the upload button appears
    | `SPACES_ENDPOINT_URL` | `https://<region>.digitaloceanspaces.com` (no bucket name) |
    | `SPACES_FOLDER` | folder inside the bucket, e.g. `yam` |
    | `SPACES_CDN_URL` | CDN origin used in the saved links; leave empty to use the bucket URL |
-   | `UPLOAD_KEY` | the secret you type into the *Add photos* dialog; empty = uploads disabled |
+   | `UPLOAD_KEY` | the secret you type into the *Add photos* dialog; empty = uploads are refused |
 
 2. Each upload goes browser → `POST /photos` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
    file type verified from its bytes. The public URL is appended to **`storage/app/carousel.json`**, and the carousel

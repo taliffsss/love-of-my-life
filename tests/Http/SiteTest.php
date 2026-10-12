@@ -176,10 +176,10 @@ final class SiteTest extends TestCase
         $this->assertSame([], $this->app->make(CarouselStore::class)->all());
     }
 
-    public function testUploadsAreDisabledWithoutAKey(): void
+    public function testUploadsAnswer503WithoutAKeyButTheButtonStillShows(): void
     {
         $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', '');
         $this->assertSame(503, $this->upload($this->csrf(), '', $this->png())->getStatusCode());
-        $this->assertStringNotContainsString('id="addBtn"', (string) $this->get('/')->getBody());
+        $this->assertStringContainsString('id="addBtn"', (string) $this->get('/')->getBody());
     }
 }
