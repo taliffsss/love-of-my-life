@@ -62,4 +62,30 @@ final class PhotoCatalogTest extends TestCase
             $catalog->absolute('https://love.test/'),
         );
     }
+
+    public function testMigratedPhotosShowFromSpacesAfterNewUploadsAndNotTwice(): void
+    {
+        $store = new CarouselStore($this->dir . '/live.json');
+        // what bin/migrate-photos.php stores for 01.jpg and 02.jpg (10.jpg was not migrated)
+        $this->assertSame(2, $store->prepend([
+            ['key' => 'yam/legacy-02.jpg', 'url' => 'https://cdn.test/yam/legacy-02.jpg'],
+            ['key' => 'yam/legacy-01.jpg', 'url' => 'https://cdn.test/yam/legacy-01.jpg'],
+        ]));
+        $store->add('yam/new.jpg', 'https://cdn.test/yam/new.jpg');
+        $catalog = new PhotoCatalog($store, $this->dir . '/photos');
+
+        $this->assertSame(
+            ['https://cdn.test/yam/new.jpg', 'https://cdn.test/yam/legacy-01.jpg', 'https://cdn.test/yam/legacy-02.jpg', '/photos/10.jpg'],
+            $catalog->all(),
+        );
+    }
+
+    public function testPrependSkipsKeysThatAreAlreadyListed(): void
+    {
+        $store = new CarouselStore($this->dir . '/live.json');
+        $entry = ['key' => 'yam/legacy-01.jpg', 'url' => 'https://cdn.test/yam/legacy-01.jpg'];
+        $this->assertSame(1, $store->prepend([$entry]));
+        $this->assertSame(0, $store->prepend([$entry]));
+        $this->assertCount(1, $store->all());
+    }
 }

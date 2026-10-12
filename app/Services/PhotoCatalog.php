@@ -10,6 +10,8 @@ namespace App\Services;
  */
 final class PhotoCatalog
 {
+    /** Prefix of the key a migrated public/photos file gets in Spaces (legacy-01.jpg) */
+    public const MIGRATED = 'legacy-';
     private const IMAGES = '/\.(jpe?g|png|webp|gif|avif)$/i';
 
     public function __construct(private readonly CarouselStore $uploaded, private readonly string $photosDir)
@@ -32,12 +34,14 @@ final class PhotoCatalog
         );
     }
 
-    /** @return list<string> */
+    /** @return list<string> the files of public/photos that were not copied to Spaces (see bin/migrate-photos.php) */
     private function local(): array
     {
+        $moved = array_map('basename', array_column($this->uploaded->all(), 'key'));
         $files = array_filter(
             is_dir($this->photosDir) ? (scandir($this->photosDir) ?: []) : [],
-            static fn (string $f): bool => preg_match(self::IMAGES, $f) === 1,
+            static fn (string $f): bool => preg_match(self::IMAGES, $f) === 1
+                && !in_array(self::MIGRATED . $f, $moved, true),
         );
         natcasesort($files);
         return array_values(array_map(static fn (string $f): string => '/photos/' . rawurlencode($f), $files));
