@@ -324,6 +324,11 @@ if (letterDialog) {
   } catch {
   }
   letterBtn.onclick = () => letterDialog.showModal();
+  letterDialog.addEventListener("close", () => {
+    letterMsg.removeAttribute("aria-invalid");
+    $("letterError").textContent = "";
+    letterStatus.textContent = "";
+  });
   letterMsg.addEventListener("input", () => {
     letterMsg.removeAttribute("aria-invalid");
     $("letterError").textContent = "";

@@ -160,6 +160,16 @@ final class SiteTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/digital\s*ocean|spaces/i', preg_replace('/letter-spacing|white-space/i', '', $served));
     }
 
+    public function testEveryDialogCanBeClosedWithoutPassingValidation(): void
+    {
+        $html = (string) $this->get('/')->getBody();
+
+        // Close is a submit button inside a <form method="dialog">; without formnovalidate the browser would run the
+        // "required" check first and refuse to close the message dialog while its box is empty.
+        $this->assertSame(3, substr_count($html, 'value="close" formnovalidate'));
+        $this->assertSame(3, substr_count($html, 'value="close"'));
+    }
+
     public function testApiListsTheStoredPhotos(): void
     {
         $this->app->make(CarouselStore::class)->add('k', 'https://cdn.test/k.jpg');

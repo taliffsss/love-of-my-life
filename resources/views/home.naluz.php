@@ -148,7 +148,7 @@
         <p id="upStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="upGo">Upload</button>
-          <button type="submit" value="close">Close</button>
+          <button type="submit" value="close" formnovalidate>Close</button>
         </div>
       </form>
     </dialog>
@@ -165,7 +165,7 @@
         <p id="songStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="songGo">Save song</button>
-          <button type="submit" value="close">Close</button>
+          <button type="submit" value="close" formnovalidate>Close</button>
         </div>
       </form>
     </dialog>
@@ -182,7 +182,7 @@
         <p id="letterStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="letterGo">Save message</button>
-          <button type="submit" value="close">Close</button>
+          <button type="submit" value="close" formnovalidate>Close</button>
         </div>
       </form>
     </dialog>
