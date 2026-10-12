@@ -2,7 +2,7 @@
 
 ## 1.2.0
 
-- Upload photos to DigitalOcean Spaces: drop images in `uploads/` and push to `main` (or run the "Upload photos to Spaces" workflow).
+- Upload photos to DigitalOcean Spaces: use the upload button in the slideshow, or drop images in `uploads/` and push to `main` (or run the "Upload photos to Spaces" workflow).
 - Uploaded photo URLs are stored in `src/data/carousel.json` and shown in the carousel after the local photos.
 - The site redeploys automatically after an upload.
 
