@@ -1,5 +1,41 @@
 # Deploying to your own server
 
+## Docker Swarm + Traefik (https://jinelin-basela.markanthonynaluz.com)
+
+This mirrors the hris-api setup: a Swarm stack (`docker-compose.yml`) with Traefik labels, the shared external
+`app_network`, the `letsencrypt` cert resolver and the `redirect-to-https@file` middleware from your main Traefik stack.
+The image (`Dockerfile`) runs nginx + PHP-FPM under Supervisor, like the hris-api image.
+
+1. **DNS:** point an `A` record for `jinelin-basela.markanthonynaluz.com` at the server running Traefik.
+2. **Server folder** (for example `/opt/love-of-my-life`):
+   ```bash
+   cp .env.docker.example .env      # then fill it in: APP_KEY, JWT_SECRET, UPLOAD_KEY, SPACES_*
+   ```
+   Generate the keys with `php naluz key:generate --show` (on any machine with the repo), or
+   `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` for `APP_KEY` and
+   `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` for `JWT_SECRET`. Write values **without quotes** in `.env`.
+3. **Build, push and deploy**, either by hand:
+   ```bash
+   docker build -t taliffsss/love-of-my-life:2.0.0 -t taliffsss/love-of-my-life:latest .
+   docker push taliffsss/love-of-my-life:2.0.0 && docker push taliffsss/love-of-my-life:latest
+   # on the server, in the folder with docker-compose.yml and .env:
+   sh deploy.sh 2.0.0 jinelin       # = docker stack deploy -c docker-compose.yml jinelin --with-registry-auth
+   ```
+   or with GitHub Actions: *Actions → Deploy → Run workflow* (version `2.0.0`). It needs these repository secrets:
+   `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `SSH_KEY`, `PROD_SERVER_HOST`, `PROD_SERVER_USER`, `PROD_DEPLOY_PATH`.
+4. Check it: `docker service logs -f jinelin_web`, then open the site. Traefik health-checks `GET /api/ping`.
+
+Notes:
+- `storage/` is a named volume (`lom_storage`): the uploaded-photo list (`carousel.json`), the chosen song
+  (`song.json`), logs and sessions survive redeploys. Photos themselves are in Spaces.
+- Traefik terminates TLS; nginx passes `HTTPS=on` to PHP when it sees `X-Forwarded-Proto: https`, so cookies are
+  `Secure` and the CSRF origin check works.
+- Single replica with a rolling update means a few seconds of downtime per deploy, same as hris-api.
+- Rollback: `sh deploy.sh <previous-version> jinelin`.
+
+## Without Docker (bare metal)
+
+
 Requirements: PHP 8.2+ (`mbstring`, `openssl`, `sodium`, `fileinfo`, `curl`), Composer, nginx or Apache.
 
 ```bash

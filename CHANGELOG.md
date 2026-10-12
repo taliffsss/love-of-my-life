@@ -7,6 +7,7 @@ Rebuilt on the NaluzPHP framework (PHP) to be deployed on your own server. The d
 - Server-side photo upload (`POST /upload`) to DigitalOcean Spaces (signed with AWS Signature V4, no SDK), with the file type checked from its bytes, CSRF protection, rate limiting and an `UPLOAD_KEY`.
 - Every uploaded photo URL is stored in `storage/app/carousel.json`; the carousel reads it, and `GET /api/photos` returns it.
 - Change the song from the page: paste a YouTube link (watch, youtu.be, embed, shorts or music links); it is validated, saved to `storage/app/song.json` and becomes the default.
+- Docker image (nginx + PHP-FPM + Supervisor), a Swarm stack file with Traefik labels for `jinelin-basela.markanthonynaluz.com` (same pattern as hris-api), a deploy script and a manual Deploy workflow.
 - The GitHub token, the upload workflow, the GitHub Pages deploy and the Astro/Node build are removed.
 - Added `DEPLOY.md`, an nginx example, a PHP CI workflow and tests.
 

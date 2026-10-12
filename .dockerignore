@@ -1,0 +1,32 @@
+.git
+.gitignore
+.gitattributes
+.github
+
+# secrets never go into the image
+.env
+.env.*
+!.env.example
+
+# dev / test
+tests
+phpunit.xml.dist
+phpcs.xml.dist
+.phpunit.cache
+.phpunit.result.cache
+vendor
+
+# runtime data (recreated by the entrypoint / kept in a volume)
+storage/logs/*
+storage/cache/*
+storage/sessions/*
+storage/app/*.json
+storage/database.sqlite
+
+.idea
+.vscode
+.DS_Store
+*.md
+!public/**/*.md
+deploy
+docker-compose.yml
