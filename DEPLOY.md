@@ -21,7 +21,7 @@ tag and CI checks, the image build, the GitHub Release and (optionally) the depl
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
 3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`; the deploy passes it to the stack as `LOM_IMAGE`, so image and stack always match), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
      `AUTO_DEPLOY` (`true` turns the deploy job on; keep it off until you trust the pipeline).
    - Environment `production` with required reviewers, so every deploy needs a human approval.
 
@@ -42,7 +42,7 @@ if `AUTO_DEPLOY=true` and you approve the `production` environment, rolls the st
 docker build -t taliffsss/love-of-my-life:2.0.0 -t taliffsss/love-of-my-life:latest .
 docker push taliffsss/love-of-my-life:2.0.0 && docker push taliffsss/love-of-my-life:latest
 # on the server, in /opt/love-of-my-life (with deploy/docker-stack.yml and deploy/.env.production):
-LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+LOM_IMAGE=taliffsss/love-of-my-life LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
 docker service logs -f jinelin_web
 ```
 
@@ -59,7 +59,7 @@ Try the image locally with `docker compose up --build` (needs a `.env.production
   `Secure` and the CSRF origin check works.
 - Rolling updates are `start-first`: the new container must pass its Docker health check (`GET /api/ping`) before the
   old one stops, so deploys have no downtime.
-- Rollback: `LOM_VERSION=<previous-version> docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin`.
+- Rollback: `LOM_IMAGE=<image> LOM_VERSION=<previous-version> docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin`.
 
 ## Without Docker (bare metal)
 
