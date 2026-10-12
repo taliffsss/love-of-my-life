@@ -286,6 +286,8 @@ final class SiteTest extends TestCase
         $html = (string) $this->get('/')->getBody();
         $this->assertStringContainsString('data-yt="fu9yk7gCTbc"', $html);
         $this->assertStringContainsString('Palagi', $html);
+        $this->assertStringContainsString('id="songBtn"', $html);
+        $this->assertStringContainsString('id="songForm"', $html);
         $this->assertStringContainsString('Change the song', $html);
         $this->assertStringContainsString('https://www.youtube.com/watch?v=fu9yk7gCTbc', $html);
     }

@@ -205,6 +205,7 @@ form.addEventListener("submit", async (e) => {
   show.classList.remove("locked");
   muteBtn.hidden = false;
   document.getElementById("addBtn")?.removeAttribute("hidden");
+  document.getElementById("songBtn")?.removeAttribute("hidden");
   nowPlaying.hidden = false;
   music.fadeIn();
   await wait(1500);
@@ -212,14 +213,14 @@ form.addEventListener("submit", async (e) => {
   await wait(700);
   gate.remove();
 });
+const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
 const uploader = document.getElementById("uploader");
 if (uploader) {
   const addBtn = $("addBtn");
-  const upKey2 = $("upKey"), upFiles = $("upFiles");
+  const upKey = $("upKey"), upFiles = $("upFiles");
   const upStatus = $("upStatus"), upGo = $("upGo");
-  const csrf2 = document.querySelector('meta[name="csrf-token"]')?.content || "";
   try {
-    upKey2.value = sessionStorage.getItem("upload-key") || "";
+    upKey.value = sessionStorage.getItem("upload-key") || "";
   } catch {
   }
   addBtn.onclick = () => uploader.showModal();
@@ -233,7 +234,7 @@ if (uploader) {
     return new Promise((res, rej) => c.toBlob((b) => b ? res(b) : rej(new Error("resize failed")), "image/jpeg", 0.88));
   }
   upGo.onclick = async () => {
-    const key = upKey2.value.trim();
+    const key = upKey.value.trim();
     const files = Array.from(upFiles.files || []);
     if (!key || !files.length) {
       upStatus.textContent = "Enter the upload key and pick at least one photo.";
@@ -251,7 +252,7 @@ if (uploader) {
         const fd = new FormData();
         fd.append("key", key);
         fd.append("photo", await shrink(f), f.name.replace(/\.[^.]+$/, "") + ".jpg");
-        const res = await fetch("/upload", { method: "POST", headers: { "X-CSRF-TOKEN": csrf2, Accept: "application/json" }, body: fd });
+        const res = await fetch("/upload", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
         const data = await res.json().catch(() => ({}));
         if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
         if (!res.ok) throw new Error(data.message || `Upload failed (HTTP ${res.status}).`);
@@ -268,11 +269,17 @@ if (uploader) {
     upStatus.textContent = `Done: ${ok} photo${ok > 1 ? "s" : ""} added to the carousel.`;
   };
 }
-const songUrl = document.getElementById("songUrl");
-if (uploader && songUrl) {
+const songDialog = document.getElementById("songDialog");
+if (songDialog) {
+  const songBtn = $("songBtn"), songKey = $("songKey"), songUrl = $("songUrl");
   const songStatus = $("songStatus"), songGo = $("songGo");
+  try {
+    songKey.value = sessionStorage.getItem("upload-key") || "";
+  } catch {
+  }
+  songBtn.onclick = () => songDialog.showModal();
   songGo.onclick = async () => {
-    const key = upKey.value.trim(), url = songUrl.value.trim();
+    const key = songKey.value.trim(), url = songUrl.value.trim();
     if (!key || !url) {
       songStatus.textContent = "Enter the upload key and a YouTube link.";
       return;

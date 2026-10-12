@@ -79,6 +79,9 @@
       <button class="mute add" id="addBtn" aria-label="Add photos" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
       </button>
+      <button class="mute add song" id="songBtn" aria-label="Change the song" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path d="M3 5h4M5 3v4"/></svg>
+      </button>
       <button class="mute" id="mute" aria-label="Toggle music" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
       </button>
@@ -142,12 +145,18 @@
         <p id="upStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="upGo">Upload</button>
+          <button type="submit" value="close">Close</button>
         </div>
+      </form>
+    </dialog>
 
-        <hr class="up-sep" />
+    <dialog id="songDialog" class="uploader">
+      <form method="dialog" id="songForm">
         <h3>Change the song</h3>
         <p class="up-note">Paste a YouTube link. It becomes the new default song.<br />
           Example: <code>https://www.youtube.com/watch?v=fu9yk7gCTbc</code> or <code>https://youtu.be/fu9yk7gCTbc</code></p>
+        <label for="songKey">Upload key</label>
+        <input id="songKey" type="password" autocomplete="off" spellcheck="false" />
         <label for="songUrl">YouTube link</label>
         <input id="songUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://www.youtube.com/watch?v=..." />
         <p id="songStatus" class="up-status" role="status" aria-live="polite"></p>

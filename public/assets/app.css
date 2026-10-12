@@ -102,6 +102,7 @@
   .mute.off { opacity: .5; }
 
   .add { right: 70px; }
+  .add.song { right: 124px; }
   .uploader { border: 1px solid rgba(255,255,255,.22); border-radius: 18px; background: rgba(42,18,32,.94); color: var(--text); padding: 22px; width: min(92vw, 420px); }
   .uploader::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
   .uploader h3 { margin: 0 0 8px; font-weight: 500; }
