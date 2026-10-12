@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\CarouselStore;
+use App\Services\UploadGate;
 use Naluz\Http\HttpException;
-use Naluz\Http\Request;
 use Naluz\Http\Response;
 use Naluz\Storage\StorageException;
 use Naluz\Storage\Uploads;
@@ -16,16 +16,9 @@ use Psr\Http\Message\UploadedFileInterface;
 
 final class PhotoController
 {
-    public function store(ServerRequestInterface $request, CarouselStore $store): ResponseInterface
+    public function store(ServerRequestInterface $request, CarouselStore $store, UploadGate $gate): ResponseInterface
     {
-        $expected = (string) config('site.upload_key');
-        if ($expected === '') {
-            throw new HttpException(503, 'Uploads are not enabled. Set UPLOAD_KEY in .env.');
-        }
-        $given = (string) (Request::body($request)['key'] ?? '');
-        if (!hash_equals($this->normalise($expected), $this->normalise($given))) {
-            throw new HttpException(403, 'Wrong upload key. ' . config('site.upload_hint'));
-        }
+        $gate->assertAllowed($request);
 
         $file = $request->getUploadedFiles()['photo'] ?? null;
         if (!$file instanceof UploadedFileInterface) {
@@ -55,11 +48,5 @@ final class PhotoController
         }
 
         return Response::json(['key' => $key, 'url' => $url], 201);
-    }
-
-    /** The key is a name, so ignore case and extra spaces when comparing. */
-    private function normalise(string $key): string
-    {
-        return mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($key)));
     }
 }

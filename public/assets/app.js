@@ -58,7 +58,7 @@ addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") go(cur - 1);
 });
 go(0);
-const YT_ID = "fu9yk7gCTbc";
+const YT_ID = document.body.dataset.yt || "fu9yk7gCTbc";
 const TARGET = 80;
 function localMusic(a) {
   return {
@@ -101,6 +101,10 @@ function youtubeMusic() {
         onReady: () => {
           ready = true;
           player.setVolume(0);
+          if (holder.dataset.next) {
+            player.loadPlaylist({ playlist: [holder.dataset.next] });
+            player.setLoop(true);
+          }
           if (wantPlay) player.playVideo();
         },
         onError: () => {
@@ -132,6 +136,15 @@ function youtubeMusic() {
         playing = true;
       }
       return playing;
+    },
+    change(id) {
+      if (ready) {
+        player.loadPlaylist({ playlist: [id] });
+        player.setLoop(true);
+        if (!playing) player.pauseVideo();
+      } else {
+        holder.dataset.next = id;
+      }
     },
     fadeIn() {
       let v = 0;
@@ -202,11 +215,11 @@ form.addEventListener("submit", async (e) => {
 const uploader = document.getElementById("uploader");
 if (uploader) {
   const addBtn = $("addBtn");
-  const upKey = $("upKey"), upFiles = $("upFiles");
+  const upKey2 = $("upKey"), upFiles = $("upFiles");
   const upStatus = $("upStatus"), upGo = $("upGo");
-  const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
+  const csrf2 = document.querySelector('meta[name="csrf-token"]')?.content || "";
   try {
-    upKey.value = sessionStorage.getItem("upload-key") || "";
+    upKey2.value = sessionStorage.getItem("upload-key") || "";
   } catch {
   }
   addBtn.onclick = () => uploader.showModal();
@@ -220,7 +233,7 @@ if (uploader) {
     return new Promise((res, rej) => c.toBlob((b) => b ? res(b) : rej(new Error("resize failed")), "image/jpeg", 0.88));
   }
   upGo.onclick = async () => {
-    const key = upKey.value.trim();
+    const key = upKey2.value.trim();
     const files = Array.from(upFiles.files || []);
     if (!key || !files.length) {
       upStatus.textContent = "Enter the upload key and pick at least one photo.";
@@ -238,7 +251,7 @@ if (uploader) {
         const fd = new FormData();
         fd.append("key", key);
         fd.append("photo", await shrink(f), f.name.replace(/\.[^.]+$/, "") + ".jpg");
-        const res = await fetch("/upload", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
+        const res = await fetch("/upload", { method: "POST", headers: { "X-CSRF-TOKEN": csrf2, Accept: "application/json" }, body: fd });
         const data = await res.json().catch(() => ({}));
         if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
         if (!res.ok) throw new Error(data.message || `Upload failed (HTTP ${res.status}).`);
@@ -253,6 +266,45 @@ if (uploader) {
     upGo.disabled = false;
     upFiles.value = "";
     upStatus.textContent = `Done: ${ok} photo${ok > 1 ? "s" : ""} added to the carousel.`;
+  };
+}
+const songUrl = document.getElementById("songUrl");
+if (uploader && songUrl) {
+  const songStatus = $("songStatus"), songGo = $("songGo");
+  songGo.onclick = async () => {
+    const key = upKey.value.trim(), url = songUrl.value.trim();
+    if (!key || !url) {
+      songStatus.textContent = "Enter the upload key and a YouTube link.";
+      return;
+    }
+    try {
+      sessionStorage.setItem("upload-key", key);
+    } catch {
+    }
+    songGo.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append("key", key);
+      fd.append("url", url);
+      const res = await fetch("/song", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
+      if (!res.ok) throw new Error(data.message || `Could not save the song (HTTP ${res.status}).`);
+      $("npTitle").textContent = data.title;
+      $("npBy").textContent = data.artist ? `\xB7 ${data.artist}` : "";
+      songUrl.value = "";
+      if (music.change) {
+        music.change(data.id);
+        songStatus.textContent = `Saved: ${data.title}. It is now the default song.`;
+      } else {
+        songStatus.textContent = `Saved: ${data.title}. Reloading to play it\u2026`;
+        setTimeout(() => location.reload(), 1200);
+      }
+    } catch (e) {
+      songStatus.textContent = e.message;
+    } finally {
+      songGo.disabled = false;
+    }
   };
 }
 function addSlide(url) {

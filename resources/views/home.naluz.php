@@ -36,7 +36,7 @@
     />
     <link rel="stylesheet" href="/assets/app.css?v={{ $assetVersion }}" />
   </head>
-  <body>
+  <body data-yt="{{ $song['id'] }}">
     <h1 class="sr-only">For {{ $name }}: a romantic photo slideshow and love letter</h1>
     <div class="hearts" aria-hidden="true"></div>
 
@@ -73,7 +73,7 @@
         <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
         <span class="np-text">
           <span class="np-label">Now playing</span>
-          <span class="np-title">Palagi <span class="np-by">· TJ Monterde</span></span>
+          <span class="np-title"><span id="npTitle">{{ $song['title'] }}</span> <span class="np-by" id="npBy">@if ($song['artist'] !== '')· {{ $song['artist'] }}@endif</span></span>
         </span>
       </div>
       <button class="mute add" id="addBtn" aria-label="Add photos" hidden>
@@ -142,6 +142,17 @@
         <p id="upStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="upGo">Upload</button>
+        </div>
+
+        <hr class="up-sep" />
+        <h3>Change the song</h3>
+        <p class="up-note">Paste a YouTube link. It becomes the new default song.<br />
+          Example: <code>https://www.youtube.com/watch?v=fu9yk7gCTbc</code> or <code>https://youtu.be/fu9yk7gCTbc</code></p>
+        <label for="songUrl">YouTube link</label>
+        <input id="songUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://www.youtube.com/watch?v=..." />
+        <p id="songStatus" class="up-status" role="status" aria-live="polite"></p>
+        <div class="up-actions">
+          <button type="button" id="songGo">Save song</button>
           <button type="submit" value="close">Close</button>
         </div>
       </form>

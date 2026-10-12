@@ -8,6 +8,9 @@ return [
 
     // Shared secret that unlocks photo uploads (the "upload key" in the Add photos dialog). Uploads are disabled while empty.
     'upload_key' => env('UPLOAD_KEY', ''),
+    // The song until one is chosen from the page (then storage/app/song.json takes over). Any YouTube video id.
+    'song' => ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde'],
+
     // Shown when the wrong upload key is entered.
     'upload_hint' => 'Hint: your complete full name.',
     'max_upload_bytes' => 12_000_000,

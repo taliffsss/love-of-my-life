@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Naluz\Tests\Http;
 
 use App\Services\CarouselStore;
+use App\Services\SongStore;
+use App\Services\YouTube;
 use Naluz\Storage\Filesystem;
 use Naluz\Storage\StorageManager;
 use Naluz\Tests\TestCase;
@@ -15,6 +17,7 @@ use Nyholm\Psr7\UploadedFile;
 final class SiteTest extends TestCase
 {
     private string $manifest;
+    private string $songFile;
 
     protected function configOverrides(): array
     {
@@ -31,10 +34,13 @@ final class SiteTest extends TestCase
         parent::setUp();
         $this->manifest = sys_get_temp_dir() . '/carousel-' . bin2hex(random_bytes(4)) . '.json';
         $this->app->instance(CarouselStore::class, new CarouselStore($this->manifest));
+        $this->songFile = sys_get_temp_dir() . '/song-' . bin2hex(random_bytes(4)) . '.json';
+        $this->app->instance(SongStore::class, new SongStore($this->songFile, ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde']));
     }
 
     protected function tearDown(): void
     {
+        @unlink($this->songFile);
         @unlink($this->manifest);
         @unlink($this->manifest . '.lock');
         parent::tearDown();
@@ -257,5 +263,71 @@ final class SiteTest extends TestCase
         $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', '');
         $this->assertSame(503, $this->upload($this->csrf(), '', $this->png())->getStatusCode());
         $this->assertStringContainsString('id="addBtn"', (string) $this->get('/')->getBody());
+    }
+
+    private function fakeYouTube(int $status, array $body = []): void
+    {
+        $client = new \GuzzleHttp\Client([
+            'handler' => \GuzzleHttp\HandlerStack::create(new \GuzzleHttp\Handler\MockHandler([new \GuzzleHttp\Psr7\Response($status, [], json_encode($body))])),
+            'http_errors' => false,
+        ]);
+        $this->app->instance(YouTube::class, new YouTube($client));
+    }
+
+    private function changeSong(string $token, string $key, string $url): \Psr\Http\Message\ResponseInterface
+    {
+        $request = (new ServerRequest('POST', '/song', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
+            ->withParsedBody(['key' => $key, 'url' => $url]);
+        return $this->send($request);
+    }
+
+    public function testHomePageShowsTheDefaultSong(): void
+    {
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('data-yt="fu9yk7gCTbc"', $html);
+        $this->assertStringContainsString('Palagi', $html);
+        $this->assertStringContainsString('Change the song', $html);
+        $this->assertStringContainsString('https://www.youtube.com/watch?v=fu9yk7gCTbc', $html);
+    }
+
+    public function testChangingTheSongMakesItTheNewDefault(): void
+    {
+        $this->fakeYouTube(200, ['title' => 'Bakit Ba Ikaw', 'author_name' => 'Michael Pangilinan']);
+
+        $response = $this->changeSong($this->csrf(), 'secret-key', 'https://youtu.be/dQw4w9WgXcQ');
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame(['id' => 'dQw4w9WgXcQ', 'title' => 'Bakit Ba Ikaw', 'artist' => 'Michael Pangilinan'], $this->decode($response));
+
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('data-yt="dQw4w9WgXcQ"', $html);
+        $this->assertStringContainsString('Bakit Ba Ikaw', $html);
+        $this->assertStringContainsString('Michael Pangilinan', $html);
+    }
+
+    public function testOnlyYouTubeLinksAreAccepted(): void
+    {
+        $response = $this->changeSong($this->csrf(), 'secret-key', 'https://example.com/song.mp3');
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertStringContainsString('Paste a YouTube link', (string) $response->getBody());
+        $this->assertFalse($this->app->make(SongStore::class)->hasSaved());
+    }
+
+    public function testAVideoYouTubeDoesNotKnowIsRejected(): void
+    {
+        $this->fakeYouTube(404);
+        $response = $this->changeSong($this->csrf(), 'secret-key', 'https://youtu.be/aaaaaaaaaaa');
+
+        $this->assertSame(422, $response->getStatusCode());
+        $this->assertFalse($this->app->make(SongStore::class)->hasSaved());
+    }
+
+    public function testChangingTheSongNeedsTheUploadKey(): void
+    {
+        $response = $this->changeSong($this->csrf(), 'wrong', 'https://youtu.be/dQw4w9WgXcQ');
+
+        $this->assertSame(403, $response->getStatusCode());
+        $this->assertFalse($this->app->make(SongStore::class)->hasSaved());
     }
 }

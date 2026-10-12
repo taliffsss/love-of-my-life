@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Services\CarouselStore;
+use App\Services\SongStore;
 use Psr\Http\Message\ResponseInterface;
 
 final class HomeController
 {
     private const IMAGES = '/\.(jpe?g|png|webp|gif|avif)$/i';
 
-    public function index(CarouselStore $store): ResponseInterface
+    public function index(CarouselStore $store, SongStore $songs): ResponseInterface
     {
         $name = (string) config('site.name');
         $siteUrl = rtrim((string) config('app.url'), '/') . '/';
@@ -24,7 +25,9 @@ final class HomeController
             'letter' => (array) config('site.letter'),
             'photos' => array_merge($this->localPhotos(), $store->urls()),
             'placeholders' => ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'],
-            'music' => $this->song(),
+            // a song chosen from the page wins over a local file in public/music
+            'music' => $songs->hasSaved() ? '' : $this->song(),
+            'song' => $songs->get(),
             'assetVersion' => (string) max(
                 (int) @filemtime(base_path('public/assets/app.js')),
                 (int) @filemtime(base_path('public/assets/app.css')),

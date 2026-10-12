@@ -42,6 +42,14 @@ saying what to set in `.env`.
    never overwrites it. Back it up with the rest of `storage/app/`. On a brand-new install it starts from
    `database/carousel.seed.json` (the photos uploaded before v2.0.0).
 
+## Changing the song
+
+Unlock the page, click the upload icon, enter the upload key, and paste a YouTube link in *Change the song*, for
+example `https://www.youtube.com/watch?v=fu9yk7gCTbc` or `https://youtu.be/fu9yk7gCTbc`. The server checks the link
+(YouTube links only, and the video must exist and be embeddable), saves it to **`storage/app/song.json`**, and it
+becomes the default song for every visitor. The "Now playing" title comes from YouTube. A saved song wins over any
+audio file in `public/music/`. Delete `storage/app/song.json` to go back to the song in `config/site.php`.
+
 ## Updating
 
 ```bash

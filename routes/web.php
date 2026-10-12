@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\SeoController;
+use App\Http\Controllers\SongController;
 use Naluz\Routing\Router;
 
 /** @var Router $router */
@@ -14,3 +15,6 @@ $router->get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 // Upload a photo to DigitalOcean Spaces and add it to the carousel (needs the upload key).
 $router->post('/upload', [PhotoController::class, 'store'])->middleware('throttle:20,1')->name('upload');
+
+// Replace the song with another YouTube link (needs the upload key). Not /music: that is a real folder.
+$router->post('/song', [SongController::class, 'update'])->middleware('throttle:20,1')->name('song');
