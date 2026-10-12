@@ -23,7 +23,7 @@ final class PhotoController
             throw new HttpException(503, 'Uploads are not enabled. Set UPLOAD_KEY in .env.');
         }
         $given = (string) (Request::body($request)['key'] ?? '');
-        if (!hash_equals($expected, $given)) {
+        if (!hash_equals($this->normalise($expected), $this->normalise($given))) {
             throw new HttpException(403, 'Wrong upload key. ' . config('site.upload_hint'));
         }
 
@@ -55,5 +55,11 @@ final class PhotoController
         }
 
         return Response::json(['key' => $key, 'url' => $url], 201);
+    }
+
+    /** The key is a name, so ignore case and extra spaces when comparing. */
+    private function normalise(string $key): string
+    {
+        return mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($key)));
     }
 }

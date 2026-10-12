@@ -25,6 +25,10 @@ final class HomeController
             'photos' => array_merge($this->localPhotos(), $store->urls()),
             'placeholders' => ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'],
             'music' => $this->song(),
+            'assetVersion' => (string) max(
+                (int) @filemtime(base_path('public/assets/app.js')),
+                (int) @filemtime(base_path('public/assets/app.css')),
+            ),
             'title' => $title,
             'description' => $description,
             'siteUrl' => $siteUrl,

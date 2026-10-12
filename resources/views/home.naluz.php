@@ -34,7 +34,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/assets/app.css" />
+    <link rel="stylesheet" href="/assets/app.css?v={{ $assetVersion }}" />
   </head>
   <body>
     <h1 class="sr-only">For {{ $name }}: a romantic photo slideshow and love letter</h1>
@@ -150,6 +150,6 @@
     @if ($music !== '')
     <audio id="song" src="{{ $music }}" loop preload="auto"></audio>
     @endif
-    <script src="/assets/app.js" defer></script>
+    <script src="/assets/app.js?v={{ $assetVersion }}" defer></script>
   </body>
 </html>

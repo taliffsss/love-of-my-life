@@ -158,6 +158,14 @@ final class SiteTest extends TestCase
         $this->assertStringContainsString('Hint: your complete full name.', (string) $response->getBody());
     }
 
+    public function testTheKeyIgnoresCaseAndExtraSpaces(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('site.upload_key', 'jinelin basela');
+        $this->app->make(StorageManager::class)->extend('spaces', $this->memoryDisk());
+
+        $this->assertSame(201, $this->upload($this->csrf(), '  Jinelin   BASELA ', $this->png())->getStatusCode());
+    }
+
     public function testUploadStoresThePhotoAndRecordsItsUrl(): void
     {
         $disk = $this->memoryDisk();
