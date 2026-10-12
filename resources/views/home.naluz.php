@@ -61,7 +61,6 @@
         @if (count($photos) > 0)
           @foreach ($photos as $i => $src)
             <figure class="slide" data-i="{{ $i }}">
-              <img class="bg" src="{{ $src }}" alt="" loading="{{ $i < 2 ? 'eager' : 'lazy' }}" decoding="async" />
               <img class="fg" src="{{ $src }}" alt="Photo memory {{ $i + 1 }} of {{ count($photos) }} for {{ $name }}" loading="{{ $i < 2 ? 'eager' : 'lazy' }}"{!! $i === 0 ? ' fetchpriority="high"' : '' !!} decoding="async" />
             </figure>
           @endforeach

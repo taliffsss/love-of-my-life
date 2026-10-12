@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.2
+
+- Lighter carousel, so it no longer stalls or goes black while it plays. Photos are shown as they are: the blurred copy that sat behind every photo (a second image per slide with a 34px blur, so each photo was downloaded, decoded and blurred twice) is gone, and the blur now belongs to the password screen only. The soft fade between photos and the slow zoom stay. Slides that are not on screen are no longer rendered at all (`visibility: hidden`), only the playing photo gets its own compositing layer, and the glow over the photo uses plain transparency instead of a blend mode, which made the browser re-mix the photo underneath on every frame.
+
 ## 2.3.1
 
 - Fix for the carousel going black: a slide used to fade in when its timer fired even if its photo had not finished loading (a big photo on a slow connection, a photo that is gone, or one the browser had dropped from memory while hidden), so the screen stayed black until the photo arrived. Now the next two photos are prepared while the current one is shown, a slide only fades in once its photo is loaded and decoded, and a photo that is still not ready after 6 seconds, or that fails to load, is skipped (the next one plays; it comes back on the next round). Measured in a browser with photo 2 delayed 25 seconds and with photo 2 answering 404: the old script showed it (black), the new one goes straight to photo 3.

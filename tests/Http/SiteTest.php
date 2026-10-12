@@ -825,6 +825,19 @@ final class SiteTest extends TestCase
         $this->assertSame(\App\Http\Middleware\RateLimit::class, $aliases['throttle']);
     }
 
+    public function testPhotosAreShownAsTheyAreAndTheBlurBelongsToThePasswordScreen(): void
+    {
+        $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.css');
+        $this->assertStringNotContainsString('.slide .bg', $css, 'no blurred copy of each photo behind it');
+        $this->assertStringContainsString('.show.locked {', $css, 'the password screen keeps its blur');
+        $this->assertDoesNotMatchRegularExpression('/\.glow\s*\{[^}]*mix-blend-mode/', $css, 'a blend mode re-mixes the photo on every frame');
+        $this->assertMatchesRegularExpression('/\.slide\s*\{[^}]*visibility:\s*hidden/', $css, 'slides that are not showing are not rendered');
+        $this->assertDoesNotMatchRegularExpression('/\.slide \.fg\s*\{[^}]*will-change/', $css, 'only the playing photo gets its own layer');
+
+        $html = (string) file_get_contents(dirname(__DIR__, 2) . '/resources/views/home.naluz.php');
+        $this->assertStringNotContainsString('class="bg"', $html);
+    }
+
     public function testASlideOnlyFadesInOnceItsPhotoIsReady(): void
     {
         $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
