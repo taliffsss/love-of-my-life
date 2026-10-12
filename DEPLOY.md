@@ -21,7 +21,7 @@ tag and CI checks, the image build, the GitHub Release and (optionally) the depl
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
 3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`), `DEPLOY_PATH` (default `/opt/love-of-my-life`),
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
      `AUTO_DEPLOY` (`true` turns the deploy job on; keep it off until you trust the pipeline).
    - Environment `production` with required reviewers, so every deploy needs a human approval.
 

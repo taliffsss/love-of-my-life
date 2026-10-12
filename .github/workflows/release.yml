@@ -10,7 +10,7 @@
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
 #   Variables DOCKER_IMAGE (default taliffsss/love-of-my-life)
-#             DEPLOY_PATH  (dir on the server holding deploy/.env.production; default /opt/love-of-my-life)
+#             DEPLOY_PATH  (dir on the server holding deploy/.env.production; default /opt/love-of-my-life; may also be a secret)
 #             AUTO_DEPLOY  ("true" turns the deploy job on; keep it off until you trust the pipeline)
 #   Environment `production` → add required reviewers so a human approves every deploy.
 # Secrets in deploy/.env.production stay on the server; they never reach GitHub or the image.
@@ -132,7 +132,7 @@ jobs:
     environment: production # configure required reviewers here: nothing deploys unapproved
     env:
       HOST: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
-      DIR: ${{ vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
+      DIR: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
       HAS_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
     steps:
       - uses: actions/checkout@v5
