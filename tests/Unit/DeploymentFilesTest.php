@@ -20,11 +20,11 @@ final class DeploymentFilesTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/^\s*HEALTHCHECK\b/mi', $dockerfile);
     }
 
-    public function testTheStackKeepsSwarmHealthchecksOff(): void
+    public function testTheStackRunsNoHealthChecks(): void
     {
         $stack = $this->file('deploy/docker-stack.yml');
-        $this->assertMatchesRegularExpression('/^\s+healthcheck:\s*\n\s+disable:\s*true\s*$/m', $stack);
-        $this->assertStringContainsString('traefik.http.services.jinelin-basela.loadbalancer.healthcheck.path=/api/ping', $stack);
+        $this->assertMatchesRegularExpression('/^\s+healthcheck:\s*\n\s+disable:\s*true\s*$/m', $stack, 'Swarm health check disabled');
+        $this->assertStringNotContainsString('loadbalancer.healthcheck', $stack, 'no Traefik health check labels');
     }
 
     public function testTheStackDeploysTheImageTheReleasePushes(): void
