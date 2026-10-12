@@ -24,7 +24,6 @@ final class HomeController
             'name' => $name,
             'firstName' => (string) config('site.first_name'),
             'letter' => $letters->paragraphs(),
-            'letterText' => implode("\n\n", $letters->paragraphs()),
             'photos' => array_merge($this->localPhotos(), $store->urls()),
             'placeholders' => ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'],
             // a song chosen from the page wins over a local file in public/music

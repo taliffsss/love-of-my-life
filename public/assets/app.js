@@ -324,10 +324,22 @@ if (letterDialog) {
   } catch {
   }
   letterBtn.onclick = () => letterDialog.showModal();
+  letterMsg.addEventListener("input", () => {
+    letterMsg.removeAttribute("aria-invalid");
+    $("letterError").textContent = "";
+  });
   letterGo.onclick = async () => {
     const key = letterKey.value.trim(), message = letterMsg.value.trim();
-    if (!key || !message) {
-      letterStatus.textContent = "Enter the upload key and the message.";
+    letterStatus.textContent = "";
+    if (message === "") {
+      letterMsg.value = "";
+      letterMsg.setAttribute("aria-invalid", "true");
+      $("letterError").textContent = "The message is required.";
+      letterMsg.focus();
+      return;
+    }
+    if (!key) {
+      letterStatus.textContent = "Enter the upload key.";
       return;
     }
     try {
@@ -347,7 +359,7 @@ if (letterDialog) {
         letterStatus.textContent = "That is already the current message.";
       } else {
         showLetter(data.paragraphs);
-        letterMsg.value = data.paragraphs.join("\n\n");
+        letterMsg.value = "";
         letterStatus.textContent = "Saved. The old message was kept as a backup file.";
       }
     } catch (e) {

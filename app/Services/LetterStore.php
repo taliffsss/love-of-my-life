@@ -47,7 +47,7 @@ final class LetterStore
             }
         }
         if ($paragraphs === []) {
-            throw new \InvalidArgumentException('Write the message first.');
+            throw new \InvalidArgumentException('The message is required.');
         }
         if (count($paragraphs) > self::MAX_PARAGRAPHS || mb_strlen(implode('', $paragraphs)) > self::MAX_CHARS) {
             throw new \InvalidArgumentException(

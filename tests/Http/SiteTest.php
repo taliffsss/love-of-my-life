@@ -362,7 +362,8 @@ final class SiteTest extends TestCase
         $this->assertStringContainsString('<p>Old first.</p>', $html);
         $this->assertStringContainsString('id="letterBtn"', $html);
         $this->assertStringContainsString('id="letterForm"', $html);
-        $this->assertStringContainsString("Old first.\n\nOld second.", $html);
+        // a new message starts from an empty box and is required
+        $this->assertMatchesRegularExpression('#<textarea id="letterMsg"[^>]*\brequired\b[^>]*></textarea>#', $html);
     }
 
     public function testReplacingTheMessageArchivesTheOldOneFirst(): void
@@ -460,7 +461,9 @@ final class SiteTest extends TestCase
     public function testTheMessageNeedsTheUploadKeyAndSomeText(): void
     {
         $this->assertSame(403, $this->changeMessage($this->csrf(), 'wrong', 'New text')->getStatusCode());
-        $this->assertSame(422, $this->changeMessage($this->csrf(), 'secret-key', "  \n ")->getStatusCode());
+        $empty = $this->changeMessage($this->csrf(), 'secret-key', "  \n ");
+        $this->assertSame(422, $empty->getStatusCode());
+        $this->assertStringContainsString('The message is required.', (string) $empty->getBody());
         $this->assertSame(['Old first.', 'Old second.'], $this->app->make(LetterStore::class)->paragraphs());
     }
 

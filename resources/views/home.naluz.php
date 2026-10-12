@@ -176,8 +176,9 @@
         <p class="up-note">Write the new message. Leave a blank line between paragraphs. The current message is saved as a backup file before the new one appears.</p>
         <label for="letterKey">Upload key</label>
         <input id="letterKey" type="password" autocomplete="off" spellcheck="false" />
-        <label for="letterMsg">Message</label>
-        <textarea id="letterMsg" rows="10" spellcheck="true">{{ $letterText }}</textarea>
+        <label for="letterMsg">New message <small>(required)</small></label>
+        <textarea id="letterMsg" rows="10" spellcheck="true" required aria-required="true" aria-describedby="letterError" placeholder="Write the new message here"></textarea>
+        <p id="letterError" class="field-error" role="alert"></p>
         <p id="letterStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="letterGo">Save message</button>
