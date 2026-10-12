@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- SEO: image sitemap, `robots.txt` that hides the action endpoints, richer structured data (`WebSite`, `WebPage`, `Person`, `ImageGallery`), `hreflang`, web manifest, PNG icons and Apple touch icon, first-photo preload, descriptive alt text and `noindex` headers on the JSON endpoints.
+
 ## 2.0.1
 
 - The Docker image is `taliffsss/jinelin-basela` everywhere (stack file, release workflow, docs, local compose); the stack deploys exactly the image the release pushed.

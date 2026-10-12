@@ -4,13 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1a0d17" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="For {{ $name }}" />
+    <meta name="apple-mobile-web-app-title" content="{{ $firstName }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>{{ $title }}</title>
     <meta name="description" content="{{ $description }}" />
     <meta name="author" content="With love" />
     <meta name="keywords" content="{{ $name }}, Jinelin, love letter, romantic photo slideshow, memories" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="{{ $siteUrl }}" />
+    <link rel="alternate" hreflang="en" href="{{ $siteUrl }}" />
+    <link rel="alternate" hreflang="x-default" href="{{ $siteUrl }}" />
     <link rel="sitemap" type="application/xml" href="{{ $siteUrl }}sitemap.xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="For {{ $name }}" />
@@ -20,14 +25,23 @@
     <meta property="og:image" content="{{ $ogImage }}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:alt" content="For {{ $name }}" />
+    <meta property="og:updated_time" content="{{ $modified }}" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="{{ $title }}" />
     <meta name="twitter:description" content="{{ $description }}" />
     <meta name="twitter:image" content="{{ $ogImage }}" />
+    <meta name="twitter:image:alt" content="For {{ $name }}" />
     <script type="application/ld+json">{!! $jsonLd !!}</script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    @if ($firstPhoto !== '')
+    <link rel="preload" as="image" href="{{ $firstPhoto }}" fetchpriority="high" />
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -48,7 +62,7 @@
           @foreach ($photos as $i => $src)
             <figure class="slide" data-i="{{ $i }}">
               <img class="bg" src="{{ $src }}" alt="" loading="{{ $i < 2 ? 'eager' : 'lazy' }}" decoding="async" />
-              <img class="fg" src="{{ $src }}" alt="Photo memory {{ $i + 1 }} for {{ $name }}" loading="{{ $i < 2 ? 'eager' : 'lazy' }}" decoding="async" />
+              <img class="fg" src="{{ $src }}" alt="Photo memory {{ $i + 1 }} of {{ count($photos) }} for {{ $name }}" loading="{{ $i < 2 ? 'eager' : 'lazy' }}"{!! $i === 0 ? ' fetchpriority="high"' : '' !!} decoding="async" />
             </figure>
           @endforeach
         @else

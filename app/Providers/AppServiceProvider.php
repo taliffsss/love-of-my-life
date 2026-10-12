@@ -6,6 +6,8 @@ namespace App\Providers;
 
 use App\Services\CarouselStore;
 use App\Services\LetterStore;
+use App\Services\PhotoCatalog;
+use App\Services\SeoData;
 use App\Services\SongStore;
 use App\Services\SpacesFilesystem;
 use Naluz\Config\Repository;
@@ -20,6 +22,13 @@ final class AppServiceProvider extends ServiceProvider
             storage_path('app/carousel.json'),
             base_path('database/carousel.seed.json'),
         ));
+        $this->app->singleton(PhotoCatalog::class, fn ($c) => new PhotoCatalog($c->make(CarouselStore::class), base_path('public/photos')));
+        $this->app->singleton(SeoData::class, fn () => new SeoData([
+            storage_path('app/carousel.json'),
+            storage_path('app/letter.json'),
+            storage_path('app/song.json'),
+            base_path('database/carousel.seed.json'),
+        ]));
         $this->app->singleton(LetterStore::class, fn () => new LetterStore(
             storage_path('app/letter.json'),
             (array) config('site.letter'),

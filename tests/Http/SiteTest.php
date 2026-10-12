@@ -487,4 +487,132 @@ final class SiteTest extends TestCase
         $this->assertFalse($this->decode($response)['changed']);
         $this->assertSame([], $disk->files);
     }
+
+    private function head(): string
+    {
+        $html = (string) $this->get('/')->getBody();
+        return substr($html, 0, (int) strpos($html, '</head>'));
+    }
+
+    public function testHeadCarriesTheSearchAndSharingTags(): void
+    {
+        $head = $this->head();
+
+        foreach (
+            [
+            '<title>For Jinelin Basela | A Romantic Photo Slideshow</title>',
+            '<link rel="canonical" href="https://love.test/" />',
+            '<meta name="robots" content="index, follow, max-image-preview:large',
+            '<link rel="alternate" hreflang="x-default" href="https://love.test/" />',
+            '<meta property="og:image" content="https://love.test/og-image.png" />',
+            '<meta property="og:image:type" content="image/png" />',
+            '<meta name="twitter:card" content="summary_large_image" />',
+            '<meta name="twitter:image:alt"',
+            '<link rel="manifest" href="/manifest.webmanifest" />',
+            '<link rel="apple-touch-icon" href="/apple-touch-icon.png" />',
+            '<meta name="color-scheme" content="dark" />',
+            ] as $tag
+        ) {
+            $this->assertStringContainsString($tag, $head);
+        }
+        $description = preg_match('/<meta name="description" content="([^"]+)"/', $head, $m) === 1 ? html_entity_decode($m[1]) : '';
+        $this->assertGreaterThanOrEqual(70, mb_strlen($description));
+        $this->assertLessThanOrEqual(160, mb_strlen($description));
+    }
+
+    public function testTheFirstPhotoIsPreloadedAndHasUsefulAltText(): void
+    {
+        $this->app->make(CarouselStore::class)->add('yam/a.jpg', 'https://cdn.test/yam/a.jpg');
+        $html = (string) $this->get('/')->getBody();
+
+        $first = $this->app->make(\App\Services\PhotoCatalog::class)->all()[0];
+        $this->assertStringContainsString('<link rel="preload" as="image" href="' . $first . '" fetchpriority="high" />', $html);
+        $this->assertMatchesRegularExpression('#<img class="fg"[^>]*alt="Photo memory 1 of \d+ for Jinelin Basela"[^>]*fetchpriority="high"#', $html);
+    }
+
+    public function testStructuredDataIsValidJsonLd(): void
+    {
+        $this->app->make(CarouselStore::class)->add('yam/a.jpg', 'https://cdn.test/yam/a.jpg');
+        $html = (string) $this->get('/')->getBody();
+
+        $this->assertSame(1, preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m));
+        $data = json_decode($m[1], true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('https://schema.org', $data['@context']);
+        $byType = array_column($data['@graph'], null, '@type');
+        $this->assertEqualsCanonicalizing(['WebSite', 'WebPage', 'Person', 'ImageGallery'], array_keys($byType));
+        $this->assertSame('https://love.test/', $byType['WebPage']['url']);
+        $this->assertSame('Jinelin Basela', $byType['Person']['name']);
+        $this->assertSame('https://love.test/og-image.png', $byType['WebPage']['primaryImageOfPage']['url']);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T/', $byType['WebPage']['dateModified']);
+        $urls = array_column($byType['ImageGallery']['associatedMedia'], 'contentUrl');
+        $this->assertContains('https://cdn.test/yam/a.jpg', $urls);
+        foreach ($urls as $url) {
+            $this->assertStringStartsWith('http', $url, 'gallery images must be absolute URLs');
+        }
+    }
+
+    public function testSitemapIsValidXmlAndListsEveryPhotoAsAnImage(): void
+    {
+        $this->app->make(CarouselStore::class)->add('yam/a.jpg', 'https://cdn.test/yam/a.jpg');
+        $response = $this->get('/sitemap.xml');
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringStartsWith('application/xml', $response->getHeaderLine('Content-Type'));
+
+        $xml = new \DOMDocument();
+        $this->assertTrue($xml->loadXML((string) $response->getBody()), 'sitemap.xml is not well-formed XML');
+        $xpath = new \DOMXPath($xml);
+        $xpath->registerNamespace('s', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+        $xpath->registerNamespace('i', 'http://www.google.com/schemas/sitemap-image/1.1');
+
+        $this->assertSame('https://love.test/', $xpath->evaluate('string(//s:url/s:loc)'));
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}$/', $xpath->evaluate('string(//s:url/s:lastmod)'));
+        $images = [];
+        foreach ($xpath->query('//i:image/i:loc') as $node) {
+            $images[] = $node->textContent;
+        }
+        $this->assertContains('https://cdn.test/yam/a.jpg', $images);
+        $this->assertContains('https://love.test/photos/01.jpg', $images, 'local photos become absolute URLs');
+    }
+
+    public function testRobotsTxtPointsToTheSitemapAndHidesTheActions(): void
+    {
+        $response = $this->get('/robots.txt');
+        $body = (string) $response->getBody();
+
+        $this->assertStringStartsWith('text/plain', $response->getHeaderLine('Content-Type'));
+        $this->assertStringContainsString("User-agent: *\nAllow: /\n", $body);
+        foreach (['/api/', '/upload', '/song', '/letter'] as $path) {
+            $this->assertStringContainsString('Disallow: ' . $path . "\n", $body);
+        }
+        $this->assertStringContainsString("Sitemap: https://love.test/sitemap.xml\n", $body);
+    }
+
+    public function testWebManifestAndIconsExist(): void
+    {
+        $response = $this->get('/manifest.webmanifest');
+        $manifest = $this->decode($response);
+
+        $this->assertStringStartsWith('application/manifest+json', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('For Jinelin Basela', $manifest['name']);
+        $this->assertSame('#160a14', $manifest['background_color']);
+        foreach ($manifest['icons'] as $icon) {
+            $file = dirname(__DIR__, 2) . '/public' . $icon['src'];
+            $this->assertFileExists($file);
+            [$w, $h] = getimagesize($file);
+            $this->assertSame($icon['sizes'], $w . 'x' . $h);
+        }
+        $this->assertFileExists(dirname(__DIR__, 2) . '/public/apple-touch-icon.png');
+    }
+
+    public function testJsonEndpointsAreKeptOutOfSearchResults(): void
+    {
+        $this->assertSame('noindex, nofollow', $this->get('/api/ping')->getHeaderLine('X-Robots-Tag'));
+        $this->assertSame('noindex, nofollow', $this->get('/api/photos')->getHeaderLine('X-Robots-Tag'));
+        // an action that completes normally (saving the unchanged message)
+        $same = $this->changeMessage($this->csrf(), 'secret-key', "Old first.\n\nOld second.");
+        $this->assertSame('noindex, nofollow', $same->getHeaderLine('X-Robots-Tag'));
+        $this->assertSame('', $this->get('/')->getHeaderLine('X-Robots-Tag'), 'the home page itself stays indexable');
+    }
 }

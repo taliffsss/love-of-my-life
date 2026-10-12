@@ -65,6 +65,15 @@ jobs:
           curl -fsS http://127.0.0.1:8080/ | grep -q 'For Jinelin Basela'
           curl -fsS http://127.0.0.1:8080/assets/app.js | grep -q 'songGo'
           curl -fsS http://127.0.0.1:8080/api/photos | grep -q '"photos"'
+      - name: SEO files are served (sitemap, robots, manifest, icons)
+        run: |
+          curl -fsS http://127.0.0.1:8080/robots.txt | grep -q '^Sitemap: https://jinelin-basela.markanthonynaluz.com/sitemap.xml'
+          curl -fsS http://127.0.0.1:8080/sitemap.xml | grep -q '<image:loc>'
+          curl -fsS -D - -o /dev/null http://127.0.0.1:8080/manifest.webmanifest | grep -qi '^content-type: application/manifest+json'
+          for f in /favicon.svg /apple-touch-icon.png /icons/icon-192.png /icons/icon-512.png /og-image.png; do
+            curl -fsS -o /dev/null "http://127.0.0.1:8080$f"
+          done
+          curl -fsS -D - -o /dev/null http://127.0.0.1:8080/api/ping | grep -qi '^x-robots-tag: noindex'
       - name: Behind Traefik the app sees HTTPS (Secure cookie + HSTS)
         run: |
           headers=$(curl -fsS -D - -o /dev/null -H 'X-Forwarded-Proto: https' -H 'Host: jinelin-basela.markanthonynaluz.com' http://127.0.0.1:8080/)
