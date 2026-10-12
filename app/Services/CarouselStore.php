@@ -67,4 +67,37 @@ final class CarouselStore
             fclose($lock);
         }
     }
+
+    /**
+     * Puts photos at the beginning of the file, i.e. makes them the oldest, so everything uploaded later still shows
+     * before them. Entries whose key is already listed are skipped. Returns how many were added.
+     *
+     * @param list<array{key:string,url:string}> $entries in storage order (oldest first)
+     */
+    public function prepend(array $entries): int
+    {
+        $dir = dirname($this->file);
+        if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
+            throw new \RuntimeException('Cannot create ' . $dir);
+        }
+        $lock = fopen($this->file . '.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            throw new \RuntimeException('Cannot lock the carousel file.');
+        }
+        try {
+            $current = $this->all();
+            $known = array_column($current, 'key');
+            $new = array_values(array_filter($entries, static fn (array $e): bool => !in_array($e['key'], $known, true)));
+            if ($new === []) {
+                return 0;
+            }
+            $tmp = $this->file . '.tmp';
+            file_put_contents($tmp, json_encode(['photos' => array_merge($new, $current)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            rename($tmp, $this->file);
+            return count($new);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0
+
+- `bin/migrate-photos.php` copies the 14 photos of `public/photos` to Spaces (public-read, key `<folder>/legacy-NN.jpg`) and lists them in `storage/app/carousel.json`, so they are served from Spaces and render exactly like uploaded photos. Run it once on the server (`--dry-run` shows what it would do); running it again skips photos already migrated. The carousel hides a `public/photos` file once its copy is listed, so nothing shows twice, and the order stays: new uploads first (newest on top), then the migrated photos in filename order.
+
 ## 2.2.2
 
 - The first photo is now the first thing seen after the password. The slideshow used to start its 8-second timer when the page loaded, behind the blurred password screen, so by the time `yam` was typed it had moved on (after 20 seconds it was on photo 3 and then 4, and photo 1 was never shown). Now the first photo waits, still, behind the blur; when the blur starts to clear its slow zoom is replayed from the beginning and the timer starts, delayed by the 2.8 seconds the blur takes, so photo 1 stays fully clear for the full 8 seconds before the carousel moves on. The same applies to the reload after a saved change.

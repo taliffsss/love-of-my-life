@@ -157,3 +157,14 @@ git pull && composer install --no-dev --optimize-autoloader && php naluz view:cl
 - The unlock password in `public/assets/app.js` is a client-side gate for a surprise, not real security. The upload
   key, by contrast, is checked on the server.
 - PHP limits: `upload_max_filesize` and `post_max_size` of at least 16M.
+
+## Moving the bundled photos to Spaces
+
+The photos in `public/photos` can be copied to Spaces once, so they are served like every uploaded photo. On the server (the `SPACES_*` values are in the container's environment):
+
+```bash
+docker exec -it $(docker ps -q -f name=jinelin_web) php bin/migrate-photos.php --dry-run   # preview
+docker exec -it $(docker ps -q -f name=jinelin_web) php bin/migrate-photos.php             # upload
+```
+
+Photos are stored as `<SPACES_FOLDER>/legacy-01.jpg` and so on and appended to `storage/app/carousel.json`. Safe to run again; photos already migrated are skipped.
