@@ -134,7 +134,7 @@
     <dialog id="uploader" class="uploader">
       <form method="dialog" id="upForm">
         <h3>Add photos</h3>
-        <p class="up-note">Photos are uploaded to DigitalOcean Spaces and added to the carousel right away.</p>
+        <p class="up-note">Add more photos?</p>
         <label for="upKey">Upload key</label>
         <input id="upKey" type="password" autocomplete="off" spellcheck="false" />
         <label for="upFiles">Photos</label>
