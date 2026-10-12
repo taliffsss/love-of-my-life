@@ -1,6 +1,7 @@
 ---
 import fs from 'node:fs';
 import path from 'node:path';
+import carousel from '../data/carousel.json';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const exts = /\.(jpe?g|png|webp|gif|avif)$/i;
@@ -10,7 +11,9 @@ const dir = path.resolve('public/photos');
 const photos = (fs.existsSync(dir) ? fs.readdirSync(dir) : [])
   .filter((f) => exts.test(f))
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-  .map((f) => `${base}/photos/${encodeURIComponent(f)}`);
+  .map((f) => `${base}/photos/${encodeURIComponent(f)}`)
+  // photos uploaded to DigitalOcean Spaces (see scripts/upload-to-spaces.mjs)
+  .concat(carousel.photos.map((p) => p.url));
 
 // Song: first audio file found in public/music (janice.mp3 expected).
 const musicDir = path.resolve('public/music');
