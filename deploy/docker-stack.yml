@@ -21,8 +21,7 @@ services:
       - app_network
     env_file:
       - .env.production
-    # Swarm must not run a container health check: it stopped a working container (see the Dockerfile). Traefik's
-    # health check on /api/ping (labels below) already takes a bad container out of rotation.
+    # Swarm must not run a container health check: it stopped a working container (see the Dockerfile).
     healthcheck:
       disable: true
     volumes:
@@ -65,10 +64,8 @@ services:
 
         # ── Service ───────────────────────────────────────────────────────
         - "traefik.http.services.jinelin-basela.loadbalancer.server.port=80"
-        # health check path must be a relative URL; /api/ping answers {"status":"ok"}
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.path=/api/ping"
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.interval=30s"
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.timeout=10s"
+        # No Traefik health check either: with one replica there is nothing to fail over to, and a failing probe only turns
+        # a working site into HTTP 503. The release workflow requests the live site after each deploy instead.
 
         # ── Middlewares ───────────────────────────────────────────────────
         # gzip/brotli at the edge, and tell the app the request arrived over HTTPS (Traefik terminates TLS).

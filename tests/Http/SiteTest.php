@@ -803,4 +803,25 @@ final class SiteTest extends TestCase
         $this->assertFalse($this->decode($response)['changed']);
         $this->assertSame([], $disk->files);
     }
+
+    public function testPingIsNeverRateLimitedButTheOtherApiRoutesAre(): void
+    {
+        foreach (range(1, 80) as $i) {
+            $this->assertSame(200, $this->get('/api/ping')->getStatusCode(), "ping $i");
+        }
+
+        $statuses = [];
+        foreach (range(1, 62) as $i) {
+            $statuses[] = $this->get('/api/photos')->getStatusCode();
+        }
+        $this->assertSame(array_fill(0, 60, 200), array_slice($statuses, 0, 60));
+        $this->assertSame([429, 429], array_slice($statuses, 60));
+        $this->assertSame(200, $this->get('/api/ping')->getStatusCode(), 'even while another route is being limited');
+    }
+
+    public function testTheThrottleAliasIsTheResettingLimiter(): void
+    {
+        $aliases = (array) config('app.middleware_aliases');
+        $this->assertSame(\App\Http\Middleware\RateLimit::class, $aliases['throttle']);
+    }
 }

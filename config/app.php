@@ -37,7 +37,8 @@ return [
     'middleware_aliases' => [
         'session' => Middleware\StartSession::class,
         'csrf' => Middleware\VerifyCsrfToken::class,
-        'throttle' => Middleware\Throttle::class,
+        // the framework's Throttle never resets its counters (see App\Http\Middleware\RateLimit)
+        'throttle' => \App\Http\Middleware\RateLimit::class,
         'noindex' => \App\Http\Middleware\NoIndex::class,
         'auth' => Middleware\Authenticate::class,
         'jwt' => Middleware\AuthenticateJwt::class,

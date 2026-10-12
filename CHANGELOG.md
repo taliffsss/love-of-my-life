@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1
+
+- **Root cause of the outage found and fixed.** The framework's `throttle` middleware reads a rate-limit counter back from the file cache without checking whether its window has ended, so the count only ever grows. With `storage/` in a persistent volume, the counters of `/api/ping` (probed every 30 seconds by the Docker and the Traefik health checks) passed 60 and the probe was answered with HTTP 429 for good: Swarm stopped the "unhealthy" container, and later Traefik answered 503. The app now uses its own limiter (`App\Http\Middleware\RateLimit`, registered as `throttle`) whose counter starts again every window, and `/api/ping` is never rate-limited. Counter files left on a server by the old limiter are ignored once their window has ended, so nothing has to be cleaned up by hand.
+- All health checks are removed, as requested: Docker's (since 2.2.0) and now Traefik's labels in `deploy/docker-stack.yml`. The release workflow still requests the live site after every deploy.
+- Tests reproduce the failure (a counter file whose window ended long ago, a health probe every 30 seconds for two hours) and guard that no health check comes back.
+
 ## 2.2.0
 
 - The message form has a second required field, **Name**, shown in the panel as "A letter for …" (it starts filled with the current name). The name is saved with the message in `storage/app/letter.json`, and the backup file of the replaced message says who that letter was for. Saving only a new name (same message) counts as a change and backs up the old letter too. A letter saved before names existed keeps the default name from `config/site.php`.
