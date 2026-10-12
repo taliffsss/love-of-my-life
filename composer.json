@@ -3,7 +3,7 @@
     "description": "A private romantic photo slideshow and love letter, built on the NaluzPHP framework.",
     "type": "project",
     "license": "proprietary",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "require": {
         "php": "^8.2",
         "ext-fileinfo": "*",

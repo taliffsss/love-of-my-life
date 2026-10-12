@@ -824,4 +824,20 @@ final class SiteTest extends TestCase
         $aliases = (array) config('app.middleware_aliases');
         $this->assertSame(\App\Http\Middleware\RateLimit::class, $aliases['throttle']);
     }
+
+    public function testTheCarouselWaitsBehindTheBlurAndStartsWithTheFirstPhoto(): void
+    {
+        $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
+
+        // nothing may advance while the password screen is up: the timer only begins in startSlideshow()
+        $this->assertStringContainsString('if (!running || slides.length < 2) return;', $js);
+        $this->assertStringContainsString('running = true;', $js);
+        // ...which is called when the blur starts to clear, and waits for the blur before the first advance
+        $this->assertStringContainsString('BLUR_CLEAR_MS = 2800', $js);
+        $this->assertStringContainsString('restart(BLUR_CLEAR_MS);', $js);
+        $this->assertMatchesRegularExpression('/show\.classList\.remove\("locked"\);\s*startSlideshow\(\);/', $js, 'unlocking starts the slideshow');
+        // the CSS blur transition is what BLUR_CLEAR_MS has to cover
+        $css = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.css');
+        $this->assertMatchesRegularExpression('/\.show\s*\{[^}]*transition:[^;]*filter 2\.6s[^;]*transform 2\.8s/s', $css);
+    }
 }
