@@ -82,7 +82,8 @@ chmod -R u+rwX storage
 
 Point the web server at **`public/`** (see `deploy/nginx.conf`, or use the bundled `public/.htaccess` on Apache) and
 reload it. Then open the site, enter the password, and the upload button appears next to the music button.
-If `UPLOAD_KEY` or the `SPACES_*` values are missing, the button still shows but uploading answers with a message
+The upload key is `UPLOAD_KEY` from `.env`, or `jinelin basela` when it is missing or empty (case, extra spaces and quotes
+around it are ignored). If the `SPACES_*` values are missing, the buttons still show but photo uploads answer with a message
 saying what to set in `.env`.
 
 ## Photo uploads to DigitalOcean Spaces
@@ -97,7 +98,7 @@ saying what to set in `.env`.
    | `SPACES_ENDPOINT_URL` | `https://<region>.digitaloceanspaces.com` (no bucket name) |
    | `SPACES_FOLDER` | folder inside the bucket, e.g. `yam` |
    | `SPACES_CDN_URL` | CDN origin used in the saved links; leave empty to use the bucket URL |
-   | `UPLOAD_KEY` | the secret you type into the *Add photos* dialog; empty = uploads are refused |
+   | `UPLOAD_KEY` | the secret you type into the upload dialogs; missing or empty = the default `jinelin basela` |
 
 2. Each upload goes browser → `POST /upload` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
    file type verified from its bytes. The public URL is appended to **`storage/app/carousel.json`**, and the carousel
@@ -123,6 +124,22 @@ one to **`storage/app/letter.json`**, which becomes the message for everyone. If
 changes and the old message stays. Every archived file is listed in `letter.json` under `archive`. Without Spaces
 credentials the old message is kept in `storage/app/letters/` on the server instead. Delete `letter.json` to go back
 to the text in `config/site.php`.
+
+## SEO
+
+What search engines and link previews get from the site:
+
+- **Page head:** title, description, canonical URL, `hreflang`, Open Graph and Twitter cards (1200x630 `og-image.png`), `robots` directives, theme colour, favicon (SVG + PNG), Apple touch icon and a web manifest (`/manifest.webmanifest`).
+- **Structured data (JSON-LD):** `WebSite`, `WebPage` (with its last-modified date), `Person` and an `ImageGallery` of the photos.
+- **`/sitemap.xml`:** the page plus every photo as an image entry (local and uploaded). `lastmod` follows the latest change to photos, message or song.
+- **`/robots.txt`:** allows the site, keeps `/api/`, `/upload`, `/song` and `/letter` out, and points to the sitemap. JSON endpoints also send `X-Robots-Tag: noindex, nofollow`.
+- **Speed:** the first photo is preloaded with high priority, other photos load lazily, assets are cached and versioned.
+
+`APP_URL` must be the real public address (`https://jinelin-basela.markanthonynaluz.com`): the canonical link, sitemap and
+previews are built from it. After deploying, submit `https://jinelin-basela.markanthonynaluz.com/sitemap.xml` in
+Google Search Console and Bing Webmaster Tools, and check the share preview with a link debugger. To keep the site out of
+search results altogether, change the `robots` meta in `resources/views/home.naluz.php` to `noindex, nofollow` and
+`Allow: /` to `Disallow: /` in `SeoController::robots()`.
 
 ## Updating
 

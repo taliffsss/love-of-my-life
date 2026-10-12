@@ -26,6 +26,10 @@ Set `UPLOAD_KEY` and the `SPACES_*` values in `.env` (see `.env.example`). After
 appears; enter the upload key, pick photos, and they are sent to Spaces. Every uploaded URL is recorded in
 `storage/app/carousel.json`, which the carousel reads (`GET /api/photos` returns the same list).
 
+## SEO
+
+Title, description, canonical, Open Graph/Twitter cards, JSON-LD, an image sitemap (`/sitemap.xml`), `robots.txt`, a web manifest and icons are built in; they follow `APP_URL`. See [DEPLOY.md](DEPLOY.md#seo).
+
 ## Deploy
 
 Docker Swarm + Traefik at <https://jinelin-basela.markanthonynaluz.com>: see [DEPLOY.md](DEPLOY.md) (`Dockerfile`, `deploy/docker-stack.yml`, `.github/workflows/release.yml`). A bare-metal nginx example is in `deploy/nginx.conf`.

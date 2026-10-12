@@ -24,9 +24,13 @@ final class UploadGate
         }
     }
 
-    /** The key is a name, so ignore case and extra spaces when comparing. */
+    /**
+     * The key is a name, so ignore case and extra spaces when comparing. Quotes around it are ignored too: Docker's
+     * env_file keeps them literally ("jinelin basela" would otherwise never match what is typed).
+     */
     private function normalise(string $key): string
     {
-        return mb_strtolower((string) preg_replace('/\s+/u', ' ', trim($key)));
+        $key = trim($key, " \t\r\n\"'");
+        return mb_strtolower((string) preg_replace('/\s+/u', ' ', $key));
     }
 }

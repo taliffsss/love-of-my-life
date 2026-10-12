@@ -38,6 +38,7 @@ return [
         'session' => Middleware\StartSession::class,
         'csrf' => Middleware\VerifyCsrfToken::class,
         'throttle' => Middleware\Throttle::class,
+        'noindex' => \App\Http\Middleware\NoIndex::class,
         'auth' => Middleware\Authenticate::class,
         'jwt' => Middleware\AuthenticateJwt::class,
     ],
@@ -45,6 +46,6 @@ return [
     /** `web` wraps routes/web.php; `api` wraps routes/api.php (stateless: no cookies, no CSRF). */
     'middleware_groups' => [
         'web' => ['session', 'csrf'],
-        'api' => ['throttle:60,1'],
+        'api' => ['throttle:60,1', 'noindex'],
     ],
 ];

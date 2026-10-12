@@ -4,27 +4,29 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\CarouselStore;
 use App\Services\LetterStore;
+use App\Services\PhotoCatalog;
+use App\Services\SeoData;
 use App\Services\SongStore;
 use Psr\Http\Message\ResponseInterface;
 
 final class HomeController
 {
-    private const IMAGES = '/\.(jpe?g|png|webp|gif|avif)$/i';
-
-    public function index(CarouselStore $store, SongStore $songs, LetterStore $letters): ResponseInterface
+    public function index(PhotoCatalog $catalog, SongStore $songs, LetterStore $letters, SeoData $seo): ResponseInterface
     {
         $name = (string) config('site.name');
         $siteUrl = rtrim((string) config('app.url'), '/') . '/';
         $title = "For {$name} | A Romantic Photo Slideshow";
-        $description = "A private romantic photo slideshow and love letter made with all my heart for {$name}.";
+        $description = "A private romantic photo slideshow and love letter made with all my heart for {$name}: "
+            . 'photos, a favourite song and a heartfelt message.';
+        $ogImage = $siteUrl . 'og-image.png';
+        $photos = $catalog->all();
 
         return view('home', [
             'name' => $name,
             'firstName' => (string) config('site.first_name'),
             'letter' => $letters->paragraphs(),
-            'photos' => array_merge($this->localPhotos(), $store->urls()),
+            'photos' => $photos,
             'placeholders' => ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'],
             // a song chosen from the page wins over a local file in public/music
             'music' => $songs->hasSaved() ? '' : $this->song(),
@@ -36,29 +38,14 @@ final class HomeController
             'title' => $title,
             'description' => $description,
             'siteUrl' => $siteUrl,
-            'ogImage' => $siteUrl . 'og-image.png',
-            'jsonLd' => json_encode([
-                '@context' => 'https://schema.org',
-                '@type' => 'WebPage',
-                'name' => $title,
-                'description' => $description,
-                'url' => $siteUrl,
-                'inLanguage' => 'en',
-                'image' => $siteUrl . 'og-image.png',
-                'about' => ['@type' => 'Person', 'name' => $name],
-            ], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP),
+            'ogImage' => $ogImage,
+            'firstPhoto' => $photos[0] ?? '',
+            'modified' => $seo->lastModified()->format('c'),
+            'jsonLd' => $seo->jsonLd(
+                ['name' => $name, 'siteUrl' => $siteUrl, 'title' => $title, 'description' => $description, 'ogImage' => $ogImage],
+                $catalog->absolute($siteUrl),
+            ),
         ]);
-    }
-
-    /** Images dropped into public/photos, in natural filename order. @return list<string> */
-    private function localPhotos(): array
-    {
-        $files = array_filter(
-            scandir(base_path('public/photos')) ?: [],
-            static fn (string $f): bool => preg_match(self::IMAGES, $f) === 1,
-        );
-        natcasesort($files);
-        return array_values(array_map(static fn (string $f): string => '/photos/' . rawurlencode($f), $files));
     }
 
     /** The first audio file in public/music, if any (otherwise the song streams from YouTube). */
