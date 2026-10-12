@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0
+
+- New photos go to the very beginning of the carousel: uploaded photos come first, the newest upload on top, followed by the photos in `public/photos`. A batch picked together keeps the order it was picked in. The sitemap, the structured data, the first-photo preload and `GET /api/photos` follow the same order. `storage/app/carousel.json` still lists uploads oldest first.
+- After a photo upload, a song change or a message change succeeds, the page reloads to show the saved state and skips the password screen for that one reload, so "yam" is not typed twice. The hint is a one-shot flag in the tab's session storage that expires after 30 seconds; a normal visit, a later refresh or a failed save still asks for the password. If the browser blocks autoplay after the reload, the music button shows the real state and one tap plays the song.
+
 ## 2.0.2
 
 - The upload key defaults to `jinelin basela` when `UPLOAD_KEY` is missing or empty, and quotes or a carriage return around the configured key are ignored (Docker's `env_file` keeps quotes literally, so `UPLOAD_KEY="jinelin basela"` used to be rejected).

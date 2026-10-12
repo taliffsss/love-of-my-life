@@ -35,6 +35,17 @@ final class CarouselStoreTest extends TestCase
         $this->assertFileExists($this->dir . '/live.json');
     }
 
+    public function testNewestUploadComesFirstForDisplay(): void
+    {
+        $store = new CarouselStore($this->dir . '/live.json');
+        $store->add('a', 'https://cdn/a.jpg');
+        $store->add('b', 'https://cdn/b.jpg');
+        $store->add('c', 'https://cdn/c.jpg');
+
+        $this->assertSame(['https://cdn/a.jpg', 'https://cdn/b.jpg', 'https://cdn/c.jpg'], $store->urls(), 'the file keeps upload order');
+        $this->assertSame(['https://cdn/c.jpg', 'https://cdn/b.jpg', 'https://cdn/a.jpg'], $store->newestFirst());
+    }
+
     public function testMissingOrCorruptFilesGiveAnEmptyList(): void
     {
         $this->assertSame([], (new CarouselStore($this->dir . '/none.json'))->all());

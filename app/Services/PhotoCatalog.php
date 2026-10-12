@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-/** Every photo of the carousel, in display order: files in public/photos first, then the uploaded ones. */
+/**
+ * Every photo of the carousel, in display order: uploaded photos first (the newest upload at the very beginning),
+ * then the files in public/photos.
+ */
 final class PhotoCatalog
 {
     private const IMAGES = '/\.(jpe?g|png|webp|gif|avif)$/i';
@@ -13,10 +16,10 @@ final class PhotoCatalog
     {
     }
 
-    /** @return list<string> site-relative paths (/photos/01.jpg) and absolute URLs of uploaded photos */
+    /** @return list<string> absolute URLs of uploaded photos, then site-relative paths (/photos/01.jpg) */
     public function all(): array
     {
-        return array_merge($this->local(), $this->uploaded->urls());
+        return array_merge($this->uploaded->newestFirst(), $this->local());
     }
 
     /** @return list<string> every photo as an absolute URL */

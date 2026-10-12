@@ -664,4 +664,65 @@ final class SiteTest extends TestCase
 
         $this->assertSame(200, $this->changeSong($this->csrf(), 'Jinelin Basela', 'https://youtu.be/dQw4w9WgXcQ')->getStatusCode());
     }
+
+    public function testSavedChangesReloadThePageWithoutAskingForThePasswordAgain(): void
+    {
+        $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
+
+        // all three actions end with the same reload, which leaves a short-lived, one-shot hint for the next page load
+        $this->assertSame(3, substr_count($js, 'reloadAfterSuccess()'), 'photos, song and message each reload on success');
+        $this->assertStringContainsString('sessionStorage.setItem(SKIP_GATE', $js);
+        $this->assertStringContainsString('sessionStorage.removeItem(SKIP_GATE);', $js, 'the hint is removed as soon as it is read');
+        $this->assertStringContainsString('SKIP_GATE_MS = 3e4', $js, 'the hint expires after 30 seconds');
+        $this->assertStringContainsString('if (consumeSkipGate())', $js);
+    }
+
+    /** @return list<string> the src of every foreground slide image, in carousel order */
+    private function slideSources(string $html): array
+    {
+        preg_match_all('#<img class="fg" src="([^"]+)"#', $html, $m);
+        return array_map('html_entity_decode', $m[1]);
+    }
+
+    public function testNewPhotosAreTheFirstSlidesNewestFirst(): void
+    {
+        $store = $this->app->make(CarouselStore::class);
+        $store->add('yam/old.jpg', 'https://cdn.test/yam/old.jpg');
+        $store->add('yam/new.jpg', 'https://cdn.test/yam/new.jpg');
+
+        $html = (string) $this->get('/')->getBody();
+        $slides = $this->slideSources($html);
+
+        $this->assertSame('https://cdn.test/yam/new.jpg', $slides[0], 'the newest upload is the very first slide');
+        $this->assertSame('https://cdn.test/yam/old.jpg', $slides[1]);
+        $this->assertSame('/photos/01.jpg', $slides[2], 'the photos folder follows the uploads');
+        $this->assertStringContainsString('<link rel="preload" as="image" href="https://cdn.test/yam/new.jpg"', $html);
+        $this->assertMatchesRegularExpression('#<img class="fg" src="https://cdn.test/yam/new.jpg"[^>]*alt="Photo memory 1 of #', $html);
+    }
+
+    public function testASecondUploadMovesToTheFrontAndTheSitemapAndApiFollow(): void
+    {
+        $this->app->make(StorageManager::class)->extend('spaces', $this->memoryDisk());
+        $this->upload($this->csrf(), 'secret-key', $this->png());
+        $first = $this->app->make(CarouselStore::class)->urls()[0];
+        $this->upload($this->csrf(), 'secret-key', $this->png());
+        $urls = $this->app->make(CarouselStore::class)->urls();
+        $this->assertCount(2, $urls);
+
+        $slides = $this->slideSources((string) $this->get('/')->getBody());
+        $this->assertSame([$urls[1], $urls[0]], array_slice($slides, 0, 2), 'the second upload is now first');
+        $this->assertSame($first, $slides[1]);
+
+        $api = $this->decode($this->get('/api/photos'));
+        $this->assertSame([$urls[1], $urls[0]], array_column($api['photos'], 'url'), 'the API lists them in carousel order');
+
+        preg_match_all('#<image:loc>([^<]+)</image:loc>#', (string) $this->get('/sitemap.xml')->getBody(), $m);
+        $this->assertSame([$urls[1], $urls[0]], array_slice($m[1], 0, 2), 'the sitemap lists them in carousel order');
+    }
+
+    public function testThePageUploadsABatchLastToFirstSoItKeepsThePickedOrder(): void
+    {
+        $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
+        $this->assertStringContainsString('[...files].reverse().entries()', $js);
+    }
 }

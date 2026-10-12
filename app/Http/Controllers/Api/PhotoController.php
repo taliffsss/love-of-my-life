@@ -10,6 +10,7 @@ final class PhotoController
 {
     public function index(CarouselStore $store): array
     {
-        return ['photos' => $store->all()];
+        // newest upload first: the order the carousel shows them in
+        return ['photos' => array_reverse($store->all())];
     }
 }
