@@ -32,6 +32,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(LetterStore::class, fn () => new LetterStore(
             storage_path('app/letter.json'),
             (array) config('site.letter'),
+            (string) config('site.first_name'),
         ));
         $this->app->singleton(SongStore::class, fn () => new SongStore(
             storage_path('app/song.json'),

@@ -36,8 +36,10 @@ final class SiteTest extends TestCase
         parent::setUp();
         $this->manifest = sys_get_temp_dir() . '/carousel-' . bin2hex(random_bytes(4)) . '.json';
         $this->app->instance(CarouselStore::class, new CarouselStore($this->manifest));
+        // never write backups into the real storage/app/letters: every test gets an in-memory disk unless it brings its own
+        $this->app->make(StorageManager::class)->extend('spaces', $this->memoryDisk());
         $this->letterFile = sys_get_temp_dir() . '/letter-' . bin2hex(random_bytes(4)) . '.json';
-        $this->app->instance(LetterStore::class, new LetterStore($this->letterFile, ['Old first.', 'Old second.']));
+        $this->app->instance(LetterStore::class, new LetterStore($this->letterFile, ['Old first.', 'Old second.'], 'Jinelin'));
         $this->songFile = sys_get_temp_dir() . '/song-' . bin2hex(random_bytes(4)) . '.json';
         $this->app->instance(SongStore::class, new SongStore($this->songFile, ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde']));
     }
@@ -358,10 +360,10 @@ final class SiteTest extends TestCase
         $this->assertFalse($this->app->make(SongStore::class)->hasSaved());
     }
 
-    private function changeMessage(string $token, string $key, string $message): \Psr\Http\Message\ResponseInterface
+    private function changeMessage(string $token, string $key, string $message, string $name = 'Jinelin'): \Psr\Http\Message\ResponseInterface
     {
         $request = (new ServerRequest('POST', '/letter', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
-            ->withParsedBody(['key' => $key, 'message' => $message]);
+            ->withParsedBody(['key' => $key, 'name' => $name, 'message' => $message]);
         return $this->send($request);
     }
 
@@ -724,5 +726,81 @@ final class SiteTest extends TestCase
     {
         $js = (string) file_get_contents(dirname(__DIR__, 2) . '/public/assets/app.js');
         $this->assertStringContainsString('[...files].reverse().entries()', $js);
+    }
+
+    public function testTheMessageFormHasANameFieldFilledWithTheCurrentName(): void
+    {
+        $html = (string) $this->get('/')->getBody();
+
+        $this->assertMatchesRegularExpression('#<input id="letterName"[^>]*\brequired\b[^>]*value="Jinelin"#', $html);
+        $this->assertStringContainsString('<h2 id="letterFor">Jinelin</h2>', $html);
+        $this->assertStringContainsString('aria-label="A letter for Jinelin"', $html);
+        $this->assertMatchesRegularExpression('#<textarea id="letterMsg"[^>]*\brequired\b[^>]*></textarea>#', $html, 'the message box still starts empty');
+    }
+
+    public function testChangingTheNameChangesWhoTheLetterIsFor(): void
+    {
+        $response = $this->changeMessage($this->csrf(), 'secret-key', 'A new message.', '  Maria   Clara ');
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('Maria Clara', $this->decode($response)['name']);
+
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('<p class="eyebrow">A letter for</p>', $html);
+        $this->assertStringContainsString('<h2 id="letterFor">Maria Clara</h2>', $html);
+        $this->assertStringContainsString('aria-label="A letter for Maria Clara"', $html);
+        $this->assertMatchesRegularExpression('#<input id="letterName"[^>]*value="Maria Clara"#', $html, 'the form is filled with the new name');
+        $this->assertStringNotContainsString('<h2 id="letterFor">Jinelin</h2>', $html);
+    }
+
+    public function testTheNameIsRequiredAndNothingChangesWithoutIt(): void
+    {
+        foreach (['', '   '] as $blank) {
+            $response = $this->changeMessage($this->csrf(), 'secret-key', 'Some text.', $blank);
+            $this->assertSame(422, $response->getStatusCode());
+            $this->assertStringContainsString('The name is required.', (string) $response->getBody());
+        }
+        $tooLong = $this->changeMessage($this->csrf(), 'secret-key', 'Some text.', str_repeat('a', 61));
+        $this->assertSame(422, $tooLong->getStatusCode());
+
+        $letters = $this->app->make(LetterStore::class);
+        $this->assertSame('Jinelin', $letters->name());
+        $this->assertSame(['Old first.', 'Old second.'], $letters->paragraphs());
+        $this->assertSame([], $letters->archive(), 'a rejected save archives nothing');
+    }
+
+    public function testTheBackupFileSaysWhoTheOldLetterWasFor(): void
+    {
+        $disk = $this->memoryDisk();
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+
+        $this->changeMessage($this->csrf(), 'secret-key', 'Brand new.', 'Maria');
+
+        $backup = $disk->files[array_key_first($disk->files)];
+        $this->assertStringContainsString("A letter for: Jinelin\n", $backup, 'the OLD name, not the new one');
+        $this->assertStringContainsString("Old first.\n\nOld second.", $backup);
+        $this->assertStringNotContainsString('Maria', $backup);
+    }
+
+    public function testOnlyChangingTheNameStillBacksUpTheOldLetter(): void
+    {
+        $disk = $this->memoryDisk();
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+
+        $response = $this->changeMessage($this->csrf(), 'secret-key', "Old first.\n\nOld second.", 'Maria');
+
+        $this->assertTrue($this->decode($response)['changed'], 'a new name alone is a change');
+        $this->assertCount(1, $disk->files);
+        $this->assertSame('Maria', $this->app->make(LetterStore::class)->name());
+    }
+
+    public function testTheSameNameAndMessageChangeNothing(): void
+    {
+        $disk = $this->memoryDisk();
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+
+        $response = $this->changeMessage($this->csrf(), 'secret-key', "Old first.\n\nOld second.", ' Jinelin ');
+
+        $this->assertFalse($this->decode($response)['changed']);
+        $this->assertSame([], $disk->files);
     }
 }

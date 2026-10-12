@@ -43,9 +43,9 @@ RUN mkdir -p storage/app storage/cache storage/logs storage/sessions storage/nos
 
 EXPOSE 80
 
-# Swarm waits for this before it stops the old container (order: start-first in deploy/docker-stack.yml).
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD curl -fsS http://127.0.0.1/api/ping || exit 1
+# No Docker HEALTHCHECK on purpose: on the production Swarm it marked a perfectly working container unhealthy and Swarm
+# stopped it (SIGQUIT, "Complete"), leaving the site at 0/1 replicas. Traefik health-checks /api/ping instead (labels in
+# deploy/docker-stack.yml) and the release workflow requests the live site after every deploy.
 
 COPY deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

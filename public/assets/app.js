@@ -324,6 +324,7 @@ if (songDialog) {
 const letterDialog = document.getElementById("letterDialog");
 if (letterDialog) {
   const letterBtn = $("letterBtn"), letterKey = $("letterKey"), letterMsg = $("letterMsg");
+  const letterName = $("letterName");
   const letterStatus = $("letterStatus"), letterGo = $("letterGo");
   try {
     letterKey.value = sessionStorage.getItem("upload-key") || "";
@@ -331,22 +332,37 @@ if (letterDialog) {
   }
   letterBtn.onclick = () => letterDialog.showModal();
   letterDialog.addEventListener("close", () => {
-    letterMsg.removeAttribute("aria-invalid");
+    for (const el of [letterMsg, letterName]) el.removeAttribute("aria-invalid");
     $("letterError").textContent = "";
+    $("letterNameError").textContent = "";
     letterStatus.textContent = "";
   });
   letterMsg.addEventListener("input", () => {
     letterMsg.removeAttribute("aria-invalid");
     $("letterError").textContent = "";
   });
+  letterName.addEventListener("input", () => {
+    letterName.removeAttribute("aria-invalid");
+    $("letterNameError").textContent = "";
+  });
   letterGo.onclick = async () => {
-    const key = letterKey.value.trim(), message = letterMsg.value.trim();
+    const key = letterKey.value.trim(), message = letterMsg.value.trim(), name = letterName.value.replace(/\s+/g, " ").trim();
     letterStatus.textContent = "";
+    let firstInvalid = null;
+    if (name === "") {
+      letterName.value = "";
+      letterName.setAttribute("aria-invalid", "true");
+      $("letterNameError").textContent = "The name is required.";
+      firstInvalid = letterName;
+    }
     if (message === "") {
       letterMsg.value = "";
       letterMsg.setAttribute("aria-invalid", "true");
       $("letterError").textContent = "The message is required.";
-      letterMsg.focus();
+      firstInvalid ?? (firstInvalid = letterMsg);
+    }
+    if (firstInvalid) {
+      firstInvalid.focus();
       return;
     }
     if (!key) {
@@ -361,13 +377,14 @@ if (letterDialog) {
     try {
       const fd = new FormData();
       fd.append("key", key);
+      fd.append("name", name);
       fd.append("message", message);
       const res = await fetch("/letter", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
       const data = await res.json().catch(() => ({}));
       if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
       if (!res.ok) throw new Error(data.message || `Could not save the message (HTTP ${res.status}).`);
       if (!data.changed) {
-        letterStatus.textContent = "That is already the current message.";
+        letterStatus.textContent = "That is already the current name and message.";
       } else {
         letterMsg.value = "";
         letterStatus.textContent = "Saved. The old message was kept as a backup file. Reloading\u2026";

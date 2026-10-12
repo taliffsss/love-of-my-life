@@ -26,6 +26,8 @@ final class HomeController
             'name' => $name,
             'firstName' => (string) config('site.first_name'),
             'letter' => $letters->paragraphs(),
+            // who the letter is for: "A letter for …" in the panel (changed from the message form)
+            'recipient' => $letters->name(),
             'photos' => $photos,
             'placeholders' => ['#f9d5d3,#e8a5b5', '#fbe3d0,#f2b8a2', '#e6d3f0,#c9a6dc', '#ffe8e0,#f5b7c4'],
             // a song chosen from the page wins over a local file in public/music
