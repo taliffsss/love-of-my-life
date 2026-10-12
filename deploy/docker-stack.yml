@@ -21,6 +21,10 @@ services:
       - app_network
     env_file:
       - .env.production
+    # Swarm must not run a container health check: it stopped a working container (see the Dockerfile). Traefik's
+    # health check on /api/ping (labels below) already takes a bad container out of rotation.
+    healthcheck:
+      disable: true
     volumes:
       # photos list (carousel.json), the chosen song (song.json), logs and sessions survive redeploys
       - lom_storage:/var/www/html/storage
@@ -29,7 +33,7 @@ services:
       update_config:
         parallelism: 1
         delay: 10s
-        order: start-first   # the new container must pass its health check before the old one stops
+        order: start-first   # the new container is started before the old one is stopped
       restart_policy:
         condition: on-failure
       resources:

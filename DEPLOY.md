@@ -57,8 +57,10 @@ Try the image locally with `docker compose up --build` (needs a `.env.production
   (`song.json`), logs and sessions survive redeploys. Photos themselves are in Spaces.
 - Traefik terminates TLS; nginx passes `HTTPS=on` to PHP when it sees `X-Forwarded-Proto: https`, so cookies are
   `Secure` and the CSRF origin check works.
-- Rolling updates are `start-first`: the new container must pass its Docker health check (`GET /api/ping`) before the
-  old one stops, so deploys have no downtime.
+- Rolling updates are `start-first`: the new container is started before the old one is stopped. There is **no Docker
+  health check** on purpose (a Docker health check stopped a working container on the production Swarm); Traefik health-checks `GET /api/ping` and takes a bad container out of rotation.
+- After every deploy the release workflow waits until `jinelin_web` runs the new image, then requests the live site
+  (`SITE_URL`, default `https://jinelin-basela.markanthonynaluz.com`): `/api/ping` and `/` must answer HTTP 200.
 - Rollback: `LOM_IMAGE=<image> LOM_VERSION=<previous-version> docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin`.
 
 ## Without Docker (bare metal)

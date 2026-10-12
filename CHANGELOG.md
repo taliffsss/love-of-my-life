@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.1.1
+
+- Fixes the production outage after 2.0.2 / 2.1.0: on the Swarm server the Docker `HEALTHCHECK` marked a working container unhealthy and Swarm stopped it (SIGQUIT, task "Complete"), leaving `jinelin_web` at 0/1 replicas. The image no longer has a Docker health check and `deploy/docker-stack.yml` keeps `healthcheck: disable: true`, so a normal deploy can no longer switch it back on. Traefik still health-checks `/api/ping`.
+- The release workflow now requests the live site (`/api/ping` and `/` over HTTPS, `SITE_URL` variable) after every deploy, so a green deploy means the site really answers.
+- nginx writes its access and error logs to the container log (`docker service logs jinelin_web`).
+- Tests guard the above (no `HEALTHCHECK`, health check disabled in the stack, image name matches the release, live-site check present).
+
 ## 2.1.0
 
 - New photos go to the very beginning of the carousel: uploaded photos come first, the newest upload on top, followed by the photos in `public/photos`. A batch picked together keeps the order it was picked in. The sitemap, the structured data, the first-photo preload and `GET /api/photos` follow the same order. `storage/app/carousel.json` still lists uploads oldest first.
