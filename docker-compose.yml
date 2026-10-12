@@ -5,7 +5,7 @@
 services:
   web:
     build: .
-    image: taliffsss/love-of-my-life:local
+    image: taliffsss/jinelin-basela:local
     env_file:
       - .env.production
     ports:

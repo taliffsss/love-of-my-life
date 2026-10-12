@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1
+
+- The Docker image is `taliffsss/jinelin-basela` everywhere (stack file, release workflow, docs, local compose); the stack deploys exactly the image the release pushed.
+- The deploy step now waits until the service runs the new image and fails if it never does or the update rolls back.
+
 ## 2.0.0
 
 Rebuilt on the NaluzPHP framework (PHP) to be deployed on your own server. The design is unchanged.

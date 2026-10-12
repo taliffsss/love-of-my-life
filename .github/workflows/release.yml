@@ -9,7 +9,7 @@
 # One-time setup (repo → Settings):
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
-#   Variables DOCKER_IMAGE (default taliffsss/love-of-my-life)
+#   Variables DOCKER_IMAGE (default taliffsss/jinelin-basela)
 #             DEPLOY_PATH  (dir on the server holding deploy/.env.production; default /opt/love-of-my-life; may also be a secret)
 #             AUTO_DEPLOY  ("true" turns the deploy job on; keep it off until you trust the pipeline)
 #   Environment `production` → add required reviewers so a human approves every deploy.
@@ -34,7 +34,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE: ${{ vars.DOCKER_IMAGE || 'taliffsss/love-of-my-life' }}
+  IMAGE: ${{ vars.DOCKER_IMAGE || 'taliffsss/jinelin-basela' }}
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
   STACK: jinelin
 

@@ -21,7 +21,7 @@ tag and CI checks, the image build, the GitHub Release and (optionally) the depl
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
 3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`; the deploy passes it to the stack as `LOM_IMAGE`, so image and stack always match), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/jinelin-basela`; the deploy passes it to the stack as `LOM_IMAGE`, so image and stack always match), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
      `AUTO_DEPLOY` (`true` turns the deploy job on; keep it off until you trust the pipeline).
    - Environment `production` with required reviewers, so every deploy needs a human approval.
 
@@ -32,17 +32,17 @@ git tag v2.0.0 && git push origin v2.0.0
 ```
 
 (or Actions → Release → Run workflow with the tag; it creates the tag if it does not exist). The pipeline runs the tests
-and a Docker smoke test, pushes `taliffsss/love-of-my-life:2.0.0`, `:2.0` and `:latest`, creates the GitHub Release and,
+and a Docker smoke test, pushes `taliffsss/jinelin-basela:2.0.0`, `:2.0` and `:latest`, creates the GitHub Release and,
 if `AUTO_DEPLOY=true` and you approve the `production` environment, rolls the stack on the server. A tag with a hyphen
 (`v2.0.0-rc.1`) is a pre-release: no `latest`, no deploy.
 
 ### Manual build and deploy
 
 ```bash
-docker build -t taliffsss/love-of-my-life:2.0.0 -t taliffsss/love-of-my-life:latest .
-docker push taliffsss/love-of-my-life:2.0.0 && docker push taliffsss/love-of-my-life:latest
+docker build -t taliffsss/jinelin-basela:2.0.0 -t taliffsss/jinelin-basela:latest .
+docker push taliffsss/jinelin-basela:2.0.0 && docker push taliffsss/jinelin-basela:latest
 # on the server, in /opt/love-of-my-life (with deploy/docker-stack.yml and deploy/.env.production):
-LOM_IMAGE=taliffsss/love-of-my-life LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+LOM_IMAGE=taliffsss/jinelin-basela LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
 docker service logs -f jinelin_web
 ```
 
