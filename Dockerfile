@@ -43,7 +43,11 @@ RUN mkdir -p storage/app storage/cache storage/logs storage/sessions storage/nos
 
 EXPOSE 80
 
-COPY docker/entrypoint.sh /entrypoint.sh
+# Swarm waits for this before it stops the old container (order: start-first in deploy/docker-stack.yml).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://127.0.0.1/api/ping || exit 1
+
+COPY deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

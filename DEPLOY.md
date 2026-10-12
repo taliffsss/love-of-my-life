@@ -2,36 +2,64 @@
 
 ## Docker Swarm + Traefik (https://jinelin-basela.markanthonynaluz.com)
 
-This mirrors the hris-api setup: a Swarm stack (`docker-compose.yml`) with Traefik labels, the shared external
+Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) with Traefik labels, the shared external
 `app_network`, the `letsencrypt` cert resolver and the `redirect-to-https@file` middleware from your main Traefik stack.
-The image (`Dockerfile`) runs nginx + PHP-FPM under Supervisor, like the hris-api image.
+The image (`Dockerfile`) runs nginx + PHP-FPM under Supervisor. The release pipeline is the one dink uses: push a version
+tag and CI checks, the image build, the GitHub Release and (optionally) the deploy all follow.
+
+### One-time setup
 
 1. **DNS:** point an `A` record for `jinelin-basela.markanthonynaluz.com` at the server running Traefik.
-2. **Server folder** (for example `/opt/love-of-my-life`):
+2. **Server folder** (default `/opt/love-of-my-life`):
    ```bash
-   cp .env.docker.example .env      # then fill it in: APP_KEY, JWT_SECRET, UPLOAD_KEY, SPACES_*
+   mkdir -p /opt/love-of-my-life/deploy
+   cp deploy/.env.production.example /opt/love-of-my-life/deploy/.env.production   # then fill it in
+   chmod 600 /opt/love-of-my-life/deploy/.env.production
    ```
-   Generate the keys with `php naluz key:generate --show` (on any machine with the repo), or
-   `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` for `APP_KEY` and
-   `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` for `JWT_SECRET`. Write values **without quotes** in `.env`.
-3. **Build, push and deploy**, either by hand:
-   ```bash
-   docker build -t taliffsss/love-of-my-life:2.0.0 -t taliffsss/love-of-my-life:latest .
-   docker push taliffsss/love-of-my-life:2.0.0 && docker push taliffsss/love-of-my-life:latest
-   # on the server, in the folder with docker-compose.yml and .env:
-   sh deploy.sh 2.0.0 jinelin       # = docker stack deploy -c docker-compose.yml jinelin --with-registry-auth
-   ```
-   or with GitHub Actions: *Actions → Deploy → Run workflow* (version `2.0.0`). It needs these repository secrets:
-   `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `SSH_KEY`, `PROD_SERVER_HOST`, `PROD_SERVER_USER`, `PROD_DEPLOY_PATH`.
-4. Check it: `docker service logs -f jinelin_web`, then open the site. Traefik health-checks `GET /api/ping`.
+   Fill in `APP_KEY`, `JWT_SECRET`, `UPLOAD_KEY` and the `SPACES_*` values. Generate the keys with
+   `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` (`APP_KEY`) and
+   `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
+3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
+   - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/love-of-my-life`), `DEPLOY_PATH` (default `/opt/love-of-my-life`),
+     `AUTO_DEPLOY` (`true` turns the deploy job on; keep it off until you trust the pipeline).
+   - Environment `production` with required reviewers, so every deploy needs a human approval.
 
-Notes:
+### Releasing
+
+```bash
+git tag v2.0.0 && git push origin v2.0.0
+```
+
+(or Actions → Release → Run workflow with the tag; it creates the tag if it does not exist). The pipeline runs the tests
+and a Docker smoke test, pushes `taliffsss/love-of-my-life:2.0.0`, `:2.0` and `:latest`, creates the GitHub Release and,
+if `AUTO_DEPLOY=true` and you approve the `production` environment, rolls the stack on the server. A tag with a hyphen
+(`v2.0.0-rc.1`) is a pre-release: no `latest`, no deploy.
+
+### Manual build and deploy
+
+```bash
+docker build -t taliffsss/love-of-my-life:2.0.0 -t taliffsss/love-of-my-life:latest .
+docker push taliffsss/love-of-my-life:2.0.0 && docker push taliffsss/love-of-my-life:latest
+# on the server, in /opt/love-of-my-life (with deploy/docker-stack.yml and deploy/.env.production):
+LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+docker service logs -f jinelin_web
+```
+
+After editing `.env.production`, run the `docker stack deploy` command again: Swarm copies the env file into the service
+definition, so `docker service update --force` would restart with the old values.
+
+Try the image locally with `docker compose up --build` (needs a `.env.production` with `APP_URL=http://localhost:8080`).
+
+### Notes
+
 - `storage/` is a named volume (`lom_storage`): the uploaded-photo list (`carousel.json`), the chosen song
   (`song.json`), logs and sessions survive redeploys. Photos themselves are in Spaces.
 - Traefik terminates TLS; nginx passes `HTTPS=on` to PHP when it sees `X-Forwarded-Proto: https`, so cookies are
   `Secure` and the CSRF origin check works.
-- Single replica with a rolling update means a few seconds of downtime per deploy, same as hris-api.
-- Rollback: `sh deploy.sh <previous-version> jinelin`.
+- Rolling updates are `start-first`: the new container must pass its Docker health check (`GET /api/ping`) before the
+  old one stops, so deploys have no downtime.
+- Rollback: `LOM_VERSION=<previous-version> docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin`.
 
 ## Without Docker (bare metal)
 

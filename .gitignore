@@ -8,3 +8,5 @@
 .vscode/
 .DS_Store
 /storage/app/song.json
+/deploy/.env.production
+/.env.production

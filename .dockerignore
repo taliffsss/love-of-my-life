@@ -28,5 +28,6 @@ storage/database.sqlite
 .DS_Store
 *.md
 !public/**/*.md
-deploy
+deploy/*
+!deploy/entrypoint.sh
 docker-compose.yml

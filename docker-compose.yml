@@ -1,82 +1,17 @@
-# ============================================================
-# docker-compose.yml  —  Love of My Life  (Docker Swarm stack, Traefik v3.6 compatible)
-#
-#   https://jinelin-basela.markanthonynaluz.com
-#
-# Deploy:  LOM_VERSION=latest docker stack deploy -c docker-compose.yml jinelin --with-registry-auth
-# Needs the shared Traefik stack and the external `app_network` (same as hris-api), and a `.env` next to this file.
-# ============================================================
-
+# Local run of the production image, no Traefik:
+#   cp deploy/.env.production.example .env.production   (set APP_KEY, JWT_SECRET, UPLOAD_KEY, ...; APP_URL=http://localhost:8080)
+#   docker compose up --build        ->  http://localhost:8080
+# Production uses deploy/docker-stack.yml (Swarm + Traefik).
 services:
   web:
-    image: taliffsss/love-of-my-life:${LOM_VERSION:-latest}
-    networks:
-      - app_network
+    build: .
+    image: taliffsss/love-of-my-life:local
     env_file:
-      - .env
+      - .env.production
+    ports:
+      - "8080:80"
     volumes:
-      # photos list (carousel.json), the chosen song (song.json), logs and sessions survive redeploys
       - lom_storage:/var/www/html/storage
-    deploy:
-      replicas: 1
-      update_config:
-        parallelism: 1
-        delay: 10s
-      restart_policy:
-        condition: on-failure
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 128M
-      labels:
-        - "traefik.enable=true"
-
-        # ── HTTPS router ──────────────────────────────────────────────────
-        - "traefik.http.routers.jinelin-basela.rule=Host(`jinelin-basela.markanthonynaluz.com`)"
-        - "traefik.http.routers.jinelin-basela.entrypoints=websecure"
-        - "traefik.http.routers.jinelin-basela.tls=true"
-        - "traefik.http.routers.jinelin-basela.tls.certresolver=letsencrypt"
-        - "traefik.http.routers.jinelin-basela.middlewares=jinelin-headers"
-        - "traefik.http.routers.jinelin-basela.service=jinelin-basela"
-
-        # ── HTTP → HTTPS redirect ─────────────────────────────────────────
-        # redirect-to-https is defined in the main Traefik stack (file provider),
-        # shared by every service on the same Swarm.
-        - "traefik.http.routers.jinelin-basela-http.rule=Host(`jinelin-basela.markanthonynaluz.com`)"
-        - "traefik.http.routers.jinelin-basela-http.entrypoints=web"
-        - "traefik.http.routers.jinelin-basela-http.middlewares=redirect-to-https@file"
-        - "traefik.http.routers.jinelin-basela-http.service=jinelin-basela"
-
-        # ── Service ───────────────────────────────────────────────────────
-        - "traefik.http.services.jinelin-basela.loadbalancer.server.port=80"
-        # health check path must be a relative URL; /api/ping answers {"status":"ok"}
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.path=/api/ping"
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.interval=30s"
-        - "traefik.http.services.jinelin-basela.loadbalancer.healthcheck.timeout=10s"
-
-        # ── Headers middleware ────────────────────────────────────────────
-        # Tells the app the request arrived over HTTPS (Traefik terminates TLS).
-        - "traefik.http.middlewares.jinelin-headers.headers.sslProxyHeaders.X-Forwarded-Proto=https"
-
-        # ── Logging labels ─────────────────────────────────────────────────
-        - "logging.service=jinelin-basela"
-        - "logging.environment=production"
-
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-        labels: "logging.service,logging.environment"
-        tag: "{{.Name}}"
-
-networks:
-  app_network:
-    external: true
-    attachable: true
 
 volumes:
   lom_storage:

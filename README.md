@@ -28,7 +28,7 @@ appears; enter the upload key, pick photos, and they are sent to Spaces. Every u
 
 ## Deploy
 
-Docker Swarm + Traefik at <https://jinelin-basela.markanthonynaluz.com>: see [DEPLOY.md](DEPLOY.md) (`Dockerfile`, `docker-compose.yml`, `deploy/deploy.sh`). A bare-metal nginx example is in `deploy/nginx.conf`.
+Docker Swarm + Traefik at <https://jinelin-basela.markanthonynaluz.com>: see [DEPLOY.md](DEPLOY.md) (`Dockerfile`, `deploy/docker-stack.yml`, `.github/workflows/release.yml`). A bare-metal nginx example is in `deploy/nginx.conf`.
 
 ## Develop
 
