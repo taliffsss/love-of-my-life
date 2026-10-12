@@ -260,7 +260,7 @@ if (uploader) {
     }
     upGo.disabled = true;
     let ok = 0;
-    for (const [i, f] of files.entries()) {
+    for (const [i, f] of [...files].reverse().entries()) {
       upStatus.textContent = `Uploading ${i + 1} / ${files.length}\u2026`;
       try {
         const fd = new FormData();

@@ -33,10 +33,16 @@ final class CarouselStore
         return $out;
     }
 
-    /** @return list<string> public URLs, in upload order */
+    /** @return list<string> public URLs, in upload order (oldest first, as stored) */
     public function urls(): array
     {
         return array_column($this->all(), 'url');
+    }
+
+    /** @return list<string> public URLs, newest upload first: the order the carousel shows them in */
+    public function newestFirst(): array
+    {
+        return array_reverse($this->urls());
     }
 
     /** Appends one uploaded photo. Writes are locked and atomic so two uploads can't lose each other. */

@@ -102,7 +102,7 @@ saying what to set in `.env`.
 
 2. Each upload goes browser → `POST /upload` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
    file type verified from its bytes. The public URL is appended to **`storage/app/carousel.json`**, and the carousel
-   shows it immediately and on every later visit. `GET /api/photos` returns the same list as JSON.
+   shows it at the very beginning of the carousel (newest first) on every visit. `GET /api/photos` returns the same list as JSON.
 3. `storage/app/carousel.json` is the file that stores every uploaded endpoint. It is not committed, so `git pull`
    never overwrites it. Back it up with the rest of `storage/app/`. On a brand-new install it starts from
    `database/carousel.seed.json` (the photos uploaded before v2.0.0).

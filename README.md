@@ -16,7 +16,7 @@ Password: `yam` (change `PASSWORD` in `public/assets/app.js`). After you save ph
 
 ## Content
 
-- **Photos** → drop files in `public/photos/` (jpg, png, webp, gif, avif); they play in filename order, before the uploaded ones.
+- **Photos** → drop files in `public/photos/` (jpg, png, webp, gif, avif); they play in filename order, after the uploaded ones (new uploads always come first, newest on top).
 - **Song** → open the upload dialog and paste a YouTube link under *Change the song*; it becomes the new default (`storage/app/song.json`). Without one, an audio file in `public/music/` is used, else the song in `config/site.php`.
 - **Letter and names** → the pen button in the page replaces the message (the old one is archived as a file in Spaces first); the starting text and names are in `config/site.php`.
 
