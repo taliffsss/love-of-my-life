@@ -35,7 +35,7 @@ saying what to set in `.env`.
    | `SPACES_CDN_URL` | CDN origin used in the saved links; leave empty to use the bucket URL |
    | `UPLOAD_KEY` | the secret you type into the *Add photos* dialog; empty = uploads are refused |
 
-2. Each upload goes browser → `POST /photos` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
+2. Each upload goes browser → `POST /upload` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
    file type verified from its bytes. The public URL is appended to **`storage/app/carousel.json`**, and the carousel
    shows it immediately and on every later visit. `GET /api/photos` returns the same list as JSON.
 3. `storage/app/carousel.json` is the file that stores every uploaded endpoint. It is not committed, so `git pull`

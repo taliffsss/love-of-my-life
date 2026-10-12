@@ -238,7 +238,7 @@ if (uploader) {
         const fd = new FormData();
         fd.append("key", key);
         fd.append("photo", await shrink(f), f.name.replace(/\.[^.]+$/, "") + ".jpg");
-        const res = await fetch("photos", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
+        const res = await fetch("/upload", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
         const data = await res.json().catch(() => ({}));
         if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
         if (!res.ok) throw new Error(data.message || `Upload failed (HTTP ${res.status}).`);

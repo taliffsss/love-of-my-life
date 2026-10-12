@@ -13,4 +13,4 @@ $router->get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap')
 $router->get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 // Upload a photo to DigitalOcean Spaces and add it to the carousel (needs the upload key).
-$router->post('/photos', [PhotoController::class, 'store'])->middleware('throttle:20,1')->name('photos.store');
+$router->post('/upload', [PhotoController::class, 'store'])->middleware('throttle:20,1')->name('upload');

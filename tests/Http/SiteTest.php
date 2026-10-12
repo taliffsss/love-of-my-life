@@ -111,7 +111,7 @@ final class SiteTest extends TestCase
 
     private function upload(string $token, string $key, ?string $bytes): \Psr\Http\Message\ResponseInterface
     {
-        $request = (new ServerRequest('POST', '/photos', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
+        $request = (new ServerRequest('POST', '/upload', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
             ->withParsedBody(['key' => $key]);
         if ($bytes !== null) {
             $request = $request->withUploadedFiles(['photo' => new UploadedFile(Stream::create($bytes), strlen($bytes), UPLOAD_ERR_OK, 'x.png', 'image/png')]);
