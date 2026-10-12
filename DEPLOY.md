@@ -114,6 +114,16 @@ example `https://www.youtube.com/watch?v=fu9yk7gCTbc` or `https://youtu.be/fu9yk
 becomes the default song for every visitor. The "Now playing" title comes from YouTube. A saved song wins over any
 audio file in `public/music/`. Delete `storage/app/song.json` to go back to the song in `config/site.php`.
 
+## Changing the message
+
+Unlock the page, click the pen icon (left of the song button), enter the upload key, edit the text (blank line =
+new paragraph) and click *Save message*. The server first uploads the **old** message as a text file to Spaces
+(`<SPACES_FOLDER>/messages/20261012-034000-xxxxxxxx.txt`, private, not publicly readable), and only then saves the new
+one to **`storage/app/letter.json`**, which becomes the message for everyone. If the archive upload fails, nothing
+changes and the old message stays. Every archived file is listed in `letter.json` under `archive`. Without Spaces
+credentials the old message is kept in `storage/app/letters/` on the server instead. Delete `letter.json` to go back
+to the text in `config/site.php`.
+
 ## Updating
 
 ```bash

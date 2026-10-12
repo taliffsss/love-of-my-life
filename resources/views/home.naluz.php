@@ -82,6 +82,9 @@
       <button class="mute add song" id="songBtn" aria-label="Change the song" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path d="M3 5h4M5 3v4"/></svg>
       </button>
+      <button class="mute add letter-btn" id="letterBtn" aria-label="Change the message" hidden>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      </button>
       <button class="mute" id="mute" aria-label="Toggle music" hidden>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
       </button>
@@ -162,6 +165,22 @@
         <p id="songStatus" class="up-status" role="status" aria-live="polite"></p>
         <div class="up-actions">
           <button type="button" id="songGo">Save song</button>
+          <button type="submit" value="close">Close</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="letterDialog" class="uploader">
+      <form method="dialog" id="letterForm">
+        <h3>Change the message</h3>
+        <p class="up-note">Write the new message. Leave a blank line between paragraphs. The current message is saved as a file in DigitalOcean Spaces before the new one appears.</p>
+        <label for="letterKey">Upload key</label>
+        <input id="letterKey" type="password" autocomplete="off" spellcheck="false" />
+        <label for="letterMsg">Message</label>
+        <textarea id="letterMsg" rows="10" spellcheck="true">{{ $letterText }}</textarea>
+        <p id="letterStatus" class="up-status" role="status" aria-live="polite"></p>
+        <div class="up-actions">
+          <button type="button" id="letterGo">Save message</button>
           <button type="submit" value="close">Close</button>
         </div>
       </form>

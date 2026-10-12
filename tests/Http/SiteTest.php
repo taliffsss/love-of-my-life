@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Naluz\Tests\Http;
 
 use App\Services\CarouselStore;
+use App\Services\LetterStore;
 use App\Services\SongStore;
 use App\Services\YouTube;
 use Naluz\Storage\Filesystem;
@@ -18,6 +19,7 @@ final class SiteTest extends TestCase
 {
     private string $manifest;
     private string $songFile;
+    private string $letterFile;
 
     protected function configOverrides(): array
     {
@@ -34,12 +36,15 @@ final class SiteTest extends TestCase
         parent::setUp();
         $this->manifest = sys_get_temp_dir() . '/carousel-' . bin2hex(random_bytes(4)) . '.json';
         $this->app->instance(CarouselStore::class, new CarouselStore($this->manifest));
+        $this->letterFile = sys_get_temp_dir() . '/letter-' . bin2hex(random_bytes(4)) . '.json';
+        $this->app->instance(LetterStore::class, new LetterStore($this->letterFile, ['Old first.', 'Old second.']));
         $this->songFile = sys_get_temp_dir() . '/song-' . bin2hex(random_bytes(4)) . '.json';
         $this->app->instance(SongStore::class, new SongStore($this->songFile, ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde']));
     }
 
     protected function tearDown(): void
     {
+        @unlink($this->letterFile);
         @unlink($this->songFile);
         @unlink($this->manifest);
         @unlink($this->manifest . '.lock');
@@ -331,5 +336,132 @@ final class SiteTest extends TestCase
 
         $this->assertSame(403, $response->getStatusCode());
         $this->assertFalse($this->app->make(SongStore::class)->hasSaved());
+    }
+
+    private function changeMessage(string $token, string $key, string $message): \Psr\Http\Message\ResponseInterface
+    {
+        $request = (new ServerRequest('POST', '/letter', ['X-CSRF-TOKEN' => $token, 'Accept' => 'application/json']))
+            ->withParsedBody(['key' => $key, 'message' => $message]);
+        return $this->send($request);
+    }
+
+    public function testHomePageShowsTheMessageAndItsForm(): void
+    {
+        $html = (string) $this->get('/')->getBody();
+
+        $this->assertStringContainsString('<p>Old first.</p>', $html);
+        $this->assertStringContainsString('id="letterBtn"', $html);
+        $this->assertStringContainsString('id="letterForm"', $html);
+        $this->assertStringContainsString("Old first.\n\nOld second.", $html);
+    }
+
+    public function testReplacingTheMessageArchivesTheOldOneFirst(): void
+    {
+        $disk = $this->memoryDisk();
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+        $this->app->make(\Naluz\Config\Repository::class)->set('filesystems.disks.spaces.folder', 'yam');
+
+        $response = $this->changeMessage($this->csrf(), 'secret-key', "Brand new.\n\nSecond new.");
+        $body = $this->decode($response);
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertTrue($body['changed']);
+        $this->assertSame(['Brand new.', 'Second new.'], $body['paragraphs']);
+        $this->assertSame('spaces', $body['archivedTo']);
+
+        // the old message was uploaded as a file...
+        $this->assertCount(1, $disk->files);
+        $path = array_key_first($disk->files);
+        $this->assertMatchesRegularExpression('#^yam/messages/\d{8}-\d{6}-[0-9a-f]{8}\.txt$#', $path);
+        $this->assertStringContainsString("Old first.\n\nOld second.", $disk->files[$path]);
+
+        // ...and the new one is what the page shows now
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('<p>Brand new.</p>', $html);
+        $this->assertStringNotContainsString('Old first.', $html);
+        $this->assertSame($path, $this->app->make(LetterStore::class)->archive()[0]['key']);
+    }
+
+    public function testTheOldMessageStaysWhenItCannotBeArchived(): void
+    {
+        $this->app->make(StorageManager::class)->extend('spaces', new class implements Filesystem {
+            public function exists(string $path): bool
+            {
+                return false;
+            }
+            public function get(string $path): string
+            {
+                return '';
+            }
+            public function put(string $path, mixed $contents): void
+            {
+                throw new \Naluz\Storage\StorageException('Spaces rejected the upload (HTTP 403, AccessDenied).');
+            }
+            public function delete(string $path): bool
+            {
+                return true;
+            }
+            public function copy(string $from, string $to): void
+            {
+            }
+            public function move(string $from, string $to): void
+            {
+            }
+            public function size(string $path): int
+            {
+                return 0;
+            }
+            public function lastModified(string $path): int
+            {
+                return 0;
+            }
+            public function mimeType(string $path): string
+            {
+                return '';
+            }
+            public function files(string $directory = ''): array
+            {
+                return [];
+            }
+            public function directories(string $directory = ''): array
+            {
+                return [];
+            }
+            public function makeDirectory(string $path): void
+            {
+            }
+            public function deleteDirectory(string $path): bool
+            {
+                return true;
+            }
+            public function url(string $path): string
+            {
+                return $path;
+            }
+        });
+
+        $response = $this->changeMessage($this->csrf(), 'secret-key', 'Should not appear.');
+
+        $this->assertSame(502, $response->getStatusCode());
+        $this->assertStringContainsString('The message was not changed', (string) $response->getBody());
+        $this->assertSame(['Old first.', 'Old second.'], $this->app->make(LetterStore::class)->paragraphs());
+    }
+
+    public function testTheMessageNeedsTheUploadKeyAndSomeText(): void
+    {
+        $this->assertSame(403, $this->changeMessage($this->csrf(), 'wrong', 'New text')->getStatusCode());
+        $this->assertSame(422, $this->changeMessage($this->csrf(), 'secret-key', "  \n ")->getStatusCode());
+        $this->assertSame(['Old first.', 'Old second.'], $this->app->make(LetterStore::class)->paragraphs());
+    }
+
+    public function testSavingTheSameMessageChangesNothing(): void
+    {
+        $disk = $this->memoryDisk();
+        $this->app->make(StorageManager::class)->extend('spaces', $disk);
+
+        $response = $this->changeMessage($this->csrf(), 'secret-key', "Old first.\n\nOld second.");
+
+        $this->assertFalse($this->decode($response)['changed']);
+        $this->assertSame([], $disk->files);
     }
 }

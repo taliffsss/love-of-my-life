@@ -57,6 +57,18 @@ final class SpacesFilesystemTest extends TestCase
         $this->assertSame('JPEGDATA', (string) $request->getBody());
     }
 
+    public function testArchivedMessagesAreStoredPrivately(): void
+    {
+        $disk = $this->disk([new Response(200)]);
+        $disk->putPrivate('yam/messages/a.txt', "old message\n");
+
+        $request = $this->history[0]['request'];
+        $this->assertSame('private', $request->getHeaderLine('x-amz-acl'));
+        $this->assertSame('text/plain; charset=utf-8', $request->getHeaderLine('Content-Type'));
+        $this->assertSame('no-store', $request->getHeaderLine('Cache-Control'));
+        $this->assertSame("old message\n", (string) $request->getBody());
+    }
+
     public function testFailedUploadThrows(): void
     {
         $this->expectException(StorageException::class);

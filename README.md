@@ -18,7 +18,7 @@ Password: `yam` (change `PASSWORD` in `public/assets/app.js`).
 
 - **Photos** → drop files in `public/photos/` (jpg, png, webp, gif, avif); they play in filename order, before the uploaded ones.
 - **Song** → open the upload dialog and paste a YouTube link under *Change the song*; it becomes the new default (`storage/app/song.json`). Without one, an audio file in `public/music/` is used, else the song in `config/site.php`.
-- **Letter and names** → `config/site.php`.
+- **Letter and names** → the pen button in the page replaces the message (the old one is archived as a file in Spaces first); the starting text and names are in `config/site.php`.
 
 ## Uploading photos
 

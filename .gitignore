@@ -10,3 +10,5 @@
 /storage/app/song.json
 /deploy/.env.production
 /.env.production
+/storage/app/letter.json
+/storage/app/letters/

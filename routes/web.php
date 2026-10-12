@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LetterController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\SongController;
@@ -18,3 +19,6 @@ $router->post('/upload', [PhotoController::class, 'store'])->middleware('throttl
 
 // Replace the song with another YouTube link (needs the upload key). Not /music: that is a real folder.
 $router->post('/song', [SongController::class, 'update'])->middleware('throttle:20,1')->name('song');
+
+// Replace the message (the letter). The old message is archived as a file first. Needs the upload key.
+$router->post('/letter', [LetterController::class, 'update'])->middleware('throttle:20,1')->name('letter');

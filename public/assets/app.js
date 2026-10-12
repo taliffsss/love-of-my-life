@@ -206,6 +206,7 @@ form.addEventListener("submit", async (e) => {
   muteBtn.hidden = false;
   document.getElementById("addBtn")?.removeAttribute("hidden");
   document.getElementById("songBtn")?.removeAttribute("hidden");
+  document.getElementById("letterBtn")?.removeAttribute("hidden");
   nowPlaying.hidden = false;
   music.fadeIn();
   await wait(1500);
@@ -313,6 +314,58 @@ if (songDialog) {
       songGo.disabled = false;
     }
   };
+}
+const letterDialog = document.getElementById("letterDialog");
+if (letterDialog) {
+  const letterBtn = $("letterBtn"), letterKey = $("letterKey"), letterMsg = $("letterMsg");
+  const letterStatus = $("letterStatus"), letterGo = $("letterGo");
+  try {
+    letterKey.value = sessionStorage.getItem("upload-key") || "";
+  } catch {
+  }
+  letterBtn.onclick = () => letterDialog.showModal();
+  letterGo.onclick = async () => {
+    const key = letterKey.value.trim(), message = letterMsg.value.trim();
+    if (!key || !message) {
+      letterStatus.textContent = "Enter the upload key and the message.";
+      return;
+    }
+    try {
+      sessionStorage.setItem("upload-key", key);
+    } catch {
+    }
+    letterGo.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append("key", key);
+      fd.append("message", message);
+      const res = await fetch("/letter", { method: "POST", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" }, body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
+      if (!res.ok) throw new Error(data.message || `Could not save the message (HTTP ${res.status}).`);
+      if (!data.changed) {
+        letterStatus.textContent = "That is already the current message.";
+      } else {
+        showLetter(data.paragraphs);
+        letterMsg.value = data.paragraphs.join("\n\n");
+        letterStatus.textContent = data.archivedTo === "spaces" ? "Saved. The old message was uploaded to Spaces as a file." : "Saved. The old message was kept as a file on the server.";
+      }
+    } catch (e) {
+      letterStatus.textContent = e.message;
+    } finally {
+      letterGo.disabled = false;
+    }
+  };
+}
+function showLetter(paragraphs) {
+  letterText.replaceChildren(...paragraphs.map((text) => {
+    const p = document.createElement("p");
+    p.textContent = text;
+    return p;
+  }));
+  letterText.classList.remove("run", "loop");
+  void letterText.offsetWidth;
+  startReading();
 }
 function addSlide(url) {
   const fig = document.createElement("figure");

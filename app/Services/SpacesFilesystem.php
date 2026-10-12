@@ -13,11 +13,11 @@ use Naluz\Storage\StorageException;
  * DigitalOcean Spaces (S3-compatible) disk. Requests are signed with AWS Signature V4 using Guzzle, so no cloud SDK
  * is needed. Only the operations the app uses are implemented (put, get, exists, delete, size, mimeType, url).
  */
-final class SpacesFilesystem implements Filesystem
+final class SpacesFilesystem implements Filesystem, PrivateWriter
 {
     private const TYPES = [
         'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif',
-        'webp' => 'image/webp', 'avif' => 'image/avif',
+        'webp' => 'image/webp', 'avif' => 'image/avif', 'txt' => 'text/plain; charset=utf-8',
     ];
 
     private readonly string $host;
@@ -51,11 +51,22 @@ final class SpacesFilesystem implements Filesystem
     public function put(string $path, mixed $contents): void
     {
         $body = is_resource($contents) ? (string) stream_get_contents($contents) : (string) $contents;
+        $this->upload($path, $body, 'public-read', 'public, max-age=31536000, immutable');
+    }
+
+    /** Stores a file only the bucket owner can read (archived messages). */
+    public function putPrivate(string $path, string $contents): void
+    {
+        $this->upload($path, $contents, 'private', 'no-store');
+    }
+
+    private function upload(string $path, string $body, string $acl, string $cacheControl): void
+    {
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
         $response = $this->send('PUT', $path, $body, [
-            'cache-control' => 'public, max-age=31536000, immutable',
+            'cache-control' => $cacheControl,
             'content-type' => self::TYPES[$ext] ?? 'application/octet-stream',
-            'x-amz-acl' => 'public-read',
+            'x-amz-acl' => $acl,
         ]);
         if ($response['status'] !== 200) {
             throw new StorageException('Spaces rejected the upload (HTTP ' . $response['status'] . $this->errorCode($response['body']) . ').');
