@@ -103,10 +103,10 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
       </button>
       </div>
-      <aside class="letter" id="letter" aria-label="A letter for {{ $name }}">
+      <aside class="letter" id="letter" aria-label="A letter for {{ $recipient }}">
         <div class="letter-head">
           <p class="eyebrow">A letter for</p>
-          <h2>{{ $firstName }}</h2>
+          <h2 id="letterFor">{{ $recipient }}</h2>
         </div>
         <div class="letter-view" id="letterView">
           <div class="letter-text" id="letterText">
@@ -190,6 +190,9 @@
         <p class="up-note">Write the new message. Leave a blank line between paragraphs. The current message is saved as a backup file before the new one appears.</p>
         <label for="letterKey">Upload key</label>
         <input id="letterKey" type="password" autocomplete="off" spellcheck="false" />
+        <label for="letterName">Name <small>(required) shown as &ldquo;A letter for &hellip;&rdquo;</small></label>
+        <input id="letterName" type="text" maxlength="60" autocomplete="off" required aria-required="true" aria-describedby="letterNameError" value="{{ $recipient }}" />
+        <p id="letterNameError" class="field-error" role="alert"></p>
         <label for="letterMsg">New message <small>(required)</small></label>
         <textarea id="letterMsg" rows="10" spellcheck="true" required aria-required="true" aria-describedby="letterError" placeholder="Write the new message here"></textarea>
         <p id="letterError" class="field-error" role="alert"></p>

@@ -5,17 +5,25 @@ declare(strict_types=1);
 namespace App\Services;
 
 /**
- * The message (love letter) shown in the right-hand panel. A message saved from the page lives in
- * storage/app/letter.json and becomes the default for everyone; until then the text from config/site.php is used.
+ * The message (love letter) and the name it is addressed to ("A letter for …"), shown in the right-hand panel. What is
+ * saved from the page lives in storage/app/letter.json and becomes the default for everyone; until then the text and
+ * name from config/site.php are used.
  */
 final class LetterStore
 {
     public const MAX_PARAGRAPHS = 40;
     public const MAX_CHARS = 8000;
+    public const MAX_NAME = 60;
 
-    /** @param list<string> $default */
-    public function __construct(private readonly string $file, private readonly array $default)
+    /** @param list<string> $default the starting paragraphs */
+    public function __construct(private readonly string $file, private readonly array $default, private readonly string $defaultName = '')
     {
+    }
+
+    /** The name the letter is for (shown after "A letter for"). */
+    public function name(): string
+    {
+        return $this->read()['name'] ?? $this->defaultName;
     }
 
     /** @return list<string> */
@@ -57,8 +65,29 @@ final class LetterStore
         return $paragraphs;
     }
 
-    /** @param list<string> $paragraphs @param string $archivedKey where the replaced message was stored ('' if none) */
-    public function set(array $paragraphs, string $archivedKey = '', ?\DateTimeImmutable $now = null): void
+    /**
+     * Tidies the typed name: control characters dropped, whitespace collapsed.
+     *
+     * @throws \InvalidArgumentException when empty or too long
+     */
+    public static function parseName(string $name): string
+    {
+        $name = trim((string) preg_replace('/\s+/u', ' ', (string) preg_replace('/[\x00-\x1F\x7F]/u', ' ', $name)));
+        if ($name === '') {
+            throw new \InvalidArgumentException('The name is required.');
+        }
+        if (mb_strlen($name) > self::MAX_NAME) {
+            throw new \InvalidArgumentException('The name is too long (at most ' . self::MAX_NAME . ' characters).');
+        }
+        return $name;
+    }
+
+    /**
+     * @param list<string> $paragraphs
+     * @param string $name the name the letter is for
+     * @param string $archivedKey where the replaced message was stored ('' if none)
+     */
+    public function set(array $paragraphs, string $name, string $archivedKey = '', ?\DateTimeImmutable $now = null): void
     {
         $archive = $this->archive();
         if ($archivedKey !== '') {
@@ -71,7 +100,7 @@ final class LetterStore
         }
         $tmp = $this->file . '.tmp';
         $json = json_encode(
-            ['paragraphs' => array_values($paragraphs), 'archive' => $archive],
+            ['name' => $name, 'paragraphs' => array_values($paragraphs), 'archive' => $archive],
             JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         );
         if (file_put_contents($tmp, $json . "\n", LOCK_EX) === false || !rename($tmp, $this->file)) {
@@ -79,7 +108,7 @@ final class LetterStore
         }
     }
 
-    /** @return array{paragraphs?:list<string>,archive?:list<array{key:string,at:string}>}|null */
+    /** @return array{name?:string,paragraphs?:list<string>,archive?:list<array{key:string,at:string}>}|null */
     private function read(): ?array
     {
         if (!is_file($this->file)) {
@@ -95,6 +124,11 @@ final class LetterStore
                 $archive[] = ['key' => $entry['key'], 'at' => (string) ($entry['at'] ?? '')];
             }
         }
-        return ['paragraphs' => array_values(array_map('strval', $data['paragraphs'])), 'archive' => $archive];
+        $read = ['paragraphs' => array_values(array_map('strval', $data['paragraphs'])), 'archive' => $archive];
+        $name = is_string($data['name'] ?? null) ? trim($data['name']) : '';
+        if ($name !== '') {
+            $read['name'] = $name;
+        }
+        return $read;
     }
 }

@@ -119,8 +119,8 @@ audio file in `public/music/`. Delete `storage/app/song.json` to go back to the 
 
 ## Changing the message
 
-Unlock the page, click the pen icon (left of the song button), enter the upload key, edit the text (blank line =
-new paragraph) and click *Save message*. The server first uploads the **old** message as a text file to Spaces
+Unlock the page, click the pen icon (left of the song button), enter the upload key, fill in the **Name** (shown as
+"A letter for …", prefilled with the current one) and the **message** (blank line = new paragraph) and click *Save message*. The server first uploads the **old** message (with the name it was for) as a text file to Spaces
 (`<SPACES_FOLDER>/messages/20261012-034000-xxxxxxxx.txt`, private, not publicly readable), and only then saves the new
 one to **`storage/app/letter.json`**, which becomes the message for everyone. If the archive upload fails, nothing
 changes and the old message stays. Every archived file is listed in `letter.json` under `archive`. Without Spaces

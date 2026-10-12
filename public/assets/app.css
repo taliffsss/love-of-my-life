@@ -258,4 +258,4 @@
 .uploader textarea { width: 100%; color: var(--text); background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-radius: 10px; padding: 9px 10px; font: inherit; line-height: 1.5; resize: vertical; min-height: 9rem; }
 
 .field-error { min-height: 1.2em; margin: 6px 0 0; font-size: .82rem; color: var(--rose); }
-.uploader textarea[aria-invalid="true"] { border-color: var(--rose-deep); box-shadow: 0 0 0 2px rgba(217,114,140,.35); }
+.uploader textarea[aria-invalid="true"], .uploader input[aria-invalid="true"] { border-color: var(--rose-deep); box-shadow: 0 0 0 2px rgba(217,114,140,.35); }

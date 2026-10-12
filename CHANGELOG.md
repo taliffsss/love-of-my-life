@@ -1,8 +1,10 @@
 # Changelog
 
-## 2.1.1
+## 2.2.0
 
-- Fixes the production outage after 2.0.2 / 2.1.0: on the Swarm server the Docker `HEALTHCHECK` marked a working container unhealthy and Swarm stopped it (SIGQUIT, task "Complete"), leaving `jinelin_web` at 0/1 replicas. The image no longer has a Docker health check and `deploy/docker-stack.yml` keeps `healthcheck: disable: true`, so a normal deploy can no longer switch it back on. Traefik still health-checks `/api/ping`.
+- The message form has a second required field, **Name**, shown in the panel as "A letter for …" (it starts filled with the current name). The name is saved with the message in `storage/app/letter.json`, and the backup file of the replaced message says who that letter was for. Saving only a new name (same message) counts as a change and backs up the old letter too. A letter saved before names existed keeps the default name from `config/site.php`.
+
+- Fix for the production outage after 2.0.2 / 2.1.0: on the Swarm server the Docker `HEALTHCHECK` marked a working container unhealthy and Swarm stopped it (SIGQUIT, task "Complete"), leaving `jinelin_web` at 0/1 replicas. The image no longer has a Docker health check and `deploy/docker-stack.yml` keeps `healthcheck: disable: true`, so a normal deploy can no longer switch it back on. Traefik still health-checks `/api/ping`.
 - The release workflow now requests the live site (`/api/ping` and `/` over HTTPS, `SITE_URL` variable) after every deploy, so a green deploy means the site really answers.
 - nginx writes its access and error logs to the container log (`docker service logs jinelin_web`).
 - Tests guard the above (no `HEALTHCHECK`, health check disabled in the stack, image name matches the release, live-site check present).

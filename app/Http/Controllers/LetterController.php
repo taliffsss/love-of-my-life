@@ -20,20 +20,23 @@ final class LetterController
     {
         $gate->assertAllowed($request);
 
+        $body = Request::body($request);
         try {
-            $new = LetterStore::parse((string) (Request::body($request)['message'] ?? ''));
+            $new = LetterStore::parse((string) ($body['message'] ?? ''));
+            $newName = LetterStore::parseName((string) ($body['name'] ?? ''));
         } catch (\InvalidArgumentException $e) {
             throw new HttpException(422, $e->getMessage());
         }
 
         $old = $letters->paragraphs();
-        if ($new === $old) {
-            return Response::json(['paragraphs' => $new, 'changed' => false]);
+        $oldName = $letters->name();
+        if ($new === $old && $newName === $oldName) {
+            return Response::json(['paragraphs' => $new, 'name' => $newName, 'changed' => false]);
         }
 
         // 1. Keep the old message: upload it as a file first. If that fails nothing changes and the old message stays.
         try {
-            [$archivedKey, $where] = $this->archive($old);
+            [$archivedKey, $where] = $this->archive($old, $oldName);
         } catch (StorageException $e) {
             error_log('[letter] archiving the old message failed: ' . $e->getMessage());
             return Response::json(['message' => $e->getMessage() . ' The message was not changed. Check the storage settings in .env.'], 502);
@@ -41,13 +44,13 @@ final class LetterController
 
         // 2. Only then show the new one.
         try {
-            $letters->set($new, $archivedKey);
+            $letters->set($new, $newName, $archivedKey);
         } catch (\RuntimeException $e) {
             error_log('[letter] ' . $e->getMessage());
             return Response::json(['message' => 'Could not save the message: storage/app is not writable.'], 500);
         }
 
-        return Response::json(['paragraphs' => $new, 'changed' => true, 'archivedTo' => $where]);
+        return Response::json(['paragraphs' => $new, 'name' => $newName, 'changed' => true, 'archivedTo' => $where]);
     }
 
     /**
@@ -55,13 +58,15 @@ final class LetterController
      * storage/app/letters on the server.
      *
      * @param list<string> $paragraphs
+     * @param string $recipient who the old letter was for
      * @return array{string,string} [key, 'spaces'|'server']
      */
-    private function archive(array $paragraphs): array
+    private function archive(array $paragraphs, string $recipient): array
     {
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $name = 'messages/' . $now->format('Ymd-His') . '-' . bin2hex(random_bytes(4)) . '.txt';
         $contents = "Message replaced on " . $now->format('c') . "\n"
+            . 'A letter for: ' . $recipient . "\n"
             . str_repeat('-', 40) . "\n\n"
             . implode("\n\n", $paragraphs) . "\n";
 
