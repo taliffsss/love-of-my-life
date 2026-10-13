@@ -1,5 +1,51 @@
 # Changelog
 
+## 3.0.0 (unreleased, branch `feature/saas-platform`)
+
+The single page becomes a product: anyone can sign up, make love pages and publish them.
+
+- **Accounts and dashboard.** Sign up and sign in (e-mail + password, Argon2id, rate limited). Each account lists its
+  pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
+  browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design
+  with a live preview, sharing (link, printable QR code) and the plan. Someone else's page always answers 404.
+- **Layouts and themes.** Classic (the 2.x look), Cinematic (full-screen photos, the letter floats over them like
+  subtitles) and Polaroid (an instant-photo frame next to a handwritten letter); colours Rose, Midnight, Sunset and Blush.
+  Switch any time; the dashboard previews a choice before it is saved.
+- **Private by design.** The answer is checked on the server (normalised and hashed like a password; case and spaces
+  don't matter) and the photos and letter are only sent after it, so the page's HTML and script contain neither. Guessing
+  is limited to 10 tries a minute. Pages are `noindex` unless marked searchable. 2.x kept the answer in `app.js`.
+- **Plans** (`config/saas.php`): a free draft only its owner can preview; Basic (₱99) and Plus (₱199) for a year; Forever
+  (₱399) never expires. Renewing adds a year to the time left; a late payment for a lower plan never downgrades a page.
+  Payment activation happens exactly once (a conditional update), whatever confirms it.
+- **Dedicated addresses.** A Forever page can claim `<name>.<SAAS_DOMAIN>` (3–30 lowercase letters, digits or dashes; reserved
+  names refused; one page per name). It works as soon as it is saved: `ResolveSiteHost` maps the host to the page before
+  routing, and only the page itself is reachable on that host. Needs a wildcard DNS record and certificate (DEPLOY.md).
+- **Payments.** Choosing a plan creates an order with a reference; with `PAYMENTS_DRIVER=none` the customer sees how to
+  pay (GCash/Maya) and an admin activates it with `php bin/grant-plan.php <reference>`. `PAYMENTS_DRIVER=fake` is a test
+  checkout and refuses to run in production. Online checkout (PayMongo) is next.
+- **The original site** moves in with `php bin/import-legacy.php`: a Forever page owned by your account, on its old
+  domain, with the same letter, song, photos and answer.
+- Landing page with the layouts, prices and FAQ, and a `/demo` anyone can open in every layout and theme.
+- Database: SQLite in the storage volume (migrations run at container start; `RUN_MIGRATIONS=false` to skip);
+  `php bin/backup-db.php` takes a consistent copy.
+- Removed: the in-page upload/song/message dialogs and their upload key (`UPLOAD_KEY`), `POST /upload|/song|/letter`,
+  `GET /api/photos`, and the 2.x image sitemap.
+- Hardening found in review before release:
+  - the rate limiter counts `/unlock`, `/unlock/` and `/%75nlock` as one path (they reach the same route), so guessing
+    can't dodge the limit by respelling the URL;
+  - nginx takes the visitor's address from Traefik's `X-Forwarded-For`, so limits are per visitor instead of one counter
+    shared by everyone (one person could otherwise lock all sign-ins);
+  - Argon2id uses 19 MiB per hash instead of PHP's 64 MiB default and the container gets 512M, so parallel sign-ins can't
+    exhaust it;
+  - when a plan starts, pending orders it made pointless (a cheaper plan, anything after Forever) are cancelled;
+  - the QR code opens the permanent `/p/` link (a released subdomain could later belong to someone else) and lives at
+    `/qr` (nginx serves `*.svg` itself);
+  - the fake checkout only runs with `APP_ENV` local/testing/development/staging;
+  - the lock-screen answer is never flashed back into the session after a failed save;
+  - `/api/ping` answers on page hosts too, so the release check still passes on the original domain after the import.
+- Tests no longer read Spaces settings from a developer's `.env` (the 2.3.2 suite failed locally when `SPACES_FOLDER`
+  was set); every test gets an in-memory disk.
+
 ## 2.3.2
 
 - Lighter carousel, so it no longer stalls or goes black while it plays. Photos are shown as they are: the blurred copy that sat behind every photo (a second image per slide with a 34px blur, so each photo was downloaded, decoded and blurred twice) is gone, and the blur now belongs to the password screen only. The soft fade between photos and the slow zoom stay. Slides that are not on screen are no longer rendered at all (`visibility: hidden`), only the playing photo gets its own compositing layer, and the glow over the photo uses plain transparency instead of a blend mode, which made the browser re-mix the photo underneath on every frame.

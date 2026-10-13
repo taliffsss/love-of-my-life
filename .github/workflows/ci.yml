@@ -48,10 +48,10 @@ jobs:
         run: |
           docker run -d --name lom -p 8080:80 \
             -e APP_ENV=production -e APP_DEBUG=false \
-            -e APP_URL=https://jinelin-basela.markanthonynaluz.com \
+            -e APP_URL=https://love.example.test \
+            -e SAAS_DOMAIN=love.example.test \
             -e APP_KEY="base64:$(head -c 32 /dev/urandom | base64)" \
             -e JWT_SECRET="$(head -c 32 /dev/urandom | xxd -p -c 64)" \
-            -e UPLOAD_KEY="jinelin basela" \
             love-of-my-life:ci
           for i in $(seq 1 30); do
             curl -fsS http://127.0.0.1:8080/api/ping >/dev/null 2>&1 && exit 0
@@ -59,16 +59,25 @@ jobs:
           done
           docker logs lom
           exit 1
-      - name: The site and the API answer
+      - name: The migrations ran and the product answers
         run: |
+          docker logs lom 2>&1 | grep -q 'Migrated: 2026_10_13_000002_create_pages_table'
           curl -fsS http://127.0.0.1:8080/api/ping | grep -q '"status":"ok"'
-          curl -fsS http://127.0.0.1:8080/ | grep -q 'For Jinelin Basela'
-          curl -fsS http://127.0.0.1:8080/assets/app.js | grep -q 'songGo'
-          curl -fsS http://127.0.0.1:8080/api/photos | grep -q '"photos"'
+          curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/ | grep -q 'A love letter they'
+          curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/demo | grep -q '"mode":"demo"'
+          curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/register | grep -q 'Create your account'
+          curl -fsS http://127.0.0.1:8080/assets/site.js | grep -q 'fetch(CONFIG.unlockUrl'
+          curl -fsS -o /dev/null http://127.0.0.1:8080/assets/demo/1.svg
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: love.example.test' http://127.0.0.1:8080/dashboard)" = "302"
+      - name: A subdomain without a page is not found, and never shows the dashboard
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: nobody.love.example.test' http://127.0.0.1:8080/)" = "404"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: nobody.love.example.test' http://127.0.0.1:8080/dashboard)" = "404"
       - name: SEO files are served (sitemap, robots, manifest, icons)
         run: |
-          curl -fsS http://127.0.0.1:8080/robots.txt | grep -q '^Sitemap: https://jinelin-basela.markanthonynaluz.com/sitemap.xml'
-          curl -fsS http://127.0.0.1:8080/sitemap.xml | grep -q '<image:loc>'
+          curl -fsS http://127.0.0.1:8080/robots.txt | grep -q '^Sitemap: https://love.example.test/sitemap.xml'
+          curl -fsS http://127.0.0.1:8080/robots.txt | grep -q '^Disallow: /p/'
+          curl -fsS http://127.0.0.1:8080/sitemap.xml | grep -q '<loc>https://love.example.test/</loc>'
           curl -fsS -D - -o /dev/null http://127.0.0.1:8080/manifest.webmanifest | grep -qi '^content-type: application/manifest+json'
           for f in /favicon.svg /apple-touch-icon.png /icons/icon-192.png /icons/icon-512.png /og-image.png; do
             curl -fsS -o /dev/null "http://127.0.0.1:8080$f"
@@ -76,17 +85,29 @@ jobs:
           curl -fsS -D - -o /dev/null http://127.0.0.1:8080/api/ping | grep -qi '^x-robots-tag: noindex'
       - name: Behind Traefik the app sees HTTPS (Secure cookie + HSTS)
         run: |
-          headers=$(curl -fsS -D - -o /dev/null -H 'X-Forwarded-Proto: https' -H 'Host: jinelin-basela.markanthonynaluz.com' http://127.0.0.1:8080/)
+          headers=$(curl -fsS -D - -o /dev/null -H 'X-Forwarded-Proto: https' -H 'Host: love.example.test' http://127.0.0.1:8080/)
           echo "$headers"
           echo "$headers" | grep -qi '^strict-transport-security:'
           echo "$headers" | grep -i '^set-cookie:' | grep -qi 'secure'
-      - name: Uploads reach the app (404 here would mean nginx swallowed the route)
+      - name: Forms reach the app (404 here would mean nginx swallowed the route)
         run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8080/upload)
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Host: love.example.test' http://127.0.0.1:8080/login)
           test "$code" = "419"
-      - name: Project files are not served
+      - name: A signed-in owner gets the dashboard and the QR code through nginx
         run: |
-          for path in /composer.json /.env /vendor/autoload.php /storage/app/carousel.json; do
+          jar=$(mktemp)
+          token=$(curl -fsS -c "$jar" -H 'Host: love.example.test' http://127.0.0.1:8080/register | sed -n 's/.*name="csrf-token" content="\([^"]*\)".*/\1/p')
+          curl -fsS -o /dev/null -b "$jar" -c "$jar" -H 'Host: love.example.test' --data-urlencode "_token=$token" \
+            --data-urlencode 'name=CI' --data-urlencode 'email=ci@example.com' \
+            --data-urlencode 'password=long enough' --data-urlencode 'password_confirmation=long enough' http://127.0.0.1:8080/register
+          page=$(curl -s -o /dev/null -w '%{redirect_url}' -b "$jar" -c "$jar" -H 'Host: love.example.test' \
+            --data-urlencode "_token=$token" --data-urlencode 'recipient=CI' http://127.0.0.1:8080/dashboard/pages)
+          slug=${page##*/}
+          curl -fsS -b "$jar" -H 'Host: love.example.test' "http://127.0.0.1:8080/dashboard/pages/$slug" | grep -q 'For CI'
+          curl -fsS -D - -o /dev/null -b "$jar" -H 'Host: love.example.test' "http://127.0.0.1:8080/dashboard/pages/$slug/qr" | grep -qi '^content-type: image/svg+xml'
+      - name: Project files and the database are not served
+        run: |
+          for path in /composer.json /.env /vendor/autoload.php /storage/database.sqlite /storage/app/carousel.json /../storage/database.sqlite; do
             code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$path")
             echo "$path -> $code"
             test "$code" != "200"

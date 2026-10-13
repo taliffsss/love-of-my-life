@@ -4,31 +4,62 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\Billing;
 use App\Services\CarouselStore;
 use App\Services\LetterStore;
+use App\Services\Payments\FakeGateway;
+use App\Services\Payments\ManualGateway;
+use App\Services\Payments\PaymentGateway;
 use App\Services\PhotoCatalog;
-use App\Services\SeoData;
+use App\Services\PhotoStorage;
+use App\Services\Plans;
+use App\Services\Sites;
 use App\Services\SongStore;
 use App\Services\SpacesFilesystem;
+use App\Services\Subdomains;
 use Naluz\Config\Repository;
+use Naluz\Database\Connection;
 use Naluz\Foundation\ServiceProvider;
+use Naluz\Security\Hasher;
 use Naluz\Storage\StorageManager;
 
 final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(Hasher::class, fn ($c) => new Hasher((array) $c->make(Repository::class)->get('security.hashing', [])));
+        $this->app->singleton(Plans::class, fn ($c) => new Plans(
+            (array) $c->make(Repository::class)->get('saas.plans', []),
+            (string) $c->make(Repository::class)->get('saas.currency', 'PHP'),
+        ));
+        $this->app->singleton(Sites::class, fn ($c) => new Sites(
+            (string) $c->make(Repository::class)->get('saas.domain', ''),
+            (string) $c->make(Repository::class)->get('app.url', 'http://localhost'),
+        ));
+        $this->app->singleton(Subdomains::class, fn ($c) => new Subdomains(
+            (string) $c->make(Repository::class)->get('saas.domain', ''),
+            array_map('strval', (array) $c->make(Repository::class)->get('saas.reserved_subdomains', [])),
+        ));
+        $this->app->bind(Billing::class, fn ($c) => new Billing($c->make(Plans::class), $c->make(Connection::class)));
+        $this->app->bind(PhotoStorage::class, fn ($c) => new PhotoStorage(
+            $c->make(StorageManager::class),
+            trim((string) $c->make(Repository::class)->get('filesystems.disks.spaces.folder', ''), '/'),
+            (int) $c->make(Repository::class)->get('saas.max_upload_bytes', 12_000_000),
+        ));
+        $this->app->bind(PaymentGateway::class, function ($c) {
+            $config = $c->make(Repository::class);
+            return match ((string) $config->get('saas.payments.driver', 'none')) {
+                'fake' => new FakeGateway((string) $config->get('app.env', 'production')),
+                default => new ManualGateway(),
+            };
+        });
+
+        // The original single-page site, read once by bin/import-legacy.php.
         $this->app->singleton(CarouselStore::class, fn () => new CarouselStore(
             storage_path('app/carousel.json'),
             base_path('database/carousel.seed.json'),
         ));
         $this->app->singleton(PhotoCatalog::class, fn ($c) => new PhotoCatalog($c->make(CarouselStore::class), base_path('public/photos')));
-        $this->app->singleton(SeoData::class, fn () => new SeoData([
-            storage_path('app/carousel.json'),
-            storage_path('app/letter.json'),
-            storage_path('app/song.json'),
-            base_path('database/carousel.seed.json'),
-        ]));
         $this->app->singleton(LetterStore::class, fn () => new LetterStore(
             storage_path('app/letter.json'),
             (array) config('site.letter'),
@@ -45,7 +76,7 @@ final class AppServiceProvider extends ServiceProvider
         $config = $this->app->make(Repository::class);
         $spaces = (array) $config->get('filesystems.disks.spaces', []);
 
-        // The Spaces disk exists only once the credentials are in .env; until then uploads answer 503.
+        // The Spaces disk exists only once the credentials are in .env; until then photos go to the local public disk.
         if (($spaces['key'] ?? '') !== '' && ($spaces['secret'] ?? '') !== '' && ($spaces['bucket'] ?? '') !== '') {
             $this->app->make(StorageManager::class)->extend('spaces', new SpacesFilesystem(
                 (string) $spaces['endpoint'],

@@ -1,170 +1,198 @@
 # Deploying to your own server
 
-## Docker Swarm + Traefik (https://jinelin-basela.markanthonynaluz.com)
+Since 3.0 this repository is a product: people sign up, build love pages in a dashboard and publish them with a plan.
+Every page is served at `/p/<id>`; a **Forever** page can also claim its own address, `<name>.<SAAS_DOMAIN>`. The
+original single page (`jinelin-basela.markanthonynaluz.com`) becomes one of those pages, on its old domain
+(see [Moving the original site into the product](#moving-the-original-site-into-the-product)).
+
+## What the server needs
+
+| Thing | Why |
+|---|---|
+| `APP_URL` | the product's address: landing page, sign-in, dashboard (e.g. `https://love.example.com`) |
+| `SAAS_DOMAIN` | the domain page addresses live under (defaults to the host of `APP_URL`) |
+| DNS `A` record for `SAAS_DOMAIN` **and** a wildcard `A` record `*.SAAS_DOMAIN` | every claimed name works immediately, with nothing to add per page |
+| A **wildcard** TLS certificate for `*.SAAS_DOMAIN` | Let's Encrypt only issues wildcards through the DNS-01 challenge (see below) |
+| A database | SQLite in the `storage` volume by default (`storage/database.sqlite`); MySQL/PostgreSQL work too (`DB_*`) |
+| DigitalOcean Spaces (`SPACES_*`) | where photos are stored; without it photos go to `public/storage` (development only) |
+
+How a request finds its page: `App\Http\Middleware\ResolveSiteHost` runs before routing. `SAAS_DOMAIN`, `www.`,
+`localhost` and IP addresses are the product. `<name>.SAAS_DOMAIN` is the Forever page that claimed `<name>` (404 when
+none did). Any other host is looked up as a page's custom domain (set by an admin, e.g. by the import below), otherwise
+it is the product. On a page's own host only `/`, `/unlock`, `/robots.txt` and `/sitemap.xml` exist: the dashboard and
+sign-in are never served there.
+
+## Docker Swarm + Traefik
 
 Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) with Traefik labels, the shared external
-`app_network`, the `letsencrypt` cert resolver and the `redirect-to-https@file` middleware from your main Traefik stack.
-The image (`Dockerfile`) runs nginx + PHP-FPM under Supervisor. The release pipeline is the one dink uses: push a version
-tag and CI checks, the image build, the GitHub Release and (optionally) the deploy all follow.
+`app_network`, the `redirect-to-https@file` middleware from your main Traefik stack. The image (`Dockerfile`) runs nginx
++ PHP-FPM under Supervisor; `deploy/entrypoint.sh` runs pending migrations at start (`RUN_MIGRATIONS=false` to skip).
 
 ### One-time setup
 
-1. **DNS:** point an `A` record for `jinelin-basela.markanthonynaluz.com` at the server running Traefik.
-2. **Server folder** (default `/opt/love-of-my-life`):
+1. **DNS:** `A` records for `SAAS_DOMAIN` and `*.SAAS_DOMAIN` (and the old `jinelin-basela.markanthonynaluz.com`) at the
+   server running Traefik.
+2. **Wildcard certificate.** The existing `letsencrypt` resolver uses the HTTP challenge, which cannot issue
+   `*.SAAS_DOMAIN`. Add a DNS-challenge resolver to the main Traefik stack. With DigitalOcean DNS:
+   ```yaml
+   # Traefik static configuration (command flags or traefik.yml)
+   - "--certificatesresolvers.letsencrypt-dns.acme.email=you@example.com"
+   - "--certificatesresolvers.letsencrypt-dns.acme.storage=/letsencrypt/acme-dns.json"
+   - "--certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=digitalocean"
+   # and the environment variable DO_AUTH_TOKEN=<a DigitalOcean API token with DNS write access>
+   ```
+   Then give the web service a router for the product and every page address (Traefik v3 syntax; on v2 use
+   ``HostRegexp(`{name:[a-z0-9-]+}.love.example.com`)``):
+   ```yaml
+   - "traefik.http.routers.lom-saas.rule=Host(`love.example.com`) || HostRegexp(`^[a-z0-9-]+\\.love\\.example\\.com$`)"
+   - "traefik.http.routers.lom-saas.entrypoints=websecure"
+   - "traefik.http.routers.lom-saas.tls=true"
+   - "traefik.http.routers.lom-saas.tls.certresolver=letsencrypt-dns"
+   - "traefik.http.routers.lom-saas.tls.domains[0].main=love.example.com"
+   - "traefik.http.routers.lom-saas.tls.domains[0].sans=*.love.example.com"
+   - "traefik.http.routers.lom-saas.middlewares=jinelin-compress,jinelin-secure"
+   - "traefik.http.routers.lom-saas.service=jinelin-basela"
+   ```
+   plus the same `-http` router with `redirect-to-https@file`. These labels are not in `deploy/docker-stack.yml` yet
+   because they depend on the domain you choose; add them once `SAAS_DOMAIN` is decided. The existing
+   `jinelin-basela` router keeps serving the old domain.
+3. **Server folder** (default `/opt/love-of-my-life`):
    ```bash
    mkdir -p /opt/love-of-my-life/deploy
    cp deploy/.env.production.example /opt/love-of-my-life/deploy/.env.production   # then fill it in
    chmod 600 /opt/love-of-my-life/deploy/.env.production
    ```
-   Fill in `APP_KEY`, `JWT_SECRET`, `UPLOAD_KEY` and the `SPACES_*` values. Generate the keys with
-   `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` (`APP_KEY`) and
+   Fill in `APP_URL` and `SAAS_DOMAIN` (the product's new domain, **not** `jinelin-basela.markanthonynaluz.com`, which
+   becomes a page), `APP_KEY`, `JWT_SECRET`, the `SPACES_*` values and `PAYMENTS_MANUAL_INSTRUCTIONS`.
+   Generate the keys with `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` (`APP_KEY`) and
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
-3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
+   Keep `PAYMENTS_DRIVER=none` in production (`fake` is refused there).
+4. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/jinelin-basela`; the deploy passes it to the stack as `LOM_IMAGE`, so image and stack always match), `DEPLOY_PATH` (default `/opt/love-of-my-life`; a secret with the same name works too),
-     `AUTO_DEPLOY` (`true` turns the deploy job on; keep it off until you trust the pipeline).
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/jinelin-basela`), `DEPLOY_PATH` (default `/opt/love-of-my-life`),
+     `AUTO_DEPLOY` (`true` turns the deploy job on), `SITE_URL` (checked after each deploy; set it to the product's
+     `APP_URL`. `/api/ping` answers on every host, page hosts included).
    - Environment `production` with required reviewers, so every deploy needs a human approval.
 
 ### Releasing
 
 ```bash
-git tag v2.0.0 && git push origin v2.0.0
+git tag v3.0.0 && git push origin v3.0.0
 ```
 
-(or Actions → Release → Run workflow with the tag; it creates the tag if it does not exist). The pipeline runs the tests
-and a Docker smoke test, pushes `taliffsss/jinelin-basela:2.0.0`, `:2.0` and `:latest`, creates the GitHub Release and,
-if `AUTO_DEPLOY=true` and you approve the `production` environment, rolls the stack on the server. A tag with a hyphen
-(`v2.0.0-rc.1`) is a pre-release: no `latest`, no deploy.
+(or Actions → Release → Run workflow with the tag). The pipeline runs the tests and a Docker smoke test (migrations,
+landing page, demo, subdomain 404s, private files), pushes the image, creates the GitHub Release and, if
+`AUTO_DEPLOY=true` and you approve the `production` environment, rolls the stack. A tag with a hyphen (`v3.0.0-rc.1`) is
+a pre-release: no `latest`, no deploy.
 
 ### Manual build and deploy
 
 ```bash
-docker build -t taliffsss/jinelin-basela:2.0.0 -t taliffsss/jinelin-basela:latest .
-docker push taliffsss/jinelin-basela:2.0.0 && docker push taliffsss/jinelin-basela:latest
+docker build -t taliffsss/jinelin-basela:3.0.0 .
+docker push taliffsss/jinelin-basela:3.0.0
 # on the server, in /opt/love-of-my-life (with deploy/docker-stack.yml and deploy/.env.production):
-LOM_IMAGE=taliffsss/jinelin-basela LOM_VERSION=2.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
+LOM_IMAGE=taliffsss/jinelin-basela LOM_VERSION=3.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
 docker service logs -f jinelin_web
 ```
 
-After editing `.env.production`, run the `docker stack deploy` command again: Swarm copies the env file into the service
-definition, so `docker service update --force` would restart with the old values.
-
-Try the image locally with `docker compose up --build` (needs a `.env.production` with `APP_URL=http://localhost:8080`).
+After editing `.env.production`, run `docker stack deploy` again: Swarm copies the env file into the service definition.
 
 ### Notes
 
-- `storage/` is a named volume (`lom_storage`): the uploaded-photo list (`carousel.json`), the chosen song
-  (`song.json`), logs and sessions survive redeploys. Photos themselves are in Spaces.
+- `storage/` is a named volume (`lom_storage`): the SQLite database, logs and sessions survive redeploys. **Back up the
+  database** (accounts, pages, orders), e.g. daily from cron:
+  `docker exec $(docker ps -q -f name=jinelin_web) php bin/backup-db.php` writes a consistent copy to
+  `storage/backups/`; copy it off the server. Photos are in Spaces.
+- One replica: SQLite in a volume is fine for one container. Before scaling out, move to MySQL/PostgreSQL (`DB_*`).
 - Traefik terminates TLS; nginx passes `HTTPS=on` to PHP when it sees `X-Forwarded-Proto: https`, so cookies are
-  `Secure` and the CSRF origin check works.
-- Rolling updates are `start-first`: the new container is started before the old one is stopped. There are **no
-  health checks** (neither Docker's nor Traefik's) on purpose: they probed `/api/ping`, the framework's rate limiter never
-  reset its counter, and after about 60 probes the probe was answered with HTTP 429, which stopped the container and then
-  made Traefik return 503. `/api/ping` is now never rate-limited and the limiter resets every window.
-- After every deploy the release workflow waits until `jinelin_web` runs the new image, then requests the live site
-  (`SITE_URL`, default `https://jinelin-basela.markanthonynaluz.com`): `/api/ping` and `/` must answer HTTP 200.
-- Rollback: `LOM_IMAGE=<image> LOM_VERSION=<previous-version> docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin`.
+  `Secure` and HSTS is sent (with `includeSubDomains`, which the wildcard certificate covers).
+- No health checks (neither Docker's nor Traefik's), on purpose: see 2.2.1 in the changelog. `/api/ping` is never
+  rate-limited.
+- Rollback: deploy the previous image. 3.0's migrations only add tables, so 2.x ignores them; but 2.x does not know about
+  accounts or pages, so anything made in the dashboard is invisible until you roll forward again.
+
+## Moving the original site into the product
+
+The old single page (letter, song, photos, the `yam` answer) becomes a Forever page owned by your account and keeps its
+domain. Run this once, after the first 3.0 deploy (until then that domain shows the landing page):
+
+```bash
+docker exec -it $(docker ps -q -f name=jinelin_web) php bin/import-legacy.php \
+  --email=you@example.com --domain=jinelin-basela.markanthonynaluz.com --answer=yam --name="Your Name"
+```
+
+It reads `config/site.php`, `storage/app/{carousel,letter,song}.json` and `public/photos`, creates your account if it does
+not exist (the random password is printed once), and serves the page on that domain behind the same answer, in the
+original Classic layout and Rose colours. Then sign in and manage it like any other page. Running it twice is refused.
+
+What changes for that page: the answer is now checked on the server and the photos and letter are sent only after it,
+so the image sitemap of 2.x is gone (the photos are no longer public). The page stays indexable (`searchable`), and the
+in-page edit buttons are replaced by the dashboard.
+
+## Payments
+
+There is no online checkout yet (`PAYMENTS_DRIVER=none`). Choosing a plan in the dashboard creates an order with a
+reference (e.g. `LM-7KQ2-9XDA`) and shows `PAYMENTS_MANUAL_INSTRUCTIONS`. When the money arrives:
+
+```bash
+docker exec -it $(docker ps -q -f name=jinelin_web) php bin/grant-plan.php LM-7KQ2-9XDA --ref="GCash 1234567890"
+# no order yet? php bin/grant-plan.php --page=<page id from the URL> --plan=forever --ref=...
+```
+
+The plan starts at once (Basic/Plus: 365 days added to any time left; Forever: never expires). Running it twice
+changes nothing. Prices and limits are in `config/saas.php`. For testing, `PAYMENTS_DRIVER=fake` adds a "pay (test)"
+button; it refuses to run with `APP_ENV=production`.
 
 ## Without Docker (bare metal)
 
-
-Requirements: PHP 8.2+ (`mbstring`, `openssl`, `sodium`, `fileinfo`, `curl`), Composer, nginx or Apache.
+Requirements: PHP 8.2+ (`mbstring`, `openssl`, `sodium`, `fileinfo`, `curl`, `pdo_sqlite` or your database's driver),
+Composer, nginx or Apache.
 
 ```bash
 git clone https://github.com/taliffsss/love-of-my-life.git /var/www/love-of-my-life
 cd /var/www/love-of-my-life
-git checkout feature/v2.0.0            # or main once merged
 composer install --no-dev --optimize-autoloader
-
 cp .env.example .env
 php naluz key:generate --jwt           # fills APP_KEY and JWT_SECRET
-# edit .env: APP_URL, UPLOAD_KEY, SPACES_*   (see below)
-
-chown -R www-data:www-data storage
-chmod -R u+rwX storage
+# edit .env: APP_URL, SAAS_DOMAIN, SPACES_*, PAYMENTS_MANUAL_INSTRUCTIONS
+php naluz migrate
+chown -R www-data:www-data storage && chmod -R u+rwX storage
 ```
 
-Point the web server at **`public/`** (see `deploy/nginx.conf`, or use the bundled `public/.htaccess` on Apache) and
-reload it. Then open the site, enter the password, and the upload button appears next to the music button.
-The upload key is `UPLOAD_KEY` from `.env`, or `jinelin basela` when it is missing or empty (case, extra spaces and quotes
-around it are ignored). If the `SPACES_*` values are missing, the buttons still show but photo uploads answer with a message
-saying what to set in `.env`.
+Point the web server at **`public/`** (see `deploy/nginx.conf`, or the bundled `public/.htaccess` on Apache) for
+`SAAS_DOMAIN`, `*.SAAS_DOMAIN` and any custom domain.
 
-## Photo uploads to DigitalOcean Spaces
+## Photo storage (DigitalOcean Spaces)
 
-1. In DigitalOcean → *API → Spaces Keys*, create a key. Put it in `.env`:
+| `.env` | Meaning |
+|---|---|
+| `SPACES_ACCESS_KEY` / `SPACES_SECRET_KEY` | the Spaces key pair |
+| `SPACES_BUCKET` | bucket name (keep file listing private) |
+| `SPACES_REGION` | e.g. `nyc3`, `sgp1` |
+| `SPACES_ENDPOINT_URL` | `https://<region>.digitaloceanspaces.com` (no bucket name) |
+| `SPACES_FOLDER` | folder inside the bucket; page photos go to `<folder>/pages/<page id>/<random>.jpg` |
+| `SPACES_CDN_URL` | CDN origin used in photo links; leave empty to use the bucket URL |
 
-   | `.env` | Meaning |
-   |---|---|
-   | `SPACES_ACCESS_KEY` / `SPACES_SECRET_KEY` | the Spaces key pair |
-   | `SPACES_BUCKET` | bucket name |
-   | `SPACES_REGION` | e.g. `nyc3`, `sgp1` |
-   | `SPACES_ENDPOINT_URL` | `https://<region>.digitaloceanspaces.com` (no bucket name) |
-   | `SPACES_FOLDER` | folder inside the bucket, e.g. `yam` |
-   | `SPACES_CDN_URL` | CDN origin used in the saved links; leave empty to use the bucket URL |
-   | `UPLOAD_KEY` | the secret you type into the upload dialogs; missing or empty = the default `jinelin basela` |
-
-2. Each upload goes browser → `POST /upload` (CSRF-protected, rate limited, checks `UPLOAD_KEY`) → Spaces, with the
-   file type verified from its bytes. The public URL is appended to **`storage/app/carousel.json`**, and the carousel
-   shows it at the very beginning of the carousel (newest first) on every visit. `GET /api/photos` returns the same list as JSON.
-3. `storage/app/carousel.json` is the file that stores every uploaded endpoint. It is not committed, so `git pull`
-   never overwrites it. Back it up with the rest of `storage/app/`. On a brand-new install it starts from
-   `database/carousel.seed.json` (the photos uploaded before v2.0.0).
-
-## Changing the song
-
-Unlock the page, click the upload icon, enter the upload key, and paste a YouTube link in *Change the song*, for
-example `https://www.youtube.com/watch?v=fu9yk7gCTbc` or `https://youtu.be/fu9yk7gCTbc`. The server checks the link
-(YouTube links only, and the video must exist and be embeddable), saves it to **`storage/app/song.json`**, and it
-becomes the default song for every visitor. The "Now playing" title comes from YouTube. A saved song wins over any
-audio file in `public/music/`. Delete `storage/app/song.json` to go back to the song in `config/site.php`.
-
-## Changing the message
-
-Unlock the page, click the pen icon (left of the song button), enter the upload key, fill in the **Name** (shown as
-"A letter for …", prefilled with the current one) and the **message** (blank line = new paragraph) and click *Save message*. The server first uploads the **old** message (with the name it was for) as a text file to Spaces
-(`<SPACES_FOLDER>/messages/20261012-034000-xxxxxxxx.txt`, private, not publicly readable), and only then saves the new
-one to **`storage/app/letter.json`**, which becomes the message for everyone. If the archive upload fails, nothing
-changes and the old message stays. Every archived file is listed in `letter.json` under `archive`. Without Spaces
-credentials the old message is kept in `storage/app/letters/` on the server instead. Delete `letter.json` to go back
-to the text in `config/site.php`.
+Photos are resized in the browser (longest side 2200 px, JPEG) before they upload, checked from their bytes on the
+server, and stored public-read under unguessable names; their URLs are only sent to a visitor after the page's answer.
+Deleting a photo or a page deletes the files too.
 
 ## SEO
 
-What search engines and link previews get from the site:
-
-- **Page head:** title, description, canonical URL, `hreflang`, Open Graph and Twitter cards (1200x630 `og-image.png`), `robots` directives, theme colour, favicon (SVG + PNG), Apple touch icon and a web manifest (`/manifest.webmanifest`).
-- **Structured data (JSON-LD):** `WebSite`, `WebPage` (with its last-modified date), `Person` and an `ImageGallery` of the photos.
-- **`/sitemap.xml`:** the page plus every photo as an image entry (local and uploaded). `lastmod` follows the latest change to photos, message or song.
-- **`/robots.txt`:** allows the site, keeps `/api/`, `/upload`, `/song` and `/letter` out, and points to the sitemap. JSON endpoints also send `X-Robots-Tag: noindex, nofollow`.
-- **Speed:** the first photo is preloaded with high priority, other photos load lazily, assets are cached and versioned.
-
-`APP_URL` must be the real public address (`https://jinelin-basela.markanthonynaluz.com`): the canonical link, sitemap and
-previews are built from it. After deploying, submit `https://jinelin-basela.markanthonynaluz.com/sitemap.xml` in
-Google Search Console and Bing Webmaster Tools, and check the share preview with a link debugger. To keep the site out of
-search results altogether, change the `robots` meta in `resources/views/home.naluz.php` to `noindex, nofollow` and
-`Allow: /` to `Disallow: /` in `SeoController::robots()`.
+- The landing page (`/`) is indexable: title, description, canonical, Open Graph, `/sitemap.xml` (landing, demo, sign-up)
+  and `/robots.txt`, which keeps `/p/`, `/dashboard` and `/api/` out.
+- Pages are `noindex` unless their owner's page is marked `searchable` (the imported original site is). A searchable page
+  gets `index, follow`, a canonical link to its own address and its own `robots.txt`/`sitemap.xml` on its host.
 
 ## Updating
 
 ```bash
-git pull && composer install --no-dev --optimize-autoloader && php naluz view:clear
+git pull && composer install --no-dev --optimize-autoloader && php naluz migrate && php naluz view:clear
 ```
 
 ## Notes
 
-- Keep `APP_DEBUG=false` in production. Serve over HTTPS (cookies become `Secure` and HSTS is sent automatically).
-- The unlock password in `public/assets/app.js` is a client-side gate for a surprise, not real security. The upload
-  key, by contrast, is checked on the server.
+- Keep `APP_DEBUG=false` in production. Serve over HTTPS.
 - PHP limits: `upload_max_filesize` and `post_max_size` of at least 16M.
-
-## Moving the bundled photos to Spaces
-
-The photos in `public/photos` can be copied to Spaces once, so they are served like every uploaded photo. On the server (the `SPACES_*` values are in the container's environment):
-
-```bash
-docker exec -it $(docker ps -q -f name=jinelin_web) php bin/migrate-photos.php --dry-run   # preview
-docker exec -it $(docker ps -q -f name=jinelin_web) php bin/migrate-photos.php             # upload
-```
-
-Photos are stored as `<SPACES_FOLDER>/legacy-01.jpg` and so on and appended to `storage/app/carousel.json`. Safe to run again; photos already migrated are skipped.
+- `bin/migrate-photos.php` (2.3.0) still copies `public/photos` to Spaces for the original site; run it before the import
+  if you want those photos on Spaces too.

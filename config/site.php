@@ -2,21 +2,16 @@
 
 declare(strict_types=1);
 
+// The original single-page site. Only bin/import-legacy.php reads this now: it turns the site (with what was saved in
+// storage/app/{carousel,letter,song}.json) into a Forever page. New pages are made in the dashboard.
 return [
     'name' => 'Jinelin Basela',
     'first_name' => 'Jinelin',
 
-    // Secret that unlocks every change made from the page (photos, song, message). Set UPLOAD_KEY in .env to change it;
-    // when it is missing or empty the key is the default below (compared ignoring case, spaces and surrounding quotes).
-    'upload_key' => env('UPLOAD_KEY') ?: 'jinelin basela',
-    // The song until one is chosen from the page (then storage/app/song.json takes over). Any YouTube video id.
+    // The song until one was chosen from the page (storage/app/song.json). Any YouTube video id.
     'song' => ['id' => 'fu9yk7gCTbc', 'title' => 'Palagi', 'artist' => 'TJ Monterde'],
 
-    // Shown when the wrong upload key is entered.
-    'upload_hint' => 'Hint: your complete full name.',
-    'max_upload_bytes' => 12_000_000,
-
-    // The letter shown (and slowly scrolled) in the right-hand panel.
+    // The letter, unless one was saved from the page (storage/app/letter.json).
     'letter' => [
         'Hello, how are you? If you’re wondering how I’ve been, well, I still miss you a lot, especially when I’m alone. Sometimes, all those feelings come rushing back.',
         'My heart still wants to fight for you, but my mind tells me otherwise. It tells me that if I keep holding on to you, I’ll only end up hurting you over and over again. It’s hard when my heart and mind can’t agree.',

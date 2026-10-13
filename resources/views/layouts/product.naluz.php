@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#fbf7f4" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>@yield('title', $brand)</title>
+    <meta name="description" content="@yield('description', 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.')" />
+    <meta name="robots" content="@yield('robots', 'noindex, nofollow')" />
+    @stack('head')
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/ui.css?v={{ (string) @filemtime(base_path('public/assets/ui.css')) }}" />
+  </head>
+  <body class="@yield('bodyClass')">
+    @yield('content')
+    @if ($flash !== '')
+    <div class="toast" role="status" id="toast">{{ $flash }}</div>
+    @endif
+    <script src="/assets/ui.js?v={{ (string) @filemtime(base_path('public/assets/ui.js')) }}" defer></script>
+  </body>
+</html>

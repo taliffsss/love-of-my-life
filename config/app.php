@@ -32,6 +32,8 @@ return [
         Middleware\SecurityHeaders::class,
         Middleware\Cors::class,
         Middleware\MethodOverride::class,
+        // <name>.<saas domain> and custom domains are routed to their page before anything else (see the class)
+        \App\Http\Middleware\ResolveSiteHost::class,
     ],
 
     'middleware_aliases' => [
@@ -41,6 +43,7 @@ return [
         'throttle' => \App\Http\Middleware\RateLimit::class,
         'noindex' => \App\Http\Middleware\NoIndex::class,
         'auth' => Middleware\Authenticate::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'jwt' => Middleware\AuthenticateJwt::class,
     ],
 

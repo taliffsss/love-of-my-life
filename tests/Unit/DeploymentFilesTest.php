@@ -49,4 +49,25 @@ final class DeploymentFilesTest extends TestCase
         $this->assertStringContainsString('access_log /dev/stdout;', $nginx);
         $this->assertStringContainsString('error_log /dev/stderr warn;', $nginx);
     }
+
+    public function testNginxPassesTheVisitorsAddressBehindTraefik(): void
+    {
+        $nginx = $this->file('docker/nginx/default.conf');
+        $this->assertStringContainsString('real_ip_header X-Forwarded-For;', $nginx);
+        $this->assertStringContainsString('real_ip_recursive on;', $nginx);
+        $this->assertStringContainsString('set_real_ip_from 10.0.0.0/8;', $nginx, 'the Swarm overlay network');
+    }
+
+    /** nginx answers files with these extensions itself (try_files … =404), so a PHP route must never end with one. */
+    public function testNoRouteEndsWithAnExtensionNginxServesItself(): void
+    {
+        $nginx = $this->file('docker/nginx/default.conf');
+        $this->assertSame(1, preg_match('/location ~\* \\\.\(([^)]+)\)\$/', $nginx, $m), 'static location found');
+        $static = '/\.(' . $m[1] . ')$/i';
+        preg_match_all("/->(?:get|post|put|delete|patch)\('([^']+)'/", $this->file('routes/web.php'), $routes);
+        $this->assertNotEmpty($routes[1]);
+        foreach ($routes[1] as $uri) {
+            $this->assertDoesNotMatchRegularExpression($static, $uri, "{$uri} would be answered by nginx, not the app");
+        }
+    }
 }

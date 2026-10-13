@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <defs>
+    <linearGradient id="dusk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0f2c"/><stop offset=".55" stop-color="#4a2349"/><stop offset="1" stop-color="#8a3b56"/>
+    </linearGradient>
+    <radialGradient id="bk" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffcf8a" stop-opacity=".9"/><stop offset="1" stop-color="#ffcf8a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="bk2" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff9fb8" stop-opacity=".8"/><stop offset="1" stop-color="#ff9fb8" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#dusk)"/>
+  <g>
+    <circle cx="180" cy="760" r="90" fill="url(#bk)"/><circle cx="420" cy="640" r="60" fill="url(#bk2)"/><circle cx="640" cy="820" r="110" fill="url(#bk)"/>
+    <circle cx="900" cy="700" r="70" fill="url(#bk2)"/><circle cx="1120" cy="860" r="120" fill="url(#bk)"/><circle cx="1380" cy="680" r="80" fill="url(#bk2)"/>
+    <circle cx="1500" cy="900" r="60" fill="url(#bk)"/><circle cx="300" cy="980" r="70" fill="url(#bk2)"/><circle cx="820" cy="1040" r="90" fill="url(#bk2)"/>
+  </g>
+  <g fill="#120a1c">
+    <rect x="80" y="980" width="120" height="220"/><rect x="220" y="900" width="90" height="300"/><rect x="330" y="1010" width="140" height="190"/>
+    <rect x="1080" y="940" width="110" height="260"/><rect x="1210" y="1020" width="160" height="180"/><rect x="1390" y="960" width="100" height="240"/>
+  </g>
+  <path d="M520 1200 V 1080 Q 800 980 1080 1080 V 1200Z" fill="#120a1c"/>
+</svg>

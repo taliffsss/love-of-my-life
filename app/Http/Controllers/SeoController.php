@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Services\PhotoCatalog;
-use App\Services\SeoData;
 use Naluz\Http\Response;
 use Psr\Http\Message\ResponseInterface;
 
+/** robots.txt, sitemap and web manifest of the product itself (pages have their own, see SiteController). */
 final class SeoController
 {
     private function siteUrl(): string
@@ -16,21 +15,15 @@ final class SeoController
         return rtrim((string) config('app.url'), '/') . '/';
     }
 
-    /** Sitemap with the photos listed as images, so they can appear in image search. */
-    public function sitemap(PhotoCatalog $catalog, SeoData $seo): ResponseInterface
+    public function sitemap(): ResponseInterface
     {
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
-        $images = '';
-        foreach ($catalog->absolute($this->siteUrl()) as $i => $photo) {
-            $images .= '<image:image><image:loc>' . $esc($photo) . '</image:loc>'
-                . '<image:caption>' . $esc('Photo memory ' . ($i + 1) . ' for ' . (string) config('site.name')) . '</image:caption></image:image>';
+        $urls = '';
+        foreach (['' => '1.0', 'demo' => '0.6', 'register' => '0.5'] as $path => $priority) {
+            $urls .= '<url><loc>' . $esc($this->siteUrl() . $path) . '</loc><changefreq>monthly</changefreq><priority>' . $priority . '</priority></url>';
         }
-
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-            . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'
-            . '<url><loc>' . $esc($this->siteUrl()) . '</loc>'
-            . '<lastmod>' . $seo->lastModified()->format('Y-m-d') . '</lastmod>'
-            . '<changefreq>monthly</changefreq><priority>1.0</priority>' . $images . '</url></urlset>' . "\n";
+            . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . $urls . '</urlset>' . "\n";
 
         return Response::html($xml)
             ->withHeader('Content-Type', 'application/xml; charset=utf-8')
@@ -41,11 +34,10 @@ final class SeoController
     {
         $body = "User-agent: *\n"
             . "Allow: /\n"
-            // JSON endpoints and form actions have nothing to index
+            // people's pages, the dashboard and JSON endpoints stay out of search results
+            . "Disallow: /p/\n"
+            . "Disallow: /dashboard\n"
             . "Disallow: /api/\n"
-            . "Disallow: /upload\n"
-            . "Disallow: /song\n"
-            . "Disallow: /letter\n"
             . 'Sitemap: ' . $this->siteUrl() . "sitemap.xml\n";
 
         return Response::html($body)
@@ -53,14 +45,13 @@ final class SeoController
             ->withHeader('Cache-Control', 'public, max-age=3600');
     }
 
-    /** Web app manifest: name, colours and icons used by browsers and "add to home screen". */
     public function manifest(): ResponseInterface
     {
-        $name = (string) config('site.name');
+        $brand = (string) config('saas.brand');
         return Response::json([
-            'name' => 'For ' . $name,
-            'short_name' => (string) config('site.first_name'),
-            'description' => 'A romantic photo slideshow and love letter.',
+            'name' => $brand,
+            'short_name' => $brand,
+            'description' => 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.',
             'start_url' => '/',
             'scope' => '/',
             'display' => 'standalone',

@@ -12,3 +12,5 @@
 /.env.production
 /storage/app/letter.json
 /storage/app/letters/
+/public/storage/
+/storage/backups/

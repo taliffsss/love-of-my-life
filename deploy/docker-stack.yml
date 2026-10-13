@@ -38,7 +38,8 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: 256M
+          # accounts and page answers are Argon2id-hashed (19 MiB each, see config/security.php): room for parallel sign-ins
+          memory: 512M
         reservations:
           cpus: "0.1"
           memory: 128M

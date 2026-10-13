@@ -1,43 +1,49 @@
 # Love of My Life
 
-A romantic, password-protected photo slideshow with a love letter, built on the
-[NaluzPHP framework](https://github.com/taliffsss/naluzphp-framework). Photos can be uploaded from the page itself; they
-are stored in DigitalOcean Spaces and appear in the carousel straight away.
+Make a private love page for someone: your photos, your song and a letter, opened with a question only they can
+answer. People sign up, build a page in the dashboard for free, and publish it with a one-time plan. Built on the
+[NaluzPHP framework](https://github.com/taliffsss/naluzphp-framework).
+
+- **Dashboard:** create pages, write the letter, upload and order photos, pick a YouTube song, set the lock-screen
+  question and answer, choose a layout and colours with a live preview, share the link or a printable QR code.
+- **Layouts:** Classic (photos with the letter beside them), Cinematic (full-screen photos, the letter floats over them)
+  and Polaroid (an instant-photo frame next to a handwritten letter). Themes: Rose, Midnight, Sunset, Blush.
+- **Plans** (`config/saas.php`): free draft preview; Basic and Plus (one year); **Forever**, which never expires and can
+  claim its own address, `<name>.<SAAS_DOMAIN>`, that works the moment it is saved.
+- **Private by default:** with a question set, the page's HTML holds no photo and no letter; they are sent only after the
+  right answer (checked on the server, rate limited). Pages are hidden from search engines.
 
 ## Run it locally
 
 ```sh
 composer install
-cp .env.example .env && php naluz key:generate --jwt
-php naluz run:server        # http://127.0.0.1:8000
+cp .env.example .env && php naluz key:generate --jwt     # .env.example is set up for local development
+php naluz migrate
+php naluz run:server        # http://localhost:8000
 ```
 
-Password: `yam` (change `PASSWORD` in `public/assets/app.js`). After you save photos, a song or a message the page reloads and skips the password screen once.
+Sign up, create a page, and with `PAYMENTS_DRIVER=fake` publish it with the test checkout. A Forever page can claim a
+name and open at `http://<name>.localhost:8000/` (browsers resolve `*.localhost` to your machine). Without the `SPACES_*`
+values photos are stored in `public/storage`.
 
-## Content
+## Admin scripts
 
-- **Photos** → drop files in `public/photos/` (jpg, png, webp, gif, avif); they play in filename order, after the uploaded ones (new uploads always come first, newest on top).
-- **Song** → open the upload dialog and paste a YouTube link under *Change the song*; it becomes the new default (`storage/app/song.json`). Without one, an audio file in `public/music/` is used, else the song in `config/site.php`.
-- **Letter and names** → the pen button in the page replaces the message and the name shown after "A letter for" (the old message is archived as a file in Spaces first); the starting text and names are in `config/site.php`.
-
-## Uploading photos
-
-Set `UPLOAD_KEY` and the `SPACES_*` values in `.env` (see `.env.example`). After unlocking the page an upload button
-appears; enter the upload key, pick photos, and they are sent to Spaces. Every uploaded URL is recorded in
-`storage/app/carousel.json`, which the carousel reads (`GET /api/photos` returns the same list).
-
-## SEO
-
-Title, description, canonical, Open Graph/Twitter cards, JSON-LD, an image sitemap (`/sitemap.xml`), `robots.txt`, a web manifest and icons are built in; they follow `APP_URL`. See [DEPLOY.md](DEPLOY.md#seo).
+```sh
+php bin/grant-plan.php LM-7KQ2-9XDA            # confirm a manual (GCash/Maya) payment and start the plan
+php bin/import-legacy.php --email=... --domain=jinelin-basela.markanthonynaluz.com --answer=yam
+```
 
 ## Deploy
 
-Docker Swarm + Traefik at <https://jinelin-basela.markanthonynaluz.com>: see [DEPLOY.md](DEPLOY.md) (`Dockerfile`, `deploy/docker-stack.yml`, `.github/workflows/release.yml`). A bare-metal nginx example is in `deploy/nginx.conf`.
+Docker Swarm + Traefik: see [DEPLOY.md](DEPLOY.md) (wildcard DNS and certificate for page addresses, migrations,
+payments, moving the original site into the product).
 
 ## Develop
 
 ```sh
-composer check     # coding standard + tests
-```
+composer check     # coding standard + tests (in-memory SQLite)
 
-> The unlock password is a client-side gate for a sweet surprise, not real security. The upload key is checked on the server.
+# the same suite on PostgreSQL, in a throw-away database (any name ending in _test; it is wiped by every test)
+createdb lovable_test
+TEST_DB_CONNECTION=pgsql TEST_DB_HOST=localhost TEST_DB_USERNAME=$USER vendor/bin/phpunit
+```

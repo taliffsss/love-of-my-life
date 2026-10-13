@@ -39,7 +39,9 @@ final class RateLimit implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $path = $request->getUri()->getPath();
+        // The path exactly as the router resolves it (decoded, without leading/trailing slashes): "/unlock/",
+        // "/unlock//" and "/%75nlock" reach the same route, so they must share one counter.
+        $path = '/' . trim(rawurldecode($request->getUri()->getPath()), '/');
         if (in_array($path, self::UNLIMITED, true)) {
             return $handler->handle($request);
         }

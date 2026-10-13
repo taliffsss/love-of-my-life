@@ -12,6 +12,15 @@ fi
 # When storage/ is a named volume, the directories created at build time are hidden. Recreate them here.
 cd /var/www/html
 mkdir -p storage/app storage/cache storage/logs storage/sessions storage/nosql
+
+# ── Database ──────────────────────────────────────────────────────────────────
+# Accounts, pages, photos and orders live in the database (SQLite in the storage volume by default). Pending migrations
+# run on every start; set RUN_MIGRATIONS=false to run them by hand instead (php naluz migrate).
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+    echo "Running database migrations..."
+    php naluz migrate
+fi
+
 chown -R www-data:www-data storage
 chmod -R 775 storage
 
