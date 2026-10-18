@@ -15,6 +15,7 @@ use Naluz\Database\Orm\Model;
  * @property int $user_id
  * @property ?int $page_id
  * @property string $plan
+ * @property string $period month | year | once (config/saas.php periods)
  * @property int $amount
  * @property string $currency
  * @property string $status

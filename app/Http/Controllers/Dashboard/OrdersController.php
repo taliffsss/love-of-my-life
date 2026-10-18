@@ -8,6 +8,7 @@ use App\Http\Screen;
 use App\Models\Order;
 use App\Models\Page;
 use App\Services\Billing;
+use App\Services\Designs;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\PaymentGateway;
 use App\Services\Plans;
@@ -27,16 +28,27 @@ final class OrdersController
     public function store(string $slug, ServerRequestInterface $request, Auth $auth, Plans $plans, Billing $billing, PaymentGateway $gateway): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
-        $plan = (string) (Request::body($request)['plan'] ?? '');
-        if (!$plans->canBuy($page, $plan)) {
+        $body = Request::body($request);
+        $plan = (string) ($body['plan'] ?? '');
+        $period = (string) ($body['period'] ?? '');
+        if (!$plans->canBuy($page, $plan, $period)) {
             throw new ValidationException(['plan' => ['That plan cannot be bought for this page.']], ['plan' => $plan]);
+        }
+        // the page's template has to come with the plan, or the page would go live in another one
+        $template = Designs::layout($page->layout);
+        if (!$plans->allowsTemplate($plan, $template)) {
+            throw new ValidationException(['plan' => [sprintf(
+                'Your page uses the %s template, which comes with %s. Choose one of those plans, or pick another template first.',
+                Designs::LAYOUTS[$template]['name'],
+                $plans->names($plans->plansWithTemplate($template)),
+            )]], ['plan' => $plan]);
         }
 
         // Clicking "buy" twice must not create two orders to pay.
         $order = Order::query()->where('user_id', (int) $auth->id())->where('page_id', $page->id)->where('plan', $plan)
-            ->where('status', Order::PENDING)->where('provider', $gateway->name())->first();
+            ->where('period', $period)->where('status', Order::PENDING)->where('provider', $gateway->name())->first();
         if (!$order instanceof Order) {
-            $order = $billing->createOrder((int) $auth->id(), $page, $plan, $gateway->name());
+            $order = $billing->createOrder((int) $auth->id(), $page, $plan, $period, $gateway->name());
         }
         return Response::redirect($gateway->checkoutUrl($order), 303);
     }

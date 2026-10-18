@@ -16,7 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * The dedicated address of a Forever page: <name>.<saas domain>. Claiming a name is all it takes; the wildcard DNS record
+ * The dedicated address of a Sweetheart or Forever page: <name>.<saas domain>. Claiming a name is all it takes; the wildcard DNS record
  * and certificate already cover it, and App\Http\Middleware\ResolveSiteHost routes it to the page.
  */
 final class SubdomainController
@@ -42,7 +42,7 @@ final class SubdomainController
     {
         $page = $this->ownedPage($auth, $slug);
         if (!$page->allowsSubdomain()) {
-            throw new HttpException(403, 'A dedicated address comes with the Forever plan.');
+            throw new HttpException(403, 'A dedicated address comes with the Sweetheart and Forever plans.');
         }
         $body = Request::body($request);
         $name = $subdomains->normalise((string) ($body['subdomain'] ?? ''));

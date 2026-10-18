@@ -6,7 +6,7 @@ namespace App\Services;
 
 use App\Models\Page;
 
-/** Rules for the dedicated address a Forever page can claim: <name>.<saas domain>. */
+/** Rules for the dedicated address a Sweetheart or Forever page can claim: <name>.<saas domain>. */
 final class Subdomains
 {
     public const MIN = 3;

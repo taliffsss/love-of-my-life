@@ -1,7 +1,7 @@
 # Deploying to your own server
 
 Since 3.0 this repository is a product: people sign up, build love pages in a dashboard and publish them with a plan.
-Every page is served at `/p/<id>`; a **Forever** page can also claim its own address, `<name>.<SAAS_DOMAIN>`. The
+Every page is served at `/p/<id>`; a **Sweetheart** or **Forever** page can also claim its own address, `<name>.<SAAS_DOMAIN>`. The
 original single page (`jinelin-basela.markanthonynaluz.com`) becomes one of those pages, on its old domain
 (see [Moving the original site into the product](#moving-the-original-site-into-the-product)).
 
@@ -17,7 +17,7 @@ original single page (`jinelin-basela.markanthonynaluz.com`) becomes one of thos
 | DigitalOcean Spaces (`SPACES_*`) | where photos are stored; without it photos go to `public/storage` (development only) |
 
 How a request finds its page: `App\Http\Middleware\ResolveSiteHost` runs before routing. `SAAS_DOMAIN`, `www.`,
-`localhost` and IP addresses are the product. `<name>.SAAS_DOMAIN` is the Forever page that claimed `<name>` (404 when
+`localhost` and IP addresses are the product. `<name>.SAAS_DOMAIN` is the Sweetheart or Forever page that claimed `<name>` (404 when
 none did). Any other host is looked up as a page's custom domain (set by an admin, e.g. by the import below), otherwise
 it is the product. On a page's own host only `/`, `/unlock`, `/robots.txt` and `/sitemap.xml` exist: the dashboard and
 sign-in are never served there.
@@ -30,7 +30,7 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
 
 ### One-time setup
 
-The product lives at `love.markanthonynaluz.com` (`SAAS_DOMAIN`), so Forever pages are
+The product lives at `love.markanthonynaluz.com` (`SAAS_DOMAIN`), so Sweetheart and Forever pages are
 `<name>.love.markanthonynaluz.com`.
 
 1. **DNS** (DigitalOcean, domain `markanthonynaluz.com`): two `A` records at the server running Traefik
@@ -138,10 +138,13 @@ reference (e.g. `LM-7KQ2-9XDA`) and shows `PAYMENTS_MANUAL_INSTRUCTIONS`. When t
 
 ```bash
 docker exec -it $(docker ps -q -f name=jinelin_web) php bin/grant-plan.php LM-7KQ2-9XDA --ref="GCash 1234567890"
-# no order yet? php bin/grant-plan.php --page=<page id from the URL> --plan=forever --ref=...
+# no order yet? php bin/grant-plan.php --page=<page id from the URL> --plan=sweetheart --period=month --ref=...
+#   periods: month or year (Sweet, Sweetheart), once (Forever)
 ```
 
-The plan starts at once (Basic/Plus: 365 days added to any time left; Forever: never expires). Running it twice
+The plan starts at once: a month or a year added to any time left (Jan 31 + 1 month is the end of February), or, for
+Forever, never expires. Monthly plans are paid again each month the same way until online recurring billing exists
+(see `marketing/PRICING.md`). Running it twice
 changes nothing. Prices and limits are in `config/saas.php`. For testing, `PAYMENTS_DRIVER=fake` adds a "pay (test)"
 button; it refuses to run with `APP_ENV=production`.
 

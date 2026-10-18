@@ -8,6 +8,7 @@ use App\Http\Middleware\ResolveSiteHost;
 use App\Models\Page;
 use App\Models\Photo;
 use App\Services\Designs;
+use App\Services\Plans;
 use App\Services\Sites;
 use Naluz\Http\HttpException;
 use Naluz\Http\Request;
@@ -24,7 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 final class SiteController
 {
-    public function __construct(private readonly Sites $sites)
+    public function __construct(private readonly Sites $sites, private readonly Plans $plans)
     {
     }
 
@@ -97,7 +98,8 @@ final class SiteController
     {
         $content = $mode === 'locked' ? null : ($content ?? $this->content($page));
         $url = $this->sites->url($page);
-        $layout = Designs::layout($page->layout);
+        // visitors see the templates of the page's plan; the owner's preview and the demo may try any
+        $layout = in_array($mode, ['open', 'locked'], true) ? $this->plans->templateFor($page) : Designs::layout($page->layout);
         $theme = Designs::theme($page->theme);
         $assets = Designs::assets($layout);
         $assetVersion = (string) max(array_map(

@@ -70,8 +70,8 @@ final class PhotosTest extends TestCase
         $this->assertStringContainsString('6 photos', $this->decode($response)['message']);
         $this->assertSame(6, Photo::query()->count());
 
-        $this->page->forceFill(['plan' => 'plus', 'expires_at' => '2099-01-01 00:00:00'])->save();
-        $this->assertSame(201, $this->upload($this->png())->getStatusCode(), 'Plus allows 20');
+        $this->page->forceFill(['plan' => 'sweetheart', 'expires_at' => '2099-01-01 00:00:00'])->save();
+        $this->assertSame(201, $this->upload($this->png())->getStatusCode(), 'Sweetheart allows 40');
     }
 
     public function testTwoUploadsRacingPastTheCheckNeverExceedTheLimit(): void

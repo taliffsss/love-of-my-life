@@ -11,8 +11,13 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
   Starry sky. A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
   `<key>.js` and `resources/views/site/templates/<key>.naluz.php`; the contract its script follows is at the top of
   `public/assets/site.js`. A theme is a block of variables in `public/assets/themes.css`.
-- **Plans** (`config/saas.php`): free draft preview; Basic and Plus (one year); **Forever**, which never expires and can
-  claim its own address, `<name>.<SAAS_DOMAIN>`, that works the moment it is saved.
+- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`):
+  - a free draft preview, with every template;
+  - **Sweet**, ₱59 a month or ₱590 a year: 12 photos and 5 templates;
+  - **Sweetheart**, ₱99 a month or ₱990 a year: 40 photos, all 10 templates, and its own address `<name>.<SAAS_DOMAIN>`,
+    which works the moment it is saved;
+  - **Forever**, ₱1,499 once: never expires, 60 photos, everything.
+  A live page shows only its plan's templates; a draft can try them all.
 - **Private by default:** with a question set, the page's HTML holds no photo and no letter; they are sent only after the
   right answer (checked on the server, rate limited). Pages are hidden from search engines.
 
@@ -25,7 +30,7 @@ php naluz migrate
 php naluz run:server        # http://localhost:8000
 ```
 
-Sign up, create a page, and with `PAYMENTS_DRIVER=fake` publish it with the test checkout. A Forever page can claim a
+Sign up, create a page, and with `PAYMENTS_DRIVER=fake` publish it with the test checkout. A Sweetheart or Forever page can claim a
 name and open at `http://<name>.localhost:8000/` (browsers resolve `*.localhost` to your machine). Without the `SPACES_*`
 values photos are stored in `public/storage`.
 

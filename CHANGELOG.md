@@ -27,10 +27,19 @@ The single page becomes a product: anyone can sign up, make love pages and publi
 - **Private by design.** The answer is checked on the server (normalised and hashed like a password; case and spaces
   don't matter) and the photos and letter are only sent after it, so the page's HTML and script contain neither. Guessing
   is limited to 10 tries a minute. Pages are `noindex` unless marked searchable. 2.x kept the answer in `app.js`.
-- **Plans** (`config/saas.php`): a free draft only its owner can preview; Basic (₱99) and Plus (₱199) for a year; Forever
-  (₱399) never expires. Renewing adds a year to the time left; a late payment for a lower plan never downgrades a page.
-  Payment activation happens exactly once (a conditional update), whatever confirms it.
-- **Dedicated addresses.** A Forever page can claim `<name>.<SAAS_DOMAIN>` (3–30 lowercase letters, digits or dashes; reserved
+- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`), monthly, yearly or once:
+  - a free draft only its owner can preview, with every template to try;
+  - **Sweet**, ₱59 a month or ₱590 a year (2 months free): 12 photos, 5 templates (Classic, Cinematic, Polaroid,
+    Envelope, Timeline);
+  - **Sweetheart**, ₱99 a month or ₱990 a year: 40 photos, all 10 templates, its own address;
+  - **Forever**, ₱1,499 once: never expires, 60 photos, everything.
+
+  Renewing adds a calendar month or year to the time left, and a monthly page can renew for a year. A late payment for
+  a lower plan never downgrades a page. Payment activation happens exactly once (a conditional update), whatever
+  confirms it. A live page shows only its plan's templates; the owner can still preview the others. Orders record their
+  period (`orders.period`); a migration renames the first plans of 3.0 development (Basic, Plus) to Sweet and
+  Sweetheart.
+- **Dedicated addresses.** A Sweetheart or Forever page can claim `<name>.<SAAS_DOMAIN>` (3–30 lowercase letters, digits or dashes; reserved
   names refused; one page per name). It works as soon as it is saved: `ResolveSiteHost` maps the host to the page before
   routing, and only the page itself is reachable on that host. The product runs at `love.markanthonynaluz.com`: the
   stack file routes it and `*.love.markanthonynaluz.com` to the app on a wildcard certificate (Traefik DNS challenge with

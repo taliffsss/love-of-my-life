@@ -117,10 +117,30 @@ final class PagesController
             'plans' => $plans->all(),
             'purchasable' => $plans->purchasable($page),
             'layouts' => Designs::LAYOUTS,
+            'templateNotes' => $this->templateNotes($page, $plans),
             'themes' => Designs::THEMES,
             'maxUploadBytes' => (int) config('saas.max_upload_bytes'),
             'storageDisk' => $storage->diskName(),
         ]);
+    }
+
+    /**
+     * For the design picker: per template, whether this page may use it and, when not every plan includes it, which do.
+     *
+     * @return array<string,array{locked:bool,plans:string}>
+     */
+    private function templateNotes(Page $page, Plans $plans): array
+    {
+        $paid = count($plans->paid());
+        $notes = [];
+        foreach (array_keys(Designs::LAYOUTS) as $key) {
+            $with = $plans->plansWithTemplate($key);
+            $notes[$key] = [
+                'locked' => $page->status() !== Page::DRAFT && !$plans->allowsTemplate($page->plan, $key),
+                'plans' => count($with) < $paid ? $plans->names($with) : '',
+            ];
+        }
+        return $notes;
     }
 
     public function updateMessage(string $slug, ServerRequestInterface $request, Auth $auth): ResponseInterface
@@ -210,7 +230,7 @@ final class PagesController
         return Screen::back($this->editUrl($page, 'lock'), $enabled ? 'The lock screen is on.' : 'The lock screen is off: the page opens with one tap.');
     }
 
-    public function updateDesign(string $slug, ServerRequestInterface $request, Auth $auth): ResponseInterface
+    public function updateDesign(string $slug, ServerRequestInterface $request, Auth $auth, Plans $plans): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $body = Request::body($request);
@@ -219,6 +239,13 @@ final class PagesController
         $errors = [];
         if (!isset(Designs::LAYOUTS[$layout])) {
             $errors['layout'] = ['Pick one of the templates.'];
+        } elseif ($page->status() !== Page::DRAFT && !$plans->allowsTemplate($page->plan, $layout)) {
+            // a draft may try any template; a published page only those of its plan
+            $errors['layout'] = [sprintf(
+                'The %s template comes with %s. Upgrade the plan to use it on this page.',
+                Designs::LAYOUTS[$layout]['name'],
+                $plans->names($plans->plansWithTemplate($layout)),
+            )];
         }
         if (!isset(Designs::THEMES[$theme])) {
             $errors['theme'] = ['Pick one of the colour themes.'];

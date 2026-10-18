@@ -277,6 +277,8 @@ p { margin: 0; }
 .plan li { display: flex; gap: 9px; align-items: flex-start; }
 .plan li::before { content: '♥'; color: var(--brand); font-size: .8rem; line-height: 1.7; }
 .plan .btn { margin-top: auto; }
+.plan .or { margin: -4px 0 0; font-size: .86rem; color: var(--ink-2); }
+.plan .or strong { color: var(--brand); font-weight: 600; }
 
 .faq { margin-top: 30px; display: grid; gap: 10px; }
 .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 18px; }
@@ -363,6 +365,13 @@ p { margin: 0; }
 .plan-option { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface); }
 .plan-option .price { font-size: 2rem; }
 .plan-option.featured { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+.plan-option { position: relative; }
+.plan-option .tag { position: absolute; top: -11px; right: 14px; padding: 2px 9px; border-radius: 999px; background: var(--brand); color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .04em; }
+.plan-option form { margin: 0; }
+.plan-option .offer { width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.plan-option .offer small { font-size: .74rem; font-weight: 500; opacity: .85; }
+.choice .box { position: relative; }
+.plan-badge { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, .92); color: var(--brand); font-size: .7rem; font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
 .orders { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .orders th, .orders td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
 .orders th { color: var(--ink-3); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }

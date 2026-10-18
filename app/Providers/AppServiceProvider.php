@@ -31,6 +31,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Plans::class, fn ($c) => new Plans(
             (array) $c->make(Repository::class)->get('saas.plans', []),
             (string) $c->make(Repository::class)->get('saas.currency', 'PHP'),
+            (array) $c->make(Repository::class)->get('saas.periods', Plans::DEFAULT_PERIODS),
         ));
         $this->app->singleton(Sites::class, fn ($c) => new Sites(
             (string) $c->make(Repository::class)->get('saas.domain', ''),

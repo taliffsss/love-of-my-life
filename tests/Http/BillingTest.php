@@ -25,54 +25,98 @@ final class BillingTest extends TestCase
         $this->now = new \DateTimeImmutable('2026-10-13 12:00:00', new \DateTimeZone('UTC'));
     }
 
-    private function pay(Page $page, string $plan, ?\DateTimeImmutable $at = null): Order
+    private function pay(Page $page, string $plan, string $period, ?\DateTimeImmutable $at = null): Order
     {
-        $order = $this->billing->createOrder($this->owner->id, $page, $plan, 'manual');
+        $order = $this->billing->createOrder($this->owner->id, $page, $plan, $period, 'manual');
         $this->assertTrue($this->billing->markPaid($order, 'manual', null, $at ?? $this->now));
         return $order;
     }
 
-    public function testAOneYearPlanStartsNow(): void
+    public function testAMonthlyPlanStartsNow(): void
     {
         $page = $this->makePage($this->owner);
-        $this->pay($page, 'basic');
+        $order = $this->pay($page, 'sweet', 'month');
         $page = $page->fresh();
-        $this->assertSame('2027-10-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'));
+        $this->assertSame('sweet', $page->plan);
+        $this->assertSame('2026-11-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'));
         $this->assertSame('2026-10-13 12:00:00', $page->published_at->format('Y-m-d H:i:s'));
+        $this->assertSame(['month', 5900], [$order->fresh()->period, $order->fresh()->amount]);
     }
 
-    public function testRenewingEarlyKeepsTheDaysLeft(): void
+    public function testAYearlyPlanStartsNow(): void
     {
-        $page = $this->makePage($this->owner, ['plan' => 'basic', 'expires_at' => '2026-12-01 00:00:00', 'published_at' => '2025-12-01 00:00:00']);
-        $this->pay($page, 'basic');
+        $page = $this->makePage($this->owner);
+        $order = $this->pay($page, 'sweetheart', 'year');
+        $this->assertSame('2027-10-13 12:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'));
+        $this->assertSame(['year', 99000], [$order->fresh()->period, $order->fresh()->amount]);
+    }
+
+    public function testRenewingEarlyKeepsTheTimeLeft(): void
+    {
+        $page = $this->makePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2026-12-01 00:00:00', 'published_at' => '2025-12-01 00:00:00']);
+        $this->pay($page, 'sweet', 'month');
         $page = $page->fresh();
-        $this->assertSame('2027-12-01 00:00:00', $page->expires_at->format('Y-m-d H:i:s'));
+        $this->assertSame('2027-01-01 00:00:00', $page->expires_at->format('Y-m-d H:i:s'));
         $this->assertSame('2025-12-01 00:00:00', $page->published_at->format('Y-m-d H:i:s'), 'first publication date kept');
+        $this->pay($page, 'sweet', 'year');
+        $this->assertSame('2028-01-01 00:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'), 'a monthly plan can be renewed for a year');
+    }
+
+    public function testAMonthEndsOnTheLastDayWhenTheDayIsMissing(): void
+    {
+        $page = $this->makePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2027-01-31 18:00:00', 'published_at' => '2026-10-01 00:00:00']);
+        $this->pay($page, 'sweet', 'month');
+        $this->assertSame('2027-02-28 18:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'), 'not March 3');
     }
 
     public function testRenewingAfterExpiryStartsAgainFromToday(): void
     {
-        $page = $this->makePage($this->owner, ['plan' => 'basic', 'expires_at' => '2026-01-01 00:00:00']);
-        $this->pay($page, 'basic');
+        $page = $this->makePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2026-01-01 00:00:00']);
+        $this->pay($page, 'sweet', 'year');
         $this->assertSame('2027-10-13 12:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'));
     }
 
-    public function testForeverClearsTheExpiryAndAllowsASubdomain(): void
+    public function testUpgradingKeepsTheTimeLeftAndOpensTheAddress(): void
     {
-        $page = $this->makePage($this->owner, ['plan' => 'plus', 'expires_at' => '2027-01-01 00:00:00']);
+        $page = $this->makePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2026-12-01 00:00:00', 'published_at' => '2026-10-01 00:00:00']);
         $this->assertFalse($page->allowsSubdomain());
-        $this->pay($page, 'forever');
+        $this->pay($page, 'sweetheart', 'month');
+        $page = $page->fresh();
+        $this->assertSame('sweetheart', $page->plan);
+        $this->assertSame('2027-01-01 00:00:00', $page->expires_at->format('Y-m-d H:i:s'));
+        $this->assertTrue($page->allowsSubdomain(), 'Sweetheart includes an address of its own');
+    }
+
+    public function testForeverClearsTheExpiry(): void
+    {
+        $page = $this->makePage($this->owner, ['plan' => 'sweetheart', 'expires_at' => '2027-01-01 00:00:00']);
+        $order = $this->pay($page, 'forever', 'once');
         $page = $page->fresh();
         $this->assertSame('forever', $page->plan);
         $this->assertNull($page->expires_at);
         $this->assertTrue($page->allowsSubdomain());
         $this->assertSame(Page::ACTIVE, $page->status(new \DateTimeImmutable('2099-01-01')));
+        $this->assertSame(['once', 149900], [$order->fresh()->period, $order->fresh()->amount]);
+    }
+
+    public function testAPlanIsOnlySoldForItsOwnPeriods(): void
+    {
+        $page = $this->makePage($this->owner);
+        foreach ([['sweet', 'once'], ['forever', 'month'], ['forever', 'year'], ['sweetheart', 'week'], ['free', 'month']] as [$plan, $period]) {
+            try {
+                $this->billing->createOrder($this->owner->id, $page, $plan, $period, 'manual');
+                $this->fail("{$plan} {$period} was sold");
+            } catch (\DomainException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+        $this->assertSame(0, Order::query()->count());
     }
 
     public function testAnOrderIsActivatedExactlyOnce(): void
     {
         $page = $this->makePage($this->owner);
-        $order = $this->pay($page, 'basic');
+        $order = $this->pay($page, 'sweet', 'month');
         $expires = $page->fresh()->expires_at->format('c');
 
         $this->assertFalse($this->billing->markPaid($order, 'manual', 'again', $this->now->modify('+1 day')));
@@ -84,29 +128,29 @@ final class BillingTest extends TestCase
     public function testUpgradingCancelsPendingOrdersForLowerPlans(): void
     {
         $page = $this->makePage($this->owner);
-        // a Basic order left pending while the page was upgraded to Plus, then "paid" late
-        $late = $this->billing->createOrder($this->owner->id, $page, 'basic', 'manual');
-        $renewal = $this->billing->createOrder($this->owner->id, $page, 'plus', 'manual');
-        $this->pay($page, 'plus');
+        // a Sweet order left pending while the page went to Sweetheart, then "paid" late
+        $late = $this->billing->createOrder($this->owner->id, $page, 'sweet', 'month', 'manual');
+        $renewal = $this->billing->createOrder($this->owner->id, $page, 'sweetheart', 'year', 'manual');
+        $this->pay($page, 'sweetheart', 'month');
 
         $this->assertSame(Order::CANCELLED, $late->fresh()->status, 'a cheaper plan can no longer be bought');
-        $this->assertSame(Order::PENDING, $renewal->fresh()->status, 'renewing the same plan still can');
+        $this->assertSame(Order::PENDING, $renewal->fresh()->status, 'renewing the same plan, for any period, still can');
         $this->assertFalse($this->billing->markPaid($late->fresh(), 'manual', null, $this->now));
         $page = $page->fresh();
-        $this->assertSame('plus', $page->plan);
-        $this->assertSame('2027-10-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'), 'the ₱99 order adds nothing to Plus');
+        $this->assertSame('sweetheart', $page->plan);
+        $this->assertSame('2026-11-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'), 'the ₱59 order adds nothing to Sweetheart');
     }
 
     public function testForeverCancelsEveryOtherPendingOrder(): void
     {
         $page = $this->makePage($this->owner);
-        $basic = $this->billing->createOrder($this->owner->id, $page, 'basic', 'manual');
-        $plus = $this->billing->createOrder($this->owner->id, $page, 'plus', 'manual');
-        $this->pay($page, 'forever');
+        $sweet = $this->billing->createOrder($this->owner->id, $page, 'sweet', 'year', 'manual');
+        $sweetheart = $this->billing->createOrder($this->owner->id, $page, 'sweetheart', 'month', 'manual');
+        $this->pay($page, 'forever', 'once');
 
-        $this->assertSame(Order::CANCELLED, $basic->fresh()->status);
-        $this->assertSame(Order::CANCELLED, $plus->fresh()->status);
-        $this->assertFalse($this->billing->markPaid($basic->fresh(), 'manual', null, $this->now));
+        $this->assertSame(Order::CANCELLED, $sweet->fresh()->status);
+        $this->assertSame(Order::CANCELLED, $sweetheart->fresh()->status);
+        $this->assertFalse($this->billing->markPaid($sweet->fresh(), 'manual', null, $this->now));
         $this->assertNull($page->fresh()->expires_at);
     }
 
@@ -114,15 +158,20 @@ final class BillingTest extends TestCase
     {
         // defensive path: activate() is only reached for pending orders, but must never lower a plan
         $page = $this->makePage($this->owner, ['plan' => 'forever', 'expires_at' => null]);
-        $this->billing->activate($page, 'basic', $this->now);
+        $this->billing->activate($page, 'sweet', 'month', $this->now);
         $this->assertSame('forever', $page->fresh()->plan);
         $this->assertNull($page->fresh()->expires_at);
+
+        $page = $this->makePage($this->owner, ['plan' => 'sweetheart', 'expires_at' => '2026-12-01 00:00:00']);
+        $this->billing->activate($page, 'sweet', 'month', $this->now);
+        $this->assertSame('sweetheart', $page->fresh()->plan, 'a late Sweet payment keeps Sweetheart');
+        $this->assertSame('2027-01-01 00:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'), 'and only adds its month');
     }
 
     public function testAnOrderForADeletedPageIsMarkedPaidWithoutError(): void
     {
         $page = $this->makePage($this->owner);
-        $order = $this->billing->createOrder($this->owner->id, $page, 'basic', 'manual');
+        $order = $this->billing->createOrder($this->owner->id, $page, 'sweet', 'month', 'manual');
         $this->db()->table('orders')->where('id', '=', $order->id)->update(['page_id' => null]);
         $this->assertTrue($this->billing->markPaid($order->fresh(), 'manual', null, $this->now));
     }

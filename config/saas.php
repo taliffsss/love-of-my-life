@@ -10,7 +10,7 @@ return [
     // Brand shown in the dashboard, the landing page and e-mails.
     'brand' => env('APP_NAME', 'Love of My Life'),
 
-    // Main domain of the product. Every Forever page can get <name>.<domain>; point a wildcard DNS record (*.domain) and
+    // Main domain of the product. Sweetheart and Forever pages can get <name>.<domain>; point a wildcard DNS record (*.domain) and
     // a wildcard certificate at this app and new subdomains work the moment they are claimed (see DEPLOY.md).
     'domain' => strtolower(trim((string) (env('SAAS_DOMAIN') ?: $appHost), '. ')),
 
@@ -33,17 +33,27 @@ return [
         'manual_instructions' => env('PAYMENTS_MANUAL_INSTRUCTIONS', 'Send the amount by GCash or Maya and reply with your order reference; your page goes live as soon as we confirm it.'),
     ],
 
-    // Prices are in centavos. `days` null = never expires. `photos` = how many photos the page may hold.
-    // A free page is a private draft: only its owner can preview it.
+    // How long a payment keeps a page online, in months; null = for good.
+    'periods' => ['month' => 1, 'year' => 12, 'once' => null],
+
+    // The plans, cheapest first (an upgrade is a move to the right). Prices are in centavos, per period: `month` and
+    // `year` add their months to the time left, `once` never expires. `photos`: how many photos the page may hold.
+    // `templates`: the templates a live page may use, 'all' or a list of App\Services\Designs keys; the free preview
+    // shows every template so people can try them before choosing a plan. A free page is a private draft: only its owner
+    // can preview it. See marketing/PRICING.md for the reasoning behind the numbers.
     'plans' => [
-        'free' => ['name' => 'Free preview', 'price' => 0, 'days' => null, 'photos' => 6, 'publish' => false, 'subdomain' => false,
+        'free' => ['name' => 'Free preview', 'prices' => [], 'photos' => 6, 'publish' => false, 'subdomain' => false,
+            'templates' => 'all', 'popular' => false,
             'blurb' => 'Build the whole page and preview it. Only you can see it.'],
-        'basic' => ['name' => 'Basic', 'price' => 9900, 'days' => 365, 'photos' => 6, 'publish' => true, 'subdomain' => false,
-            'blurb' => 'One year online, up to 6 photos, a song and your letter.'],
-        'plus' => ['name' => 'Plus', 'price' => 19900, 'days' => 365, 'photos' => 20, 'publish' => true, 'subdomain' => false,
-            'blurb' => 'One year online and up to 20 photos.'],
-        'forever' => ['name' => 'Forever', 'price' => 39900, 'days' => null, 'photos' => 50, 'publish' => true, 'subdomain' => true,
-            'blurb' => 'Never expires, up to 50 photos and an address of its own.'],
+        'sweet' => ['name' => 'Sweet', 'prices' => ['month' => 5900, 'year' => 59000], 'photos' => 12, 'publish' => true,
+            'subdomain' => false, 'templates' => ['classic', 'cinematic', 'polaroid', 'envelope', 'timeline'], 'popular' => false,
+            'blurb' => 'Your page online, with up to 12 photos and 5 templates.'],
+        'sweetheart' => ['name' => 'Sweetheart', 'prices' => ['month' => 9900, 'year' => 99000], 'photos' => 40, 'publish' => true,
+            'subdomain' => true, 'templates' => 'all', 'popular' => true,
+            'blurb' => 'All 10 templates, up to 40 photos and an address of its own.'],
+        'forever' => ['name' => 'Forever', 'prices' => ['once' => 149900], 'photos' => 60, 'publish' => true,
+            'subdomain' => true, 'templates' => 'all', 'popular' => false,
+            'blurb' => 'Pay once and it stays online for good: 60 photos, every template, its own address.'],
     ],
 
     'max_upload_bytes' => 12_000_000,

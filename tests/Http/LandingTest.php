@@ -17,7 +17,7 @@ final class LandingTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringContainsString('<meta name="robots" content="index, follow"', $html);
         $this->assertStringContainsString('<link rel="canonical" href="https://love.test/"', $html);
-        foreach (['Basic', 'Plus', 'Forever', '₱99', '₱199', '₱399', 'Classic', 'Cinematic', 'Polaroid', 'yourname.love.test'] as $text) {
+        foreach (['Sweet', 'Sweetheart', 'Forever', '₱59', '₱590', '₱99', '₱990', '₱1,499', 'a month', '2 months free', 'Most popular', 'Classic', 'Cinematic', 'Polaroid', 'yourname.love.test'] as $text) {
             $this->assertStringContainsString($text, $html);
         }
         $this->assertStringNotContainsString('Free preview</h3>', $html, 'the free draft is not sold as a plan');

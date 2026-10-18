@@ -17,38 +17,91 @@ final class SaasRulesTest extends TestCase
     private function plans(): Plans
     {
         $config = require dirname(__DIR__, 2) . '/config/saas.php';
-        return new Plans($config['plans'], 'PHP');
+        return new Plans($config['plans'], 'PHP', $config['periods']);
     }
 
-    private function page(string $plan): Page
+    private function page(string $plan, string $layout = 'classic'): Page
     {
         $page = new Page();
         $page->setRawAttribute('plan', $plan);
+        $page->setRawAttribute('layout', $layout);
         return $page;
     }
 
     public function testWhatEachPlanCanBuyNext(): void
     {
         $plans = $this->plans();
-        $this->assertSame(['basic', 'plus', 'forever'], array_keys($plans->purchasable($this->page('free'))));
-        $this->assertSame(['basic', 'plus', 'forever'], array_keys($plans->purchasable($this->page('basic'))), 'renew or upgrade');
-        $this->assertSame(['plus', 'forever'], array_keys($plans->purchasable($this->page('plus'))));
-        $this->assertSame([], $plans->purchasable($this->page('forever')));
-        $this->assertFalse($plans->canBuy($this->page('free'), 'free'));
-        $this->assertFalse($plans->canBuy($this->page('plus'), 'basic'));
+        $this->assertSame(['sweet', 'sweetheart', 'forever'], array_keys($plans->purchasable($this->page('free'))));
+        $this->assertSame(['sweet', 'sweetheart', 'forever'], array_keys($plans->purchasable($this->page('sweet'))), 'renew or upgrade');
+        $this->assertSame(['sweetheart', 'forever'], array_keys($plans->purchasable($this->page('sweetheart'))));
+        $this->assertSame([], $plans->purchasable($this->page('forever')), 'nothing after Forever');
+        $this->assertSame(['month' => 5900, 'year' => 59000], $plans->purchasable($this->page('free'))['sweet']['offers']);
+        $this->assertSame(['month' => 9900, 'year' => 99000], $plans->purchasable($this->page('sweet'))['sweetheart']['offers']);
+        $this->assertSame(['once' => 149900], $plans->purchasable($this->page('sweetheart'))['forever']['offers']);
+        $this->assertTrue($plans->canBuy($this->page('sweet'), 'sweet', 'year'), 'a monthly page can renew for a year');
+        $this->assertFalse($plans->canBuy($this->page('free'), 'free', 'month'));
+        $this->assertFalse($plans->canBuy($this->page('sweetheart'), 'sweet', 'month'));
+        $this->assertFalse($plans->canBuy($this->page('free'), 'sweet', 'once'));
+        $this->assertFalse($plans->canBuy($this->page('free'), 'forever', 'month'));
+    }
+
+    public function testThePeriods(): void
+    {
+        $plans = $this->plans();
+        $this->assertSame([1, 12, null], [$plans->months('month'), $plans->months('year'), $plans->months('once')]);
+        $this->assertTrue($plans->isPermanent('forever'));
+        $this->assertFalse($plans->isPermanent('sweetheart'));
+        $this->assertSame([2, 2, 0], [$plans->monthsFree('sweet'), $plans->monthsFree('sweetheart'), $plans->monthsFree('forever')], 'a year costs 10 months');
+        $this->expectException(\DomainException::class);
+        $plans->months('week');
+    }
+
+    public function testMonthsAreCalendarMonths(): void
+    {
+        $utc = new \DateTimeZone('UTC');
+        $at = static fn (string $s): \DateTimeImmutable => new \DateTimeImmutable($s, $utc);
+        $this->assertSame('2026-02-28 09:30', Plans::addMonths($at('2026-01-31 09:30'), 1)->format('Y-m-d H:i'));
+        $this->assertSame('2028-02-29 00:00', Plans::addMonths($at('2028-01-31 00:00'), 1)->format('Y-m-d H:i'), 'leap year');
+        $this->assertSame('2026-09-30 00:00', Plans::addMonths($at('2026-08-31 00:00'), 1)->format('Y-m-d H:i'));
+        $this->assertSame('2027-10-13 12:00', Plans::addMonths($at('2026-10-13 12:00'), 12)->format('Y-m-d H:i'));
+        $this->assertSame('2027-01-15 08:00', Plans::addMonths($at('2026-12-15 08:00'), 1)->format('Y-m-d H:i'), 'into the next year');
     }
 
     public function testMoneyIsShownInPesos(): void
     {
         $this->assertSame('₱99', Plans::money(9900));
-        $this->assertSame('₱1,250', Plans::money(125000));
+        $this->assertSame('₱1,499', Plans::money(149900));
         $this->assertSame('₱99.50', Plans::money(9950));
         $this->assertSame('USD 5', Plans::money(500, 'USD'));
+        $this->assertSame(['a month', 'a year', 'once'], [Plans::per('month'), Plans::per('year'), Plans::per('once')]);
     }
 
-    public function testOnlyForeverIncludesASubdomain(): void
+    public function testSweetheartAndForeverIncludeAnAddress(): void
     {
-        $this->assertSame(['forever'], array_keys(array_filter($this->plans()->all(), static fn (array $p): bool => $p['subdomain'])));
+        $this->assertSame(['sweetheart', 'forever'], array_keys(array_filter($this->plans()->all(), static fn (array $p): bool => $p['subdomain'])));
+    }
+
+    public function testWhichTemplatesEachPlanIncludes(): void
+    {
+        $plans = $this->plans();
+        foreach (['classic', 'cinematic', 'polaroid', 'envelope', 'timeline'] as $key) {
+            $this->assertTrue($plans->allowsTemplate('sweet', $key), $key);
+        }
+        foreach (['scratch', 'storybook', 'memory', 'gift', 'stars'] as $key) {
+            $this->assertFalse($plans->allowsTemplate('sweet', $key), $key);
+            $this->assertSame(['sweetheart', 'forever'], $plans->plansWithTemplate($key), $key);
+        }
+        foreach (array_keys(Designs::LAYOUTS) as $key) {
+            $this->assertTrue($plans->allowsTemplate('sweetheart', $key), $key);
+            $this->assertTrue($plans->allowsTemplate('forever', $key), $key);
+            $this->assertTrue($plans->allowsTemplate('free', $key), "{$key}: the free preview tries everything");
+        }
+        $this->assertSame('classic', $plans->templateFor($this->page('sweet', 'stars')), 'visitors of a Sweet page see a template of Sweet');
+        $this->assertSame('envelope', $plans->templateFor($this->page('sweet', 'envelope')));
+        $this->assertSame('stars', $plans->templateFor($this->page('sweetheart', 'stars')));
+        $this->assertSame('Sweetheart and Forever', $plans->names(['sweetheart', 'forever']));
+        $this->assertSame('Sweet, Sweetheart and Forever', $plans->names(['sweet', 'sweetheart', 'forever']));
+        $this->assertSame('Forever', $plans->names(['forever']));
     }
 
     /** @return array<string,array{string,string}> */

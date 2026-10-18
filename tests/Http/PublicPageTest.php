@@ -144,7 +144,7 @@ final class PublicPageTest extends TestCase
 
     public function testAnExpiredPageRestsWithoutShowingItsContent(): void
     {
-        $page = $this->lockedPage(['plan' => 'basic', 'expires_at' => '2026-01-01 00:00:00']);
+        $page = $this->lockedPage(['plan' => 'sweet', 'expires_at' => '2026-01-01 00:00:00']);
         $response = $this->get('/p/' . $page->slug);
         $html = (string) $response->getBody();
 
@@ -192,6 +192,17 @@ final class PublicPageTest extends TestCase
         $this->assertStringNotContainsString('A secret paragraph', $html);
         $this->assertStringNotContainsString('<b>Yam</b>', $html, 'the name is escaped in the template markup too');
         $this->assertStringContainsString('&lt;b&gt;Yam&lt;/b&gt;', $html);
+    }
+
+    public function testVisitorsSeeATemplateOfThePagesPlan(): void
+    {
+        $page = $this->makeLivePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2099-01-01 00:00:00', 'layout' => 'stars']);
+        $html = (string) $this->get('/p/' . $page->slug)->getBody();
+        $this->assertStringContainsString('data-layout="classic"', $html, 'Sweet does not include the Starry sky (set by an admin, say)');
+        $this->assertStringContainsString('/assets/templates/classic.js', $html);
+
+        $page->forceFill(['plan' => 'sweetheart'])->save();
+        $this->assertStringContainsString('data-layout="stars"', (string) $this->get('/p/' . $page->slug)->getBody());
     }
 
     public function testUserTextIsEscaped(): void

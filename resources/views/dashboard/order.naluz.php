@@ -19,7 +19,7 @@
     </div>
     <div class="section-body stack" style="--gap:18px">
       <dl class="kv">
-        <dt>Plan</dt><dd>{{ $plan['name'] ?? $order->plan }}</dd>
+        <dt>Plan</dt><dd>{{ $plan['name'] ?? $order->plan }}, {{ ['month' => 'one month', 'year' => 'one year', 'once' => 'for good'][$order->period] ?? $order->period }}</dd>
         <dt>Amount</dt><dd>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</dd>
         <dt>Reference</dt><dd>{{ $order->reference }}</dd>
         @if ($order->paid_at !== null)

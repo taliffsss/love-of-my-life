@@ -9,7 +9,7 @@ use App\Models\Page;
 /**
  * Maps hosts to pages and pages to their public address.
  *
- *  - <name>.<saas domain>  → the Forever page that claimed <name> (nothing to configure per page: a wildcard DNS record
+ *  - <name>.<saas domain>  → the Sweetheart or Forever page that claimed <name> (nothing to configure per page: a wildcard DNS record
  *    and certificate cover every name)
  *  - a custom domain set by an admin (e.g. the original single-page site) → that page
  *  - the saas domain itself, www, localhost, an IP address or any other host → the product (landing page, dashboard)

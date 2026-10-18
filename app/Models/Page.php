@@ -93,7 +93,7 @@ final class Page extends Model
         return (int) $this->planDetails()['photos'];
     }
 
-    /** Only plans that include it (Forever) may have a dedicated subdomain. */
+    /** Only plans that include it (Sweetheart and Forever) may have a dedicated subdomain. */
     public function allowsSubdomain(): bool
     {
         return (bool) $this->planDetails()['subdomain'];

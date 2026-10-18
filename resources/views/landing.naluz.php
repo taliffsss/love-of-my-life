@@ -112,26 +112,34 @@
   <section class="band" id="pricing" aria-labelledby="pricing-title">
     <div class="container">
       <p class="eyebrow">Pricing</p>
-      <h2 id="pricing-title" style="margin-top:10px">Pay once. No subscription.</h2>
-      <p class="sub">Build your page and preview it for free. Choose a plan only when you are ready to send it.</p>
+      <h2 id="pricing-title" style="margin-top:10px">Monthly, yearly, or once for good.</h2>
+      <p class="sub">Build your page and preview it for free, with every template. Choose a plan only when you are ready to send it.</p>
       <div class="plans">
         @foreach ($plans as $key => $plan)
-        <article class="card plan {{ $plan['subdomain'] ? 'featured' : '' }}">
-          @if ($plan['subdomain'])<span class="tag">Most loved</span>@endif
+        @php $monthly = $plan['prices']['month'] ?? null; $yearly = $plan['prices']['year'] ?? null; $once = $plan['prices']['once'] ?? null; @endphp
+        <article class="card plan {{ $plan['popular'] ? 'featured' : '' }}">
+          @if ($plan['popular'])<span class="tag">Most popular</span>@endif
           <h3>{{ $plan['name'] }}</h3>
-          <p class="price">{{ \App\Services\Plans::money((int) $plan['price']) }} <small>one time</small></p>
+          @if ($monthly !== null)
+          <p class="price">{{ \App\Services\Plans::money((int) $monthly) }} <small>a month</small></p>
+          @if ($yearly !== null)
+          <p class="or">or {{ \App\Services\Plans::money((int) $yearly) }} a year{!! $plan['months_free'] > 0 ? ': <strong>' . $plan['months_free'] . ' months free</strong>' : '' !!}</p>
+          @endif
+          @elseif ($once !== null)
+          <p class="price">{{ \App\Services\Plans::money((int) $once) }} <small>once</small></p>
+          <p class="or">No renewals: it stays online for good.</p>
+          @endif
           <p class="muted">{{ $plan['blurb'] }}</p>
           <ul>
-            <li>{{ $plan['days'] === null ? 'Online forever' : 'Online for ' . $plan['days'] . ' days' }}</li>
             <li>Up to {{ $plan['photos'] }} photos</li>
+            <li>{{ $plan['templates'] === 'all' ? 'All ' . count($layouts) . ' templates' : count($plan['templates']) . ' templates: ' . implode(', ', array_map(fn ($k) => $layouts[$k]['name'], $plan['templates'])) }}, every colour theme</li>
             <li>Your song, your letter, your question</li>
-            <li>All {{ count($layouts) }} templates and every colour theme</li>
             <li>Link and printable QR code</li>
             @if ($plan['subdomain'])
             <li>Its own address: <strong>yourname.{{ $domain }}</strong></li>
             @endif
           </ul>
-          <a class="btn {{ $plan['subdomain'] ? 'btn-primary' : 'btn-secondary' }}" href="/register">Start with {{ $plan['name'] }}</a>
+          <a class="btn {{ $plan['popular'] ? 'btn-primary' : 'btn-secondary' }}" href="/register">Start with {{ $plan['name'] }}</a>
         </article>
         @endforeach
       </div>
@@ -153,11 +161,11 @@
         </details>
         <details>
           <summary>What is the dedicated address?</summary>
-          <p>With the Forever plan your page can live at its own address, like <strong>yourname.{{ $domain }}</strong>. Pick the name in your dashboard and it works right away.</p>
+          <p>With the Sweetheart and Forever plans your page can live at its own address, like <strong>yourname.{{ $domain }}</strong>. Pick the name in your dashboard and it works right away.</p>
         </details>
         <details>
-          <summary>What happens when a one-year plan ends?</summary>
-          <p>The page rests: visitors see a short note instead of your content, and nothing is deleted. Renew from your dashboard and it is back immediately, with the same link.</p>
+          <summary>What happens when a monthly or yearly plan ends?</summary>
+          <p>The page rests: visitors see a short note instead of your content, and nothing is deleted. Renew from your dashboard, for a month or a year, and it is back immediately, with the same link. Renewing early adds the time to what is left.</p>
         </details>
         <details>
           <summary>How do I pay?</summary>

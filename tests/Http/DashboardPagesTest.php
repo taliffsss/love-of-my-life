@@ -80,7 +80,7 @@ final class DashboardPagesTest extends TestCase
         $this->assertStringContainsString('First paragraph.' . "\n\n" . 'Second paragraph.', $html, 'the letter is editable as paragraphs');
         $this->assertStringContainsString('https://cdn.test/a.jpg', $html);
         $this->assertStringContainsString('1 / 6', $html, 'photos used out of the free limit');
-        $this->assertStringContainsString('It comes with the Forever plan', $html, 'subdomain upsell on a free page');
+        $this->assertStringContainsString('It comes with the Sweetheart and Forever plans', $html, 'subdomain upsell on a free page');
         $this->assertStringContainsString('/dashboard/pages/' . $page->slug . '/qr', $html);
     }
 
@@ -185,6 +185,46 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame('midnight', $page->fresh()->theme);
     }
 
+    public function testALivePageUsesTheTemplatesOfItsPlanAndPreviewsTheRest(): void
+    {
+        $page = $this->makeLivePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2099-01-01 00:00:00', 'layout' => 'classic']);
+        $url = '/dashboard/pages/' . $page->slug . '/design';
+
+        $this->submit('PUT', $url, ['layout' => 'stars', 'theme' => 'midnight']);
+        $this->assertSame('classic', $page->fresh()->layout, 'Sweet does not include the Starry sky');
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
+        $this->assertStringContainsString('The Starry sky template comes with Sweetheart and Forever. Upgrade the plan to use it on this page.', $html);
+        $this->assertStringContainsString('data-locked="Starry sky comes with Sweetheart and Forever.', $html, 'the picker says so before saving');
+        $this->assertStringNotContainsString('data-locked="Envelope', $html);
+        $this->assertStringContainsString('<span class="plan-badge">Sweetheart and Forever</span>', $html);
+
+        $this->submit('PUT', $url, ['layout' => 'envelope', 'theme' => 'midnight']);
+        $this->assertSame('envelope', $page->fresh()->layout);
+        $preview = (string) $this->get('/dashboard/pages/' . $page->slug . '/preview?layout=stars')->getBody();
+        $this->assertStringContainsString('data-layout="stars"', $preview, 'the owner can still preview it');
+
+        $draft = $this->makePage($this->owner);
+        $this->submit('PUT', '/dashboard/pages/' . $draft->slug . '/design', ['layout' => 'stars', 'theme' => 'rose']);
+        $this->assertSame('stars', $draft->fresh()->layout, 'a draft may try any template');
+        $this->assertStringNotContainsString('data-locked=', (string) $this->get('/dashboard/pages/' . $draft->slug)->getBody());
+    }
+
+    public function testThePlanSectionSellsMonthlyYearlyAndOnce(): void
+    {
+        $page = $this->makePage($this->owner);
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
+        foreach (['₱59 a month', '₱590 a year', '₱99 a month', '₱990 a year', '₱1,499 once', '2 months free', 'Most popular'] as $text) {
+            $this->assertStringContainsString($text, $html);
+        }
+        $this->assertSame(5, substr_count($html, 'name="period" value="'), 'Sweet and Sweetheart monthly and yearly, Forever once');
+
+        $page->forceFill(['plan' => 'sweetheart', 'expires_at' => '2099-01-01 00:00:00', 'published_at' => '2026-01-01 00:00:00'])->save();
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
+        $this->assertStringContainsString('Renew Sweetheart', $html);
+        $this->assertStringContainsString('Upgrade to Forever', $html);
+        $this->assertStringNotContainsString('₱59 a month', $html, 'no way down');
+    }
+
     public function testEveryTemplateCanBeChosenWithEveryTheme(): void
     {
         $page = $this->makePage($this->owner);
@@ -247,7 +287,7 @@ final class DashboardPagesTest extends TestCase
         $this->makePhoto($page, 'https://cdn.test/a.jpg', 1);
         $this->makePhoto($page, 'https://cdn.test/b.jpg', 2);
         $order = new Order();
-        $order->forceFill(['reference' => 'LM-AAAA-BBBB', 'user_id' => $this->owner->id, 'page_id' => $page->id, 'plan' => 'basic', 'amount' => 9900, 'currency' => 'PHP', 'status' => 'paid', 'provider' => 'manual'])->save();
+        $order->forceFill(['reference' => 'LM-AAAA-BBBB', 'user_id' => $this->owner->id, 'page_id' => $page->id, 'plan' => 'sweet', 'period' => 'month', 'amount' => 5900, 'currency' => 'PHP', 'status' => 'paid', 'provider' => 'manual'])->save();
 
         $this->submit('DELETE', '/dashboard/pages/' . $page->slug, ['confirm' => 'nope']);
         $this->assertNotNull($page->fresh(), 'not without typing "delete"');
@@ -276,7 +316,7 @@ final class DashboardPagesTest extends TestCase
             ['PUT', $base . '/design', ['layout' => 'polaroid', 'theme' => 'blush']],
             ['PUT', $base . '/subdomain', ['subdomain' => 'stolen']],
             ['DELETE', $base . '/subdomain', []],
-            ['POST', $base . '/orders', ['plan' => 'basic']],
+            ['POST', $base . '/orders', ['plan' => 'sweet', 'period' => 'month']],
             ['DELETE', $base . '/photos/' . $photo->id, []],
             ['DELETE', $base, ['confirm' => 'delete']],
         ];

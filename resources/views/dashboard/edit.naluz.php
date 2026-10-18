@@ -184,12 +184,14 @@
           <div class="section-body stack" style="--gap:18px">
             <fieldset style="border:0;margin:0;padding:0">
               <legend class="label" style="margin-bottom:10px">Template</legend>
+              @include('partials.errors', ['field' => 'layout'])
               <div class="choice-grid">
                 @foreach ($layouts as $key => $layout)
                 <label class="choice">
-                  <input type="radio" name="layout" value="{{ $key }}" @if ($page->layout === $key) checked @endif />
+                  <input type="radio" name="layout" value="{{ $key }}" @if ($page->layout === $key) checked @endif @if ($templateNotes[$key]['locked']) data-locked="{{ $layout['name'] }} comes with {{ $templateNotes[$key]['plans'] }}. Preview it here, then upgrade the plan to use it." @endif />
                   <span class="box">
                     <span class="shot"><span class="schem schem-{{ $key }}" aria-hidden="true" style="display:block"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></span></span>
+                    @if ($templateNotes[$key]['plans'] !== '')<span class="plan-badge">{{ $templateNotes[$key]['plans'] }}</span>@endif
                     <span class="txt"><b>{{ $layout['name'] }}</b><small>{{ $layout['description'] }}</small><small class="play">{{ $layout['play'] }}</small></span>
                   </span>
                 </label>
@@ -208,9 +210,10 @@
               </div>
             </fieldset>
           </div>
+          <p class="notice notice-brand" id="design-locked" role="status" hidden></p>
           <div class="section-foot">
             <a class="btn btn-ghost" id="design-preview-link" href="/dashboard/pages/{{ $page->slug }}/preview" target="_blank" rel="noopener">Preview full screen</a>
-            <button class="btn btn-primary" type="submit">Save design</button>
+            <button class="btn btn-primary" type="submit" id="design-save">Save design</button>
           </div>
         </form>
       </section>
@@ -264,7 +267,7 @@
                 @endif
                 @else
                 <div class="notice notice-brand">
-                  <div>Give this page an address of its own, like <strong>{{ strtolower(preg_replace('/[^a-z0-9]+/i', '', $page->shortName()) ?: 'yourname') }}.{{ $domain }}</strong>. It comes with the Forever plan. <a href="#plan">See plans</a></div>
+                  <div>Give this page an address of its own, like <strong>{{ strtolower(preg_replace('/[^a-z0-9]+/i', '', $page->shortName()) ?: 'yourname') }}.{{ $domain }}</strong>. It comes with the Sweetheart and Forever plans. <a href="#plan">See plans</a></div>
                 </div>
                 @endif
               </div>
@@ -301,15 +304,23 @@
           @if (count($purchasable) > 0)
           <div class="plan-row">
             @foreach ($purchasable as $key => $option)
-            <form method="post" action="/dashboard/pages/{{ $page->slug }}/orders" class="plan-option {{ $option['subdomain'] ? 'featured' : '' }}">
-              @csrf
-              <input type="hidden" name="plan" value="{{ $key }}" />
-              <strong>{{ $option['name'] }}</strong>
-              <span class="price">{{ \App\Services\Plans::money((int) $option['price']) }}</span>
+            <div class="plan-option {{ $option['popular'] ? 'featured' : '' }}">
+              @if ($option['popular'])<span class="tag">Most popular</span>@endif
+              <strong>{{ $key === $page->plan ? 'Renew ' . $option['name'] : ($status === 'draft' ? $option['name'] : 'Upgrade to ' . $option['name']) }}</strong>
               <span class="small muted">{{ $option['blurb'] }}</span>
-              <span class="small">{{ $option['days'] === null ? 'Never expires' : ($key === $page->plan ? 'Adds ' . $option['days'] . ' days' : $option['days'] . ' days online') }} · {{ $option['photos'] }} photos</span>
-              <button class="btn {{ $option['subdomain'] ? 'btn-primary' : 'btn-secondary' }}" type="submit">{{ $key === $page->plan ? 'Renew' : ($status === 'draft' ? 'Publish with ' . $option['name'] : 'Upgrade to ' . $option['name']) }}</button>
-            </form>
+              <span class="small">{{ $option['photos'] }} photos · {{ $option['templates'] === 'all' ? 'all ' . count($layouts) . ' templates' : count($option['templates']) . ' templates' }}{{ $option['subdomain'] ? ' · its own address' : '' }}</span>
+              @foreach ($option['offers'] as $period => $price)
+              <form method="post" action="/dashboard/pages/{{ $page->slug }}/orders">
+                @csrf
+                <input type="hidden" name="plan" value="{{ $key }}" />
+                <input type="hidden" name="period" value="{{ $period }}" />
+                <button class="btn {{ $option['popular'] ? 'btn-primary' : 'btn-secondary' }} offer" type="submit">
+                  <span>{{ \App\Services\Plans::money($price) }} {{ \App\Services\Plans::per($period) }}</span>
+                  @if ($period === 'year' && $option['months_free'] > 0)<small>{{ $option['months_free'] }} months free</small>@elseif ($period === 'once')<small>never expires</small>@endif
+                </button>
+              </form>
+              @endforeach
+            </div>
             @endforeach
           </div>
           @endif
@@ -322,7 +333,7 @@
                 @foreach ($orders as $order)
                 <tr>
                   <td><a href="/dashboard/orders/{{ $order->reference }}">{{ $order->reference }}</a></td>
-                  <td>{{ $plans[$order->plan]['name'] ?? $order->plan }}</td>
+                  <td>{{ $plans[$order->plan]['name'] ?? $order->plan }} <span class="muted">{{ \App\Services\Plans::per((string) $order->period) }}</span></td>
                   <td>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</td>
                   <td>{{ ucfirst($order->status) }}</td>
                 </tr>

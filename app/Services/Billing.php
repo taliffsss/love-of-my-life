@@ -21,11 +21,11 @@ final class Billing
     {
     }
 
-    /** @throws \DomainException when the plan cannot be bought for this page */
-    public function createOrder(int $userId, Page $page, string $plan, string $provider): Order
+    /** @throws \DomainException when the plan cannot be bought for this page in that period */
+    public function createOrder(int $userId, Page $page, string $plan, string $period, string $provider): Order
     {
-        $details = $this->plans->get($plan);
-        if ($details === null || !$this->plans->canBuy($page, $plan)) {
+        $price = $this->plans->price($plan, $period);
+        if ($price === null || !$this->plans->canBuy($page, $plan, $period)) {
             throw new \DomainException('That plan cannot be bought for this page.');
         }
         $order = new Order();
@@ -34,7 +34,8 @@ final class Billing
             'user_id' => $userId,
             'page_id' => $page->id,
             'plan' => $plan,
-            'amount' => (int) $details['price'],
+            'period' => $period,
+            'amount' => $price,
             'currency' => $this->plans->currency(),
             'status' => Order::PENDING,
             'provider' => $provider,
@@ -67,7 +68,7 @@ final class Billing
 
             $page = $order->page_id !== null ? Page::query()->withoutCache()->useWritePdo()->find($order->page_id) : null;
             if ($page instanceof Page) {
-                $this->activate($page, $order->plan, $now);
+                $this->activate($page, $order->plan, (string) $order->period, $now);
                 $this->cancelOutdated($page, $order->id, $now);
             } else {
                 logger()->warning('[billing] order {reference} was paid but its page no longer exists: refund it', ['reference' => $order->reference]);
@@ -78,14 +79,17 @@ final class Billing
     }
 
     /**
-     * Puts the plan on the page. Time-limited plans add their days to whatever time is left (a renewal never loses
-     * days); a plan that never expires clears the expiry. A lower plan than the page already has never downgrades it
-     * (orders for one are cancelled when the higher plan starts, see cancelOutdated()); defensively it only adds its days
-     * when the current plan is time-limited.
+     * Puts the plan on the page for the period paid. A month or a year is added to whatever time is left (a renewal
+     * never loses days; Jan 31 + 1 month is the end of February); a plan bought once clears the expiry. A lower plan
+     * than the page already has never downgrades it (orders for one are cancelled when the higher plan starts, see
+     * cancelOutdated()); defensively it only adds its months when the current plan is time-limited.
      */
-    public function activate(Page $page, string $plan, \DateTimeImmutable $now): void
+    public function activate(Page $page, string $plan, string $period, \DateTimeImmutable $now): void
     {
-        $details = $this->plans->get($plan) ?? throw new \DomainException("Unknown plan [{$plan}].");
+        if ($this->plans->get($plan) === null) {
+            throw new \DomainException("Unknown plan [{$plan}].");
+        }
+        $months = $this->plans->months($period);
         $current = $this->plans->get($page->plan);
         $currentIsPaid = $current !== null && $current['publish'];
 
@@ -96,15 +100,16 @@ final class Billing
                 'current' => $page->plan,
                 'plan' => $plan,
             ]);
-            if ($current['days'] === null) {
+            if ($this->plans->isPermanent($page->plan) && $page->expires_at === null) {
                 return;
             }
         }
 
-        $days = $details['days'];
-        if ($keepCurrent || $days !== null) {
+        if ($months !== null) {
             $left = $currentIsPaid && $page->expires_at !== null && $page->expires_at > $now ? $page->expires_at : $now;
-            $expires = $left->modify('+' . (int) $days . ' days');
+            $expires = Plans::addMonths($left, $months);
+        } elseif ($keepCurrent) {
+            return;
         } else {
             $expires = null;
         }
@@ -125,7 +130,7 @@ final class Billing
         $pending = Order::query()->withoutCache()->useWritePdo()
             ->where('page_id', $page->id)->where('status', Order::PENDING)->where('id', '!=', $paidOrderId)->get()->all();
         foreach ($pending as $other) {
-            if (!$this->plans->canBuy($page, $other->plan)) {
+            if (!$this->plans->canBuy($page, $other->plan, (string) $other->period)) {
                 $this->db->table('orders')->where('id', '=', $other->id)->where('status', '=', Order::PENDING)
                     ->update(['status' => Order::CANCELLED, 'updated_at' => $now->format('Y-m-d H:i:s')]);
             }

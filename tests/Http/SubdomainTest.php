@@ -26,14 +26,19 @@ final class SubdomainTest extends TestCase
 
     // ------------------------------------------------------------------ claiming from the dashboard
 
-    public function testOnlyForeverPagesGetAnAddressOfTheirOwn(): void
+    public function testOnlySweetheartAndForeverPagesGetAnAddressOfTheirOwn(): void
     {
         $this->signIn($this->owner);
-        $basic = $this->makeLivePage($this->owner, ['plan' => 'basic', 'expires_at' => '2099-01-01 00:00:00']);
-        $response = $this->submit('PUT', '/dashboard/pages/' . $basic->slug . '/subdomain', ['subdomain' => 'jinelin']);
+        $sweet = $this->makeLivePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2099-01-01 00:00:00']);
+        $response = $this->submit('PUT', '/dashboard/pages/' . $sweet->slug . '/subdomain', ['subdomain' => 'jinelin']);
 
         $this->assertSame(403, $response->getStatusCode());
-        $this->assertNull($basic->fresh()->subdomain);
+        $this->assertNull($sweet->fresh()->subdomain);
+
+        $sweetheart = $this->makeLivePage($this->owner, ['plan' => 'sweetheart', 'expires_at' => '2099-01-01 00:00:00', 'recipient' => 'Yam']);
+        $this->claim($sweetheart, 'yam');
+        $this->assertSame('yam', $sweetheart->fresh()->subdomain);
+        $this->assertStringContainsString('For Yam', (string) $this->get('https://yam.love.test/')->getBody());
     }
 
     public function testAForeverPageClaimsANameAndItWorksImmediately(): void

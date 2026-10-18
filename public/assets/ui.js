@@ -177,16 +177,29 @@ if (editor) {
     }
   });
 
-  // Design: preview a layout or colour before saving it.
+  // Design: preview a template or colour before saving it. A template the page's plan does not include can be
+  // previewed, but not saved (the server refuses it too): say which plan has it.
   const designForm = $("#design-form");
   if (designForm) {
     const link = $("#design-preview-link");
+    const locked = $("#design-locked");
+    const save = $("#design-save");
+    const checkLocked = () => {
+      const note = designForm.querySelector('input[name="layout"]:checked')?.dataset.locked || "";
+      if (locked) {
+        locked.textContent = note;
+        locked.hidden = note === "";
+      }
+      if (save) save.disabled = note !== "";
+    };
     designForm.addEventListener("change", () => {
       const fd = new FormData(designForm);
       const query = `?layout=${encodeURIComponent(fd.get("layout") || "")}&theme=${encodeURIComponent(fd.get("theme") || "")}`;
       reloadPreview(query);
       if (link) link.href = `${base}/preview${query}`;
+      checkLocked();
     });
+    checkLocked();
   }
 
   // Subdomain: say whether a name is free while it is typed.
