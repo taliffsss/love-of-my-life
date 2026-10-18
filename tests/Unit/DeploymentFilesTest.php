@@ -58,6 +58,33 @@ final class DeploymentFilesTest extends TestCase
         $this->assertStringContainsString('set_real_ip_from 10.0.0.0/8;', $nginx, 'the Swarm overlay network');
     }
 
+    /** The product's domain and every <name>.<domain> page address reach the app, on the wildcard certificate. */
+    public function testTheStackRoutesTheProductAndEveryPageAddress(): void
+    {
+        $stack = $this->file('deploy/docker-stack.yml');
+        $this->assertSame(1, preg_match('/^SAAS_DOMAIN=(\S+)$/m', $this->file('deploy/.env.production.example'), $m));
+        $domain = $m[1];
+        $regex = '^[a-z0-9-]+\\\\.' . str_replace('.', '\\\\.', $domain) . '$$';
+        foreach (['lom-saas', 'lom-saas-http'] as $router) {
+            $this->assertStringContainsString(
+                "traefik.http.routers.{$router}.rule=Host(`{$domain}`) || HostRegexp(`{$regex}`)",
+                $stack,
+                "{$router} matches {$domain} and <name>.{$domain}",
+            );
+        }
+        $this->assertStringContainsString('traefik.http.routers.lom-saas.tls.certresolver=letsencrypt-dns', $stack, 'only the DNS challenge issues wildcards');
+        $this->assertStringContainsString("traefik.http.routers.lom-saas.tls.domains[0].main={$domain}", $stack);
+        $this->assertStringContainsString("traefik.http.routers.lom-saas.tls.domains[0].sans=*.{$domain}", $stack);
+        $this->assertStringContainsString('traefik.http.routers.lom-saas-http.middlewares=redirect-to-https@file', $stack);
+    }
+
+    /** docker stack deploy interpolates `$`: a lone one ("…com$`") is refused with "invalid interpolation format". */
+    public function testEveryDollarInTheStackIsAVariableOrEscaped(): void
+    {
+        $stack = (string) preg_replace('/^\s*#.*$/m', '', $this->file('deploy/docker-stack.yml'));
+        $this->assertDoesNotMatchRegularExpression('/(?<!\$)\$(?![${])/', str_replace('$$', '', $stack));
+    }
+
     /** nginx answers files with these extensions itself (try_files … =404), so a PHP route must never end with one. */
     public function testNoRouteEndsWithAnExtensionNginxServesItself(): void
     {

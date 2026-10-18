@@ -1,0 +1,99 @@
+/* Colour themes. A theme only sets these variables; every template (public/assets/templates/<key>.css) uses nothing
+   else for colour, so any template works with any theme. A light theme also sets data-scheme="light" on <body>
+   (App\Services\Designs::THEMES), which site.css uses for the few things that need a light treatment.
+   Adding a theme: one block here + one entry in Designs::THEMES. */
+
+:root, body[data-theme="rose"] {
+  --bg: #160a14;
+  --bg-2: #2a1220;
+  --text: #fbeef0;
+  --muted: rgba(251, 238, 240, .62);
+  --accent: #f2a7b8;
+  --accent-deep: #d9728c;
+  --gold: #f0cfa8;
+  --on-accent: #2a1220;
+  --panel-a: rgba(38, 14, 32, .94);
+  --panel-b: rgba(22, 8, 20, .97);
+  --panel-line: rgba(255, 255, 255, .1);
+  --gate-a: rgba(34, 12, 30, .6);
+  --gate-b: rgba(110, 36, 70, .4);
+  --vignette: rgba(22, 8, 20, .55);
+  --glow-a: rgba(255, 190, 150, .55);
+  --glow-b: rgba(242, 130, 170, .5);
+  --heart-glow: rgba(242, 167, 184, .55);
+  --card-text: #fbeef0;
+  --field-bg: rgba(255, 255, 255, .09);
+  --field-line: rgba(255, 255, 255, .22);
+  --paper: #fffaf3;
+  --ink: #3a2230;
+  --ph-1: #f9d5d3; --ph-2: #e8a5b5; --ph-3: #e6d3f0; --ph-4: #c9a6dc;
+}
+body[data-theme="midnight"] {
+  --bg: #0a0f1f;
+  --bg-2: #141c38;
+  --text: #eef1ff;
+  --muted: rgba(238, 241, 255, .62);
+  --accent: #a9b8ff;
+  --accent-deep: #7b8ef0;
+  --gold: #e8d6a8;
+  --on-accent: #0d1430;
+  --panel-a: rgba(16, 22, 46, .94);
+  --panel-b: rgba(8, 12, 28, .97);
+  --gate-a: rgba(10, 16, 40, .6);
+  --gate-b: rgba(60, 70, 140, .38);
+  --vignette: rgba(6, 10, 26, .55);
+  --glow-a: rgba(150, 170, 255, .45);
+  --glow-b: rgba(232, 214, 168, .35);
+  --heart-glow: rgba(169, 184, 255, .55);
+  --card-text: #eef1ff;
+  --paper: #f7f8ff;
+  --ink: #1d2448;
+  --ph-1: #c7d0ff; --ph-2: #7b8ef0; --ph-3: #e8d6a8; --ph-4: #4d5aa8;
+}
+body[data-theme="sunset"] {
+  --bg: #1d0c08;
+  --bg-2: #3a1a10;
+  --text: #fff1e8;
+  --muted: rgba(255, 241, 232, .64);
+  --accent: #ff9a76;
+  --accent-deep: #e46e4c;
+  --gold: #ffd39a;
+  --on-accent: #3a1408;
+  --panel-a: rgba(48, 20, 12, .94);
+  --panel-b: rgba(28, 11, 7, .97);
+  --gate-a: rgba(44, 16, 8, .6);
+  --gate-b: rgba(160, 70, 40, .38);
+  --vignette: rgba(28, 10, 6, .55);
+  --glow-a: rgba(255, 196, 120, .55);
+  --glow-b: rgba(255, 120, 90, .45);
+  --heart-glow: rgba(255, 154, 118, .55);
+  --card-text: #fff1e8;
+  --paper: #fff8ef;
+  --ink: #45200f;
+  --ph-1: #ffd39a; --ph-2: #ff9a76; --ph-3: #f6b7a0; --ph-4: #c8644a;
+}
+body[data-theme="blush"] {
+  --bg: #fbf0ec;
+  --bg-2: #f3dcd6;
+  --text: #3a1f2b;
+  --muted: rgba(58, 31, 43, .66);
+  --accent: #c2577a;
+  --accent-deep: #a5405f;
+  --gold: #9a6b2f;
+  --on-accent: #fff;
+  --panel-a: rgba(255, 249, 246, .96);
+  --panel-b: rgba(250, 238, 233, .98);
+  --panel-line: rgba(58, 31, 43, .1);
+  --gate-a: rgba(255, 244, 240, .55);
+  --gate-b: rgba(232, 180, 196, .4);
+  --vignette: rgba(58, 31, 43, .28);
+  --glow-a: rgba(255, 214, 196, .55);
+  --glow-b: rgba(232, 150, 180, .4);
+  --heart-glow: rgba(194, 87, 122, .35);
+  --card-text: #3a1f2b;
+  --field-bg: rgba(255, 255, 255, .7);
+  --field-line: rgba(58, 31, 43, .2);
+  --paper: #fffdfa;
+  --ink: #3a1f2b;
+  --ph-1: #f7d2d8; --ph-2: #e9a6b8; --ph-3: #f4e1cf; --ph-4: #d6a3b2;
+}

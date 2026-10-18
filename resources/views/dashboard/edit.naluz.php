@@ -179,18 +179,18 @@
           @csrf
           @method('PUT')
           <div class="section-head">
-            <div><h2 id="design-title">Design</h2><p>Change the layout and colours any time. The preview updates before you save.</p></div>
+            <div><h2 id="design-title">Design</h2><p>Pick one of the {{ count($layouts) }} templates and a colour theme; every template works with every theme. Change them any time: the preview updates before you save.</p></div>
           </div>
           <div class="section-body stack" style="--gap:18px">
             <fieldset style="border:0;margin:0;padding:0">
-              <legend class="label" style="margin-bottom:10px">Layout</legend>
+              <legend class="label" style="margin-bottom:10px">Template</legend>
               <div class="choice-grid">
                 @foreach ($layouts as $key => $layout)
                 <label class="choice">
                   <input type="radio" name="layout" value="{{ $key }}" @if ($page->layout === $key) checked @endif />
                   <span class="box">
                     <span class="shot"><span class="schem schem-{{ $key }}" aria-hidden="true" style="display:block"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></span></span>
-                    <span class="txt"><b>{{ $layout['name'] }}</b><small>{{ $layout['description'] }}</small></span>
+                    <span class="txt"><b>{{ $layout['name'] }}</b><small>{{ $layout['description'] }}</small><small class="play">{{ $layout['play'] }}</small></span>
                   </span>
                 </label>
                 @endforeach

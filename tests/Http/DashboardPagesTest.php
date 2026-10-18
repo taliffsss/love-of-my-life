@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Page;
 use App\Models\Photo;
 use App\Models\User;
+use App\Services\Designs;
 use App\Services\YouTube;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -182,6 +183,24 @@ final class DashboardPagesTest extends TestCase
         $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'grid', 'theme' => 'neon']);
         $this->assertSame('polaroid', $page->fresh()->layout, 'unknown layouts are refused');
         $this->assertSame('midnight', $page->fresh()->theme);
+    }
+
+    public function testEveryTemplateCanBeChosenWithEveryTheme(): void
+    {
+        $page = $this->makePage($this->owner);
+        foreach (array_keys(Designs::LAYOUTS) as $layout) {
+            foreach (array_keys(Designs::THEMES) as $theme) {
+                $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => $layout, 'theme' => $theme]);
+                $fresh = $page->fresh();
+                $this->assertSame([$layout, $theme], [$fresh->layout, $fresh->theme]);
+            }
+        }
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
+        foreach (Designs::LAYOUTS as $key => $template) {
+            $this->assertStringContainsString('name="layout" value="' . $key . '"', $html, "{$key} is in the picker");
+            $this->assertStringContainsString($template['play'], $html);
+        }
+        $this->assertStringContainsString('Template</legend>', $html);
     }
 
     public function testThePreviewShowsTheDraftWithAnyDesignBeforeItIsSaved(): void

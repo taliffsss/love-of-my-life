@@ -1,0 +1,11 @@
+/* Template "classic": the photos with the letter scrolling beside them (below them on phones).
+   Built on the slideshow kit in site.css (.show, .slide, .letter …); colours only from themes.css. */
+
+@media (min-width: 860px) {
+  body[data-layout="classic"] .show { flex-direction: row; }
+  body[data-layout="classic"] .letter { flex: 0 0 clamp(340px, 30vw, 440px); padding: 2rem 2rem .6rem; border-top: 0; border-left: 1px solid var(--panel-line, rgba(255, 255, 255, .1)); transform: translate3d(36px, 0, 0); }
+  body[data-layout="classic"] .letter-head h2 { font-size: 2.4rem; }
+  body[data-layout="classic"] .letter-text { font-size: 1.35rem; }
+}
+
+body[data-layout="classic"] .made-with { bottom: auto; top: max(70px, calc(env(safe-area-inset-top) + 64px)); }

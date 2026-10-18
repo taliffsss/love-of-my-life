@@ -1,0 +1,21 @@
+/* Template "cinematic": full-screen photos, the letter floats over them like subtitles.
+   Built on the slideshow kit in site.css (.show, .slide, .letter …); colours only from themes.css. */
+
+body[data-layout="cinematic"] .slide .fg { object-fit: cover; }
+body[data-layout="cinematic"] .letter {
+  position: absolute; z-index: 7; left: 50%; bottom: calc(max(22px, env(safe-area-inset-bottom)) + 30px);
+  width: min(92vw, 760px); height: min(34dvh, 260px); flex: none; margin-left: max(-46vw, -380px);
+  padding: .9rem 1.4rem .2rem; border: 1px solid rgba(255, 255, 255, .16); border-radius: 22px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel-a) 72%, transparent), color-mix(in srgb, var(--panel-b) 80%, transparent));
+  backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+}
+body[data-layout="cinematic"] .letter-head { display: flex; align-items: baseline; justify-content: center; gap: .7rem; }
+body[data-layout="cinematic"] .letter-head h2 { font-size: 1.5rem; margin: 0; }
+body[data-layout="cinematic"] .letter-text { font-size: 1.22rem; line-height: 1.7; }
+body[data-layout="cinematic"] .hud { bottom: max(10px, env(safe-area-inset-bottom)); }
+@media (min-width: 860px) {
+  body[data-layout="cinematic"] .letter-text { font-size: 1.4rem; }
+}
+
+body[data-layout="cinematic"] .made-with { bottom: auto; top: max(70px, calc(env(safe-area-inset-top) + 64px)); }

@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="{{ $theme === 'blush' ? '#fbf0ec' : '#140a12' }}" />
-    <meta name="color-scheme" content="{{ $theme === 'blush' ? 'light' : 'dark' }}" />
+    <meta name="theme-color" content="{{ $themeColor }}" />
+    <meta name="color-scheme" content="{{ $scheme }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>{{ $title }}</title>
     <meta name="description" content="Someone made this for {{ $page->recipient }}: photos, a song and a letter." />
@@ -29,48 +29,20 @@
       href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/assets/themes.css?v={{ $assetVersion }}" />
     <link rel="stylesheet" href="/assets/site.css?v={{ $assetVersion }}" />
+    <link rel="stylesheet" href="/{{ $assets['css'] }}?v={{ $assetVersion }}" />
   </head>
-  <body data-layout="{{ $layout }}" data-theme="{{ $theme }}" data-mode="{{ $mode }}">
+  <body data-layout="{{ $layout }}" data-theme="{{ $theme }}" data-scheme="{{ $scheme }}" data-mode="{{ $mode }}">
     <h1 class="sr-only">For {{ $page->recipient }}</h1>
     <div class="hearts" aria-hidden="true"></div>
 
-    <!-- The photos and the letter. Empty until the page opens: site.js fills them from the page data.
+    <!-- The template. Empty until the page opens: site.js and the template's script fill it from the page data.
          inert while the lock screen is up, so keyboard and screen-reader focus starts on the question. -->
-    <section id="show" class="show on locked" aria-label="Photo slideshow" inert>
-      <div class="viewer">
-        <div class="frame">
-          <div class="stage" id="stage"></div>
-          <div class="vignette"></div>
-          <div class="glow"></div>
-          <button class="nav prev" id="prev" aria-label="Previous photo"></button>
-          <button class="nav next" id="next" aria-label="Next photo"></button>
-          <div class="hud">
-            <span class="count" id="count" aria-hidden="true"></span>
-            <div class="bar" aria-hidden="true"><i id="barfill"></i></div>
-          </div>
-        </div>
-        <div class="nowplaying" id="nowplaying" hidden aria-live="polite">
-          <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-          <span class="np-text">
-            <span class="np-label">Now playing</span>
-            <span class="np-title"><span id="npTitle"></span> <span class="np-by" id="npBy"></span></span>
-          </span>
-        </div>
-        <button class="mute" id="mute" aria-label="Pause or play the music" hidden>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.500" cy="18" r="2.500"/><circle cx="16.500" cy="16" r="2.500"/></svg>
-        </button>
-      </div>
-      <aside class="letter" id="letter" aria-label="A letter for {{ $page->recipient }}">
-        <div class="letter-head">
-          <p class="eyebrow">A letter for</p>
-          <h2 id="letterFor">{{ $page->recipient }}</h2>
-        </div>
-        <div class="letter-view" id="letterView">
-          <div class="letter-text" id="letterText"></div>
-        </div>
-      </aside>
+    <section id="show" class="show on locked" aria-label="{{ $view === 'slideshow' ? 'Photo slideshow' : 'A page for ' . $page->recipient }}" inert>
+      @include('site.templates.' . $view)
     </section>
+    <p id="announce" class="sr-only" aria-live="polite"></p>
 
     <!-- The lock screen -->
     <main id="gate" class="gate">
@@ -123,6 +95,7 @@
     @endif
 
     <script type="application/json" id="page-config">{!! json_for_html($config) !!}</script>
+    <script src="/{{ $assets['js'] }}?v={{ $assetVersion }}" defer></script>
     <script src="/assets/site.js?v={{ $assetVersion }}" defer></script>
   </body>
 </html>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Naluz\Tests\Http;
 
+use App\Services\Designs;
 use Naluz\Tests\TestCase;
 
 final class LandingTest extends TestCase
@@ -20,6 +21,11 @@ final class LandingTest extends TestCase
             $this->assertStringContainsString($text, $html);
         }
         $this->assertStringNotContainsString('Free preview</h3>', $html, 'the free draft is not sold as a plan');
+        $this->assertStringContainsString('10 templates', $html);
+        foreach (Designs::LAYOUTS as $key => $template) {
+            $this->assertStringContainsString('<h3>' . $template['name'] . '</h3>', $html);
+            $this->assertStringContainsString('href="/demo?layout=' . $key . '"', $html);
+        }
         $this->assertStringContainsString('href="/register"', $html);
     }
 
@@ -32,6 +38,12 @@ final class LandingTest extends TestCase
         $this->assertStringContainsString('"\/assets\/demo\/1.svg"', $html);
         $this->assertStringContainsString('Demo: type anything to open it.', $html);
         $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow"', $html);
+
+        foreach (array_keys(Designs::LAYOUTS) as $key) {
+            $demo = $this->get('/demo?layout=' . $key);
+            $this->assertSame(200, $demo->getStatusCode(), $key);
+            $this->assertStringContainsString('/assets/templates/' . $key . '.js', (string) $demo->getBody());
+        }
 
         $fallback = (string) $this->get('/demo?layout=../../etc&theme=%22')->getBody();
         $this->assertStringContainsString('data-layout="classic"', $fallback);

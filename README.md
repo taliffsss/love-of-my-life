@@ -5,9 +5,12 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
 [NaluzPHP framework](https://github.com/taliffsss/naluzphp-framework).
 
 - **Dashboard:** create pages, write the letter, upload and order photos, pick a YouTube song, set the lock-screen
-  question and answer, choose a layout and colours with a live preview, share the link or a printable QR code.
-- **Layouts:** Classic (photos with the letter beside them), Cinematic (full-screen photos, the letter floats over them)
-  and Polaroid (an instant-photo frame next to a handwritten letter). Themes: Rose, Midnight, Sunset, Blush.
+  question and answer, choose a template and colours with a live preview, share the link or a printable QR code.
+- **10 templates**, each with any of the colour themes (Rose, Midnight, Sunset, Blush): the slideshows Classic,
+  Cinematic and Polaroid, and the interactive Envelope, Scratch card, Storybook, Memory game, Timeline, Gift box and
+  Starry sky. A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
+  `<key>.js` and `resources/views/site/templates/<key>.naluz.php`; the contract its script follows is at the top of
+  `public/assets/site.js`. A theme is a block of variables in `public/assets/themes.css`.
 - **Plans** (`config/saas.php`): free draft preview; Basic and Plus (one year); **Forever**, which never expires and can
   claim its own address, `<name>.<SAAS_DOMAIN>`, that works the moment it is saved.
 - **Private by default:** with a question set, the page's HTML holds no photo and no letter; they are sent only after the

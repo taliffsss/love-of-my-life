@@ -218,7 +218,7 @@ final class PagesController
         $theme = (string) ($body['theme'] ?? '');
         $errors = [];
         if (!isset(Designs::LAYOUTS[$layout])) {
-            $errors['layout'] = ['Pick one of the layouts.'];
+            $errors['layout'] = ['Pick one of the templates.'];
         }
         if (!isset(Designs::THEMES[$theme])) {
             $errors['theme'] = ['Pick one of the colour themes.'];
@@ -230,7 +230,7 @@ final class PagesController
         $page->forceFill(['layout' => $layout, 'theme' => $theme])->save();
         return Screen::back(
             $this->editUrl($page, 'design'),
-            'Design saved: ' . Designs::LAYOUTS[$layout]['name'] . ' layout, ' . Designs::THEMES[$theme]['name'] . ' colours.',
+            'Design saved: the ' . Designs::LAYOUTS[$layout]['name'] . ' template in ' . Designs::THEMES[$theme]['name'] . ' colours.',
         );
     }
 

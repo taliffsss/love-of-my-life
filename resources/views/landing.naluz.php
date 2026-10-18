@@ -17,7 +17,7 @@
       @include('partials.brand')
       <span class="spacer"></span>
       <nav aria-label="Main" class="row">
-        <a class="hide-sm" href="#layouts">Layouts</a>
+        <a class="hide-sm" href="#templates">Templates</a>
         <a class="hide-sm" href="#pricing">Pricing</a>
         <a class="hide-sm" href="/demo">Demo</a>
         @if ($user !== null)
@@ -80,19 +80,20 @@
     </div>
   </section>
 
-  <section class="band band-alt" id="layouts" aria-labelledby="layouts-title">
+  <section class="band band-alt" id="templates" aria-labelledby="templates-title">
     <div class="container">
-      <p class="eyebrow">Layouts</p>
-      <h2 id="layouts-title" style="margin-top:10px">Make it look like the two of you.</h2>
-      <p class="sub">Pick a layout and a colour theme. Switch any time from your dashboard; the link stays the same.</p>
-      <div class="grid-3">
+      <p class="eyebrow">{{ count($layouts) }} templates</p>
+      <h2 id="templates-title" style="margin-top:10px">Make it look like the two of you.</h2>
+      <p class="sub">Pick a template and a colour theme: every template works with every theme. Most of them are little things to play: break a seal, scratch a card, turn the pages, find the pairs. Switch any time from your dashboard; the link stays the same.</p>
+      <div class="grid-templates">
         @foreach ($layouts as $key => $layout)
         <article class="card layout-card">
           <div class="shot"><div class="schem schem-{{ $key }}" aria-hidden="true"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></div></div>
           <div class="body">
             <h3>{{ $layout['name'] }}</h3>
             <p>{{ $layout['description'] }}</p>
-            <div class="row"><a class="btn btn-secondary btn-sm" href="/demo?layout={{ $key }}">Open the {{ strtolower($layout['name']) }} demo</a></div>
+            <p class="play">{{ $layout['play'] }}</p>
+            <div class="row"><a class="btn btn-secondary btn-sm" href="/demo?layout={{ $key }}" aria-label="Open the {{ strtolower($layout['name']) }} demo">Try it</a></div>
           </div>
         </article>
         @endforeach
@@ -124,7 +125,7 @@
             <li>{{ $plan['days'] === null ? 'Online forever' : 'Online for ' . $plan['days'] . ' days' }}</li>
             <li>Up to {{ $plan['photos'] }} photos</li>
             <li>Your song, your letter, your question</li>
-            <li>All layouts and colour themes</li>
+            <li>All {{ count($layouts) }} templates and every colour theme</li>
             <li>Link and printable QR code</li>
             @if ($plan['subdomain'])
             <li>Its own address: <strong>yourname.{{ $domain }}</strong></li>
@@ -148,7 +149,7 @@
         </details>
         <details>
           <summary>Can I change it after I send it?</summary>
-          <p>Yes. Change the letter, the photos, the song, the question, the layout or the colours whenever you like. The link and the QR code stay the same.</p>
+          <p>Yes. Change the letter, the photos, the song, the question, the template or the colours whenever you like. The link and the QR code stay the same.</p>
         </details>
         <details>
           <summary>What is the dedicated address?</summary>

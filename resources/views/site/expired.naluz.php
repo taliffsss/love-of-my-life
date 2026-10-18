@@ -9,9 +9,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/assets/themes.css?v={{ (string) @filemtime(base_path('public/assets/themes.css')) }}" />
     <link rel="stylesheet" href="/assets/site.css?v={{ (string) @filemtime(base_path('public/assets/site.css')) }}" />
   </head>
-  <body data-layout="classic" data-theme="{{ \App\Services\Designs::theme($page->theme) }}" data-mode="expired">
+  @php $theme = \App\Services\Designs::theme($page->theme); @endphp
+  <body data-layout="classic" data-theme="{{ $theme }}" data-scheme="{{ \App\Services\Designs::THEMES[$theme]['scheme'] }}" data-mode="expired">
     <main class="gate">
       <div class="card">
         <p class="eyebrow">For {{ $page->recipient }}</p>

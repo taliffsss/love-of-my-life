@@ -1,0 +1,51 @@
+/* Template "envelope": a sealed envelope; the seal opens it, the letter slides out, the photos are tucked in after it.
+   Colours only from themes.css. */
+
+body[data-layout="envelope"] .show { background: radial-gradient(70% 60% at 50% 35%, var(--bg-2), var(--bg) 75%); }
+body[data-layout="envelope"] .env-stage { min-height: 100%; display: grid; place-content: center; justify-items: center; gap: 30px; padding: 84px 18px 48px; }
+body[data-layout="envelope"] .env-scene { position: relative; width: min(86vw, 520px); aspect-ratio: 1.6; perspective: 1400px; cursor: pointer; }
+body[data-layout="envelope"] .env-back,
+body[data-layout="envelope"] .env-front,
+body[data-layout="envelope"] .env-flap { position: absolute; inset: 0; border-radius: 10px; }
+body[data-layout="envelope"] .env-back { background: color-mix(in srgb, var(--accent) 34%, var(--paper)); box-shadow: 0 2px 6px rgba(0, 0, 0, .18), 0 30px 70px rgba(0, 0, 0, .35); }
+body[data-layout="envelope"] .env-paper {
+  position: absolute; z-index: 1; left: 6%; right: 6%; top: 7%; height: 86%; border-radius: 6px;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 17px, color-mix(in srgb, var(--ink) 12%, transparent) 17px, color-mix(in srgb, var(--ink) 12%, transparent) 18px) 0 28px / 100% calc(100% - 40px) no-repeat, var(--paper);
+  transition: transform 1.2s var(--ease) .45s;
+}
+body[data-layout="envelope"] .env-front { z-index: 2; background: color-mix(in srgb, var(--accent) 22%, var(--paper)); clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%); }
+body[data-layout="envelope"] .env-to { position: absolute; left: 0; right: 0; bottom: 11%; margin: 0; text-align: center; font-family: 'Caveat', cursive; font-weight: 600; font-size: clamp(1.4rem, 5.5vw, 2.1rem); color: var(--ink); overflow-wrap: anywhere; padding: 0 12%; }
+body[data-layout="envelope"] .env-flap {
+  z-index: 3; clip-path: polygon(0 0, 100% 0, 50% 58%); transform-origin: 50% 0;
+  background: color-mix(in srgb, var(--accent) 44%, var(--paper));
+  transition: transform 1s var(--ease), z-index 0s linear .45s;
+}
+body[data-layout="envelope"] .env-seal {
+  position: absolute; z-index: 4; left: 50%; top: 58%; width: 70px; height: 70px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; color: var(--paper); cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, var(--accent), var(--accent-deep) 72%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .3), inset 0 0 0 5px color-mix(in srgb, var(--accent-deep) 80%, transparent);
+  transform: translate(-50%, -50%); animation: envPulse 2.6s ease-in-out infinite;
+  transition: transform .6s var(--ease), opacity .6s var(--soft);
+}
+body[data-layout="envelope"] .env-seal:focus-visible { outline: 3px solid var(--text); outline-offset: 5px; }
+@keyframes envPulse { 50% { transform: translate(-50%, -50%) scale(1.08); } }
+
+body[data-layout="envelope"] .env.opening .env-seal { animation: none; transform: translate(-50%, -50%) scale(1.7); opacity: 0; pointer-events: none; }
+body[data-layout="envelope"] .env.opening .env-flap { transform: rotateX(180deg); z-index: 0; }
+body[data-layout="envelope"] .env.opening .env-paper { transform: translate3d(0, -64%, 0); }
+body[data-layout="envelope"] .env.opening .hint { visibility: hidden; }
+body[data-layout="envelope"] .env.open .env-stage { display: none; }
+
+body[data-layout="envelope"] .env-open { padding: 84px 18px 56px; display: grid; justify-items: center; gap: 36px; }
+body[data-layout="envelope"] .env-open .sheet { width: min(100%, 640px); animation: envUp 1.1s var(--ease) both; }
+body[data-layout="envelope"] .env-tucked { width: min(100%, 760px); animation: envUp 1.1s var(--ease) .35s both; }
+body[data-layout="envelope"] .env-tucked h3 { margin: 0 0 18px; text-align: center; font-size: .72rem; font-weight: 500; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); }
+body[data-scheme="light"][data-layout="envelope"] .env-tucked h3 { color: var(--accent-deep); }
+@keyframes envUp { from { opacity: 0; transform: translate3d(0, 40px, 0) scale(.97); } }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-layout="envelope"] .env-seal { animation: none; }
+  body[data-layout="envelope"] .env-flap, body[data-layout="envelope"] .env-paper, body[data-layout="envelope"] .env-seal { transition: none; }
+  body[data-layout="envelope"] .env-open .sheet, body[data-layout="envelope"] .env-tucked { animation: none; }
+}

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Naluz\Tests\Http;
 
 use App\Models\Page;
+use App\Services\Designs;
 use App\Models\User;
 use Naluz\Security\Hasher;
 use Naluz\Tests\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Http\Message\ResponseInterface;
 
 final class PublicPageTest extends TestCase
@@ -158,6 +160,38 @@ final class PublicPageTest extends TestCase
         $html = (string) $this->get('/p/' . $page->slug)->getBody();
         $this->assertStringContainsString('data-layout="polaroid"', $html);
         $this->assertStringContainsString('data-theme="sunset"', $html);
+    }
+
+    /** @return array<string,array{string}> */
+    public static function templates(): array
+    {
+        return array_combine(array_keys(Designs::LAYOUTS), array_map(static fn (string $key): array => [$key], array_keys(Designs::LAYOUTS)));
+    }
+
+    /** Every template loads its own CSS and script, has the music controls, and gives nothing away before the answer. */
+    #[DataProvider('templates')]
+    public function testEveryTemplateIsServedAsItsOwnModule(string $layout): void
+    {
+        $page = $this->lockedPage(['layout' => $layout, 'theme' => 'blush', 'recipient' => '<b>Yam</b>']);
+        $response = $this->get('/p/' . $page->slug);
+        $html = (string) $response->getBody();
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('data-layout="' . $layout . '"', $html);
+        $this->assertStringContainsString('data-scheme="light"', $html, 'blush is a light theme');
+        $this->assertStringContainsString('<link rel="stylesheet" href="/assets/themes.css?v=', $html);
+        $this->assertStringContainsString('<link rel="stylesheet" href="/assets/templates/' . $layout . '.css?v=', $html);
+        $script = strpos($html, '<script src="/assets/templates/' . $layout . '.js?v=');
+        $this->assertNotFalse($script, 'the template script');
+        $this->assertGreaterThan($script, strpos($html, '<script src="/assets/site.js?v='), 'registered before site.js runs');
+        $this->assertStringContainsString('"layout":"' . $layout . '"', $html);
+        foreach (['id="show"', 'id="mute"', 'id="nowplaying"', 'id="npTitle"', 'id="announce"'] as $needed) {
+            $this->assertStringContainsString($needed, $html, "{$needed}: site.js relies on it");
+        }
+        $this->assertStringNotContainsString('secret-photo', $html);
+        $this->assertStringNotContainsString('A secret paragraph', $html);
+        $this->assertStringNotContainsString('<b>Yam</b>', $html, 'the name is escaped in the template markup too');
+        $this->assertStringContainsString('&lt;b&gt;Yam&lt;/b&gt;', $html);
     }
 
     public function testUserTextIsEscaped(): void

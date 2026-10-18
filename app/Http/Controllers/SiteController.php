@@ -97,18 +97,26 @@ final class SiteController
     {
         $content = $mode === 'locked' ? null : ($content ?? $this->content($page));
         $url = $this->sites->url($page);
-        $assetVersion = (string) max(
-            (int) @filemtime(base_path('public/assets/site.js')),
-            (int) @filemtime(base_path('public/assets/site.css')),
-        );
+        $layout = Designs::layout($page->layout);
+        $theme = Designs::theme($page->theme);
+        $assets = Designs::assets($layout);
+        $assetVersion = (string) max(array_map(
+            static fn (string $file): int => (int) @filemtime(base_path('public/' . $file)),
+            ['assets/site.js', 'assets/site.css', 'assets/themes.css', $assets['css'], $assets['js']],
+        ));
 
         $response = view('site.page', [
             'page' => $page,
             'mode' => $mode,
-            'layout' => Designs::layout($page->layout),
-            'theme' => Designs::theme($page->theme),
+            'layout' => $layout,
+            'theme' => $theme,
+            'scheme' => Designs::THEMES[$theme]['scheme'],
+            'themeColor' => Designs::THEMES[$theme]['colors'][0],
+            'view' => Designs::view($layout),
+            'assets' => $assets,
             'config' => [
                 'mode' => $mode,
+                'layout' => $layout,
                 'unlockUrl' => $unlockUrl,
                 'song' => $page->song_id !== null && $page->song_id !== ''
                     ? ['id' => $page->song_id, 'title' => (string) $page->song_title, 'artist' => (string) $page->song_artist]

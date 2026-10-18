@@ -9,7 +9,7 @@ original single page (`jinelin-basela.markanthonynaluz.com`) becomes one of thos
 
 | Thing | Why |
 |---|---|
-| `APP_URL` | the product's address: landing page, sign-in, dashboard (e.g. `https://love.example.com`) |
+| `APP_URL` | the product's address: landing page, sign-in, dashboard (`https://love.markanthonynaluz.com`) |
 | `SAAS_DOMAIN` | the domain page addresses live under (defaults to the host of `APP_URL`) |
 | DNS `A` record for `SAAS_DOMAIN` **and** a wildcard `A` record `*.SAAS_DOMAIN` | every claimed name works immediately, with nothing to add per page |
 | A **wildcard** TLS certificate for `*.SAAS_DOMAIN` | Let's Encrypt only issues wildcards through the DNS-01 challenge (see below) |
@@ -30,32 +30,34 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
 
 ### One-time setup
 
-1. **DNS:** `A` records for `SAAS_DOMAIN` and `*.SAAS_DOMAIN` (and the old `jinelin-basela.markanthonynaluz.com`) at the
-   server running Traefik.
+The product lives at `love.markanthonynaluz.com` (`SAAS_DOMAIN`), so Forever pages are
+`<name>.love.markanthonynaluz.com`.
+
+1. **DNS** (DigitalOcean, domain `markanthonynaluz.com`): two `A` records at the server running Traefik
+   (`152.42.252.125`, the same address as `jinelin-basela`): `love` and the wildcard `*.love`. With the API:
+   ```bash
+   for name in love '*.love'; do
+     curl -s -X POST https://api.digitalocean.com/v2/domains/markanthonynaluz.com/records \
+       -H "Authorization: Bearer $DO_AUTH_TOKEN" -H "Content-Type: application/json" \
+       -d "{\"type\":\"A\",\"name\":\"$name\",\"data\":\"152.42.252.125\",\"ttl\":1800}"
+   done
+   dig +short love.markanthonynaluz.com anything.love.markanthonynaluz.com   # both print 152.42.252.125
+   ```
+   The token needs only the `domain:read`, `domain:create` and `domain:delete` scopes.
 2. **Wildcard certificate.** The existing `letsencrypt` resolver uses the HTTP challenge, which cannot issue
-   `*.SAAS_DOMAIN`. Add a DNS-challenge resolver to the main Traefik stack. With DigitalOcean DNS:
+   `*.love.markanthonynaluz.com`. Add a DNS-challenge resolver named `letsencrypt-dns` to the main Traefik stack:
    ```yaml
    # Traefik static configuration (command flags or traefik.yml)
    - "--certificatesresolvers.letsencrypt-dns.acme.email=you@example.com"
    - "--certificatesresolvers.letsencrypt-dns.acme.storage=/letsencrypt/acme-dns.json"
    - "--certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=digitalocean"
-   # and the environment variable DO_AUTH_TOKEN=<a DigitalOcean API token with DNS write access>
+   # and, on the Traefik service only (never in the app's .env.production): DO_AUTH_TOKEN=<the same scoped token>
    ```
-   Then give the web service a router for the product and every page address (Traefik v3 syntax; on v2 use
-   ``HostRegexp(`{name:[a-z0-9-]+}.love.example.com`)``):
-   ```yaml
-   - "traefik.http.routers.lom-saas.rule=Host(`love.example.com`) || HostRegexp(`^[a-z0-9-]+\\.love\\.example\\.com$`)"
-   - "traefik.http.routers.lom-saas.entrypoints=websecure"
-   - "traefik.http.routers.lom-saas.tls=true"
-   - "traefik.http.routers.lom-saas.tls.certresolver=letsencrypt-dns"
-   - "traefik.http.routers.lom-saas.tls.domains[0].main=love.example.com"
-   - "traefik.http.routers.lom-saas.tls.domains[0].sans=*.love.example.com"
-   - "traefik.http.routers.lom-saas.middlewares=jinelin-compress,jinelin-secure"
-   - "traefik.http.routers.lom-saas.service=jinelin-basela"
-   ```
-   plus the same `-http` router with `redirect-to-https@file`. These labels are not in `deploy/docker-stack.yml` yet
-   because they depend on the domain you choose; add them once `SAAS_DOMAIN` is decided. The existing
-   `jinelin-basela` router keeps serving the old domain.
+   The routers that use it are already in `deploy/docker-stack.yml` (`lom-saas` and `lom-saas-http`, Traefik v3
+   `HostRegexp` syntax). Traefik asks for the certificate the first time the stack is deployed with them; if the resolver
+   has another name on your server, change `tls.certresolver` there. In that file a literal `$` is written `$$`:
+   `docker stack deploy` refuses a lone `$` ("invalid interpolation format"). The existing `jinelin-basela` router keeps
+   serving the old domain.
 3. **Server folder** (default `/opt/love-of-my-life`):
    ```bash
    mkdir -p /opt/love-of-my-life/deploy

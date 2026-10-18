@@ -8,9 +8,22 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
   browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design
   with a live preview, sharing (link, printable QR code) and the plan. Someone else's page always answers 404.
-- **Layouts and themes.** Classic (the 2.x look), Cinematic (full-screen photos, the letter floats over them like
-  subtitles) and Polaroid (an instant-photo frame next to a handwritten letter); colours Rose, Midnight, Sunset and Blush.
-  Switch any time; the dashboard previews a choice before it is saved.
+- **10 templates and 4 colour themes**, any template with any theme; switch any time, the dashboard previews a choice
+  before it is saved:
+  - slideshows: Classic (the 2.x look), Cinematic (full-screen photos, the letter floats over them like subtitles) and
+    Polaroid (an instant-photo frame next to a handwritten letter);
+  - interactive: Envelope (break the heart seal; the letter slides out with the photos tucked in), Scratch card (scratch
+    the foil off the first photo), Storybook (turn the pages of a book: a photo and a part of the letter each), Memory
+    game (find the pairs of photos to open the letter), Timeline (chapters that appear as you scroll), Gift box (untie the
+    present, flick through the photos) and Starry sky (stars in a heart, each holding a photo and a line);
+  - colours Rose, Midnight, Sunset and Blush (light).
+  Each template is a module: an entry in `App\Services\Designs`, its own `public/assets/templates/<key>.css` and `.js`
+  (registered as `window.LoveTemplates.<key>`) and its markup in `resources/views/site/templates/`; only the page's own
+  template is loaded. Themes are blocks of CSS variables in `public/assets/themes.css`, which is all a template uses for
+  colour. Every interaction has a keyboard way (and a way to skip a game), respects reduced motion, and the content still
+  arrives only after the answer. If a template's script fails, the page opens on the plain letter and photos.
+  With reduced motion turned on, the zoom out of the lock screen's blur takes 0.4 s instead of 2.8 s, so the page can be
+  used as soon as it opens.
 - **Private by design.** The answer is checked on the server (normalised and hashed like a password; case and spaces
   don't matter) and the photos and letter are only sent after it, so the page's HTML and script contain neither. Guessing
   is limited to 10 tries a minute. Pages are `noindex` unless marked searchable. 2.x kept the answer in `app.js`.
@@ -19,13 +32,15 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   Payment activation happens exactly once (a conditional update), whatever confirms it.
 - **Dedicated addresses.** A Forever page can claim `<name>.<SAAS_DOMAIN>` (3–30 lowercase letters, digits or dashes; reserved
   names refused; one page per name). It works as soon as it is saved: `ResolveSiteHost` maps the host to the page before
-  routing, and only the page itself is reachable on that host. Needs a wildcard DNS record and certificate (DEPLOY.md).
+  routing, and only the page itself is reachable on that host. The product runs at `love.markanthonynaluz.com`: the
+  stack file routes it and `*.love.markanthonynaluz.com` to the app on a wildcard certificate (Traefik DNS challenge with
+  DigitalOcean); the two DNS records and the resolver are set up once (DEPLOY.md).
 - **Payments.** Choosing a plan creates an order with a reference; with `PAYMENTS_DRIVER=none` the customer sees how to
   pay (GCash/Maya) and an admin activates it with `php bin/grant-plan.php <reference>`. `PAYMENTS_DRIVER=fake` is a test
   checkout and refuses to run in production. Online checkout (PayMongo) is next.
 - **The original site** moves in with `php bin/import-legacy.php`: a Forever page owned by your account, on its old
   domain, with the same letter, song, photos and answer.
-- Landing page with the layouts, prices and FAQ, and a `/demo` anyone can open in every layout and theme.
+- Landing page with the templates, prices and FAQ, and a `/demo` anyone can open in every template and theme.
 - Database: SQLite in the storage volume (migrations run at container start; `RUN_MIGRATIONS=false` to skip);
   `php bin/backup-db.php` takes a consistent copy.
 - Removed: the in-page upload/song/message dialogs and their upload key (`UPLOAD_KEY`), `POST /upload|/song|/letter`,

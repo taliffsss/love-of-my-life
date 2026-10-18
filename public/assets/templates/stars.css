@@ -1,0 +1,61 @@
+/* Template "stars": a sky of stars in the shape of a heart; each star opens a photo and a part of the letter.
+   Colours only from themes.css (the sky is --bg/--bg-2, the stars --accent and --gold). */
+
+body[data-layout="stars"] .show { background: radial-gradient(90% 70% at 50% 20%, var(--bg-2), var(--bg) 70%); }
+body[data-layout="stars"] .sky-dust { position: absolute; inset: 0; height: 100%; pointer-events: none; overflow: hidden; }
+body[data-layout="stars"] .sky-dust i,
+body[data-layout="stars"] .sky-field > i { position: absolute; width: var(--d); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2); border-radius: 50%; background: var(--text); opacity: var(--o); animation: skyTwinkle var(--t) ease-in-out var(--delay) infinite; }
+body[data-scheme="light"][data-layout="stars"] .sky-dust i { background: var(--accent); }
+body[data-layout="stars"] .sky-field > i.outline { background: var(--gold); }
+@keyframes skyTwinkle { 50% { opacity: calc(var(--o) * .25); } }
+
+body[data-layout="stars"] .sky-stage { position: relative; min-height: 100%; display: grid; align-content: center; justify-items: center; gap: 14px; padding: 76px 14px 28px; }
+body[data-layout="stars"] .sky-head { text-align: center; display: grid; gap: 8px; }
+body[data-layout="stars"] .sky-head .eyebrow { margin: 0; }
+body[data-layout="stars"] .sky-field { position: relative; width: min(92vw, 620px, 66svh); aspect-ratio: 1; }
+body[data-layout="stars"] .sky-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+body[data-layout="stars"] .sky-lines polyline { fill: none; stroke: var(--gold); stroke-width: 1.5px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: .75; filter: drop-shadow(0 0 4px var(--gold)); transition: opacity .6s; }
+body[data-layout="stars"] .sky.complete .sky-lines polyline { stroke-width: 2.5px; opacity: 1; animation: skyGlow 2.4s ease-in-out infinite; }
+@keyframes skyGlow { 50% { opacity: .55; } }
+
+body[data-layout="stars"] .sky-star {
+  position: absolute; left: var(--x); top: var(--y); width: 48px; height: 48px; margin: -24px 0 0 -24px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; background: none; cursor: pointer; color: var(--accent);
+}
+body[data-layout="stars"] .sky-star::before {
+  content: ''; width: 22px; height: 22px; background: currentColor;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 6px currentColor); animation: skyStar 2.6s ease-in-out var(--delay, 0s) infinite; transition: transform .4s var(--ease);
+}
+body[data-layout="stars"] .sky-star:hover::before { transform: scale(1.25); }
+body[data-layout="stars"] .sky-star:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+body[data-layout="stars"] .sky-star.seen { color: var(--gold); }
+body[data-layout="stars"] .sky-star.seen::before { width: 26px; height: 26px; animation: none; }
+@keyframes skyStar { 50% { transform: scale(.78); opacity: .7; } }
+body[data-layout="stars"] .sky-count { margin: 0; min-height: 1.2em; font-size: .78rem; letter-spacing: .14em; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* a star's memory */
+body[data-layout="stars"] .sky-card {
+  width: min(92vw, 440px); max-height: 92dvh; padding: 16px 16px 18px; border: 0; border-radius: 18px; overflow-y: auto;
+  color: var(--ink); background: var(--paper); box-shadow: 0 30px 80px rgba(0, 0, 0, .5);
+}
+body[data-layout="stars"] .sky-card::backdrop { background: color-mix(in srgb, var(--bg) 70%, transparent); }
+body[data-layout="stars"] .sky-card[open] { animation: skyCardIn .45s var(--ease); }
+@keyframes skyCardIn { from { opacity: 0; transform: translate3d(0, 24px, 0) scale(.96); } }
+body[data-layout="stars"] .sky-card-title { margin: 0 0 10px; text-align: center; color: color-mix(in srgb, var(--ink) 55%, transparent); }
+body[data-layout="stars"] .sky-card-photo { position: relative; aspect-ratio: 4 / 3.4; border-radius: 10px; overflow: hidden; background: #ece7e2; }
+body[data-layout="stars"] .sky-card-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+body[data-layout="stars"] .sky-card-photo .sky-card-heart { position: absolute; inset: 0; display: grid; place-items: center; font-size: 3.4rem; color: var(--paper); }
+body[data-layout="stars"] .sky-card-text { margin: 14px 4px 16px; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.22rem; line-height: 1.6; text-align: center; text-wrap: pretty; }
+body[data-layout="stars"] .sky-card-text:empty { display: none; }
+body[data-layout="stars"] .sky-card-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+body[data-layout="stars"] .sky-card .pill.ghost { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); border-color: color-mix(in srgb, var(--ink) 18%, transparent); }
+
+body[data-layout="stars"] .sky-end { position: relative; display: grid; justify-items: center; gap: 30px; padding: 8px 18px 60px; }
+body[data-layout="stars"] .sky-end .sheet { width: min(100%, 640px); scroll-margin-top: 76px; animation: skyCardIn 1s var(--ease) both; }
+body[data-layout="stars"] .sky-end .prints { width: min(100%, 760px); }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-layout="stars"] .sky-dust i, body[data-layout="stars"] .sky-field > i, body[data-layout="stars"] .sky-star::before, body[data-layout="stars"] .sky.complete .sky-lines polyline { animation: none; }
+  body[data-layout="stars"] .sky-card[open], body[data-layout="stars"] .sky-end .sheet { animation: none; }
+}

@@ -1,7 +1,8 @@
 # ============================================================
 # deploy/docker-stack.yml  —  Love of My Life  (Swarm + shared Traefik)
 #
-#   https://jinelin-basela.markanthonynaluz.com
+#   https://love.markanthonynaluz.com (the product), https://<name>.love.markanthonynaluz.com (Forever pages)
+#   https://jinelin-basela.markanthonynaluz.com (the original page, after bin/import-legacy.php)
 #
 # Same pattern as hris-api / dink: the one shared Traefik (Swarm provider, certresolver `letsencrypt`, file middleware
 # `redirect-to-https@file`) routes by Host() across the external `app_network`.
@@ -62,6 +63,24 @@ services:
         - "traefik.http.routers.jinelin-basela-http.entrypoints=web"
         - "traefik.http.routers.jinelin-basela-http.middlewares=redirect-to-https@file"
         - "traefik.http.routers.jinelin-basela-http.service=jinelin-basela"
+
+        # ── The product and every page address: love.markanthonynaluz.com and <name>.love.markanthonynaluz.com ──
+        # (SAAS_DOMAIN=love.markanthonynaluz.com). One wildcard certificate covers every name a Forever page claims, so
+        # nothing is added per page. Let's Encrypt issues wildcards only through the DNS challenge: the resolver
+        # `letsencrypt-dns` (DigitalOcean DNS, DO_AUTH_TOKEN) must exist in the main Traefik stack, see DEPLOY.md.
+        # `$$` is a literal `$` here (docker stack deploy interpolates `$`).
+        - "traefik.http.routers.lom-saas.rule=Host(`love.markanthonynaluz.com`) || HostRegexp(`^[a-z0-9-]+\\.love\\.markanthonynaluz\\.com$$`)"
+        - "traefik.http.routers.lom-saas.entrypoints=websecure"
+        - "traefik.http.routers.lom-saas.tls=true"
+        - "traefik.http.routers.lom-saas.tls.certresolver=letsencrypt-dns"
+        - "traefik.http.routers.lom-saas.tls.domains[0].main=love.markanthonynaluz.com"
+        - "traefik.http.routers.lom-saas.tls.domains[0].sans=*.love.markanthonynaluz.com"
+        - "traefik.http.routers.lom-saas.middlewares=jinelin-compress,jinelin-secure"
+        - "traefik.http.routers.lom-saas.service=jinelin-basela"
+        - "traefik.http.routers.lom-saas-http.rule=Host(`love.markanthonynaluz.com`) || HostRegexp(`^[a-z0-9-]+\\.love\\.markanthonynaluz\\.com$$`)"
+        - "traefik.http.routers.lom-saas-http.entrypoints=web"
+        - "traefik.http.routers.lom-saas-http.middlewares=redirect-to-https@file"
+        - "traefik.http.routers.lom-saas-http.service=jinelin-basela"
 
         # ── Service ───────────────────────────────────────────────────────
         - "traefik.http.services.jinelin-basela.loadbalancer.server.port=80"
