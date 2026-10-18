@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Love of My Life: social cards</title>
+    <!-- One social card per URL: cards.html?card=feed-hook (see cards.js CARDS). render_cards.py screenshots them. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=Inter:wght@400;500;600&display=block" rel="stylesheet" />
+    <style>
+      :root { --bg: #160a14; --bg-2: #2a1220; --text: #fbeef0; --muted: rgba(251, 238, 240, .72); --accent: #f2a7b8; --gold: #f0cfa8; --paper: #fffaf3; --ink: #3a2230; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: transparent; }
+      .card { position: relative; overflow: hidden; color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+        background: radial-gradient(110% 90% at 28% 12%, #3a1630, var(--bg-2) 45%, var(--bg) 82%); }
+      .card.clear { background: transparent; }
+      .abs { position: absolute; }
+      .hearts span { position: absolute; color: var(--accent); opacity: .3; line-height: 1; filter: drop-shadow(0 0 10px rgba(242, 167, 184, .5)); }
+      .kicker { font-size: 28px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+      .headline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; line-height: 1.02; }
+      .sub { font-size: 34px; line-height: 1.35; color: var(--muted); }
+      .hand { font-family: 'Caveat', cursive; font-weight: 700; color: var(--gold); }
+      .url { display: inline-block; padding: 16px 30px; border-radius: 999px; font-size: 34px; font-weight: 600; color: #2a1220; background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 16px 40px rgba(0, 0, 0, .35); }
+      .logo { display: flex; align-items: center; gap: 16px; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 44px; }
+      .logo svg { width: 46px; height: 46px; color: #e0607e; }
+      .phone { border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #3a2434, #120810); box-shadow: 0 0 0 2px rgba(255, 255, 255, .08) inset, 0 34px 80px rgba(0, 0, 0, .55); }
+      .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: #000; }
+      .phone img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .phone .island { position: absolute; left: 50%; top: 10px; width: 30%; height: 22px; margin-left: -15%; border-radius: 14px; background: #000; }
+      .lettie svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .35)); }
+      .clear .lettie svg { filter: none; }
+      .note { font-size: 20px; color: rgba(251, 238, 240, .5); }
+      .qr { background: var(--paper); border-radius: 22px; padding: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, .4); }
+      .qr img { display: block; width: 100%; image-rendering: pixelated; }
+    </style>
+  </head>
+  <body>
+    <div id="card" class="card"></div>
+    <script src="cards.js"></script>
+  </body>
+</html>

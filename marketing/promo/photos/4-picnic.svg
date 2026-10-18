@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <!-- Sample "photo" for the promo: a picnic with heart balloons. Illustration, not a real photo. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd9e2"/><stop offset=".7" stop-color="#ffe9d8"/><stop offset="1" stop-color="#fff3e0"/></linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a8d8a8"/><stop offset="1" stop-color="#6fae86"/></linearGradient>
+    <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3e5b8"/><stop offset="1" stop-color="#93c9a0"/></linearGradient>
+    <pattern id="check" width="80" height="80" patternUnits="userSpaceOnUse" patternTransform="rotate(12)">
+      <rect width="80" height="80" fill="#fff6f2"/><rect width="40" height="40" fill="#f2879f"/><rect x="40" y="40" width="40" height="40" fill="#f2879f"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#sky)"/>
+  <circle cx="300" cy="300" r="110" fill="#fff4cf"/>
+  <g fill="#fff" opacity=".85"><ellipse cx="820" cy="250" rx="130" ry="44"/><ellipse cx="900" cy="220" rx="90" ry="50"/><ellipse cx="200" cy="560" rx="110" ry="36"/></g>
+  <path d="M0 900 C 300 820 700 860 1200 780 V 1500 H 0 Z" fill="url(#hill2)"/>
+  <path d="M0 1040 C 380 960 820 1020 1200 950 V 1500 H 0 Z" fill="url(#hill)"/>
+  <!-- the tree -->
+  <rect x="890" y="700" width="46" height="330" rx="18" fill="#8b5a44"/>
+  <g fill="#7cbf8e"><circle cx="912" cy="640" r="150"/><circle cx="800" cy="720" r="110"/><circle cx="1030" cy="720" r="120"/><circle cx="910" cy="770" r="110"/></g>
+  <g fill="#f7a1b5"><circle cx="830" cy="640" r="12"/><circle cx="980" cy="600" r="12"/><circle cx="1010" cy="760" r="12"/><circle cx="880" cy="760" r="12"/></g>
+  <!-- the blanket and basket -->
+  <path d="M260 1180 L 820 1110 L 960 1330 L 340 1420 Z" fill="url(#check)"/>
+  <path d="M500 1150 h 200 l -20 120 h -160 z" fill="#c98a5a"/>
+  <path d="M520 1150 q 80 -110 160 0" fill="none" stroke="#a96a3e" stroke-width="16"/>
+  <rect x="490" y="1140" width="220" height="24" rx="12" fill="#b77a4a"/>
+  <!-- heart balloons -->
+  <g fill="none" stroke="#c46a83" stroke-width="4">
+    <path d="M600 1140 C 560 980 470 840 430 700"/><path d="M600 1140 C 600 960 590 800 600 640"/><path d="M600 1140 C 650 990 720 860 760 740"/>
+  </g>
+  <g>
+    <path transform="translate(430 640) scale(4.4)" d="M0 15 C -19 3, -25 -8, -17 -16 C -11 -22, -2 -20, 0 -12 C 2 -20, 11 -22, 17 -16 C 25 -8, 19 3, 0 15 Z" fill="#ee6687"/>
+    <path transform="translate(600 570) scale(5)" d="M0 15 C -19 3, -25 -8, -17 -16 C -11 -22, -2 -20, 0 -12 C 2 -20, 11 -22, 17 -16 C 25 -8, 19 3, 0 15 Z" fill="#f59ab0"/>
+    <path transform="translate(765 680) scale(4.2)" d="M0 15 C -19 3, -25 -8, -17 -16 C -11 -22, -2 -20, 0 -12 C 2 -20, 11 -22, 17 -16 C 25 -8, 19 3, 0 15 Z" fill="#e0607e"/>
+    <g fill="#fff" opacity=".45"><ellipse cx="400" cy="590" rx="16" ry="9" transform="rotate(-30 400 590)"/><ellipse cx="566" cy="512" rx="18" ry="10" transform="rotate(-30 566 512)"/><ellipse cx="737" cy="632" rx="15" ry="8" transform="rotate(-30 737 632)"/></g>
+  </g>
+</svg>

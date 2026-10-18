@@ -14,3 +14,7 @@
 /storage/app/letters/
 /public/storage/
 /storage/backups/
+
+# marketing renders (videos, frames, PNGs): rebuilt by marketing/promo/make_promo.sh
+/marketing/out/
+/marketing/**/__pycache__/

@@ -1,0 +1,82 @@
+/* The promo video's stage. Every moving thing is positioned by promo.js for a given time (seek(t)), never by CSS
+   animations, so each frame renders exactly the same on every run. Colours: the Rose theme of the product. */
+:root {
+  --bg: #160a14;
+  --bg-2: #2a1220;
+  --text: #fbeef0;
+  --muted: rgba(251, 238, 240, .7);
+  --accent: #f2a7b8;
+  --accent-deep: #d9728c;
+  --gold: #f0cfa8;
+  --paper: #fffaf3;
+  --ink: #3a2230;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; overflow: hidden; }
+#stage {
+  position: relative; overflow: hidden; color: var(--text);
+  font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  background: radial-gradient(110% 90% at 30% 15%, #3a1630, var(--bg-2) 45%, var(--bg) 80%);
+}
+#stage.landscape { width: 1920px; height: 1080px; }
+#stage.portrait { width: 1080px; height: 1920px; }
+.abs { position: absolute; left: 0; top: 0; will-change: transform, opacity; }
+
+/* background hearts and light */
+.bg-heart { color: var(--accent); line-height: 1; filter: drop-shadow(0 0 10px rgba(242, 167, 184, .55)); }
+.glow { width: 1400px; height: 1400px; border-radius: 50%; background: radial-gradient(circle, rgba(255, 190, 160, .22), transparent 65%); }
+
+/* the phone */
+.phone { border-radius: 64px; background: linear-gradient(160deg, #3a2434, #120810); padding: 16px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .08) inset, 0 40px 90px rgba(0, 0, 0, .55), 0 0 0 1px rgba(0, 0, 0, .6); }
+.phone .screen { position: relative; width: 100%; height: 100%; border-radius: 50px; overflow: hidden; background: #000; }
+.phone .screen img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.phone .island { position: absolute; z-index: 2; left: 50%; top: 14px; width: 30%; height: 30px; margin-left: -15%; border-radius: 20px; background: #000; }
+.mini { border-radius: 26px; padding: 7px; }
+.mini .screen { border-radius: 20px; }
+.mini .island { top: 6px; height: 12px; }
+
+/* words */
+.kicker { font-size: 26px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+.headline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; line-height: 1.02; color: var(--text); }
+.landscape .headline { font-size: 104px; width: 760px; }
+.portrait .headline { font-size: 100px; width: 940px; text-align: center; }
+.sub { font-size: 34px; font-weight: 400; line-height: 1.35; color: var(--muted); }
+.landscape .sub { width: 700px; }
+.portrait .sub { width: 900px; text-align: center; }
+.hand { font-family: 'Caveat', cursive; font-weight: 600; color: var(--gold); white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 14px; padding: 16px 28px; border-radius: 999px; white-space: nowrap;
+  font-size: 34px; font-weight: 500; color: var(--ink); background: linear-gradient(135deg, #fff7f1, #ffe1e6);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .3); }
+.pill i { font-style: normal; color: #d9466e; font-size: 34px; }
+.chip { padding: 18px 30px 20px; border-radius: 26px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .22);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .3); white-space: nowrap; }
+.chip b { display: block; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 58px; line-height: 1.05; color: var(--text); }
+.chip span { display: block; margin-top: 4px; font-size: 26px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.caption { padding: 16px 30px 18px; border-radius: 22px; background: rgba(16, 6, 14, .62); font-size: 40px; font-weight: 500; line-height: 1.3;
+  color: #fff; text-align: center; max-width: 960px; }
+
+/* share scene */
+.card { border-radius: 34px; background: var(--paper); color: var(--ink); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
+.link-card { width: 640px; padding: 26px; }
+.link-card .bubble { display: inline-block; padding: 18px 26px; border-radius: 28px 28px 28px 8px; background: #f3dde3; font-size: 34px; margin-bottom: 18px; }
+.link-card .preview { border-radius: 22px; overflow: hidden; border: 1px solid #ecd4da; }
+.link-card .preview .top { height: 220px; background: linear-gradient(135deg, #3d1d4f, #b9507a 55%, #f59a7b); display: grid; place-items: center; }
+.link-card .preview .top span { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 64px; color: #fff3ea; }
+.link-card .preview .meta { padding: 18px 22px 20px; }
+.link-card .preview .meta b { display: block; font-size: 32px; }
+.link-card .preview .meta small { display: block; margin-top: 6px; font-size: 26px; color: #9a7380; }
+.qr-card { width: 380px; padding: 28px 28px 22px; text-align: center; }
+.qr-card img { display: block; width: 100%; aspect-ratio: 1; image-rendering: pixelated; }
+.qr-card p { margin: 14px 0 0; font-size: 28px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #b8405f; }
+
+/* end card */
+.logo { display: flex; align-items: center; gap: 22px; white-space: nowrap; }
+.logo svg { width: 84px; height: 84px; color: #e0607e; filter: drop-shadow(0 0 18px rgba(242, 167, 184, .6)); }
+.logo span { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 112px; line-height: 1; }
+.url { padding: 18px 34px; border-radius: 999px; font-size: 40px; font-weight: 600; letter-spacing: .02em; white-space: nowrap;
+  color: #2a1220; background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 16px 40px rgba(0, 0, 0, .35); }
+.note { font-size: 22px; color: rgba(251, 238, 240, .45); white-space: nowrap; }
+
+#lettie svg { width: 100%; height: 100%; overflow: visible; display: block; filter: drop-shadow(0 26px 40px rgba(0, 0, 0, .35)); }
+.burst-heart { color: #ff8fab; line-height: 1; filter: drop-shadow(0 0 8px rgba(255, 143, 171, .7)); }

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1500" width="1200" height="1500">
+  <!-- Sample "photo" for the promo: a walk on the shore at sunset. Illustration, not a real photo. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d1d4f"/><stop offset=".42" stop-color="#b9507a"/><stop offset=".78" stop-color="#f59a7b"/><stop offset="1" stop-color="#ffd3a1"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e88a73"/><stop offset=".55" stop-color="#9a4a6a"/><stop offset="1" stop-color="#4a2547"/>
+    </linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f3b48e"/><stop offset="1" stop-color="#c97a68"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2cf"/><stop offset=".5" stop-color="#ffd39a" stop-opacity=".8"/><stop offset="1" stop-color="#ffb37a" stop-opacity="0"/></radialGradient>
+    <clipPath id="above"><rect width="1200" height="820"/></clipPath>
+  </defs>
+  <rect width="1200" height="820" fill="url(#sky)"/>
+  <g clip-path="url(#above)">
+    <circle cx="600" cy="800" r="330" fill="url(#glow)"/>
+    <circle cx="600" cy="810" r="130" fill="#fff0cc"/>
+  </g>
+  <g fill="none" stroke="#3d1d4f" stroke-width="7" stroke-linecap="round" opacity=".55">
+    <path d="M250 300 q 22 -20 44 0 q 22 -20 44 0"/><path d="M380 230 q 16 -14 32 0 q 16 -14 32 0"/><path d="M860 340 q 18 -16 36 0 q 18 -16 36 0"/>
+  </g>
+  <rect y="820" width="1200" height="330" fill="url(#sea)"/>
+  <g fill="#fff1d4" opacity=".6">
+    <rect x="520" y="842" width="160" height="7" rx="3.5"/><rect x="470" y="880" width="260" height="6" rx="3" opacity=".8"/>
+    <rect x="430" y="925" width="340" height="5" rx="2.5" opacity=".6"/><rect x="390" y="980" width="420" height="5" rx="2.5" opacity=".45"/>
+    <rect x="340" y="1045" width="520" height="4" rx="2" opacity=".3"/>
+  </g>
+  <path d="M0 1150 C 220 1120 420 1160 640 1138 C 860 1118 1020 1146 1200 1130 V 1500 H 0 Z" fill="url(#sand)"/>
+  <path d="M0 1150 C 220 1120 420 1160 640 1138 C 860 1118 1020 1146 1200 1130" fill="none" stroke="#fff4e0" stroke-width="6" opacity=".55"/>
+  <!-- the two of them, holding hands -->
+  <g fill="#2b1426">
+    <ellipse cx="600" cy="1308" rx="190" ry="20" opacity=".22"/>
+    <circle cx="520" cy="1012" r="34"/>
+    <rect x="486" y="1052" width="68" height="150" rx="30"/>
+    <rect x="492" y="1180" width="22" height="118" rx="11"/><rect x="526" y="1180" width="22" height="118" rx="11"/>
+    <circle cx="680" cy="1002" r="33"/><circle cx="703" cy="978" r="18"/>
+    <path d="M650 1040 h 60 q 14 0 18 14 l 34 160 q 3 14 -11 14 h -142 q -14 0 -11 -14 l 34 -160 q 4 -14 18 -14 z"/>
+    <rect x="652" y="1220" width="20" height="80" rx="10"/><rect x="688" y="1220" width="20" height="80" rx="10"/>
+    <path d="M548 1090 C 575 1130 615 1130 640 1092" fill="none" stroke="#2b1426" stroke-width="20" stroke-linecap="round"/>
+  </g>
+  <path transform="translate(600 905) scale(1.6)" d="M0 15 C -19 3, -25 -8, -17 -16 C -11 -22, -2 -20, 0 -12 C 2 -20, 11 -22, 17 -16 C 25 -8, 19 3, 0 15 Z" fill="#ffe1e8"/>
+</svg>

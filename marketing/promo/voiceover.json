@@ -1,0 +1,18 @@
+{
+  "_comment": "Lettie's lines. at/until: seconds on the video timeline (promo.js SCENES); a line must end before `until`. `say` overrides what is spoken (pronunciation); `text` is what the captions show. Spoken by voice.py. The four 05 lines start with the clip of the template they name.",
+  "lang": "en-us",
+  "lines": [
+    {"id": "01-hello", "at": 0.7, "until": 3.1, "text": "Hi! I'm Lettie, your little love letter."},
+    {"id": "02-hook", "at": 3.45, "until": 6.8, "text": "Got something sweet to say to someone you love?"},
+    {"id": "03-page", "at": 7.2, "until": 11.55, "text": "Make them a page of their own: your photos, your song, and a letter from the heart."},
+    {"id": "04-lock", "at": 11.9, "until": 15.1, "text": "Lock it with a question only they can answer."},
+    {"id": "05-choose", "at": 15.35, "until": 16.8, "text": "Then choose how it opens."},
+    {"id": "05-seal", "at": 16.95, "until": 19.0, "text": "Break a seal,", "say": "Break a seal..."},
+    {"id": "05-scratch", "at": 19.25, "until": 21.3, "text": "scratch a card,", "say": "scratch a card..."},
+    {"id": "05-pages", "at": 21.55, "until": 23.6, "text": "turn the pages,", "say": "turn the pages..."},
+    {"id": "05-stars", "at": 23.85, "until": 26.1, "text": "or light up the stars.", "say": "or, light up the stars!"},
+    {"id": "06-ten", "at": 26.45, "until": 29.7, "text": "Ten templates, in colours that feel like the two of you."},
+    {"id": "07-share", "at": 30.05, "until": 33.1, "text": "Send the link or a QR code, and watch them smile.", "say": "Send the link, or a Q R code, and watch them smile."},
+    {"id": "08-end", "at": 33.55, "until": 37.0, "text": "Love of My Life. Make one for someone you love."}
+  ]
+}

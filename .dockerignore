@@ -35,3 +35,6 @@ docker-compose.yml
 
 # photos uploaded while developing locally (production uses Spaces)
 public/storage
+
+# promo video and ad sources are not part of the app
+marketing
