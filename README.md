@@ -11,13 +11,16 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
   Starry sky. A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
   `<key>.js` and `resources/views/site/templates/<key>.naluz.php`; the contract its script follows is at the top of
   `public/assets/site.js`. A theme is a block of variables in `public/assets/themes.css`.
-- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`):
+- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`), from ₱200 a month; a year costs twelve months:
   - a free draft preview, with every template;
-  - **Sweet**, ₱59 a month or ₱590 a year: 12 photos and 5 templates;
-  - **Sweetheart**, ₱99 a month or ₱990 a year: 40 photos, all 10 templates, and its own address `<name>.<SAAS_DOMAIN>`,
-    which works the moment it is saved;
-  - **Forever**, ₱1,499 once: never expires, 60 photos, everything.
+  - **Sweet**, ₱200 a month or ₱2,400 a year: 12 photos and 5 templates;
+  - **Sweetheart**, ₱350 a month or ₱4,200 a year: 40 photos, all 10 templates, and its own address
+    `<name>.<SAAS_DOMAIN>`, which works the moment it is saved;
+  - **Forever**, ₱4,999 once: never expires, 60 photos, everything.
   A live page shows only its plan's templates; a draft can try them all.
+- **Photos belong to the account:** the plans of its live pages add up (6 for the free preview), every photo on every
+  page counts, and **12 more cost ₱100**, once. Up to 10 MB each. Deleting a photo or a page deletes its files from
+  storage (`php bin/empty-trash.php` retries any that failed).
 - **Private by default:** with a question set, the page's HTML holds no photo and no letter; they are sent only after the
   right answer (checked on the server, rate limited). Pages are hidden from search engines.
 

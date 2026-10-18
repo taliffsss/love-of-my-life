@@ -38,7 +38,7 @@
         <a class="btn btn-light btn-lg" href="/register">Start free: build it first</a>
         <a class="btn btn-outline-light btn-lg" href="/demo">See a demo</a>
       </div>
-      <p class="small" style="margin-top:14px;color:var(--night-muted)">Build and preview for free. Pay once when you are ready to send it.</p>
+      <p class="small" style="margin-top:14px;color:var(--night-muted)">Build and preview for free. Choose a plan when you are ready to send it.</p>
     </div>
     <div aria-hidden="true">
       <div class="phone">
@@ -123,7 +123,7 @@
           @if ($monthly !== null)
           <p class="price">{{ \App\Services\Plans::money((int) $monthly) }} <small>a month</small></p>
           @if ($yearly !== null)
-          <p class="or">or {{ \App\Services\Plans::money((int) $yearly) }} a year{!! $plan['months_free'] > 0 ? ': <strong>' . $plan['months_free'] . ' months free</strong>' : '' !!}</p>
+          <p class="or">or {{ \App\Services\Plans::money((int) $yearly) }} for a whole year, paid once</p>
           @endif
           @elseif ($once !== null)
           <p class="price">{{ \App\Services\Plans::money((int) $once) }} <small>once</small></p>
@@ -131,7 +131,7 @@
           @endif
           <p class="muted">{{ $plan['blurb'] }}</p>
           <ul>
-            <li>Up to {{ $plan['photos'] }} photos</li>
+            <li>{{ $plan['photos'] }} photos included</li>
             <li>{{ $plan['templates'] === 'all' ? 'All ' . count($layouts) . ' templates' : count($plan['templates']) . ' templates: ' . implode(', ', array_map(fn ($k) => $layouts[$k]['name'], $plan['templates'])) }}, every colour theme</li>
             <li>Your song, your letter, your question</li>
             <li>Link and printable QR code</li>
@@ -143,6 +143,7 @@
         </article>
         @endforeach
       </div>
+      <p class="sub plans-more">Need more photos? Add {{ $pack['photos'] }} for {{ \App\Services\Plans::money($pack['price']) }} whenever you like: paid once, kept for good, shared by all your pages.</p>
     </div>
   </section>
 
@@ -162,6 +163,10 @@
         <details>
           <summary>What is the dedicated address?</summary>
           <p>With the Sweetheart and Forever plans your page can live at its own address, like <strong>yourname.{{ $domain }}</strong>. Pick the name in your dashboard and it works right away.</p>
+        </details>
+        <details>
+          <summary>How many photos can I add?</summary>
+          <p>Photos belong to your account and are shared by all your pages. The free preview includes {{ $freePhotos }}; each live page adds the photos of its plan: @foreach (array_values($plans) as $i => $p){{ $i > 0 ? ($i === count($plans) - 1 ? ' and ' : ', ') : '' }}{{ $p['name'] }} {{ $p['photos'] }}@endforeach. Every photo counts until you delete it. When you run out, add {{ $pack['photos'] }} more for {{ \App\Services\Plans::money($pack['price']) }}; they never expire. Each photo can be up to {{ $maxPhoto }} and fits every template without being stretched.</p>
         </details>
         <details>
           <summary>What happens when a monthly or yearly plan ends?</summary>

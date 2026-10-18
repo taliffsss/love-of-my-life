@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Order;
 use App\Models\Page;
 
 /**
@@ -25,16 +26,17 @@ final class Plans
         private readonly string $currency = 'PHP',
         private readonly array $periods = self::DEFAULT_PERIODS,
     ) {
+        if (array_key_exists(Order::PHOTO_PACK, $plans)) {
+            throw new \InvalidArgumentException('"' . Order::PHOTO_PACK . '" names photo pack orders; give the plan another key.');
+        }
     }
 
-    /** @return array<string,array{key:string,name:string,prices:array<string,int>,photos:int,publish:bool,subdomain:bool,templates:string|list<string>,popular:bool,blurb:string,months_free:int}> */
+    /** @return array<string,array{key:string,name:string,prices:array<string,int>,photos:int,publish:bool,subdomain:bool,templates:string|list<string>,popular:bool,blurb:string}> */
     public function all(): array
     {
         $out = [];
         foreach ($this->plans as $key => $plan) {
-            $plan = ['key' => (string) $key] + $plan + ['prices' => [], 'templates' => 'all', 'popular' => false];
-            $plan['months_free'] = self::monthsFreeOf($plan['prices']);
-            $out[$key] = $plan;
+            $out[$key] = ['key' => (string) $key] + $plan + ['prices' => [], 'templates' => 'all', 'popular' => false];
         }
         return $out;
     }
@@ -83,23 +85,6 @@ final class Plans
             }
         }
         return false;
-    }
-
-    /** Months a yearly price saves against paying monthly (2 for ₱590 vs ₱59); 0 when the plan has no such pair. */
-    public function monthsFree(string $plan): int
-    {
-        return self::monthsFreeOf($this->get($plan)['prices'] ?? []);
-    }
-
-    /** @param array<string,int> $prices */
-    private static function monthsFreeOf(array $prices): int
-    {
-        $month = (int) ($prices['month'] ?? 0);
-        $year = (int) ($prices['year'] ?? 0);
-        if ($month <= 0 || $year <= 0) {
-            return 0;
-        }
-        return max(0, (int) round(12 - $year / $month));
     }
 
     /**

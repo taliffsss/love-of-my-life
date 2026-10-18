@@ -40,7 +40,7 @@ for (const opener of $$("[data-open]")) {
 const editor = $("main[data-page]");
 if (editor) {
   const slug = editor.dataset.page;
-  const maxBytes = Number(editor.dataset.maxBytes) || 12e6;
+  const maxBytes = Number(editor.dataset.maxBytes) || 10 * 1024 * 1024;
   const base = `/dashboard/pages/${slug}`;
   const frame = $("#preview-frame");
   const status = $("#photo-status");
@@ -64,46 +64,115 @@ if (editor) {
     });
     const data = await res.json().catch(() => ({}));
     if (res.status === 419) throw new Error("Your session expired. Reload the page and try again.");
-    if (!res.ok) throw new Error(data.message || `Something went wrong (HTTP ${res.status}).`);
+    if (res.status === 413) throw new Error(`This photo is too large. Photos can be up to ${mb(maxBytes)} each.`);
+    if (!res.ok) throw Object.assign(new Error(data.message || `Something went wrong (HTTP ${res.status}).`), { code: data.code, usage: data.usage });
     return data;
   }
 
-  // Photos are resized in the browser (longest side 2200 px, JPEG) so phone photos upload quickly.
+  // sizes as phones and computers show them (1 MB = 1024 × 1024 bytes), like the server's messages
+  const mb = (bytes) => `${String(Math.round((bytes / 1048576) * 10) / 10)} MB`;
+
+  // The account's photos (partials/photo-usage): numbers, meter and note after a photo is added or deleted.
+  const usageBox = $("#photo-usage");
+  const remaining = () => Number(usageBox?.dataset.remaining ?? Infinity);
+  function showUsage(u) {
+    if (!usageBox || !u) return;
+    usageBox.dataset.remaining = String(u.remaining);
+    $("#usage-used", usageBox).textContent = String(u.used);
+    $("#usage-total", usageBox).textContent = String(u.total);
+    $("#usage-left", usageBox).textContent = u.over > 0 ? `${u.over} over` : `${u.remaining} left`;
+    const bar = $(".meter", usageBox);
+    bar?.setAttribute("aria-valuenow", String(u.used));
+    bar?.setAttribute("aria-valuemax", String(u.total));
+    const fill = $("#usage-meter", usageBox);
+    if (fill) fill.style.width = `${u.total > 0 ? Math.min(100, Math.round((u.used / u.total) * 100)) : 100}%`;
+    const state = u.over > 0 ? "over" : u.remaining === 0 ? "full" : u.remaining <= 3 ? "low" : "ok";
+    usageBox.classList.remove("usage-ok", "usage-low", "usage-full", "usage-over");
+    usageBox.classList.add(`usage-${state}`);
+    // the same notes as partials/photo-usage
+    const notes = {
+      over: "A plan ended, so your account holds more photos than it now includes. Nothing was removed; to add new ones, delete some or buy more.",
+      full: `You have used every photo. Buy ${usageBox.dataset.pack} to keep adding, or delete one to make room.`,
+      low: `Only ${u.remaining} left. When they are used up, add ${usageBox.dataset.pack}.`,
+    };
+    const alert = $("#usage-alert", usageBox);
+    if (alert) {
+      alert.className = `notice ${state === "low" ? "notice-brand" : "notice-warn"}`;
+      alert.textContent = notes[state] || "";
+      alert.hidden = state === "ok";
+    }
+    if (state !== "ok") usageBox.querySelector("details")?.setAttribute("open", "");
+    if (zone) zone.hidden = u.remaining <= 0;
+  }
+
+  // Photos are resized in the browser (longest side 2200 px, JPEG) so phone photos upload quickly. The photo keeps its
+  // proportions and the way the camera held it; transparent parts become white rather than JPEG's black.
   async function shrink(file) {
-    const bmp = await createImageBitmap(file);
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
     const k = Math.min(1, 2200 / Math.max(bmp.width, bmp.height));
     const c = document.createElement("canvas");
-    c.width = Math.round(bmp.width * k);
-    c.height = Math.round(bmp.height * k);
-    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("That photo could not be read."))), "image/jpeg", 0.88));
+    c.width = Math.max(1, Math.round(bmp.width * k));
+    c.height = Math.max(1, Math.round(bmp.height * k));
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bmp, 0, 0, c.width, c.height);
+    bmp.close?.();
+    return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("That photo could not be read."))), "image/jpeg", 0.9));
   }
 
   async function upload(files) {
     if (!files.length) return;
+    // the server checks all of this again; checking first saves uploading what it would refuse
+    const tooBig = files.filter((f) => f.size > maxBytes);
+    let queue = files.filter((f) => f.size <= maxBytes);
+    const notes = tooBig.map((f) => `${f.name} is ${mb(f.size)}. Photos can be up to ${mb(maxBytes)} each.`);
+    const room = remaining();
+    if (queue.length > room) {
+      const left = queue.length - room;
+      queue = queue.slice(0, Math.max(0, room));
+      notes.push(`${left} photo${left === 1 ? "" : "s"} did not fit: ${room > 0 ? `there was room for ${room} more` : "your account has no photos left"}. Add ${usageBox?.dataset.pack || "more photos"} below.`);
+    }
+    if (!queue.length) {
+      say(notes.join(" "));
+      if (input) input.value = "";
+      if (room <= 0) usageBox?.querySelector("details")?.setAttribute("open", "");
+      return;
+    }
     let done = 0;
     zone?.setAttribute("aria-busy", "true");
     try {
-      for (const [i, file] of files.entries()) {
-        say(`Uploading ${i + 1} of ${files.length}…`);
+      for (const [i, file] of queue.entries()) {
+        say(`Uploading ${i + 1} of ${queue.length}…`);
         let blob;
         try {
           blob = await shrink(file);
         } catch {
           blob = file; // let the server judge it
         }
-        if (blob.size > maxBytes) throw new Error(`${file.name} is too large.`);
+        if (blob.size > maxBytes) throw new Error(`${file.name} is ${mb(blob.size)}. Photos can be up to ${mb(maxBytes)} each.`);
         const fd = new FormData();
         fd.append("photo", blob, file.name.replace(/\.[^.]+$/, "") + ".jpg");
-        await send("POST", `${base}/photos`, fd);
+        const data = await send("POST", `${base}/photos`, fd);
+        showUsage(data.usage);
         done++;
       }
-      say(`Added ${done} photo${done === 1 ? "" : "s"}.`);
-      location.hash = "photos";
-      location.reload();
+      say([`Added ${done} photo${done === 1 ? "" : "s"}.`, ...notes].join(" "));
+      if (!notes.length) {
+        location.hash = "photos";
+        location.reload();
+      } else {
+        setTimeout(() => location.reload(), 4000);
+      }
     } catch (e) {
-      say(done ? `Added ${done}, then: ${e.message}` : e.message);
-      if (done) setTimeout(() => location.reload(), 1800);
+      if (e.code === "photo_limit") {
+        showUsage(e.usage);
+        usageBox?.querySelector("details")?.setAttribute("open", "");
+      }
+      say([done ? `Added ${done}, then: ${e.message}` : e.message, ...notes].join(" "));
+      if (done) setTimeout(() => location.reload(), 4000);
     } finally {
       zone?.removeAttribute("aria-busy");
       if (input) input.value = "";
@@ -143,12 +212,9 @@ if (editor) {
         const data = await send("DELETE", `${base}/photos/${thumb.dataset.id}`);
         thumb.remove();
         renumber();
-        const limit = Number(($("#photo-count")?.textContent || "").split("/")[1]) || 0;
-        $("#photo-count").textContent = `${data.count} / ${limit}`;
-        const meter = $("#photo-meter");
-        if (meter && limit) meter.style.width = `${Math.min(100, Math.round((data.count / limit) * 100))}%`;
-        if (zone && data.count < limit) zone.hidden = false;
-        $("#photo-full")?.remove();
+        const count = $("#photo-count");
+        if (count) count.textContent = `${data.count} on this page`;
+        showUsage(data.usage);
         say("Photo deleted.");
         reloadPreview();
       } catch (problem) {

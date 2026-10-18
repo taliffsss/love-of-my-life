@@ -6,7 +6,7 @@
   $status = $page->status();
   $plan = $page->planDetails();
   $photoCount = count($photos);
-  $limit = $page->photoLimit();
+  $canAdd = $usage['remaining'] > 0;
   $letterText = isset($old['message']) ? (string) $old['message'] : implode("\n\n", $page->paragraphs());
 @endphp
 <main class="container" data-page="{{ $page->slug }}" data-max-bytes="{{ $maxUploadBytes }}">
@@ -75,11 +75,11 @@
       {{-- Photos ------------------------------------------------------------------------------------------------ --}}
       <section class="card section-card" id="photos" aria-labelledby="photos-title">
         <div class="section-head">
-          <div><h2 id="photos-title">Photos</h2><p>They play in this order, one every 8 seconds. Photos are resized on your phone before they upload.</p></div>
-          <span class="small muted" id="photo-count">{{ $photoCount }} / {{ $limit }}</span>
+          <div><h2 id="photos-title">Photos</h2><p>They play in this order, one every 8 seconds. Up to {{ \App\Services\PhotoStorage::megabytes($maxUploadBytes) }} each; they are resized on your phone before they upload and fit every template without stretching.</p></div>
+          <span class="small muted" id="photo-count">{{ $photoCount }} on this page</span>
         </div>
         <div class="section-body stack">
-          <div class="meter" aria-hidden="true"><i id="photo-meter" style="width:{{ $limit > 0 ? min(100, (int) round($photoCount / $limit * 100)) : 0 }}%"></i></div>
+          @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs, 'pageSlug' => $page->slug])
           <div class="thumbs" id="thumbs">
             @foreach ($photos as $i => $photo)
             <figure class="thumb" data-id="{{ $photo->id }}" style="margin:0">
@@ -94,16 +94,13 @@
               </div>
             </figure>
             @endforeach
-            <label class="upload-zone" id="upload-zone" @if ($photoCount >= $limit) hidden @endif>
+            <label class="upload-zone" id="upload-zone" @if (!$canAdd) hidden @endif>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
               <span>Add photos</span>
               <input id="photo-input" type="file" accept="image/*" multiple class="sr-only" />
             </label>
           </div>
           <p class="small" id="photo-status" role="status" aria-live="polite"></p>
-          @if ($photoCount >= $limit)
-          <div class="notice notice-brand" id="photo-full">This page holds {{ $limit }} photos on the {{ $plan['name'] }} plan. Delete one to add another@if (count($purchasable) > 0), or <a href="#plan">upgrade the plan</a>@endif.</div>
-          @endif
         </div>
       </section>
 
@@ -316,7 +313,7 @@
                 <input type="hidden" name="period" value="{{ $period }}" />
                 <button class="btn {{ $option['popular'] ? 'btn-primary' : 'btn-secondary' }} offer" type="submit">
                   <span>{{ \App\Services\Plans::money($price) }} {{ \App\Services\Plans::per($period) }}</span>
-                  @if ($period === 'year' && $option['months_free'] > 0)<small>{{ $option['months_free'] }} months free</small>@elseif ($period === 'once')<small>never expires</small>@endif
+                  @if ($period === 'once')<small>never expires</small>@endif
                 </button>
               </form>
               @endforeach
@@ -333,7 +330,7 @@
                 @foreach ($orders as $order)
                 <tr>
                   <td><a href="/dashboard/orders/{{ $order->reference }}">{{ $order->reference }}</a></td>
-                  <td>{{ $plans[$order->plan]['name'] ?? $order->plan }} <span class="muted">{{ \App\Services\Plans::per((string) $order->period) }}</span></td>
+                  <td>@if ($order->isPhotoPack()){{ $order->photos }} photos @else {{ $plans[$order->plan]['name'] ?? $order->plan }} <span class="muted">{{ \App\Services\Plans::per((string) $order->period) }}</span>@endif</td>
                   <td>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</td>
                   <td>{{ ucfirst($order->status) }}</td>
                 </tr>
@@ -348,7 +345,7 @@
       {{-- Delete ------------------------------------------------------------------------------------------------ --}}
       <section class="card section-card danger-zone" aria-labelledby="delete-title">
         <div class="section-head">
-          <div><h2 id="delete-title">Delete this page</h2><p>The page, its photos and its address are removed for good.</p></div>
+          <div><h2 id="delete-title">Delete this page</h2><p>The page, its photos and its address are removed for good. Its photos stop counting towards your account.</p></div>
         </div>
         <div class="section-body">
           <button class="btn btn-secondary" type="button" data-open="#delete-dialog" style="color:var(--danger)">Delete page…</button>
@@ -373,7 +370,7 @@
     @method('DELETE')
     <div class="modal-body">
       <h2 id="delete-dialog-title">Delete the page for {{ $page->recipient }}?</h2>
-      <p class="muted">Its photos, letter and address are removed and the link stops working. This cannot be undone.</p>
+      <p class="muted">Its letter{{ $photoCount > 0 ? ', address and ' . $photoCount . ' photo' . ($photoCount === 1 ? '' : 's') : ' and address' }} are removed and the link stops working.@if ($photoCount > 0) The photos are deleted from storage and stop counting towards your account.@endif This cannot be undone.</p>
       <div class="field">
         <label for="confirm-delete">Type <strong>delete</strong> to confirm</label>
         <input class="input" id="confirm-delete" name="confirm" autocomplete="off" required pattern="delete" />

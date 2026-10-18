@@ -105,6 +105,10 @@ After editing `.env.production`, run `docker stack deploy` again: Swarm copies t
   database** (accounts, pages, orders), e.g. daily from cron:
   `docker exec $(docker ps -q -f name=jinelin_web) php bin/backup-db.php` writes a consistent copy to
   `storage/backups/`; copy it off the server. Photos are in Spaces.
+- **Empty the photo trash**, e.g. daily from cron, next to the backup:
+  `docker exec $(docker ps -q -f name=jinelin_web) php bin/empty-trash.php`. Deleted photos' files are normally removed
+  at once; this retries any that Spaces refused or that a cut-off request left behind (it exits 1 while some still
+  fail, so cron mails you).
 - One replica: SQLite in a volume is fine for one container. Before scaling out, move to MySQL/PostgreSQL (`DB_*`).
 - Traefik terminates TLS; nginx passes `HTTPS=on` to PHP when it sees `X-Forwarded-Proto: https`, so cookies are
   `Secure` and HSTS is sent (with `includeSubDomains`, which the wildcard certificate covers).
@@ -198,6 +202,7 @@ git pull && composer install --no-dev --optimize-autoloader && php naluz migrate
 ## Notes
 
 - Keep `APP_DEBUG=false` in production. Serve over HTTPS.
-- PHP limits: `upload_max_filesize` and `post_max_size` of at least 16M.
+- PHP limits: `upload_max_filesize` and `post_max_size` of at least 16M. Photos are refused above 10 MB
+  (`saas.max_upload_bytes`); the higher PHP limit lets the app answer larger files with a clear message.
 - `bin/migrate-photos.php` (2.3.0) still copies `public/photos` to Spaces for the original site; run it before the import
   if you want those photos on Spaces too.

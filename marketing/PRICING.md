@@ -1,125 +1,121 @@
-# Pricing proposal: monthly plans for Love of My Life
+# Pricing: plans, photos and what they earn
 
-Status: **built** (2026-10-18), as proposed below. The plans live in `config/saas.php`, and they can still be changed
-freely: version 3.0 has not launched, so no customer is on these prices yet. Monthly payments are confirmed by hand
-until automatic charging exists (see "What it takes to build", point 4).
-
-## What we sold before (the first 3.0 plans)
-
-| Plan | Price | Lasts | Photos | Own address (`name.love…`) |
-|---|---|---|---|---|
-| Free preview | ₱0 | draft only, never public | 6 | no |
-| Basic | ₱99 | 1 year | 6 | no |
-| Plus | ₱199 | 1 year | 20 | no |
-| Forever | ₱399 | never expires | 50 | yes |
-
-Every plan gets all 10 templates, all 4 colour themes, the song, the lock question, the link and the QR code.
-
-**The problems:**
-- **Low revenue per customer.** A Basic page earns ₱99 a year, and one Facebook or Instagram ad sale probably costs more
-  than that. That cost is an assumption; check it with your first ad tests.
-- **One payment, endless upkeep.** Forever's ₱399 pays once for a page we host and back up indefinitely.
-- **Weak reasons to upgrade.** Everything a buyer sees in the preview comes with every plan, so the plans differ only in
-  the number of photos and the address.
+Status: **built** (2026-10-18). The plans and the photo pack live in `config/saas.php` and can still be changed freely:
+version 3.0 has not launched, so no customer pays these prices yet. Payments are confirmed by hand until automatic
+charging exists (see "What is left").
 
 ## The plans
 
 | | **Sweet** | **Sweetheart** (most popular) | **Forever** |
 |---|---|---|---|
-| Monthly | **₱59 / month** | **₱99 / month** | none |
-| Yearly (2 months free) | ₱590 / year | ₱990 / year | none |
-| One time | none | none | **₱1,499** |
-| Photos | 12 | 40 | 60 |
+| Monthly | **₱200 / month** | **₱350 / month** | none |
+| Yearly (twelve months, paid at once) | ₱2,400 / year | ₱4,200 / year | none |
+| One time | none | none | **₱4,999** |
+| Photos it adds to the account | 12 | 40 | 60 |
 | Templates | 5: Classic, Cinematic, Polaroid, Envelope, Timeline | all 10 | all 10 |
 | Own address `name.love.markanthonynaluz.com` | no | **yes** | yes |
 | Song, lock question, link, QR code, change anything any time | yes | yes | yes |
-| Stays online | while subscribed | while subscribed | always |
+| Stays online | while paid | while paid | always |
 
-The Free preview stays as it is: build everything and preview it privately, with **all 10 templates**, before paying.
+- **Free preview:** build everything and preview it privately, with all 10 templates and 6 photos, before paying.
+- **Extra photos:** 12 for ₱100, 1 to 10 packs an order. Paid once, kept for good, shared by all the account's pages.
+
+**What changed from the first monthly plans (₱59 / ₱99 / ₱1,499):**
+- **Prices start at ₱200 a month**, and the other plans keep roughly their distance from it.
+- **No yearly discount.** A year costs twelve months, so the "2 months free" offer is gone. The yearly option stays
+  because, while payments are manual, paying once a year saves the customer eleven GCash transfers.
+- **Photos are counted per account, and extra photos are sold.**
 
 **Why these numbers:**
-- **Small, monthsary-sized prices.** ₱59 is less than a milk tea and ₱99 less than a cinema ticket. Many couples
-  here celebrate every *monthsary*, so a monthly plan fits: update the letter and photos each month and the page stays a
-  living gift.
-- **Two clear reasons to upgrade.** The own address, which used to come only with Forever, moves down to Sweetheart.
-  The five playful templates (Scratch card, Storybook, Memory game, Gift box, Starry sky) need Sweetheart too. People try
-  them in the free preview, so they know exactly what the upgrade gets them.
-- **Forever as the anchor.** At ₱1,499 it costs as much as 15 months of Sweetheart. Couples who plan to keep the page
-  get a fair deal, and next to it the monthly price looks small.
-- **Yearly plans:** paying for the year costs 10 months (2 free). They bring money in up front and keep more people
-  subscribed.
+- **₱200 is the entry price you set.** Sweetheart at ₱350 is 1.75 times that. It adds 28 photos, worth ₱233 in packs,
+  plus every template and the own address, so upgrading is the better deal for anyone who wants more than Sweet.
+- **Forever at ₱4,999** is about 14 months of Sweetheart, and a little more than one year of it (₱4,200). Couples who
+  plan to keep the page pay once; for everyone else the monthly price looks small next to it.
+
+## Photos
+
+The allowance belongs to the account, not to one page:
+- **It adds up.** It is the photos of the plans of the account's live pages, added up: a Sweet page and a Sweetheart
+  page give 52. While no page is live, it is the free preview's 6. Photo packs come on top.
+- **Every photo counts.** That means every photo on every page, drafts included; deleting a photo or a page frees its
+  place. Five free drafts can no longer hold 30 photos between them.
+- **When a plan ends, its photos stop counting.** Nothing is deleted or hidden, but no photo can be added until the
+  account fits again: renew, buy packs, or delete some. The dashboard says how many to delete or which packs make room.
+- **The server enforces all of this.** It checks before storing an upload and again after saving it, so two uploads at
+  once can't get past the limit. The browser checks first only to save a wasted upload.
+- **Photos can be up to 10 MB each.** Larger files get "This photo is 14.2 MB. Photos can be up to 10 MB each." The
+  browser shrinks the rest to about 0.5–0.9 MB.
+- **Deleted photos leave storage.** If Spaces fails at that moment, the file waits in a trash table, and
+  `bin/empty-trash.php` (daily cron) deletes it later.
+
+What photos cost us: Spaces is $5 a month for 250 GiB and 1 TiB of downloads. Beyond that, storage is $0.02 per GiB
+and downloads $0.01 per GiB ([DigitalOcean Spaces](https://www.digitalocean.com/products/spaces)).
+- **Storage:** a pack of 12 is about 8 MB, so ₱100 pays for its storage for decades.
+- **Downloads:** a visitor who opens every photo of a 60-photo page downloads about 42 MB. Downloads beyond the free
+  1 TiB cost about ₱0.02 per such visit.
 
 ## The money
 
 Assumptions:
-- **Payment fees.** These are PayMongo's published rates, VAT included: cards 3.5% + ₱15, GCash 2.5%, Maya 2.0%, QR Ph
-  1.5% ([PayMongo fees](https://developers.paymongo.com/docs/fees-and-rates)).
-- **Hosting.** Fixed hosting is about ₱1,500–2,000 a month: your share of the server, Spaces at $5 a month for 250 GB,
-  and the domain. A page with 60 photos uses about 30 MB, so the cost per page is negligible.
+- **Payment fees:** PayMongo's published rates, VAT included. Cards are 3.5% + ₱15, GCash 2.5%, Maya 2.0%, QR Ph 1.5%
+  ([PayMongo fees](https://developers.paymongo.com/docs/fees-and-rates)).
+- **Hosting:** about ₱1,500–2,000 a month for your share of the server, Spaces and the domain.
 
 What each payment leaves us after fees:
 
 | Payment | GCash | Maya | QR Ph | Card |
 |---|---|---|---|---|
-| Sweet ₱59 | ₱57.53 | ₱57.82 | ₱58.12 | ₱41.94 (29% fees) |
-| Sweetheart ₱99 | ₱96.53 | ₱97.02 | ₱97.52 | ₱80.54 |
-| Sweet yearly ₱590 | ₱575.25 | ₱578.20 | ₱581.15 | ₱554.35 |
-| Sweetheart yearly ₱990 | ₱965.25 | ₱970.20 | ₱975.15 | ₱940.35 |
-| Forever ₱1,499 | ₱1,461.53 | ₱1,469.02 | ₱1,476.52 | ₱1,431.54 |
+| Sweet ₱200 | ₱195.00 | ₱196.00 | ₱197.00 | ₱178.00 (11% fees) |
+| Sweetheart ₱350 | ₱341.25 | ₱343.00 | ₱344.75 | ₱322.75 |
+| Sweet yearly ₱2,400 | ₱2,340.00 | ₱2,352.00 | ₱2,364.00 | ₱2,301.00 |
+| Sweetheart yearly ₱4,200 | ₱4,095.00 | ₱4,116.00 | ₱4,137.00 | ₱4,038.00 |
+| Forever ₱4,999 | ₱4,874.03 | ₱4,899.02 | ₱4,924.02 | ₱4,809.04 |
+| 12 photos ₱100 | ₱97.50 | ₱98.00 | ₱98.50 | ₱81.50 (19% fees) |
 
 What these numbers mean:
-- **Monthly plans belong on e-wallets.** Card fees take 29% of a ₱59 payment, so offer GCash, Maya and QR Ph first for
-  monthly plans and push cards towards the yearly plans and Forever.
-- **Fixed costs are covered early.** About 35 paying pages a month cover the fixed costs at any mix of plans.
-- **Advertising is the real cost.** It decides whether we make money. If an ad sale costs ₱150 and a monthly customer
-  stays 3 months, a Sweet customer brings in about ₱175 after fees, which is barely profitable. The same customer on
-  Sweetheart brings in about ₱290, and on a yearly plan or Forever ₱575–1,460 up front. So the website and the ads should
-  lead with Sweetheart and offer the yearly saving prominently.
-- **Free advertising from every page.** Every page visitors open is free advertising if it carries a small "Made with
-  Love of My Life" link. Today only the demo has one. Worth adding to Sweet pages; that's a separate decision.
+- **Card fees no longer eat the monthly plans.** At ₱59 they took 29%; at ₱200 they take 11%.
+- **Packs belong on e-wallets.** The card's ₱15 is a fifth of a ₱100 pack, so offer GCash, Maya and QR Ph first.
+- **Fixed costs are covered early.** About 10 paying pages a month cover hosting.
+- **Advertising decides profit.** Suppose an ad sale costs ₱150 and a monthly customer stays 3 months. A Sweet
+  customer then brings in about ₱585 after GCash fees, and a Sweetheart customer about ₱1,024.
 
-## What was built, and what is left
+## Decisions taken
 
-1. **Plans (built).**
-   - `config/saas.php` holds the three plans, each with monthly and yearly prices or a one-time price, its photo limit,
-     whether it includes the own address, and its templates.
-   - Each order records its period.
-   - A payment adds a calendar month or year to the time left; Jan 31 + 1 month is the end of February.
-2. **Templates per plan (built).**
-   - The free preview, and the owner's preview of a live page, show every template.
-   - Templates outside the plan are refused in two places, each saying which plans include the template:
-     - buying a plan that doesn't include the page's template;
-     - saving one on a live page.
-   - The picker marks those templates and says so before saving.
-   - Visitors only ever see a template of the page's plan.
-3. **Dashboard and landing page (built).**
-   - Every plan shows its monthly and yearly buttons, with "2 months free" on the yearly one; Forever shows "once".
-   - Sweetheart is marked "Most popular".
-4. **Paying every month (still manual).**
-   - Today a customer gets an order reference, pays by GCash or Maya, and you confirm it with `bin/grant-plan.php`. They
-     pay again the same way each month.
-   - Automatic monthly charging needs PayMongo Subscriptions. It is documented for cards
-     ([PayMongo Subscriptions API](https://developers.paymongo.com/docs/subscriptions)). PayMongo's product page also
-     claims GCash and Maya ([PayMongo Subscriptions](https://www.paymongo.com/products/accept-payments/subscriptions)),
-     which needs confirming with them, and their account has to be approved first.
-   - It also needs renewal reminders by e-mail. The app sends no e-mail yet; the same mailer would also fix the sign-up
-     check that reveals which e-mails have an account.
-5. **Tests (built)** cover every plan and period, templates per plan, monthly and yearly renewals, month-end dates,
-   upgrades and the screens.
+The ones marked *assumed* were my call while building. Each is a line in `config/saas.php` or
+`App\Services\PhotoAllowance` if you want it otherwise.
+
+| Rule | Status |
+|---|---|
+| Plans start at ₱200 a month; no "2 months free" | confirmed by you |
+| 12 photos for ₱100; every photo counts towards the limit | confirmed by you |
+| Up to 10 MB per photo (counted like phones show it: 10 × 1024 × 1024 bytes) | confirmed; the counting is assumed |
+| Sweetheart ₱350/month, Forever ₱4,999, yearly = 12 × monthly | assumed |
+| Photos counted per account; live plans add up; the free 6 apply only while no page is live | assumed (from your question about 6 templates sharing 60 photos) |
+| A deleted photo frees its place (the limit is on photos kept, not photos ever uploaded) | assumed (you asked that deleting update the usage) |
+| Packs never expire and stay when their page is deleted; 1–10 packs an order | assumed |
+| When a plan ends: nothing deleted or hidden, uploads blocked until the account fits | assumed |
+| A file used by two photos is kept until the last one is deleted (photos can't be shared between pages today, so this is a safeguard) | assumed |
+
+## What is left
+
+- **Paying every month is still manual.** A customer gets an order reference and pays by GCash or Maya, and you confirm
+  it with `bin/grant-plan.php <reference>`; packs work the same way. Automatic monthly charging needs PayMongo
+  Subscriptions ([API](https://developers.paymongo.com/docs/subscriptions)), and their account has to be approved
+  first. The product page also lists GCash and Maya
+  ([PayMongo Subscriptions](https://www.paymongo.com/products/accept-payments/subscriptions)); confirm that with them.
+- **Renewal reminders need e-mail.** The app sends none yet.
 
 ## Risks
 
-- **Monthly churn after the occasion.** Couples may cancel once the anniversary is over. The yearly saving and the
-  monthsary angle are the answer; watch how long monthly customers actually stay.
-- **Manual monthly payments put people off.** Paying by hand every month is a hassle until automatic charging exists.
-  Until then, consider selling only yearly plans and Forever online, and offering monthly as "pay as you go".
-- **Prices to check after a month of sales.** Is ₱59 too cheap to matter, and is ₱1,499 too much for Forever? The
-  conversion numbers will tell; the plans are one config file, so they're easy to change.
+- **Monthly churn after the occasion.** Couples may stop paying once the anniversary is over. Watch how long monthly
+  customers stay.
+- **₱200 is a bigger first step than ₱59.** The free preview, with every template, is what has to sell it. Watch how
+  many drafts become paid pages in the first month.
+- **Forever is cheap next to a yearly Sweetheart.** The two differ by ₱799, so many yearly buyers may take Forever. That
+  brings more money now and less later. If it happens a lot, raise Forever.
 
 ## Sources
 - [PayMongo: fees and rates](https://developers.paymongo.com/docs/fees-and-rates)
 - [PayMongo: Subscriptions API](https://developers.paymongo.com/docs/subscriptions)
 - [PayMongo: Subscriptions product page](https://www.paymongo.com/products/accept-payments/subscriptions)
-- [HitPay: subscription billing in the Philippines](https://hitpayapp.com/ph/blog/best-subscription-billing-software-philippines)
-- Comparable gift pages are sold one-time abroad. For example, Sevgilime in Turkey charges about 200 TL for a year and
-  350 TL for life ([listing](https://trustmrr.com/startup/sevgilime-website)); a marketplace listing, not verified.
+- [DigitalOcean Spaces pricing](https://www.digitalocean.com/products/spaces)

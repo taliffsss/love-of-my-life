@@ -11,6 +11,7 @@ use App\Models\Page;
 use App\Models\Photo;
 use App\Services\Designs;
 use App\Services\LetterStore;
+use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
 use App\Services\QrCode;
@@ -41,7 +42,7 @@ final class PagesController
         'Whatever comes next, I want to face it with you. I love you, today and every day after.',
     ];
 
-    public function index(Auth $auth, Sites $sites): ResponseInterface
+    public function index(Auth $auth, Sites $sites, PhotoAllowance $allowance): ResponseInterface
     {
         $pages = Page::query()->where('user_id', (int) $auth->id())->orderBy('id', 'desc')->get()->all();
         $covers = [];
@@ -57,6 +58,8 @@ final class PagesController
 
         return Screen::render('dashboard.index', [
             'pages' => $pages,
+            'usage' => $allowance->of((int) $auth->id()),
+            'packs' => $allowance->packOptions(),
             'covers' => $covers,
             'counts' => $counts,
             'urls' => array_combine(
@@ -100,7 +103,7 @@ final class PagesController
         return Screen::back($this->editUrl($page), 'Your page for ' . $recipient . ' is ready to fill in.');
     }
 
-    public function edit(string $slug, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage): ResponseInterface
+    public function edit(string $slug, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $photos = Photo::query()->where('page_id', $page->id)->orderBy('position')->orderBy('id')->get()->all();
@@ -119,8 +122,10 @@ final class PagesController
             'layouts' => Designs::LAYOUTS,
             'templateNotes' => $this->templateNotes($page, $plans),
             'themes' => Designs::THEMES,
-            'maxUploadBytes' => (int) config('saas.max_upload_bytes'),
+            'maxUploadBytes' => $storage->maxBytes(),
             'storageDisk' => $storage->diskName(),
+            'usage' => $allowance->of((int) $auth->id()),
+            'packs' => $allowance->packOptions(),
         ]);
     }
 
@@ -293,18 +298,24 @@ final class PagesController
             throw new HttpException(422, 'Confirm that the page should be deleted.');
         }
 
-        $photos = Photo::query()->where('page_id', $page->id)->get()->all();
-        $db->transaction(function () use ($db, $page): void {
+        $photos = Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->get()->all();
+        $db->transaction(function () use ($db, $page, $photos, $storage): void {
             $db->table('photos')->where('page_id', '=', $page->id)->delete();
-            // paid orders stay on record without their page
+            $storage->trash(...$photos);
+            // paid orders stay on record without their page; photo packs bought from it stay on the account
             $db->table('orders')->where('page_id', '=', $page->id)->update(['page_id' => null]);
             $db->table('pages')->where('id', '=', $page->id)->delete();
         });
-        // files are removed once the rows are gone; a failure leaves an orphan file, never a broken page
-        foreach ($photos as $photo) {
-            $storage->delete($photo);
-        }
+        // the files go once the rows are gone: one that cannot be deleted now waits in the trash (bin/empty-trash.php),
+        // and one another photo still uses is kept
+        $storage->purge(...$photos);
 
-        return Screen::back('/dashboard', 'The page for ' . $page->recipient . ' was deleted.');
+        $count = count($photos);
+        $freed = match (true) {
+            $count === 0 => '.',
+            $count === 1 => ', with its photo, which no longer counts towards your account.',
+            default => sprintf(', with its %d photos, which no longer count towards your account.', $count),
+        };
+        return Screen::back('/dashboard', 'The page for ' . $page->recipient . ' was deleted' . $freed);
     }
 }

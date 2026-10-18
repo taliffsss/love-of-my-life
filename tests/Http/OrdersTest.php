@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\Billing;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\PaymentGateway;
+use App\Services\PhotoAllowance;
 use Naluz\Tests\TestCase;
 
 final class OrdersTest extends TestCase
@@ -45,7 +46,7 @@ final class OrdersTest extends TestCase
 
         $this->assertSame('sweetheart', $order->plan);
         $this->assertSame('month', $order->period);
-        $this->assertSame(9900, $order->amount);
+        $this->assertSame(35000, $order->amount);
         $this->assertSame('PHP', $order->currency);
         $this->assertSame(Order::PENDING, $order->status);
         $this->assertSame('manual', $order->provider);
@@ -53,7 +54,7 @@ final class OrdersTest extends TestCase
 
         $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
         $this->assertStringContainsString('How to pay', $html);
-        $this->assertStringContainsString('₱99', $html);
+        $this->assertStringContainsString('₱350', $html);
         $this->assertStringContainsString('Sweetheart, one month', $html);
         $this->assertStringNotContainsString('(test)', $html);
         $this->assertSame(404, $this->submit('POST', '/dashboard/orders/' . $order->reference . '/fake-pay')->getStatusCode(), 'no test payments');
@@ -67,8 +68,69 @@ final class OrdersTest extends TestCase
         $this->assertSame($first->id, $second->id);
         $yearly = $this->buy('sweet', 'year');
         $this->assertNotSame($first->id, $yearly->id, 'another period is another order');
-        $this->assertSame(59000, $yearly->amount);
+        $this->assertSame(240000, $yearly->amount, 'twelve months of ₱200');
         $this->assertSame(2, Order::query()->count());
+    }
+
+    private function buyPhotos(array $data): Order
+    {
+        $response = $this->submit('POST', '/dashboard/photo-packs', $data);
+        $order = Order::query()->orderBy('id', 'desc')->first();
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertSame('/dashboard/orders/' . $order->reference, $response->getHeaderLine('Location'));
+        return $order;
+    }
+
+    public function testPhotoPacksAreSoldInTwelvesAtOneHundredPesos(): void
+    {
+        $order = $this->buyPhotos(['packs' => '2', 'page' => $this->page->slug]);
+        $this->assertSame([Order::PHOTO_PACK, 'once', 24, 20000, $this->page->id, Order::PENDING], [$order->plan, $order->period, $order->photos, $order->amount, $order->page_id, $order->status]);
+        $this->assertSame($order->id, $this->buyPhotos(['packs' => '2', 'page' => $this->page->slug])->id, 'clicking twice reuses the pending order');
+        $this->assertNotSame($order->id, $this->buyPhotos(['packs' => '1'])->id, 'from the dashboard: no page');
+
+        $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
+        $this->assertStringContainsString('24 more photos for your account', $html);
+        $this->assertStringContainsString('₱200', $html);
+        $this->assertStringContainsString('How to pay', $html);
+        $this->assertStringContainsString('#photos">Back to the page', $html);
+        $this->assertSame(6, $this->app->make(PhotoAllowance::class)->of($this->owner->id)['total'], 'unpaid packs add nothing');
+    }
+
+    public function testThePackCountIsCheckedOnTheServer(): void
+    {
+        foreach (['0', '11', '-1', 'two', '1.5', ''] as $packs) {
+            $response = $this->submit('POST', '/dashboard/photo-packs', ['packs' => $packs]);
+            $this->assertSame(303, $response->getStatusCode(), "packs={$packs}");
+            $this->assertStringNotContainsString('/dashboard/orders/', $response->getHeaderLine('Location'), "packs={$packs} is refused");
+        }
+        $theirs = $this->makePage($this->makeUser('other@example.com'));
+        $this->assertSame(404, $this->submit('POST', '/dashboard/photo-packs', ['packs' => '1', 'page' => $theirs->slug])->getStatusCode(), 'not from someone else\'s page');
+        $this->assertSame(0, Order::query()->count());
+    }
+
+    public function testAPaidPackAddsItsPhotosToTheAccount(): void
+    {
+        $this->useFakeCheckout();
+        $order = $this->buyPhotos(['packs' => '1', 'page' => $this->page->slug]);
+        $response = $this->submit('POST', '/dashboard/orders/' . $order->reference . '/fake-pay');
+
+        $this->assertSame('/dashboard/pages/' . $this->page->slug . '#photos', $response->getHeaderLine('Location'));
+        $this->assertSame(Order::PAID, $order->fresh()->status);
+        $usage = $this->app->make(PhotoAllowance::class)->of($this->owner->id);
+        $this->assertSame([6, 12, 18], [$usage['included'], $usage['bought'], $usage['total']]);
+        $this->assertSame('free', $this->page->fresh()->plan, 'a pack never changes a plan');
+        $this->assertStringContainsString('12 more photos are ready to use', (string) $this->get('/dashboard')->getBody());
+    }
+
+    public function testPhotoPacksStayWithTheAccountWhenTheirPageIsDeleted(): void
+    {
+        $this->useFakeCheckout();
+        $order = $this->buyPhotos(['packs' => '1', 'page' => $this->page->slug]);
+        $this->submit('POST', '/dashboard/orders/' . $order->reference . '/fake-pay');
+        $this->submit('DELETE', '/dashboard/pages/' . $this->page->slug, ['confirm' => 'delete']);
+
+        $this->assertNull($order->fresh()->page_id);
+        $this->assertSame(18, $this->app->make(PhotoAllowance::class)->of($this->owner->id)['total']);
     }
 
     public function testATestPaymentPublishesThePageForAMonth(): void

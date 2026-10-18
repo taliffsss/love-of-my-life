@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Screen;
 use App\Models\Photo;
+use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
@@ -17,23 +18,33 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
-/** Photos of a page, managed from the dashboard (the browser resizes each photo before it is sent). */
+/**
+ * Photos of a page, managed from the dashboard (the browser resizes each photo before it is sent). Every photo counts
+ * towards the account's allowance (App\Services\PhotoAllowance), checked here, on the server, before and after each
+ * upload.
+ */
 final class PhotosController
 {
     use OwnsPages;
 
-    public function store(string $slug, ServerRequestInterface $request, Auth $auth, PhotoStorage $storage): ResponseInterface
+    public function store(string $slug, ServerRequestInterface $request, Auth $auth, PhotoStorage $storage, PhotoAllowance $allowance, Connection $db): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
-        $limit = $page->photoLimit();
-        $count = fn (): int => Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->count();
-        if ($count() >= $limit) {
-            throw new HttpException(422, "This page already has {$limit} photos, the most its plan allows. Delete one or upgrade the plan.");
+        $userId = (int) $auth->id();
+        $usage = $allowance->of($userId);
+        if ($usage['remaining'] <= 0) {
+            return $this->full($allowance, $usage);
         }
 
         $file = $request->getUploadedFiles()['photo'] ?? null;
         if (!$file instanceof UploadedFileInterface) {
-            throw new HttpException(422, 'Choose a photo to upload.');
+            // a body over PHP's post_max_size arrives without its files
+            $length = (int) $request->getHeaderLine('Content-Length');
+            throw new HttpException(422, $length > $storage->maxBytes() ? self::tooLarge($length, $storage->maxBytes()) : 'Choose a photo to upload.');
+        }
+        $size = (int) $file->getSize();
+        if (in_array($file->getError(), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) || $size > $storage->maxBytes()) {
+            throw new HttpException(422, self::tooLarge($size, $storage->maxBytes()));
         }
 
         try {
@@ -44,37 +55,49 @@ final class PhotosController
         }
 
         $photo = new Photo();
-        $photo->forceFill([
-            'page_id' => $page->id,
-            'disk' => $stored['disk'],
-            'path' => $stored['path'],
-            'url' => $stored['url'],
-            'position' => (int) Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->max('position') + 1,
-        ])->save();
-
-        // Two uploads racing past the first check: the later one is undone, so the limit always holds.
-        $total = $count();
-        if ($total > $limit) {
-            $photo->delete();
-            $storage->delete($photo);
-            throw new HttpException(422, "This page already has {$limit} photos, the most its plan allows.");
+        try {
+            $photo->forceFill([
+                'page_id' => $page->id,
+                'disk' => $stored['disk'],
+                'path' => $stored['path'],
+                'url' => $stored['url'],
+                'position' => (int) Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->max('position') + 1,
+            ])->save();
+        } catch (\Throwable $e) {
+            $storage->discard($stored['disk'], $stored['path']);
+            throw $e;
         }
 
-        return Response::json(['id' => $photo->id, 'url' => $photo->url, 'count' => $total, 'limit' => $limit], 201);
+        // Two uploads racing past the first check: one that lands beyond the allowance is undone, so it always holds.
+        $usage = $allowance->of($userId);
+        if ($usage['over'] > 0) {
+            $this->remove($photo, $storage, $db);
+            return $this->full($allowance, $allowance->of($userId));
+        }
+
+        return Response::json([
+            'id' => $photo->id,
+            'url' => $photo->url,
+            'count' => $this->pageCount($page->id),
+            'usage' => self::usage($usage),
+        ], 201);
     }
 
-    public function destroy(string $slug, int $photo, ServerRequestInterface $request, Auth $auth, PhotoStorage $storage): ResponseInterface
+    public function destroy(string $slug, int $photo, ServerRequestInterface $request, Auth $auth, PhotoStorage $storage, PhotoAllowance $allowance, Connection $db): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $model = Photo::query()->where('id', $photo)->where('page_id', $page->id)->first();
         if (!$model instanceof Photo) {
             throw new HttpException(404, 'Photo not found.');
         }
-        $model->delete();
-        $storage->delete($model);
+        $this->remove($model, $storage, $db);
 
         if (Request::expectsJson($request)) {
-            return Response::json(['deleted' => $model->id, 'count' => Photo::query()->where('page_id', $page->id)->count()]);
+            return Response::json([
+                'deleted' => $model->id,
+                'count' => $this->pageCount($page->id),
+                'usage' => self::usage($allowance->of((int) $auth->id())),
+            ]);
         }
         return Screen::back($this->editUrl($page, 'photos'), 'Photo deleted.');
     }
@@ -103,5 +126,45 @@ final class PhotosController
             }
         });
         return Response::json(['order' => $ids]);
+    }
+
+    /** Deletes the photo and then its file (unless another photo uses the same file). */
+    private function remove(Photo $photo, PhotoStorage $storage, Connection $db): void
+    {
+        $db->transaction(function () use ($photo, $storage): void {
+            $photo->delete();
+            $storage->trash($photo);
+        });
+        $storage->purge($photo);
+    }
+
+    private function pageCount(int $pageId): int
+    {
+        return Photo::query()->withoutCache()->useWritePdo()->where('page_id', $pageId)->count();
+    }
+
+    /** 422 with what the dashboard needs to offer more photos. @param array<string,mixed> $usage */
+    private function full(PhotoAllowance $allowance, array $usage): ResponseInterface
+    {
+        return Response::json(['message' => $allowance->fullMessage($usage), 'code' => 'photo_limit', 'usage' => self::usage($usage)], 422);
+    }
+
+    /** @param array<string,mixed> $usage @return array{used:int,total:int,remaining:int,over:int,packs_needed:int} */
+    private static function usage(array $usage): array
+    {
+        return [
+            'used' => (int) $usage['used'],
+            'total' => (int) $usage['total'],
+            'remaining' => (int) $usage['remaining'],
+            'over' => (int) $usage['over'],
+            'packs_needed' => (int) $usage['packs_needed'],
+        ];
+    }
+
+    /** "This photo is 14.2 MB. Photos can be up to 10 MB each." */
+    public static function tooLarge(int $bytes, int $maxBytes): string
+    {
+        $max = 'Photos can be up to ' . PhotoStorage::megabytes($maxBytes) . ' each.';
+        return $bytes > $maxBytes ? 'This photo is ' . PhotoStorage::megabytes($bytes) . '. ' . $max : 'This photo is too large. ' . $max;
     }
 }

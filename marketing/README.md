@@ -9,7 +9,7 @@ app; `.dockerignore` keeps it out of the image. Rendered files go to `marketing/
 | `cards/` | social cards and Lettie stickers: `render_cards.py` (needs the promo's shots) |
 | `brand/LETTIE.md` | the mascot: who she is, colours, poses, do's and don'ts |
 | `copy/SOCIAL.md` | posts, ad copy, hashtags, a two-week plan and the honesty rules |
-| `PRICING.md` | the proposal for monthly plans (not built yet) |
+| `PRICING.md` | the plans, prices and photo allowance, and the reasoning behind them (built) |
 
 ## Rebuild everything
 

@@ -17,9 +17,13 @@ final class LandingTest extends TestCase
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringContainsString('<meta name="robots" content="index, follow"', $html);
         $this->assertStringContainsString('<link rel="canonical" href="https://love.test/"', $html);
-        foreach (['Sweet', 'Sweetheart', 'Forever', '₱59', '₱590', '₱99', '₱990', '₱1,499', 'a month', '2 months free', 'Most popular', 'Classic', 'Cinematic', 'Polaroid', 'yourname.love.test'] as $text) {
+        foreach (['Sweet', 'Sweetheart', 'Forever', '₱200', '₱2,400', '₱350', '₱4,200', '₱4,999', 'a month', 'Most popular', 'Classic', 'Cinematic', 'Polaroid', 'yourname.love.test'] as $text) {
             $this->assertStringContainsString($text, $html);
         }
+        $this->assertStringNotContainsString('months free', $html, 'no yearly discount any more');
+        $this->assertStringContainsString('Need more photos? Add 12 for ₱100', $html);
+        $this->assertStringContainsString('Sweet 12, Sweetheart 40 and Forever 60', $html, 'what each plan includes, shared by the account');
+        $this->assertStringContainsString('up to 10 MB', $html);
         $this->assertStringNotContainsString('Free preview</h3>', $html, 'the free draft is not sold as a plan');
         $this->assertStringContainsString('10 templates', $html);
         foreach (Designs::LAYOUTS as $key => $template) {

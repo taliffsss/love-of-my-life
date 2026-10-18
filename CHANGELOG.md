@@ -27,25 +27,44 @@ The single page becomes a product: anyone can sign up, make love pages and publi
 - **Private by design.** The answer is checked on the server (normalised and hashed like a password; case and spaces
   don't matter) and the photos and letter are only sent after it, so the page's HTML and script contain neither. Guessing
   is limited to 10 tries a minute. Pages are `noindex` unless marked searchable. 2.x kept the answer in `app.js`.
-- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`), monthly, yearly or once:
+- **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`), monthly, yearly or once, from ₱200 a month; a year
+  costs twelve months (no yearly discount):
   - a free draft only its owner can preview, with every template to try;
-  - **Sweet**, ₱59 a month or ₱590 a year (2 months free): 12 photos, 5 templates (Classic, Cinematic, Polaroid,
-    Envelope, Timeline);
-  - **Sweetheart**, ₱99 a month or ₱990 a year: 40 photos, all 10 templates, its own address;
-  - **Forever**, ₱1,499 once: never expires, 60 photos, everything.
+  - **Sweet**, ₱200 a month or ₱2,400 a year: 12 photos, 5 templates (Classic, Cinematic, Polaroid, Envelope,
+    Timeline);
+  - **Sweetheart**, ₱350 a month or ₱4,200 a year: 40 photos, all 10 templates, its own address;
+  - **Forever**, ₱4,999 once: never expires, 60 photos, everything.
 
   Renewing adds a calendar month or year to the time left, and a monthly page can renew for a year. A late payment for
   a lower plan never downgrades a page. Payment activation happens exactly once (a conditional update), whatever
   confirms it. A live page shows only its plan's templates; the owner can still preview the others. Orders record their
   period (`orders.period`); a migration renames the first plans of 3.0 development (Basic, Plus) to Sweet and
   Sweetheart.
+- **Photos belong to the account** (`App\Services\PhotoAllowance`). Every photo on every page counts, and deleting one,
+  or its page, frees its place. The allowance is the photos of the plans of the account's live pages, added up (6 from
+  the free preview while none is live), plus photo packs: **12 more photos for ₱100**, 1 to 10 packs an order, paid
+  once, kept for good, shared by all pages (an order with plan `photos`; `orders.photos` says how many it adds). A plan
+  that ends stops counting: nothing is deleted or hidden, but no photo can be added until the account fits again. The
+  server checks the allowance before storing an upload and again after saving it, so two uploads at once can't go past
+  it. The dashboard and the editor show used, of, left, where the allowance comes from, and offer packs when it runs low.
+- **Photos up to 10 MB each** (`saas.max_upload_bytes`), with a clear message ("This photo is 14.2 MB. Photos can be up
+  to 10 MB each.") from the browser before uploading and from the server, including files PHP itself refused. The
+  browser shrinks photos to 2,200 px on the long side, keeping their proportions and the way the camera held them,
+  with high-quality resampling, JPEG quality 0.9, white instead of black behind transparent parts, and no location or
+  other camera data. Every template shows them with `object-fit` (cover or contain): checked in all 10 templates at
+  phone and desktop width with panoramas, tall screenshots, tiny and rotated photos.
+- **Deleted photos leave storage.** A photo's file is deleted after its row, through a trash table written in the same
+  transaction (`storage_trash`), so a delete that fails or is cut short is retried by `php bin/empty-trash.php` instead
+  of leaving a file behind. A file another photo still uses is kept. A file whose photo could not be saved is deleted
+  again. Photo packs bought from a deleted page stay on the account.
 - **Dedicated addresses.** A Sweetheart or Forever page can claim `<name>.<SAAS_DOMAIN>` (3–30 lowercase letters, digits or dashes; reserved
   names refused; one page per name). It works as soon as it is saved: `ResolveSiteHost` maps the host to the page before
   routing, and only the page itself is reachable on that host. The product runs at `love.markanthonynaluz.com`: the
   stack file routes it and `*.love.markanthonynaluz.com` to the app on a wildcard certificate (Traefik DNS challenge with
   DigitalOcean); the two DNS records and the resolver are set up once (DEPLOY.md).
-- **Payments.** Choosing a plan creates an order with a reference; with `PAYMENTS_DRIVER=none` the customer sees how to
-  pay (GCash/Maya) and an admin activates it with `php bin/grant-plan.php <reference>`. `PAYMENTS_DRIVER=fake` is a test
+- **Payments.** Choosing a plan or a photo pack creates an order with a reference; with `PAYMENTS_DRIVER=none` the
+  customer sees how to pay (GCash/Maya) and an admin activates it with `php bin/grant-plan.php <reference>` (or
+  `--email=<e-mail> --packs=<n>` for packs paid without an order). `PAYMENTS_DRIVER=fake` is a test
   checkout and refuses to run in production. Online checkout (PayMongo) is next.
 - **The original site** moves in with `php bin/import-legacy.php`: a Forever page owned by your account, on its old
   domain, with the same letter, song, photos and answer.

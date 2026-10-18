@@ -9,7 +9,7 @@ use App\Models\Page;
 use Naluz\Database\Connection;
 
 /**
- * Orders and plan activation.
+ * Orders, plan activation and photo packs.
  *
  * An order is activated exactly once: the switch from pending to paid is a single conditional UPDATE, so a payment
  * confirmed twice (a webhook and the return page, a double click, an admin re-running the grant script) changes the page
@@ -17,7 +17,7 @@ use Naluz\Database\Connection;
  */
 final class Billing
 {
-    public function __construct(private readonly Plans $plans, private readonly Connection $db)
+    public function __construct(private readonly Plans $plans, private readonly Connection $db, private readonly PhotoAllowance $allowance)
     {
     }
 
@@ -44,7 +44,35 @@ final class Billing
     }
 
     /**
-     * Marks the order paid and activates its plan on the page. Returns false (and changes nothing) when the order was
+     * An order for photo packs: `$packs` × the pack's photos for the account, at the pack price each. `$page` is the page it
+     * was bought from (where to come back to); the photos belong to the account and stay when that page is deleted.
+     *
+     * @throws \DomainException when the number of packs is out of range
+     */
+    public function createPhotoOrder(int $userId, ?Page $page, int $packs, string $provider): Order
+    {
+        if ($packs < 1 || $packs > $this->allowance->maxPacks()) {
+            throw new \DomainException(sprintf('Choose between 1 and %d packs of photos.', $this->allowance->maxPacks()));
+        }
+        $order = new Order();
+        $order->forceFill([
+            'reference' => $this->uniqueReference(),
+            'user_id' => $userId,
+            'page_id' => $page?->id,
+            'plan' => Order::PHOTO_PACK,
+            'period' => 'once',
+            'photos' => $packs * $this->allowance->packPhotos(),
+            'amount' => $packs * $this->allowance->packPrice(),
+            'currency' => $this->plans->currency(),
+            'status' => Order::PENDING,
+            'provider' => $provider,
+        ])->save();
+        return $order;
+    }
+
+    /**
+     * Marks the order paid and activates its plan on the page (a photo pack needs nothing more: paid packs count
+     * towards the account's allowance from then on). Returns false (and changes nothing) when the order was
      * already paid or is no longer pending.
      */
     public function markPaid(Order $order, string $provider, ?string $providerRef = null, ?\DateTimeImmutable $now = null): bool
@@ -64,6 +92,10 @@ final class Billing
                 ]);
             if ($changed !== 1) {
                 return false;
+            }
+            if ($order->isPhotoPack()) {
+                $order->refresh();
+                return true;
             }
 
             $page = $order->page_id !== null ? Page::query()->withoutCache()->useWritePdo()->find($order->page_id) : null;
@@ -128,7 +160,8 @@ final class Billing
     private function cancelOutdated(Page $page, int $paidOrderId, \DateTimeImmutable $now): void
     {
         $pending = Order::query()->withoutCache()->useWritePdo()
-            ->where('page_id', $page->id)->where('status', Order::PENDING)->where('id', '!=', $paidOrderId)->get()->all();
+            ->where('page_id', $page->id)->where('status', Order::PENDING)->where('id', '!=', $paidOrderId)
+            ->where('plan', '!=', Order::PHOTO_PACK)->get()->all();
         foreach ($pending as $other) {
             if (!$this->plans->canBuy($page, $other->plan, (string) $other->period)) {
                 $this->db->table('orders')->where('id', '=', $other->id)->where('status', '=', Order::PENDING)

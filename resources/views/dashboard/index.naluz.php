@@ -6,7 +6,7 @@
   <div class="page-head">
     <div>
       <h1>Your pages</h1>
-      <p class="muted" style="margin-top:6px">Each page is one letter for one person. Build it for free; publish it with a plan.</p>
+      <p class="muted" style="margin-top:6px">Each page is one letter for one person. Build it for free; publish it with a plan. Your photos are shared by all your pages.</p>
     </div>
   </div>
 
@@ -22,6 +22,10 @@
       Create page
     </button>
   </form>
+
+  <section class="card usage-card" aria-label="Photos on your account">
+    @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs])
+  </section>
 
   @if (count($pages) === 0)
   <section class="card empty" style="margin:22px 0 60px">

@@ -279,6 +279,7 @@ p { margin: 0; }
 .plan .btn { margin-top: auto; }
 .plan .or { margin: -4px 0 0; font-size: .86rem; color: var(--ink-2); }
 .plan .or strong { color: var(--brand); font-weight: 600; }
+.plans-more { margin-top: 22px; }
 
 .faq { margin-top: 30px; display: grid; gap: 10px; }
 .faq details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0 18px; }
@@ -337,6 +338,19 @@ p { margin: 0; }
 .upload-zone svg { width: 26px; height: 26px; }
 .meter { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .meter i { display: block; height: 100%; background: linear-gradient(90deg, #f0cfa8, var(--brand)); border-radius: 3px; }
+
+/* the account's photos: used, left, buying more (partials/photo-usage) */
+.usage { display: grid; gap: 10px; }
+.usage-head { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: space-between; align-items: baseline; }
+.usage-count { font-size: .9rem; color: var(--ink-2); }
+.usage-count b { color: var(--ink); font-weight: 600; }
+.usage-full .meter i, .usage-over .meter i { background: var(--warn); }
+.pack-more summary { cursor: pointer; font-size: .9rem; font-weight: 500; color: var(--brand-ink); width: fit-content; }
+.pack-more[open] summary { margin-bottom: 10px; }
+.pack-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.pack-form .field { flex: 0 1 230px; }
+.pack-more .hint { margin-top: 6px; }
+.usage-card { padding: 16px; margin-top: 18px; }
 
 .choice-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
 .choice { position: relative; display: block; cursor: pointer; }

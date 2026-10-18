@@ -59,6 +59,17 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame(0, Page::query()->count());
     }
 
+    public function testTheDashboardShowsTheAccountsPhotos(): void
+    {
+        $this->makePhoto($this->makePage($this->owner), 'https://cdn.test/a.jpg', 1);
+        $this->makePhoto($this->makePage($this->owner), 'https://cdn.test/b.jpg', 1);
+        $html = (string) $this->get('/dashboard')->getBody();
+        $this->assertMatchesRegularExpression('#<b id="usage-used">2</b> of <span id="usage-total">6</span> used · <span id="usage-left">4 left</span>#', $html);
+        $this->assertStringContainsString('Need more photos? 12 for ₱100', $html);
+        $this->assertStringContainsString('action="/dashboard/photo-packs"', $html);
+        $this->assertStringNotContainsString('name="page"', $html, 'bought from the dashboard: no page to come back to');
+    }
+
     public function testFreeDraftsAreLimited(): void
     {
         for ($i = 0; $i < PagesController::MAX_DRAFTS; $i++) {
@@ -79,7 +90,9 @@ final class DashboardPagesTest extends TestCase
         }
         $this->assertStringContainsString('First paragraph.' . "\n\n" . 'Second paragraph.', $html, 'the letter is editable as paragraphs');
         $this->assertStringContainsString('https://cdn.test/a.jpg', $html);
-        $this->assertStringContainsString('1 / 6', $html, 'photos used out of the free limit');
+        $this->assertStringContainsString('1 on this page', $html);
+        $this->assertMatchesRegularExpression('#<b id="usage-used">1</b> of <span id="usage-total">6</span> used · <span id="usage-left">5 left</span>#', $html, 'the account\'s photos: used, of, left');
+        $this->assertStringContainsString('Included: 6 with the free preview', $html);
         $this->assertStringContainsString('It comes with the Sweetheart and Forever plans', $html, 'subdomain upsell on a free page');
         $this->assertStringContainsString('/dashboard/pages/' . $page->slug . '/qr', $html);
     }
@@ -213,16 +226,17 @@ final class DashboardPagesTest extends TestCase
     {
         $page = $this->makePage($this->owner);
         $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
-        foreach (['₱59 a month', '₱590 a year', '₱99 a month', '₱990 a year', '₱1,499 once', '2 months free', 'Most popular'] as $text) {
+        foreach (['₱200 a month', '₱2,400 a year', '₱350 a month', '₱4,200 a year', '₱4,999 once', 'Most popular'] as $text) {
             $this->assertStringContainsString($text, $html);
         }
+        $this->assertStringNotContainsString('months free', $html, 'no yearly discount any more');
         $this->assertSame(5, substr_count($html, 'name="period" value="'), 'Sweet and Sweetheart monthly and yearly, Forever once');
 
         $page->forceFill(['plan' => 'sweetheart', 'expires_at' => '2099-01-01 00:00:00', 'published_at' => '2026-01-01 00:00:00'])->save();
         $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
         $this->assertStringContainsString('Renew Sweetheart', $html);
         $this->assertStringContainsString('Upgrade to Forever', $html);
-        $this->assertStringNotContainsString('₱59 a month', $html, 'no way down');
+        $this->assertStringNotContainsString('₱200 a month', $html, 'no way down');
     }
 
     public function testEveryTemplateCanBeChosenWithEveryTheme(): void
@@ -287,7 +301,9 @@ final class DashboardPagesTest extends TestCase
         $this->makePhoto($page, 'https://cdn.test/a.jpg', 1);
         $this->makePhoto($page, 'https://cdn.test/b.jpg', 2);
         $order = new Order();
-        $order->forceFill(['reference' => 'LM-AAAA-BBBB', 'user_id' => $this->owner->id, 'page_id' => $page->id, 'plan' => 'sweet', 'period' => 'month', 'amount' => 5900, 'currency' => 'PHP', 'status' => 'paid', 'provider' => 'manual'])->save();
+        $order->forceFill(['reference' => 'LM-AAAA-BBBB', 'user_id' => $this->owner->id, 'page_id' => $page->id, 'plan' => 'sweet', 'period' => 'month', 'amount' => 20000, 'currency' => 'PHP', 'status' => 'paid', 'provider' => 'manual'])->save();
+        $other = $this->makePage($this->owner);
+        $kept = $this->makePhoto($other, 'https://cdn.test/kept.jpg');
 
         $this->submit('DELETE', '/dashboard/pages/' . $page->slug, ['confirm' => 'nope']);
         $this->assertNotNull($page->fresh(), 'not without typing "delete"');
@@ -295,9 +311,13 @@ final class DashboardPagesTest extends TestCase
         $response = $this->submit('DELETE', '/dashboard/pages/' . $page->slug, ['confirm' => 'delete']);
         $this->assertSame('/dashboard', $response->getHeaderLine('Location'));
         $this->assertNull($page->fresh());
-        $this->assertSame(0, Photo::query()->count());
-        $this->assertSame([], $this->disk->files, 'the stored files are deleted');
+        $this->assertSame([$kept->id], array_map('intval', Photo::query()->pluck('id')->all()), 'only the other page\'s photo is left');
+        $this->assertSame(['pages/' . $page->slug . '/a.jpg', 'pages/' . $page->slug . '/b.jpg'], $this->disk->deleted, 'its stored files are deleted');
+        $this->assertSame([(string) $kept->path], array_keys($this->disk->files));
+        $this->assertSame(0, $this->db()->table('storage_trash')->count(), 'nothing left to retry');
         $this->assertNull($order->fresh()->page_id, 'the order stays on record');
+        $this->assertStringContainsString('with its 2 photos, which no longer count towards your account', (string) $this->get('/dashboard')->getBody());
+        $this->assertSame(1, $this->app->make(\App\Services\PhotoAllowance::class)->of($this->owner->id)['used']);
     }
 
     public function testAnotherOwnersPageIsInvisible(): void

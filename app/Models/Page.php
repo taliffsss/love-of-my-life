@@ -88,11 +88,6 @@ final class Page extends Model
         return $this->status($now) === self::ACTIVE;
     }
 
-    public function photoLimit(): int
-    {
-        return (int) $this->planDetails()['photos'];
-    }
-
     /** Only plans that include it (Sweetheart and Forever) may have a dedicated subdomain. */
     public function allowsSubdomain(): bool
     {

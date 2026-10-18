@@ -10,6 +10,8 @@
         <h1 id="order-title" class="display" style="font-size:2rem;margin-top:6px">
           @if ($order->status === 'paid')
             Paid. Thank you!
+          @elseif ($order->isPhotoPack())
+            {{ $order->photos }} more photos for your account
           @else
             {{ $plan['name'] ?? $order->plan }} for {{ $page?->recipient ?? 'your page' }}
           @endif
@@ -19,7 +21,11 @@
     </div>
     <div class="section-body stack" style="--gap:18px">
       <dl class="kv">
+        @if ($order->isPhotoPack())
+        <dt>Photos</dt><dd>{{ $order->photos }} more, kept for good and shared by all your pages</dd>
+        @else
         <dt>Plan</dt><dd>{{ $plan['name'] ?? $order->plan }}, {{ ['month' => 'one month', 'year' => 'one year', 'once' => 'for good'][$order->period] ?? $order->period }}</dd>
+        @endif
         <dt>Amount</dt><dd>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</dd>
         <dt>Reference</dt><dd>{{ $order->reference }}</dd>
         @if ($order->paid_at !== null)
@@ -47,7 +53,7 @@
     </div>
     <div class="section-foot">
       @if ($page !== null)
-      <a class="btn btn-secondary" href="/dashboard/pages/{{ $page->slug }}#plan">Back to the page</a>
+      <a class="btn btn-secondary" href="/dashboard/pages/{{ $page->slug }}#{{ $order->isPhotoPack() ? 'photos' : 'plan' }}">Back to the page</a>
       @else
       <a class="btn btn-secondary" href="/dashboard">Your pages</a>
       @endif

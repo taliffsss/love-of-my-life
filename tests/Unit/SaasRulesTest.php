@@ -35,9 +35,9 @@ final class SaasRulesTest extends TestCase
         $this->assertSame(['sweet', 'sweetheart', 'forever'], array_keys($plans->purchasable($this->page('sweet'))), 'renew or upgrade');
         $this->assertSame(['sweetheart', 'forever'], array_keys($plans->purchasable($this->page('sweetheart'))));
         $this->assertSame([], $plans->purchasable($this->page('forever')), 'nothing after Forever');
-        $this->assertSame(['month' => 5900, 'year' => 59000], $plans->purchasable($this->page('free'))['sweet']['offers']);
-        $this->assertSame(['month' => 9900, 'year' => 99000], $plans->purchasable($this->page('sweet'))['sweetheart']['offers']);
-        $this->assertSame(['once' => 149900], $plans->purchasable($this->page('sweetheart'))['forever']['offers']);
+        $this->assertSame(['month' => 20000, 'year' => 240000], $plans->purchasable($this->page('free'))['sweet']['offers'], 'from ₱200 a month');
+        $this->assertSame(['month' => 35000, 'year' => 420000], $plans->purchasable($this->page('sweet'))['sweetheart']['offers']);
+        $this->assertSame(['once' => 499900], $plans->purchasable($this->page('sweetheart'))['forever']['offers']);
         $this->assertTrue($plans->canBuy($this->page('sweet'), 'sweet', 'year'), 'a monthly page can renew for a year');
         $this->assertFalse($plans->canBuy($this->page('free'), 'free', 'month'));
         $this->assertFalse($plans->canBuy($this->page('sweetheart'), 'sweet', 'month'));
@@ -51,9 +51,18 @@ final class SaasRulesTest extends TestCase
         $this->assertSame([1, 12, null], [$plans->months('month'), $plans->months('year'), $plans->months('once')]);
         $this->assertTrue($plans->isPermanent('forever'));
         $this->assertFalse($plans->isPermanent('sweetheart'));
-        $this->assertSame([2, 2, 0], [$plans->monthsFree('sweet'), $plans->monthsFree('sweetheart'), $plans->monthsFree('forever')], 'a year costs 10 months');
+        foreach (['sweet', 'sweetheart'] as $plan) {
+            $this->assertSame(12 * $plans->price($plan, 'month'), $plans->price($plan, 'year'), "a {$plan} year costs twelve months: no free months");
+        }
+        $this->assertSame(20000, min(array_map(static fn (array $p): int => (int) ($p['prices']['month'] ?? PHP_INT_MAX), $plans->paid())), 'plans start at ₱200 a month');
         $this->expectException(\DomainException::class);
         $plans->months('week');
+    }
+
+    public function testPhotosIsNotAPlanKey(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new Plans(['photos' => ['name' => 'Photos', 'prices' => ['once' => 100], 'photos' => 1, 'publish' => true, 'subdomain' => false]]);
     }
 
     public function testMonthsAreCalendarMonths(): void

@@ -11,6 +11,7 @@ use App\Services\Billing;
 use App\Services\Designs;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\PaymentGateway;
+use App\Services\PhotoAllowance;
 use App\Services\Plans;
 use Naluz\Auth\Auth;
 use Naluz\Http\HttpException;
@@ -20,7 +21,10 @@ use Naluz\Validation\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
-/** Buying a plan for a page: create (or reuse) the order, then hand over to the payment gateway. */
+/**
+ * Buying a plan for a page, or photo packs for the account: create (or reuse) the order, then hand over to the payment
+ * gateway.
+ */
 final class OrdersController
 {
     use OwnsPages;
@@ -53,6 +57,33 @@ final class OrdersController
         return Response::redirect($gateway->checkoutUrl($order), 303);
     }
 
+    /**
+     * Photo packs for the account. Body: packs (1 to the most an order may buy), and page: the slug of the page it is
+     * bought from, to come back to (optional).
+     */
+    public function storePhotos(ServerRequestInterface $request, Auth $auth, Billing $billing, PhotoAllowance $allowance, PaymentGateway $gateway): ResponseInterface
+    {
+        $body = Request::body($request);
+        $slug = is_string($body['page'] ?? null) ? $body['page'] : '';
+        $page = $slug !== '' ? $this->ownedPage($auth, $slug) : null;
+        $packs = filter_var($body['packs'] ?? null, FILTER_VALIDATE_INT);
+        if (!is_int($packs) || $packs < 1 || $packs > $allowance->maxPacks()) {
+            throw new ValidationException(
+                ['packs' => [sprintf('Choose how many photos to add: 1 to %d packs of %d.', $allowance->maxPacks(), $allowance->packPhotos())]],
+                ['packs' => is_scalar($body['packs'] ?? null) ? (string) $body['packs'] : ''],
+            );
+        }
+
+        // Clicking "buy" twice must not create two orders to pay.
+        $pending = Order::query()->where('user_id', (int) $auth->id())->where('plan', Order::PHOTO_PACK)
+            ->where('photos', $packs * $allowance->packPhotos())->where('status', Order::PENDING)->where('provider', $gateway->name());
+        $order = ($page !== null ? $pending->where('page_id', $page->id) : $pending->whereNull('page_id'))->first();
+        if (!$order instanceof Order) {
+            $order = $billing->createPhotoOrder((int) $auth->id(), $page, $packs, $gateway->name());
+        }
+        return Response::redirect($gateway->checkoutUrl($order), 303);
+    }
+
     public function show(string $reference, Auth $auth, Plans $plans, PaymentGateway $gateway): ResponseInterface
     {
         $order = $this->ownedOrder($auth, $reference);
@@ -76,6 +107,12 @@ final class OrdersController
         $billing->markPaid($order, 'fake', 'fake_' . bin2hex(random_bytes(8)));
 
         $page = $order->page_id !== null ? Page::query()->where('id', $order->page_id)->first() : null;
+        if ($order->isPhotoPack()) {
+            return Screen::back(
+                $page instanceof Page ? $this->editUrl($page, 'photos') : '/dashboard',
+                sprintf('Payment received: %d more photos are ready to use on any of your pages.', $order->photos),
+            );
+        }
         return Screen::back($page instanceof Page ? $this->editUrl($page, 'plan') : '/dashboard', 'Payment received. Your page is live!');
     }
 

@@ -7,6 +7,8 @@ namespace App\Http\Controllers;
 use App\Http\Screen;
 use App\Models\Page;
 use App\Services\Designs;
+use App\Services\PhotoAllowance;
+use App\Services\PhotoStorage;
 use App\Services\Plans;
 use App\Services\Sites;
 use Psr\Http\Message\ResponseInterface;
@@ -21,10 +23,13 @@ final class LandingController
         'I do not need anything grand. Just you, and more days like these. Happy monthsary, my love.',
     ];
 
-    public function index(Plans $plans, Sites $sites): ResponseInterface
+    public function index(Plans $plans, Sites $sites, PhotoAllowance $allowance): ResponseInterface
     {
         return Screen::render('landing', [
             'plans' => $plans->paid(),
+            'freePhotos' => $allowance->freePhotos(),
+            'pack' => $allowance->packOptions()[1],
+            'maxPhoto' => PhotoStorage::megabytes((int) config('saas.max_upload_bytes')),
             'layouts' => Designs::LAYOUTS,
             'themes' => Designs::THEMES,
             'domain' => $sites->domain(),

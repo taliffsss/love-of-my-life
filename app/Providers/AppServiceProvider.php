@@ -10,6 +10,7 @@ use App\Services\LetterStore;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\ManualGateway;
 use App\Services\Payments\PaymentGateway;
+use App\Services\PhotoAllowance;
 use App\Services\PhotoCatalog;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
@@ -41,11 +42,21 @@ final class AppServiceProvider extends ServiceProvider
             (string) $c->make(Repository::class)->get('saas.domain', ''),
             array_map('strval', (array) $c->make(Repository::class)->get('saas.reserved_subdomains', [])),
         ));
-        $this->app->bind(Billing::class, fn ($c) => new Billing($c->make(Plans::class), $c->make(Connection::class)));
+        $this->app->bind(PhotoAllowance::class, function ($c) {
+            $pack = (array) $c->make(Repository::class)->get('saas.photo_pack', []);
+            return new PhotoAllowance(
+                $c->make(Plans::class),
+                (int) ($pack['photos'] ?? 12),
+                (int) ($pack['price'] ?? 10000),
+                (int) ($pack['max_packs'] ?? 10),
+            );
+        });
+        $this->app->bind(Billing::class, fn ($c) => new Billing($c->make(Plans::class), $c->make(Connection::class), $c->make(PhotoAllowance::class)));
         $this->app->bind(PhotoStorage::class, fn ($c) => new PhotoStorage(
             $c->make(StorageManager::class),
+            $c->make(Connection::class),
             trim((string) $c->make(Repository::class)->get('filesystems.disks.spaces.folder', ''), '/'),
-            (int) $c->make(Repository::class)->get('saas.max_upload_bytes', 12_000_000),
+            (int) $c->make(Repository::class)->get('saas.max_upload_bytes', 10 * 1024 * 1024),
         ));
         $this->app->bind(PaymentGateway::class, function ($c) {
             $config = $c->make(Repository::class);

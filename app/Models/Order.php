@@ -7,8 +7,10 @@ namespace App\Models;
 use Naluz\Database\Orm\Model;
 
 /**
- * A plan bought for a page. Amounts are in centavos. Status: pending → paid (or failed/cancelled). Activation happens
- * once, when the order turns paid (App\Services\Billing).
+ * A plan bought for a page, or a photo pack for the account (plan `photos`; `photos` is how many it adds, `page_id`
+ * the page it was bought from, if any). Amounts are in centavos. Status: pending → paid (or failed/cancelled).
+ * Activation happens once, when the order turns paid (App\Services\Billing); a pack needs none, since paid packs are
+ * counted where the allowance is worked out (App\Services\PhotoAllowance).
  *
  * @property int $id
  * @property string $reference
@@ -16,6 +18,7 @@ use Naluz\Database\Orm\Model;
  * @property ?int $page_id
  * @property string $plan
  * @property string $period month | year | once (config/saas.php periods)
+ * @property int $photos photos a pack adds; 0 for a plan
  * @property int $amount
  * @property string $currency
  * @property string $status
@@ -29,13 +32,22 @@ final class Order extends Model
     public const PAID = 'paid';
     public const CANCELLED = 'cancelled';
 
+    /** The `plan` of a photo pack order (never a key of config/saas.php plans). */
+    public const PHOTO_PACK = 'photos';
+
     protected array $casts = [
         'user_id' => 'integer',
         'page_id' => 'integer',
         'amount' => 'integer',
+        'photos' => 'integer',
         'paid_at' => 'datetime',
         'created_at' => 'datetime',
     ];
+
+    public function isPhotoPack(): bool
+    {
+        return $this->plan === self::PHOTO_PACK;
+    }
 
     /** A short reference a person can read out or type in a payment note, e.g. LM-7KQ2-9XDA. */
     public static function newReference(): string

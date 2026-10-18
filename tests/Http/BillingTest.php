@@ -40,7 +40,7 @@ final class BillingTest extends TestCase
         $this->assertSame('sweet', $page->plan);
         $this->assertSame('2026-11-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'));
         $this->assertSame('2026-10-13 12:00:00', $page->published_at->format('Y-m-d H:i:s'));
-        $this->assertSame(['month', 5900], [$order->fresh()->period, $order->fresh()->amount]);
+        $this->assertSame(['month', 20000], [$order->fresh()->period, $order->fresh()->amount]);
     }
 
     public function testAYearlyPlanStartsNow(): void
@@ -48,7 +48,7 @@ final class BillingTest extends TestCase
         $page = $this->makePage($this->owner);
         $order = $this->pay($page, 'sweetheart', 'year');
         $this->assertSame('2027-10-13 12:00:00', $page->fresh()->expires_at->format('Y-m-d H:i:s'));
-        $this->assertSame(['year', 99000], [$order->fresh()->period, $order->fresh()->amount]);
+        $this->assertSame(['year', 420000], [$order->fresh()->period, $order->fresh()->amount]);
     }
 
     public function testRenewingEarlyKeepsTheTimeLeft(): void
@@ -96,7 +96,7 @@ final class BillingTest extends TestCase
         $this->assertNull($page->expires_at);
         $this->assertTrue($page->allowsSubdomain());
         $this->assertSame(Page::ACTIVE, $page->status(new \DateTimeImmutable('2099-01-01')));
-        $this->assertSame(['once', 149900], [$order->fresh()->period, $order->fresh()->amount]);
+        $this->assertSame(['once', 499900], [$order->fresh()->period, $order->fresh()->amount]);
     }
 
     public function testAPlanIsOnlySoldForItsOwnPeriods(): void
@@ -111,6 +111,36 @@ final class BillingTest extends TestCase
             }
         }
         $this->assertSame(0, Order::query()->count());
+    }
+
+    public function testAPhotoPackIsPaidOnceAndTouchesNoPage(): void
+    {
+        $page = $this->makePage($this->owner);
+        $plan = $this->billing->createOrder($this->owner->id, $page, 'sweet', 'month', 'manual');
+        $pack = $this->billing->createPhotoOrder($this->owner->id, $page, 3, 'manual');
+        $this->assertSame([36, 30000], [$pack->photos, $pack->amount]);
+
+        $this->assertTrue($this->billing->markPaid($pack, 'manual', 'gcash-1', $this->now));
+        $this->assertFalse($this->billing->markPaid($pack->fresh(), 'manual', 'gcash-2', $this->now), 'paid once');
+        $this->assertSame('free', $page->fresh()->plan);
+        $this->assertNull($page->fresh()->expires_at);
+
+        $pending = $this->billing->createPhotoOrder($this->owner->id, $page, 1, 'manual');
+        $this->billing->markPaid($plan, 'manual', null, $this->now);
+        $this->assertSame(Order::PENDING, $pending->fresh()->status, 'a new plan never cancels a pack waiting to be paid');
+    }
+
+    public function testAPhotoPackOrderHasOneToTenPacks(): void
+    {
+        foreach ([0, 11, -2] as $packs) {
+            try {
+                $this->billing->createPhotoOrder($this->owner->id, null, $packs, 'manual');
+                $this->fail("{$packs} packs were sold");
+            } catch (\DomainException $e) {
+                $this->assertSame('Choose between 1 and 10 packs of photos.', $e->getMessage());
+            }
+        }
+        $this->assertSame(120, $this->billing->createPhotoOrder($this->owner->id, null, 10, 'manual')->photos);
     }
 
     public function testAnOrderIsActivatedExactlyOnce(): void
@@ -138,7 +168,7 @@ final class BillingTest extends TestCase
         $this->assertFalse($this->billing->markPaid($late->fresh(), 'manual', null, $this->now));
         $page = $page->fresh();
         $this->assertSame('sweetheart', $page->plan);
-        $this->assertSame('2026-11-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'), 'the ₱59 order adds nothing to Sweetheart');
+        $this->assertSame('2026-11-13 12:00:00', $page->expires_at->format('Y-m-d H:i:s'), 'the Sweet order adds nothing to Sweetheart');
     }
 
     public function testForeverCancelsEveryOtherPendingOrder(): void

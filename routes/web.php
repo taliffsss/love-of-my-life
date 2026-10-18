@@ -52,6 +52,7 @@ $router->group(['prefix' => 'dashboard', 'middleware' => ['auth', 'noindex']], s
     $router->delete('/pages/{slug}/subdomain', [SubdomainController::class, 'destroy'])->where('slug', $slug);
 
     $router->post('/pages/{slug}/orders', [OrdersController::class, 'store'])->where('slug', $slug)->middleware(['throttle:20,1']);
+    $router->post('/photo-packs', [OrdersController::class, 'storePhotos'])->middleware(['throttle:20,1']);
     $router->get('/orders/{reference}', [OrdersController::class, 'show'])->where('reference', 'LM-[A-Z0-9]{4}-[A-Z0-9]{4}');
     $router->post('/orders/{reference}/fake-pay', [OrdersController::class, 'fakePay'])->where('reference', 'LM-[A-Z0-9]{4}-[A-Z0-9]{4}');
 });

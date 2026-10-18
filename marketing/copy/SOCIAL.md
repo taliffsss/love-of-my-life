@@ -74,7 +74,7 @@ Use the video or `feed-envelope.png`. Send the ad to the landing page.
 - "10 ways to open a love letter"
 - TL: "Sulat na para lang sa kanya"
 
-**Description:** "Photos, your song and your letter. Free to try, from ₱59 a month." The preview is free, so this is
+**Description:** "Photos, your song and your letter. Free to try, from ₱200 a month." The preview is free, so this is
 true.
 **Button:** *Sign up* (cold audiences) or *Learn more* (retargeting).
 
@@ -104,8 +104,9 @@ Boost the Valentine's post from the first week of February.
 
 - **Sample content.** The photos in the video and cards are illustrations and the letter is a sample; the video's end
   card says so. Don't present them as a real couple's page.
-- **Prices.** The plans are final in the app: Sweet ₱59 a month (₱590 a year), Sweetheart ₱99 a month (₱990 a year),
-  Forever ₱1,499 once. When you quote them, say "from ₱59 a month" and keep the free preview in front: "Try it free".
+- **Prices.** The plans in the app: Sweet ₱200 a month (₱2,400 a year), Sweetheart ₱350 a month (₱4,200 a year),
+  Forever ₱4,999 once; extra photos 12 for ₱100. A year costs twelve months: never advertise free months or a yearly
+  discount. When you quote them, say "from ₱200 a month" and keep the free preview in front: "Try it free".
 - **Own address.** "Own address" (`name.love.markanthonynaluz.com`) comes with Sweetheart and Forever; the video's end
   note says so.
 - **Payments.** Don't claim online checkout until it is live; payments are confirmed by hand for now.
