@@ -101,10 +101,11 @@ final class SiteController
         // visitors see the templates of the page's plan; the owner's preview and the demo may try any
         $layout = in_array($mode, ['open', 'locked'], true) ? $this->plans->templateFor($page) : Designs::layout($page->layout);
         $theme = Designs::theme($page->theme);
+        $occasion = Designs::occasion($page->occasion);
         $assets = Designs::assets($layout);
         $assetVersion = (string) max(array_map(
             static fn (string $file): int => (int) @filemtime(base_path('public/' . $file)),
-            ['assets/site.js', 'assets/site.css', 'assets/themes.css', $assets['css'], $assets['js']],
+            ['assets/site.js', 'assets/site.css', 'assets/themes.css', 'assets/occasions.css', $assets['css'], $assets['js']],
         ));
 
         $response = view('site.page', [
@@ -112,6 +113,7 @@ final class SiteController
             'mode' => $mode,
             'layout' => $layout,
             'theme' => $theme,
+            'occasion' => $occasion,
             'scheme' => Designs::THEMES[$theme]['scheme'],
             'themeColor' => Designs::THEMES[$theme]['colors'][0],
             'view' => Designs::view($layout),

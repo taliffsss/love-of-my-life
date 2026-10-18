@@ -10,6 +10,7 @@ use App\Models\Page;
 use App\Models\Photo;
 use App\Models\User;
 use App\Services\Designs;
+use App\Services\OccasionTemplates;
 use App\Services\YouTube;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
@@ -51,6 +52,105 @@ final class DashboardPagesTest extends TestCase
         $html = (string) $this->get('/dashboard')->getBody();
         $this->assertStringContainsString('For Jinelin Basela', $html);
         $this->assertStringContainsString('Draft', $html);
+    }
+
+    public function testCreatingAPageFromAnOccasionTemplateFillsItIn(): void
+    {
+        $this->submit('POST', '/dashboard/pages', ['recipient' => 'Mia', 'template' => 'birthday-happy']);
+
+        $page = Page::query()->first();
+        $this->assertInstanceOf(Page::class, $page);
+        $template = OccasionTemplates::find('birthday-happy');
+        $this->assertSame($template['letter'], $page->paragraphs());
+        $this->assertSame($template['layout'], $page->layout);
+        $this->assertSame($template['theme'], $page->theme);
+        $this->assertSame($template['eyebrow'], $page->gate_eyebrow);
+        $this->assertSame($template['question'], $page->gate_question);
+        $this->assertSame('birthday', $page->occasion);
+        $this->assertSame(Page::DRAFT, $page->status());
+    }
+
+    public function testTheDesignCanBeGivenAnOccasionAndItDressesTheTemplate(): void
+    {
+        $page = $this->makePage($this->owner, ['layout' => 'classic', 'theme' => 'rose']);
+        $url = '/dashboard/pages/' . $page->slug;
+        $this->assertNull($page->occasion);
+        $this->assertStringNotContainsString('data-occasion', (string) $this->get($url . '/preview')->getBody());
+
+        $this->submit('PUT', $url . '/design', ['layout' => 'envelope', 'theme' => 'blush', 'occasion' => 'wedding']);
+        $page = Page::query()->where('slug', $page->slug)->first();
+        $this->assertSame('wedding', $page->occasion);
+        $this->assertSame('envelope', $page->layout);
+
+        $html = (string) $this->get($url . '/preview')->getBody();
+        $this->assertStringContainsString('data-occasion="wedding"', $html);
+        $this->assertStringContainsString('/assets/occasions.css', $html);
+
+        // a request that says nothing of the occasion keeps it; an empty one removes it
+        $this->submit('PUT', $url . '/design', ['layout' => 'gift', 'theme' => 'blush']);
+        $this->assertSame('wedding', Page::query()->where('slug', $page->slug)->first()->occasion);
+        $this->submit('PUT', $url . '/design', ['layout' => 'gift', 'theme' => 'blush', 'occasion' => '']);
+        $this->assertNull(Page::query()->where('slug', $page->slug)->first()->occasion);
+    }
+
+    public function testAnUnknownOccasionIsRefused(): void
+    {
+        $page = $this->makePage($this->owner, ['layout' => 'classic', 'theme' => 'rose']);
+        $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'gift', 'theme' => 'rose', 'occasion' => 'funeral']);
+        $fresh = Page::query()->where('slug', $page->slug)->first();
+        $this->assertSame('classic', $fresh->layout);
+        $this->assertNull($fresh->occasion);
+    }
+
+    public function testThePreviewTriesAnOccasionBeforeItIsSaved(): void
+    {
+        $page = $this->makePage($this->owner, ['layout' => 'classic', 'theme' => 'rose']);
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug . '/preview?layout=stars&occasion=birthday')->getBody();
+        $this->assertStringContainsString('data-occasion="birthday"', $html);
+        $this->assertStringContainsString('data-layout="stars"', $html);
+        $this->assertNull(Page::query()->where('slug', $page->slug)->first()->occasion);
+    }
+
+    public function testTheDesignPickerHasTenDesignsForEveryOccasion(): void
+    {
+        $page = $this->makePage($this->owner);
+        $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
+        $this->assertSame(5, substr_count($html, 'class="choice-grid design-grid"'));
+        foreach (Designs::OCCASION_DESIGNS as $occasion => $designs) {
+            $this->assertCount(10, $designs, $occasion);
+            $this->assertSame(array_keys(Designs::LAYOUTS), array_keys($designs));
+            foreach ($designs as [$name]) {
+                $this->assertStringContainsString('<b>' . $name . '</b>', $html);
+            }
+        }
+    }
+
+    public function testAnUnknownOccasionTemplateCreatesNothing(): void
+    {
+        $this->submit('POST', '/dashboard/pages', ['recipient' => 'Mia', 'template' => 'not-a-template']);
+        $this->assertSame(0, Page::query()->count());
+    }
+
+    public function testTheDashboardOffersTenTemplatesForEveryOccasion(): void
+    {
+        $html = (string) $this->get('/dashboard')->getBody();
+        foreach (OccasionTemplates::OCCASIONS as $occasion) {
+            $this->assertStringContainsString($occasion['name'], $html);
+        }
+        $this->assertSame(40, substr_count($html, 'name="template"'));
+    }
+
+    public function testEveryPageCardHasADeleteButtonAndConfirmation(): void
+    {
+        $a = $this->makePage($this->owner, ['recipient' => 'Ana']);
+        $b = $this->makePage($this->owner, ['recipient' => 'Ben']);
+        $html = (string) $this->get('/dashboard')->getBody();
+        foreach ([$a, $b] as $page) {
+            $this->assertStringContainsString('data-open="#delete-' . $page->slug . '"', $html);
+            $this->assertStringContainsString('id="delete-' . $page->slug . '"', $html);
+            $this->assertStringContainsString('action="/dashboard/pages/' . $page->slug . '"', $html);
+        }
+        $this->assertLessThan(strpos($html, 'data-open="#delete-' . $a->slug), strpos($html, '/preview"', strpos($html, $a->slug)) ?: PHP_INT_MAX);
     }
 
     public function testAPageNeedsSomeoneToBeFor(): void

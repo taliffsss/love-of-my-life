@@ -176,24 +176,39 @@
           @csrf
           @method('PUT')
           <div class="section-head">
-            <div><h2 id="design-title">Design</h2><p>Pick one of the {{ count($layouts) }} templates and a colour theme; every template works with every theme. Change them any time: the preview updates before you save.</p></div>
+            <div><h2 id="design-title">Design</h2><p>Pick an occasion, then one of its {{ count($layouts) }} designs and a colour theme; every design works with every theme. Change them any time: the preview updates before you save.</p></div>
           </div>
           <div class="section-body stack" style="--gap:18px">
             <fieldset style="border:0;margin:0;padding:0">
+              <legend class="label" style="margin-bottom:10px">Occasion</legend>
+              @include('partials.errors', ['field' => 'occasion'])
+              <div class="occasion-tabs" role="group" aria-label="Occasion">
+                <label class="occasion-tab"><input type="radio" name="occasion" value="" @if (empty($page->occasion)) checked @endif /><span>Plain</span></label>
+                @foreach ($occasions as $okey => $occasion)
+                <label class="occasion-tab"><input type="radio" name="occasion" value="{{ $okey }}" @if ($page->occasion === $okey) checked @endif /><span>{{ $occasion['name'] }}</span></label>
+                @endforeach
+              </div>
+            </fieldset>
+            <fieldset style="border:0;margin:0;padding:0">
               <legend class="label" style="margin-bottom:10px">Template</legend>
               @include('partials.errors', ['field' => 'layout'])
-              <div class="choice-grid">
+              @php $groups = ['' => null] + $occasions; @endphp
+              @foreach ($groups as $okey => $occasion)
+              @php $okey = (string) $okey; $current = (string) $page->occasion === $okey; @endphp
+              <div class="choice-grid design-grid" data-occasion="{{ $okey }}">
                 @foreach ($layouts as $key => $layout)
+                @php $label = $okey === '' ? $layout['name'] : $occasionDesigns[$okey][$key][0]; $about = $okey === '' ? $layout['description'] : $occasionDesigns[$okey][$key][1]; @endphp
                 <label class="choice">
-                  <input type="radio" name="layout" value="{{ $key }}" @if ($page->layout === $key) checked @endif @if ($templateNotes[$key]['locked']) data-locked="{{ $layout['name'] }} comes with {{ $templateNotes[$key]['plans'] }}. Preview it here, then upgrade the plan to use it." @endif />
+                  <input type="radio" name="layout" value="{{ $key }}" @if ($current && $page->layout === $key) checked @endif @if ($templateNotes[$key]['locked']) data-locked="{{ $label }} comes with {{ $templateNotes[$key]['plans'] }}. Preview it here, then upgrade the plan to use it." @endif />
                   <span class="box">
                     <span class="shot"><span class="schem schem-{{ $key }}" aria-hidden="true" style="display:block"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></span></span>
                     @if ($templateNotes[$key]['plans'] !== '')<span class="plan-badge">{{ $templateNotes[$key]['plans'] }}</span>@endif
-                    <span class="txt"><b>{{ $layout['name'] }}</b><small>{{ $layout['description'] }}</small><small class="play">{{ $layout['play'] }}</small></span>
+                    <span class="txt"><b>{{ $label }}</b><small>{{ $about }}</small><small class="play">{{ $layout['play'] }}</small></span>
                   </span>
                 </label>
                 @endforeach
               </div>
+              @endforeach
             </fieldset>
             <fieldset style="border:0;margin:0;padding:0">
               <legend class="label" style="margin-bottom:10px">Colours</legend>

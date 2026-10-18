@@ -26,14 +26,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Fredoka:wght@400;500&family=Great+Vibes&family=Playfair+Display:ital,wght@1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/assets/themes.css?v={{ $assetVersion }}" />
     <link rel="stylesheet" href="/assets/site.css?v={{ $assetVersion }}" />
+    @if ($occasion !== null)
+    <link rel="stylesheet" href="/assets/occasions.css?v={{ $assetVersion }}" />
+    @endif
     <link rel="stylesheet" href="/{{ $assets['css'] }}?v={{ $assetVersion }}" />
   </head>
-  <body data-layout="{{ $layout }}" data-theme="{{ $theme }}" data-scheme="{{ $scheme }}" data-mode="{{ $mode }}">
+  <body data-layout="{{ $layout }}" @if ($occasion !== null) data-occasion="{{ $occasion }}" @endif data-theme="{{ $theme }}" data-scheme="{{ $scheme }}" data-mode="{{ $mode }}">
     <h1 class="sr-only">For {{ $page->recipient }}</h1>
     <div class="hearts" aria-hidden="true"></div>
 

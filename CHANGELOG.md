@@ -4,6 +4,14 @@
 
 The single page becomes a product: anyone can sign up, make love pages and publish them.
 
+- **Occasion templates.** A new page can start from one of 40 ready-made templates: ten each for Anniversary, Wedding,
+  Boyfriend / Girlfriend and Birthday. A template fills in the letter, the lock-screen heading and question, and a
+  layout and colour theme that suit it; all of it stays editable. Choosing none keeps the old starter letter.
+- **Occasion designs.** The Design tab has an occasion (Plain, Anniversary, Wedding, Boyfriend / Girlfriend, Birthday); each
+  occasion offers the ten templates as ten designs of its own (typeface plus two ornaments placed differently per
+  template, `public/assets/occasions.css`). New column `pages.occasion`; plans still decide by template, so they are unchanged.
+- **Seeders.** `php naluz db:seed` makes the administrator (`ADMIN_EMAIL` / `ADMIN_PASSWORD`; the password is required outside
+  local environments) and, outside production, the demo account `demo@lovable.local` / `demo1234` with a page per occasion.
 - **Accounts and dashboard.** Sign up and sign in (e-mail + password, Argon2id, rate limited). Each account lists its
   pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
   browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design

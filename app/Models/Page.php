@@ -30,6 +30,7 @@ use Naluz\Database\Orm\Relations\HasMany;
  * @property string $gate_question
  * @property string $layout
  * @property string $theme
+ * @property ?string $occasion
  * @property string $plan
  * @property ?\DateTimeImmutable $expires_at
  * @property ?\DateTimeImmutable $published_at

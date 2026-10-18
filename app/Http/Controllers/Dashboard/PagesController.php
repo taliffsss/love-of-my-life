@@ -11,6 +11,7 @@ use App\Models\Page;
 use App\Models\Photo;
 use App\Services\Designs;
 use App\Services\LetterStore;
+use App\Services\OccasionTemplates;
 use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
@@ -42,6 +43,20 @@ final class PagesController
         'Whatever comes next, I want to face it with you. I love you, today and every day after.',
     ];
 
+    /** The occasion a starter template belongs to (its key starts with the occasion's). */
+    private function occasionOf(string $templateKey): ?string
+    {
+        foreach (OccasionTemplates::all() as $occasion => $templates) {
+            foreach ($templates as $template) {
+                if ($template['key'] === $templateKey) {
+                    return $occasion;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function index(Auth $auth, Sites $sites, PhotoAllowance $allowance): ResponseInterface
     {
         $pages = Page::query()->where('user_id', (int) $auth->id())->orderBy('id', 'desc')->get()->all();
@@ -57,6 +72,8 @@ final class PagesController
         }
 
         return Screen::render('dashboard.index', [
+            'occasions' => Designs::OCCASIONS,
+            'templates' => OccasionTemplates::all(),
             'pages' => $pages,
             'usage' => $allowance->of((int) $auth->id()),
             'packs' => $allowance->packOptions(),
@@ -77,6 +94,13 @@ final class PagesController
             throw new ValidationException(['recipient' => [$e->getMessage()]], Request::body($request));
         }
 
+        // an optional head start from one of the occasion templates; a key that does not exist is a mistake, not a blank page
+        $key = trim((string) (Request::body($request)['template'] ?? ''));
+        $template = OccasionTemplates::find($key);
+        if ($key !== '' && $template === null) {
+            throw new ValidationException(['template' => ['Pick one of the templates.']], Request::body($request));
+        }
+
         $drafts = Page::query()->where('user_id', (int) $auth->id())->where('plan', 'free')->count();
         if ($drafts >= self::MAX_DRAFTS) {
             throw new ValidationException(
@@ -90,12 +114,13 @@ final class PagesController
             'user_id' => (int) $auth->id(),
             'slug' => Page::newSlug(),
             'recipient' => $recipient,
-            'letter' => self::STARTER_LETTER,
+            'letter' => $template['letter'] ?? self::STARTER_LETTER,
             'gate_enabled' => false,
-            'gate_eyebrow' => Page::DEFAULT_EYEBROW,
-            'gate_question' => Page::DEFAULT_QUESTION,
-            'layout' => Designs::DEFAULT_LAYOUT,
-            'theme' => Designs::DEFAULT_THEME,
+            'gate_eyebrow' => $template['eyebrow'] ?? Page::DEFAULT_EYEBROW,
+            'gate_question' => $template['question'] ?? Page::DEFAULT_QUESTION,
+            'layout' => $template['layout'] ?? Designs::DEFAULT_LAYOUT,
+            'theme' => $template['theme'] ?? Designs::DEFAULT_THEME,
+            'occasion' => $template === null ? null : $this->occasionOf($template['key']),
             'plan' => 'free',
             'searchable' => false,
         ])->save();
@@ -120,6 +145,8 @@ final class PagesController
             'plans' => $plans->all(),
             'purchasable' => $plans->purchasable($page),
             'layouts' => Designs::LAYOUTS,
+            'occasions' => Designs::OCCASIONS,
+            'occasionDesigns' => Designs::OCCASION_DESIGNS,
             'templateNotes' => $this->templateNotes($page, $plans),
             'themes' => Designs::THEMES,
             'maxUploadBytes' => $storage->maxBytes(),
@@ -241,7 +268,12 @@ final class PagesController
         $body = Request::body($request);
         $layout = (string) ($body['layout'] ?? '');
         $theme = (string) ($body['theme'] ?? '');
+        // absent: keep the page's occasion; empty: none; otherwise one of Designs::OCCASIONS
+        $occasion = array_key_exists('occasion', $body) ? (string) $body['occasion'] : (string) $page->occasion;
         $errors = [];
+        if ($occasion !== '' && Designs::occasion($occasion) === null) {
+            $errors['occasion'] = ['Pick one of the occasions.'];
+        }
         if (!isset(Designs::LAYOUTS[$layout])) {
             $errors['layout'] = ['Pick one of the templates.'];
         } elseif ($page->status() !== Page::DRAFT && !$plans->allowsTemplate($page->plan, $layout)) {
@@ -259,10 +291,11 @@ final class PagesController
             throw new ValidationException($errors, $body);
         }
 
-        $page->forceFill(['layout' => $layout, 'theme' => $theme])->save();
+        $page->forceFill(['layout' => $layout, 'theme' => $theme, 'occasion' => $occasion === '' ? null : $occasion])->save();
+        $name = $occasion === '' ? Designs::LAYOUTS[$layout]['name'] : Designs::OCCASION_DESIGNS[$occasion][$layout][0];
         return Screen::back(
             $this->editUrl($page, 'design'),
-            'Design saved: the ' . Designs::LAYOUTS[$layout]['name'] . ' template in ' . Designs::THEMES[$theme]['name'] . ' colours.',
+            'Design saved: ' . $name . ' in ' . Designs::THEMES[$theme]['name'] . ' colours.',
         );
     }
 
@@ -273,6 +306,7 @@ final class PagesController
         // the design picker previews a choice before it is saved
         $page->setAttribute('layout', Designs::layout(is_string($query['layout'] ?? null) ? $query['layout'] : $page->layout));
         $page->setAttribute('theme', Designs::theme(is_string($query['theme'] ?? null) ? $query['theme'] : $page->theme));
+        $page->setAttribute('occasion', Designs::occasion(is_string($query['occasion'] ?? null) ? $query['occasion'] : $page->occasion));
         return $site->render($page, 'preview');
     }
 

@@ -407,3 +407,18 @@ dialog.modal .section-foot { border-radius: 0 0 var(--radius-lg) var(--radius-lg
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 @media (min-width: 960px) { .hide-art { display: none; } }
+
+/* ---------- occasion templates (new page) ---------- */
+.occasions { border: 0; padding: 0; margin: 0; min-width: 0; }
+.occasions legend { font-weight: 500; padding: 0; margin-bottom: 8px; }
+.occasion-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.occasion-tab input, .template-card input { position: absolute; opacity: 0; pointer-events: none; }
+.occasion-tab span { display: inline-block; padding: 7px 14px; border: 1px solid var(--line-2); border-radius: 999px; cursor: pointer; background: var(--surface); }
+.occasion-tab input:checked + span { background: var(--brand-soft); border-color: var(--brand); color: var(--brand-ink); }
+.occasion-tab input:focus-visible + span, .template-card:has(input:focus-visible) { box-shadow: var(--focus); }
+.template-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-bottom: 10px; }
+.template-card { position: relative; display: grid; gap: 2px; align-content: start; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; }
+.template-card .name { font-weight: 500; }
+.template-card:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+.js .template-grid { display: none; }
+.js .template-grid.on { display: grid; }

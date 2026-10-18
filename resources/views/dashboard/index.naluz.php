@@ -17,7 +17,30 @@
       <input class="input" id="recipient" name="recipient" type="text" maxlength="60" required placeholder="Their name or what you call them" value="{{ $old['recipient'] ?? '' }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
       @include('partials.errors', ['field' => 'recipient'])
     </div>
-    <button class="btn btn-primary" type="submit" style="margin-top:28px">
+    <fieldset class="occasions" style="flex-basis:100%">
+      <legend>Start from an occasion <span class="muted">(optional)</span></legend>
+      <div class="occasion-tabs" role="group" aria-label="Occasion">
+        @php $first = array_key_first($occasions); @endphp
+        @foreach ($occasions as $okey => $occasion)
+        <label class="occasion-tab"><input type="radio" name="occasion" value="{{ $okey }}" @if ($okey === $first) checked @endif /><span>{{ $occasion['name'] }}</span></label>
+        @endforeach
+      </div>
+      @foreach ($occasions as $okey => $occasion)
+      <div class="template-grid" data-occasion="{{ $okey }}">
+        <p class="small muted" style="grid-column:1/-1">{{ $occasion['blurb'] }}</p>
+        @foreach ($templates[$okey] as $tpl)
+        <label class="template-card">
+          <input type="radio" name="template" value="{{ $tpl['key'] }}" @if (($old['template'] ?? '') === $tpl['key']) checked @endif />
+          <span class="name">{{ $tpl['name'] }}</span>
+          <span class="small muted">{{ $tpl['blurb'] }}</span>
+        </label>
+        @endforeach
+      </div>
+      @endforeach
+      @include('partials.errors', ['field' => 'template'])
+      <p class="small muted">Pick one for a ready-made letter, question, layout and colours. You can change all of it afterwards.</p>
+    </fieldset>
+    <button class="btn btn-primary" type="submit">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
       Create page
     </button>
@@ -61,11 +84,32 @@
         <div class="row">
           <a class="btn btn-primary btn-sm" href="/dashboard/pages/{{ $page->slug }}">Edit</a>
           <a class="btn btn-secondary btn-sm" href="/dashboard/pages/{{ $page->slug }}/preview" target="_blank" rel="noopener">Preview</a>
+          <button class="btn btn-secondary btn-sm" type="button" data-open="#delete-{{ $page->slug }}" style="color:var(--danger)">Delete</button>
         </div>
       </div>
     </article>
     @endforeach
   </div>
+  @foreach ($pages as $page)
+  <dialog class="modal" id="delete-{{ $page->slug }}" aria-labelledby="delete-title-{{ $page->slug }}">
+    <form method="post" action="/dashboard/pages/{{ $page->slug }}">
+      @csrf
+      @method('DELETE')
+      <div class="modal-body">
+        <h2 id="delete-title-{{ $page->slug }}">Delete the page for {{ $page->recipient }}?</h2>
+        <p class="muted">Its letter, address and {{ $counts[$page->id] ?? 0 }} photo{{ ($counts[$page->id] ?? 0) === 1 ? '' : 's' }} are removed and the link stops working. Photos stop counting towards your account. This cannot be undone.</p>
+        <div class="field">
+          <label for="confirm-{{ $page->slug }}">Type <strong>delete</strong> to confirm</label>
+          <input class="input" id="confirm-{{ $page->slug }}" name="confirm" autocomplete="off" required pattern="delete" />
+        </div>
+      </div>
+      <div class="section-foot">
+        <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn-danger" type="submit">Delete forever</button>
+      </div>
+    </form>
+  </dialog>
+  @endforeach
   @endif
 </main>
 @endsection

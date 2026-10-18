@@ -258,9 +258,27 @@ if (editor) {
       }
       if (save) save.disabled = note !== "";
     };
-    designForm.addEventListener("change", () => {
+    // the ten designs shown are those of the chosen occasion; the chosen template carries over to them
+    const grids = $$(".design-grid", designForm);
+    const occasionOf = () => designForm.querySelector('input[name="occasion"]:checked')?.value ?? "";
+    const showGrid = (carry) => {
+      const occasion = occasionOf();
+      const previous = designForm.querySelector('input[name="layout"]:checked')?.value;
+      for (const g of grids) g.hidden = g.dataset.occasion !== occasion;
+      const next = grids.find((g) => g.dataset.occasion === occasion);
+      if (carry && next && previous) {
+        const radio = $$('input[name="layout"]', next).find((r) => r.value === previous);
+        if (radio) radio.checked = true;
+      }
+    };
+    if (grids.length) {
+      document.documentElement.classList.add("js");
+      showGrid(false);
+    }
+    designForm.addEventListener("change", (event) => {
+      if (event.target.name === "occasion") showGrid(true);
       const fd = new FormData(designForm);
-      const query = `?layout=${encodeURIComponent(fd.get("layout") || "")}&theme=${encodeURIComponent(fd.get("theme") || "")}`;
+      const query = `?layout=${encodeURIComponent(fd.get("layout") || "")}&theme=${encodeURIComponent(fd.get("theme") || "")}&occasion=${encodeURIComponent(fd.get("occasion") || "")}`;
       reloadPreview(query);
       if (link) link.href = `${base}/preview${query}`;
       checkLocked();
@@ -294,5 +312,20 @@ if (editor) {
         }
       }, 350);
     });
+  }
+}
+
+// ---------- occasion templates: show the ten templates of the chosen occasion ----------
+{
+  const tabs = $$('input[name="occasion"]');
+  const grids = $$(".template-grid");
+  if (tabs.length && grids.length) {
+    document.documentElement.classList.add("js");
+    const show = () => {
+      const on = tabs.find((t) => t.checked)?.value;
+      for (const g of grids) g.classList.toggle("on", g.dataset.occasion === on);
+    };
+    for (const t of tabs) t.addEventListener("change", show);
+    show();
   }
 }

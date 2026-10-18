@@ -31,6 +31,7 @@ composer install
 cp .env.example .env && php naluz key:generate --jwt     # .env.example is set up for local development
 php naluz migrate
 php naluz run:server        # http://localhost:8000
+php naluz db:seed           # admin@lovable.local / admin1234 and demo@lovable.local / demo1234 (local only; see database/seeders)
 ```
 
 Sign up, create a page, and with `PAYMENTS_DRIVER=fake` publish it with the test checkout. A Sweetheart or Forever page can claim a

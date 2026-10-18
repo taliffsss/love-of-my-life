@@ -16,6 +16,11 @@ namespace App\Services;
  *    built on the shared slideshow, the template's own key for the interactive ones
  * The markup never holds the photos or the letter: they arrive after the answer (site.js fills the template).
  *
+ * An occasion (Anniversary, Wedding, Boyfriend / Girlfriend, Birthday; stored in the page's nullable `occasion` column) dresses
+ * every template in its own style: public/assets/occasions.css (the typeface and two ornaments, placed differently for
+ * each template). Each occasion therefore offers the same ten templates as ten designs of its own, OCCASION_DESIGNS. The
+ * template (layout) alone decides what a plan includes, so plans are unaffected by occasions.
+ *
  * A theme is a block of CSS variables in public/assets/themes.css plus an entry in THEMES.
  */
 final class Designs
@@ -91,12 +96,77 @@ final class Designs
         'blush' => ['name' => 'Blush', 'colors' => ['#fbf0ec', '#c2577a', '#b4874a'], 'scheme' => 'light'],
     ];
 
+    public const OCCASIONS = [
+        'anniversary' => ['name' => 'Anniversary', 'blurb' => 'Another year of choosing each other.'],
+        'wedding' => ['name' => 'Wedding', 'blurb' => 'For the day, the vows and the forever after.'],
+        'partner' => ['name' => 'Boyfriend / Girlfriend', 'blurb' => 'For monthsaries, sweet surprises and just because.'],
+        'birthday' => ['name' => 'Birthday', 'blurb' => 'Make their day with something made only for them.'],
+    ];
+
+    /** The ten designs of every occasion: layout key => [name, what makes it that occasion's]. */
+    public const OCCASION_DESIGNS = [
+        'anniversary' => [
+            'classic' => ['Love Letter', 'Your letter beside the photos, with gold anniversary sparkles.'],
+            'cinematic' => ['Our Movie', 'Full-screen photos under a gold-trimmed film strip of sparkles.'],
+            'polaroid' => ['Memory Wall', 'Instant photos on a wall scattered with tiny sparkles.'],
+            'envelope' => ['Sealed with a Kiss', 'A sealed envelope with sparkles on its corners.'],
+            'scratch' => ['Anniversary Surprise', 'Scratch the foil to find the memory underneath.'],
+            'storybook' => ['Our Story', 'A little book of your years, edged with sparkles.'],
+            'memory' => ['Remember When', 'Match the pairs of your best moments.'],
+            'timeline' => ['Years Together', 'Your story, chapter by chapter, down a sparkling edge.'],
+            'gift' => ['Anniversary Gift', 'A wrapped present of photos and words.'],
+            'stars' => ['Written in the Stars', 'A heart of stars, each holding a memory.'],
+        ],
+        'wedding' => [
+            'classic' => ['Our Vows', 'The letter as your vows, in wedding script with rings.'],
+            'cinematic' => ['Wedding Film', 'Full-screen photos with a ring-trimmed border.'],
+            'polaroid' => ['Wedding Album', 'Instant photos in an album sprinkled with rings.'],
+            'envelope' => ['The Invitation', 'A sealed wedding invitation with ring corners.'],
+            'scratch' => ['Wedding Reveal', 'Scratch the foil to reveal the big news.'],
+            'storybook' => ['Fairytale', 'A storybook of how it happened, edged with rings.'],
+            'memory' => ['Guest Game', 'A matching game for the reception table.'],
+            'timeline' => ['Journey to I Do', 'From hello to the altar, one chapter at a time.'],
+            'gift' => ['Wedding Gift', 'A wrapped gift for the new husband or wife.'],
+            'stars' => ['Meant to Be', 'Stars aligned in the shape of a heart.'],
+        ],
+        'partner' => [
+            'classic' => ['Sweet Note', 'A handwritten-style letter with little hearts.'],
+            'cinematic' => ['Us on Screen', 'Full-screen photos with a border of hearts.'],
+            'polaroid' => ['Date Night', 'Instant photos from your best nights, with hearts.'],
+            'envelope' => ['Secret Letter', 'A sealed letter with heart-shaped corners.'],
+            'scratch' => ['Will You Be Mine', 'Scratch the card to find the question.'],
+            'storybook' => ['Our Little Book', 'A tiny book about you two, with hearts along its edge.'],
+            'memory' => ['Our Moments', 'Match the moments you shared.'],
+            'timeline' => ['How We Began', 'The story of you two, down a line of hearts.'],
+            'gift' => ['Just Because', 'A present for no reason except love.'],
+            'stars' => ['My Person', 'A heart of stars, just for them.'],
+        ],
+        'birthday' => [
+            'classic' => ['Birthday Wishes', 'Your letter beside the photos, with confetti.'],
+            'cinematic' => ['Birthday Premiere', 'Full-screen photos under a confetti banner.'],
+            'polaroid' => ['Photo Booth', 'Instant photos with confetti all over.'],
+            'envelope' => ['Birthday Card', 'A sealed card with confetti on its corners.'],
+            'scratch' => ['Scratch and Win', 'Scratch the foil to open the surprise.'],
+            'storybook' => ['Story of You', 'A storybook of the birthday star.'],
+            'memory' => ['Party Match-Up', 'Match the pairs of your favourite party moments.'],
+            'timeline' => ['Year in Review', 'The year in moments, down a confetti edge.'],
+            'gift' => ['Surprise Box', 'A box to open with photos inside.'],
+            'stars' => ['Make a Wish', 'A star for every wish.'],
+        ],
+    ];
+
     public const DEFAULT_LAYOUT = 'classic';
     public const DEFAULT_THEME = 'rose';
 
     public static function layout(?string $key): string
     {
         return isset(self::LAYOUTS[$key]) ? (string) $key : self::DEFAULT_LAYOUT;
+    }
+
+    /** The occasion key, or null when the page has none (or an unknown one). */
+    public static function occasion(?string $key): ?string
+    {
+        return $key !== null && isset(self::OCCASIONS[$key]) ? $key : null;
     }
 
     public static function theme(?string $key): string
