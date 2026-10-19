@@ -229,6 +229,58 @@ final class OccasionTemplates
                     'Happy birthday. Cue the confetti.',
                 ]),
             ],
+            'invitation' => [
+                self::t('invitation-wedding', 'Wedding invitation', 'A sealed envelope: break the seal to read it.', 'envelope', 'blush', 'You are invited', 'What are the couple\'s first names?', [
+                    'Together with our families, we joyfully invite you to celebrate our wedding. [Bride] and [Groom] are getting married, and it would mean the world to have you with us.',
+                    'Saturday, [date], at [time]. The ceremony is at [church or venue], [city], with the reception to follow at [reception venue].',
+                    'Please let us know by [RSVP date] if you can come. Dress code: [dress code]. We cannot wait to celebrate with you.',
+                ]),
+                self::t('invitation-debut', 'Debut (18th birthday)', 'An 18th birthday invitation with the details.', 'classic', 'rose', 'You are invited to my debut', 'What is the celebrator\'s nickname?', [
+                    'I am turning 18, and I would love for you to be part of the night I will remember forever. Please join me for my debut.',
+                    '[Date], at [time], at [venue], [city]. Dinner and dancing follow the 18 roses and the 18 candles.',
+                    'Dress code: [dress code or theme]. Kindly confirm by [RSVP date]. Your presence is the best gift.',
+                ]),
+                self::t('invitation-baptism', 'Baptism and christening', 'A little book that welcomes the baby.', 'storybook', 'blush', 'Please join us', 'What is the baby\'s first name?', [
+                    'With grateful hearts we invite you to the baptism of our little one, [baby name], as they are welcomed into the family of God.',
+                    '[Date], at [time], at [church], [city]. A small celebration at [venue] follows, with lunch for everyone.',
+                    'Being there with the people we love makes this day complete. Kindly let us know by [RSVP date].',
+                ]),
+                self::t('invitation-baby-shower', 'Baby shower', 'A wrapped surprise with the details inside.', 'gift', 'sunset', 'A little one is on the way', 'What month is the baby due?', [
+                    'We are so excited to share that our family is growing! Please join us for a baby shower for [mom\'s name].',
+                    '[Date], at [time], at [venue], [city]. There will be games, food and plenty of cuddles to look forward to.',
+                    'Gift ideas: [registry, diapers, or whatever you like]. Please reply by [RSVP date].',
+                ]),
+                self::t('invitation-engagement', 'Engagement party', 'Instant photos of the couple, with the details.', 'polaroid', 'rose', 'We are engaged!', 'Who asked the question?', [
+                    'She said yes! We are so happy to share the news with the people who have loved us the most, and we would love you to celebrate with us.',
+                    'Join us for an engagement party on [date], at [time], at [venue], [city]. Food, drinks and our favourite people.',
+                    'Come as you are and bring your stories about us. Kindly confirm by [RSVP date].',
+                ]),
+                self::t('invitation-save-the-date', 'Save the date', 'Full-screen photos and the date, like a film.', 'cinematic', 'midnight', 'Save the date', 'What is the occasion?', [
+                    'Something wonderful is coming, and you are part of it. Mark your calendar.',
+                    '[Date], in [city]. The formal invitation with the full details will follow soon.',
+                    'Please keep the day free and, if you need to travel, start planning now. We cannot wait to see you.',
+                ]),
+                self::t('invitation-wedding-program', 'Wedding day program', 'The day in order, one chapter at a time.', 'timeline', 'blush', 'The day, hour by hour', 'What is the wedding date?', [
+                    'Here is how our day will go, so you know exactly when to be where. [Time]: guests arrive and are seated at [church or venue].',
+                    '[Time]: the ceremony. [Time]: photos with the family. [Time]: the reception at [reception venue], with dinner, speeches and the first dance.',
+                    'The party goes on until [end time]. Thank you for sharing the day with us.',
+                ]),
+                self::t('invitation-gender-reveal', 'Gender reveal', 'Scratch the foil to find out.', 'scratch', 'sunset', 'Scratch to find out', 'Boy or girl: what is your guess?', [
+                    'We are about to find out, and we want to find out with you. Scratch the foil for the big news, and then come celebrate.',
+                    '[Date], at [time], at [venue], [city]. We will reveal it together, followed by food, games and cake.',
+                    'Wear [pink, blue, or both]. Kindly reply by [RSVP date].',
+                ]),
+                self::t('invitation-reunion', 'Class reunion', 'Match the old photos, then find out where.', 'memory', 'midnight', 'Remember us?', 'What year did we graduate?', [
+                    'It has been [number] years. Remember the classroom, the canteen and the friends who made it all worth it? Let us do it again.',
+                    '[Date], at [time], at [venue], [city]. Come and catch up, bring your old photos and your best stories.',
+                    'Please bring [what to bring], and invite anyone from our batch you can reach. Reply by [RSVP date].',
+                ]),
+                self::t('invitation-graduation', 'Graduation party', 'A sky of stars for a proud day.', 'stars', 'midnight', 'We did it!', 'What did the graduate finish?', [
+                    'After all the late nights and hard work, [name] is graduating! We are so proud, and we want you there to celebrate.',
+                    '[Date], at [time], at [venue], [city]. Come for dinner, photos and a lot of congratulations.',
+                    'Your support got us here. Please let us know if you are coming by [RSVP date].',
+                ]),
+            ],
         ];
     }
 

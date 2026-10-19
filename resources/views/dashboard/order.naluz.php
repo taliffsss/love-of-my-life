@@ -28,13 +28,35 @@
         @endif
         <dt>Amount</dt><dd>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</dd>
         <dt>Reference</dt><dd>{{ $order->reference }}</dd>
+        @if ($order->status === 'paid' && $order->method !== null)
+        <dt>Paid with</dt><dd>{{ $methods[$order->method] ?? $order->method }} · {{ $order->billing === 'subscription' ? 'subscription' : 'one-time payment' }}</dd>
+        @endif
         @if ($order->paid_at !== null)
         <dt>Paid</dt><dd>{{ \App\Support\Time::show($order->paid_at, 'M j, Y g:i A') }} {{ \App\Support\Time::label() }}</dd>
         @endif
       </dl>
 
       @if ($order->status === 'pending')
-        @if ($canFakePay)
+        @if ($online)
+          @if ($attempt !== null)
+          <div class="pay-wait" id="order-wait" data-status-url="/dashboard/orders/{{ $order->reference }}/status" data-expires="{{ $attempt->expires_at->getTimestamp() }}" data-go="{{ $go ? '1' : '0' }}">
+            <p><strong>Waiting for your payment…</strong> <span class="small muted" id="wait-state" role="status"></span></p>
+            @if ((string) $attempt->redirect_url !== '')
+            <p>Approve the payment in {{ $methods[$attempt->method] ?? $attempt->method }}, then come back: this page updates by itself.</p>
+            <a class="btn btn-primary btn-lg" id="continue-link" href="{{ $attempt->redirect_url }}" rel="noopener">Continue to {{ $methods[$attempt->method] ?? $attempt->method }}</a>
+            @else
+            <p>Confirming your card payment. If your bank asked you to approve it, that opens in a moment.</p>
+            @endif
+          </div>
+          <details class="pay-change">
+            <summary>Pay another way</summary>
+            @include('partials.pay-methods')
+          </details>
+          @else
+          @if ($order->method !== null)<div class="notice notice-warn">That payment was not completed. Choose how to pay below.</div>@endif
+          @include('partials.pay-methods')
+          @endif
+        @elseif ($canFakePay)
         <div class="notice notice-warn">Test checkout: no real money moves. This button only appears while PAYMENTS_DRIVER=fake.</div>
         <form method="post" action="/dashboard/orders/{{ $order->reference }}/fake-pay">
           @csrf

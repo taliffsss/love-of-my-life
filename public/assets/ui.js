@@ -91,9 +91,9 @@ if (editor) {
     usageBox.classList.add(`usage-${state}`);
     // the same notes as partials/photo-usage
     const notes = {
-      over: "A plan ended, so your account holds more photos than it now includes. Nothing was removed; to add new ones, delete some or buy more.",
-      full: `You have used every photo. Buy ${usageBox.dataset.pack} to keep adding, or delete one to make room.`,
-      low: `Only ${u.remaining} left. When they are used up, add ${usageBox.dataset.pack}.`,
+      over: "A plan ended, so your account holds more photos than it now includes. Nothing was removed; to add new ones, delete some, buy more or upgrade a plan.",
+      full: `You have used every photo. Buy ${usageBox.dataset.pack}, upgrade your plan, or delete one to make room.`,
+      low: `Only ${u.remaining} left. When they are used up, add ${usageBox.dataset.pack} or upgrade your plan.`,
     };
     const alert = $("#usage-alert", usageBox);
     if (alert) {
@@ -133,7 +133,7 @@ if (editor) {
     if (queue.length > room) {
       const left = queue.length - room;
       queue = queue.slice(0, Math.max(0, room));
-      notes.push(`${left} photo${left === 1 ? "" : "s"} did not fit: ${room > 0 ? `there was room for ${room} more` : "your account has no photos left"}. Add ${usageBox?.dataset.pack || "more photos"} below.`);
+      notes.push(`${left} photo${left === 1 ? "" : "s"} did not fit: ${room > 0 ? `there was room for ${room} more` : "your account has no photos left"}. Add ${usageBox?.dataset.pack || "more photos"} below, or upgrade your plan.`);
     }
     if (!queue.length) {
       say(notes.join(" "));
@@ -489,5 +489,131 @@ if (editor) {
         }
       });
     }
+  }
+}
+
+
+// ---------- forms that ask first (data-confirm) ----------
+for (const form of $$("form[data-confirm]")) {
+  form.addEventListener("submit", (event) => {
+    if (!confirm(form.dataset.confirm)) event.preventDefault();
+  });
+}
+
+// ---------- paying: wait for the payment, and send a card straight to the provider ----------
+{
+  // After starting a payment (or coming back from the wallet or the bank's page): follow the wallet link once, then ask
+  // whether it was paid until it is, and show the choices again when the payment has run out.
+  const wait = $("#order-wait");
+  if (wait) {
+    const state = $("#wait-state", wait);
+    const expires = Number(wait.dataset.expires) * 1000;
+    let busy = false;
+    const check = async () => {
+      if (busy) return;
+      busy = true;
+      try {
+        const res = await fetch(wait.dataset.statusUrl, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+        const data = await res.json();
+        if (data.paid) {
+          if (state) state.textContent = "Payment received. Thank you!";
+          setTimeout(() => location.reload(), 600);
+        }
+      } catch {
+        // a missed check is retried on the next one
+      } finally {
+        busy = false;
+      }
+    };
+    const poll = setInterval(check, 5000);
+    const expiry = setTimeout(() => location.reload(), Math.max(1000, expires - Date.now()));
+    window.addEventListener("pagehide", () => {
+      clearInterval(poll);
+      clearTimeout(expiry);
+    });
+    const link = $("#continue-link", wait);
+    if (link && wait.dataset.go === "1") setTimeout(() => (location.href = link.href), 700);
+    check();
+  }
+
+  // Card: the number is read here and sent to PayMongo with the public key; our server only starts the payment and says
+  // whether it was paid. 3-D Secure (the bank's approval page) is followed when PayMongo asks for it.
+  for (const form of $$("[data-card-form]")) {
+    const box = (name) => form.querySelector(`[data-cc="${name}"]`);
+    const errorBox = $("[data-cc-error]", form);
+    const submit = $("[data-cc-submit]", form);
+    const fail = (message) => {
+      if (errorBox) {
+        errorBox.textContent = message;
+        errorBox.hidden = false;
+      }
+      if (submit) submit.disabled = false;
+    };
+    const luhn = (digits) => {
+      let sum = 0;
+      for (let i = 0; i < digits.length; i++) {
+        let d = Number(digits[digits.length - 1 - i]);
+        if (i % 2 === 1) {
+          d *= 2;
+          if (d > 9) d -= 9;
+        }
+        sum += d;
+      }
+      return sum % 10 === 0;
+    };
+    box("number")?.addEventListener("input", (event) => {
+      const digits = event.target.value.replace(/\D/g, "").slice(0, 19);
+      event.target.value = digits.replace(/(.{4})/g, "$1 ").trim();
+    });
+    box("exp")?.addEventListener("input", (event) => {
+      const digits = event.target.value.replace(/\D/g, "").slice(0, 4);
+      event.target.value = digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
+    });
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (errorBox) errorBox.hidden = true;
+      const number = box("number").value.replace(/\D/g, "");
+      const [mm, yy] = box("exp").value.split("/");
+      const month = Number(mm);
+      const year = Number(yy) < 100 ? 2000 + Number(yy) : Number(yy);
+      const cvc = box("cvc").value.replace(/\D/g, "");
+      const name = box("name").value.trim();
+      const now = new Date();
+      if (!name) return fail("Enter the name on the card.");
+      if (number.length < 13 || !luhn(number)) return fail("Check the card number.");
+      if (!(month >= 1 && month <= 12) || !year || year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) return fail("Check the expiry date.");
+      if (cvc.length < 3) return fail("Check the security code (CVC).");
+      if (submit) submit.disabled = true;
+      try {
+        const started = await fetch(form.dataset.cardUrl, { method: "POST", headers: { Accept: "application/json", "X-CSRF-TOKEN": csrf }, credentials: "same-origin" });
+        const begun = await started.json();
+        if (!started.ok) return fail(begun.message || "We could not start the payment. Please try again.");
+        const auth = { Authorization: `Basic ${btoa(`${begun.public_key}:`)}`, "Content-Type": "application/json", Accept: "application/json" };
+        const made = await fetch("https://api.paymongo.com/v1/payment_methods", {
+          method: "POST",
+          headers: auth,
+          body: JSON.stringify({ data: { attributes: { type: "card", details: { card_number: number, exp_month: month, exp_year: year, cvc }, billing: { name, email: begun.email } } } }),
+        });
+        const method = await made.json();
+        if (!made.ok) return fail(method.errors?.[0]?.detail || "The card was not accepted. Check the details.");
+        const attached = await fetch(`https://api.paymongo.com/v1/payment_intents/${encodeURIComponent(begun.intent)}/attach`, {
+          method: "POST",
+          headers: auth,
+          body: JSON.stringify({ data: { attributes: { payment_method: method.data.id, client_key: begun.client_key, return_url: begun.return_url } } }),
+        });
+        const result = await attached.json();
+        if (!attached.ok) return fail(result.errors?.[0]?.detail || "The payment was not accepted. Please try again.");
+        const attributes = result.data.attributes;
+        if (attributes.status === "awaiting_next_action" && attributes.next_action?.redirect?.url) {
+          location.href = attributes.next_action.redirect.url; // the bank's approval page (3-D Secure)
+        } else if (attributes.status === "awaiting_payment_method") {
+          fail(attributes.last_payment_error?.failed_message || "The card was declined. Try another card.");
+        } else {
+          location.href = begun.return_url; // paid, or being processed: the order page confirms it
+        }
+      } catch {
+        fail("We could not reach the payment provider. Please try again.");
+      }
+    });
   }
 }

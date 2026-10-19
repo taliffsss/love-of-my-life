@@ -1,5 +1,6 @@
-{{-- The account's photos: used, left, where the allowance comes from, and buying more. Needs $usage and $packs
-     (App\Services\PhotoAllowance); $pageSlug brings the buyer back to that page after paying. --}}
+{{-- The account's photos: used, left, where the allowance comes from, and how to get more: buy photos (12 for ₱100, paid like a plan:
+     the same order page, GCash, PayMaya or card) or upgrade the plan. Needs $usage and $packs (App\Services\PhotoAllowance);
+     $pageSlug brings the buyer back to that page after paying; $upgradeUrl (optional) is where the plans to upgrade to are. --}}
 @php
   $u = $usage;
   $pack = $packs[1];
@@ -27,22 +28,21 @@
   <p class="small muted">Included: {{ implode(' · ', $from) }}. Every photo on every page counts; deleting one frees its place.</p>
   <p class="notice {{ $state === 'low' ? 'notice-brand' : 'notice-warn' }}" id="usage-alert" role="status" @if ($state === 'ok') hidden @endif>
     @if ($state === 'over')
-      A plan ended, so your account holds more photos than it now includes. Nothing was removed; to add new ones, delete some or buy more.
+      A plan ended, so your account holds more photos than it now includes. Nothing was removed; to add new ones, delete some, buy more or upgrade a plan.
     @elseif ($state === 'full')
-      You have used every photo. Buy {{ $packText }} to keep adding, or delete one to make room.
+      You have used every photo. Buy {{ $packText }}, upgrade your plan, or delete one to make room.
     @elseif ($state === 'low')
-      Only {{ $u['remaining'] }} left. When they are used up, add {{ $packText }}.
+      Only {{ $u['remaining'] }} left. When they are used up, add {{ $packText }} or upgrade your plan.
     @endif
   </p>
-  <details class="pack-more" @if ($state !== 'ok' || !empty($errors['packs'])) open @endif>
-    <summary>Need more photos? {{ $pack['photos'] }} for {{ \App\Services\Plans::money($pack['price']) }}</summary>
+  <div class="usage-more">
     <form method="post" action="/dashboard/photo-packs" class="pack-form" novalidate>
       @csrf
       @if (!empty($pageSlug))
       <input type="hidden" name="page" value="{{ $pageSlug }}" />
       @endif
       <div class="field">
-        <label for="packs">How many</label>
+        <label for="packs">Need more photos? {{ $pack['photos'] }} for {{ \App\Services\Plans::money($pack['price']) }}</label>
         <select class="select" id="packs" name="packs" @if (!empty($errors['packs'])) aria-invalid="true" aria-describedby="packs-error" @endif>
           @foreach ($packs as $n => $option)
           <option value="{{ $n }}" @if ($n === $selected) selected @endif>{{ $option['photos'] }} photos · {{ \App\Services\Plans::money($option['price']) }}</option>
@@ -50,8 +50,11 @@
         </select>
       </div>
       <button class="btn btn-primary btn-sm" type="submit">Buy photos</button>
+      @if (!empty($upgradeUrl))
+      <a class="btn btn-secondary btn-sm" href="{{ $upgradeUrl }}">Upgrade plan</a>
+      @endif
     </form>
     @include('partials.errors', ['field' => 'packs'])
-    <p class="hint">Paid once, kept for good, and shared by all your pages.</p>
-  </details>
+    <p class="hint">Photos are paid once and kept for good, shared by all your pages. You pay the same way as a plan: GCash, PayMaya or a card.</p>
+  </div>
 </div>

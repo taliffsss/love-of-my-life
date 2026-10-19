@@ -101,6 +101,7 @@ final class Designs
         'wedding' => ['name' => 'Wedding', 'blurb' => 'For the day, the vows and the forever after.'],
         'partner' => ['name' => 'Boyfriend / Girlfriend', 'blurb' => 'For monthsaries, sweet surprises and just because.'],
         'birthday' => ['name' => 'Birthday', 'blurb' => 'Make their day with something made only for them.'],
+        'invitation' => ['name' => 'Invitation', 'blurb' => 'Weddings, debuts, baptisms and parties: invite them in style.'],
     ];
 
     /** The ten designs of every occasion: layout key => [name, what makes it that occasion's]. */
@@ -152,6 +153,18 @@ final class Designs
             'timeline' => ['Year in Review', 'The year in moments, down a confetti edge.'],
             'gift' => ['Surprise Box', 'A box to open with photos inside.'],
             'stars' => ['Make a Wish', 'A star for every wish.'],
+        ],
+        'invitation' => [
+            'classic' => ['Debut', 'An 18th birthday invitation, the details beside the photos.'],
+            'cinematic' => ['Save the Date', 'Full-screen photos and the date, like a film trailer.'],
+            'polaroid' => ['Engagement Party', 'Instant photos of the couple, with the party details.'],
+            'envelope' => ['Wedding Invitation', 'A sealed envelope: break the seal to read the invitation.'],
+            'scratch' => ['Gender Reveal', 'Scratch the foil to find out, and when to celebrate.'],
+            'storybook' => ['Christening', 'A little book that welcomes the baby, page by page.'],
+            'memory' => ['Class Reunion', 'Match the old photos, then find out when and where.'],
+            'timeline' => ['Wedding Program', 'The day in order: ceremony, reception and more.'],
+            'gift' => ['Baby Shower', 'A wrapped surprise with the shower details inside.'],
+            'stars' => ['Graduation Party', 'A sky of stars, each with a bit of the celebration.'],
         ],
     ];
 

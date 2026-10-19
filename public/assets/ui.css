@@ -100,7 +100,9 @@ p { margin: 0; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); }
 .card-pad { padding: 22px; }
 .section-card { scroll-margin-top: 84px; }
-.section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 22px 0; }
+.section-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 12px; padding: 20px 22px 0; }
+.section-head > div { flex: 1 1 280px; min-width: 0; }
+.section-head > .small { flex: none; white-space: nowrap; }
 .section-head h2 { font-size: 1.12rem; font-weight: 600; }
 .section-head p { margin-top: 3px; color: var(--ink-3); font-size: .9rem; }
 .section-body { padding: 18px 22px 22px; }
@@ -332,14 +334,14 @@ p { margin: 0; }
 .swatch .dots i:first-child { margin-left: 0; }
 
 .plans { display: grid; gap: 18px; margin-top: 34px; }
-@media (min-width: 820px) { .plans { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 820px) { .plans { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .plan { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 26px; }
 .plan.featured { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand), var(--shadow-2); }
 .plan .tag { position: absolute; top: -12px; left: 24px; padding: 3px 10px; border-radius: 999px; background: var(--brand); color: #fff; font-size: .75rem; font-weight: 600; letter-spacing: .04em; }
 .plan h3 { font-size: 1.15rem; }
 .price { font-family: var(--font-display); font-size: 2.6rem; font-weight: 500; line-height: 1; }
 .price small { font-family: var(--font-ui); font-size: .85rem; color: var(--ink-3); font-weight: 400; }
-.plan ul { list-style: none; margin: 6px 0 10px; padding: 0; display: grid; gap: 8px; color: var(--ink-2); font-size: .92rem; }
+.plan ul { list-style: none; margin: 6px 0 10px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; color: var(--ink-2); font-size: .92rem; }
 .plan li { display: flex; gap: 9px; align-items: flex-start; }
 .plan li::before { content: '♥'; color: var(--brand); font-size: .8rem; line-height: 1.7; }
 .plan .btn { margin-top: auto; }
@@ -378,9 +380,9 @@ p { margin: 0; }
 .empty h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.8rem; }
 .empty p { margin: 8px auto 0; max-width: 46ch; color: var(--ink-2); }
 
-.editor { display: grid; gap: 24px; padding-bottom: 80px; }
+.editor { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding-bottom: 80px; }
 @media (min-width: 1140px) { .editor { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; } }
-.editor-main { display: grid; gap: 18px; min-width: 0; }
+.editor-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; } /* minmax(0, …): a wide child must not stretch every card past the phone */
 .section-nav { position: sticky; top: 64px; z-index: 20; display: flex; gap: 6px; overflow-x: auto; padding: 10px 0; background: var(--bg); scrollbar-width: none; }
 .section-nav::-webkit-scrollbar { display: none; }
 .section-nav a { flex: none; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink-2); text-decoration: none; font-size: .86rem; }
@@ -399,7 +401,7 @@ p { margin: 0; }
 .thumb .n { position: absolute; left: 8px; top: 8px; min-width: 24px; height: 24px; padding: 0 7px; display: grid; place-items: center; border-radius: 999px; background: rgba(23, 11, 20, .72); color: #fff; font-size: .75rem; font-weight: 600; }
 .thumb .tools { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; gap: 4px; justify-content: space-between; }
 .thumb .tools .icon-btn { width: 30px; height: 30px; background: rgba(255, 255, 255, .92); border-color: transparent; }
-.upload-zone { display: grid; place-items: center; gap: 6px; aspect-ratio: 1; border: 1.5px dashed var(--line-2); border-radius: 12px; background: #fdfaf8; color: var(--ink-2); text-align: center; padding: 10px; cursor: pointer; font-size: .86rem; }
+.upload-zone { display: grid; place-items: center; align-content: center; gap: 8px; aspect-ratio: 1; border: 1.5px dashed var(--line-2); border-radius: 12px; background: #fdfaf8; color: var(--ink-2); text-align: center; padding: 10px; cursor: pointer; font-size: .86rem; }
 .upload-zone:hover, .upload-zone.drag { border-color: var(--brand); color: var(--brand-ink); background: var(--brand-soft); }
 .upload-zone svg { width: 26px; height: 26px; }
 .meter { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
@@ -411,11 +413,6 @@ p { margin: 0; }
 .usage-count { font-size: .9rem; color: var(--ink-2); }
 .usage-count b { color: var(--ink); font-weight: 600; }
 .usage-full .meter i, .usage-over .meter i { background: var(--warn); }
-.pack-more summary { cursor: pointer; font-size: .9rem; font-weight: 500; color: var(--brand-ink); width: fit-content; }
-.pack-more[open] summary { margin-bottom: 10px; }
-.pack-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-.pack-form .field { flex: 0 1 230px; }
-.pack-more .hint { margin-top: 6px; }
 .usage-card { padding: 16px; margin-top: 18px; }
 
 .choice-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
@@ -448,14 +445,17 @@ p { margin: 0; }
 .plan-option { position: relative; }
 .plan-option .tag { position: absolute; top: -11px; right: 14px; padding: 2px 9px; border-radius: 999px; background: var(--brand); color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .04em; }
 .plan-option form { margin: 0; }
-.plan-option .offer { width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.plan-option.current { border-color: var(--ok); box-shadow: 0 0 0 1px var(--ok); background: linear-gradient(180deg, var(--ok-soft), var(--surface) 90px); }
+.plan-option .tag-current { right: auto; left: 14px; background: var(--ok); }
+.plan-option .current-note { color: var(--ok); font-weight: 500; }
+.plan-option .offer { width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0 8px; text-align: left; }
 .plan-option .offer small { font-size: .74rem; font-weight: 500; opacity: .85; }
 .choice .box { position: relative; }
 .plan-badge { position: absolute; top: 8px; right: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255, 255, 255, .92); color: var(--brand); font-size: .7rem; font-weight: 600; box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
 .orders { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .orders th, .orders td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); }
 .orders th { color: var(--ink-3); font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
-.table-wrap { overflow-x: auto; }
+.table-wrap { position: relative; overflow-x: auto; } /* relative: the screen-reader-only header cell must not leave the box and widen the page */
 
 .danger-zone { border-color: #f3c9c4; }
 dialog.modal { width: min(440px, calc(100% - 32px)); padding: 0; border: 0; border-radius: var(--radius-lg); box-shadow: 0 30px 80px rgba(0, 0, 0, .3); color: var(--ink); }
@@ -523,3 +523,44 @@ a.stat:hover { box-shadow: var(--shadow-2); }
 .pill-active { color: var(--ok); background: var(--ok-soft); }
 .pill-deactivated { color: var(--ink-2); background: var(--surface-2); }
 .pill-suspended { color: var(--danger); background: var(--danger-soft); }
+
+/* ---------- paying: the ways to pay, each opening its form beneath it ---------- */
+.pay-methods { display: grid; gap: 10px; }
+.pay-option { border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.pay-radio { position: absolute; opacity: 0; pointer-events: none; }
+.pay-tile { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; }
+.pay-tile:hover { background: var(--surface-2); }
+.pay-radio:focus-visible + .pay-tile { box-shadow: var(--focus); border-radius: var(--radius); }
+.pay-radio:checked + .pay-tile { background: var(--brand-soft); }
+.pay-name { display: grid; flex: 1; line-height: 1.25; }
+.pay-name small { color: var(--ink-3); font-size: .84rem; }
+.pay-chevron { width: 10px; height: 10px; border-right: 2px solid var(--ink-3); border-bottom: 2px solid var(--ink-3); transform: rotate(45deg); transition: transform .2s var(--ease); margin-right: 4px; }
+.pay-radio:checked + .pay-tile .pay-chevron { transform: rotate(-135deg); }
+.pay-panel { display: none; padding: 6px 16px 18px; border-top: 1px solid var(--line); }
+.pay-radio:checked ~ .pay-panel { display: block; }
+.pay-logo { display: grid; place-items: center; flex: 0 0 52px; height: 34px; border-radius: 8px; color: #fff; font-weight: 700; font-size: .8rem; letter-spacing: .04em; }
+.pay-logo-gcash { background: #0b6cf5; font-size: 1.1rem; }
+.pay-logo-paymaya { background: #0a0a0a; color: #3be39a; font-size: 1.2rem; text-transform: lowercase; }
+.pay-logo-card-credit { background: #1a1f71; }
+.pay-logo-card-mastercard { background: #222; gap: 0; }
+.pay-logo-card-mastercard i { width: 18px; height: 18px; border-radius: 50%; background: #eb001b; }
+.pay-logo-card-mastercard i + i { background: #f79e1b; margin-left: -7px; opacity: .92; }
+.pay-form { padding-top: 14px; }
+.pay-field { border: 0; margin: 0; padding: 0; min-width: 0; }
+.pay-field legend { margin-bottom: 10px; }
+.pay-wait { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface-2); }
+.pay-change summary { cursor: pointer; font-weight: 500; color: var(--brand-ink); width: fit-content; margin: 8px 0 12px; }
+.sub-box form { margin-top: 2px; }
+.subs-card { padding: 18px; margin-bottom: 14px; }
+.subs-card h2 { font-size: 1.1rem; margin-bottom: 8px; }
+.subs-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.subs-list li { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); }
+.subs-list li:first-child { border-top: 0; }
+.subs-list li > div { display: grid; gap: 2px; }
+
+/* buying photos and upgrading, under the photo meter */
+.usage-more { display: grid; gap: 6px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+.pack-form { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; }
+.pack-form .field { flex: 1 1 240px; max-width: 340px; }
+.usage-more .hint { margin: 0; }
+@media (max-width: 520px) { .pack-form .field { flex-basis: 100%; max-width: none; } }

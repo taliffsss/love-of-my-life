@@ -47,10 +47,19 @@ final class AccountRemoval
             if ($pageIds !== []) {
                 $this->db->table('photos')->whereIn('page_id', $pageIds)->delete();
                 $this->storage->trash(...$photos);
+                $pageOrderIds = $this->db->table('orders')->whereIn('page_id', $pageIds)->where('status', '!=', Order::PAID)->pluck('id')->all();
+                if ($pageOrderIds !== []) {
+                    $this->db->table('payment_attempts')->whereIn('order_id', $pageOrderIds)->delete();
+                }
                 $this->db->table('orders')->whereIn('page_id', $pageIds)->where('status', '!=', Order::PAID)->delete();
                 $this->db->table('pages')->whereIn('id', $pageIds)->delete();
             }
+            $orderIds = $this->db->table('orders')->where('user_id', '=', $user->id)->pluck('id')->all();
+            if ($orderIds !== []) {
+                $this->db->table('payment_attempts')->whereIn('order_id', $orderIds)->delete();
+            }
             $this->db->table('orders')->where('user_id', '=', $user->id)->delete(); // none paid: checked above
+            $this->db->table('subscriptions')->where('user_id', '=', $user->id)->delete();
             $this->db->table('social_accounts')->where('user_id', '=', $user->id)->delete();
             $this->db->table('users')->where('id', '=', $user->id)->delete();
         });

@@ -18,6 +18,7 @@ use App\Services\Plans;
 use App\Services\QrCode;
 use App\Services\Sites;
 use App\Services\Subdomains;
+use App\Services\Subscriptions;
 use App\Services\YouTube;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
@@ -43,6 +44,19 @@ final class PagesController
         'Whatever comes next, I want to face it with you. I love you, today and every day after.',
     ];
 
+    /** Where to upgrade from the dashboard: the plan section of the newest page that has something higher to buy; null when none has. */
+    private function upgradeUrl(array $pages, Plans $plans): ?string
+    {
+        foreach ($pages as $page) {
+            foreach ($plans->purchasable($page) as $key => $option) {
+                if ($plans->rank($key) > $plans->rank($page->plan)) {
+                    return $this->editUrl($page, 'plan');
+                }
+            }
+        }
+        return null;
+    }
+
     /** The occasion a starter template belongs to (its key starts with the occasion's). */
     private function occasionOf(string $templateKey): ?string
     {
@@ -57,8 +71,11 @@ final class PagesController
         return null;
     }
 
-    public function index(Auth $auth, Sites $sites, PhotoAllowance $allowance): ResponseInterface
+    public function index(Auth $auth, Sites $sites, PhotoAllowance $allowance, Subscriptions $subscriptions, Plans $plans): ResponseInterface
     {
+        $subscriptions->syncAuto((int) $auth->id()); // periods the provider charged by itself
+        $subscriptions->createDueRenewals((int) $auth->id()); // a renewal that has come due is waiting here
+        $renewals = Order::query()->where('user_id', (int) $auth->id())->where('status', Order::PENDING)->whereNotNull('subscription_id')->get()->all();
         $pages = Page::query()->where('user_id', (int) $auth->id())->orderBy('id', 'desc')->get()->all();
         $covers = [];
         $counts = [];
@@ -72,11 +89,15 @@ final class PagesController
         }
 
         return Screen::render('dashboard.index', [
+            'renewals' => $renewals,
+            'packs' => $allowance->packOptions(),
+            'upgradeUrl' => $this->upgradeUrl($pages, $plans),
+            'accountSubscriptions' => $subscriptions->forUser((int) $auth->id()),
+            'plans' => $plans->all(),
             'occasions' => Designs::OCCASIONS,
             'templates' => OccasionTemplates::all(),
             'pages' => $pages,
             'usage' => $allowance->of((int) $auth->id()),
-            'packs' => $allowance->packOptions(),
             'covers' => $covers,
             'counts' => $counts,
             'urls' => array_combine(
@@ -128,15 +149,23 @@ final class PagesController
         return Screen::back($this->editUrl($page), 'Your page for ' . $recipient . ' is ready to fill in.');
     }
 
-    public function edit(string $slug, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance): ResponseInterface
+    public function edit(string $slug, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance, Subscriptions $subscriptions): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
+        $subscriptions->syncAuto((int) $auth->id());
+        $subscription = $subscriptions->forPage($page->id);
+        $renewal = $subscription !== null ? $subscriptions->ensureRenewal($subscription) : null;
         $photos = Photo::query()->where('page_id', $page->id)->orderBy('position')->orderBy('id')->get()->all();
         $orders = Order::query()->where('page_id', $page->id)->where('user_id', (int) $auth->id())
             ->orderBy('id', 'desc')->limit(5)->get()->all();
 
         return Screen::render('dashboard.edit', [
             'page' => $page,
+            'packs' => $allowance->packOptions(),
+            // a plan above this page's is on sale (or the page is a draft): the photos box offers to upgrade
+            'canUpgrade' => array_filter(array_keys($plans->purchasable($page)), static fn (string $key): bool => $plans->rank($key) > $plans->rank($page->plan)) !== [],
+            'subscription' => $subscription,
+            'renewal' => $renewal,
             'photos' => $photos,
             'orders' => $orders,
             'url' => $sites->url($page),
@@ -152,7 +181,6 @@ final class PagesController
             'maxUploadBytes' => $storage->maxBytes(),
             'storageDisk' => $storage->diskName(),
             'usage' => $allowance->of((int) $auth->id()),
-            'packs' => $allowance->packOptions(),
         ]);
     }
 
@@ -338,6 +366,7 @@ final class PagesController
             $storage->trash(...$photos);
             // paid orders stay on record without their page; photo packs bought from it stay on the account
             $db->table('orders')->where('page_id', '=', $page->id)->update(['page_id' => null]);
+            $db->table('subscriptions')->where('page_id', '=', $page->id)->update(['status' => 'ended']);
             $db->table('pages')->where('id', '=', $page->id)->delete();
         });
         // the files go once the rows are gone: one that cannot be deleted now waits in the trash (bin/empty-trash.php),

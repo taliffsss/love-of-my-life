@@ -17,6 +17,7 @@ use App\Services\PhotoCatalog;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
 use App\Services\Sites;
+use App\Services\Subscriptions;
 use App\Services\Social\SocialAuth;
 use App\Services\SongStore;
 use App\Services\SpacesFilesystem;
@@ -58,6 +59,7 @@ final class AppServiceProvider extends ServiceProvider
                 (int) ($pack['max_packs'] ?? 10),
             );
         });
+        $this->app->bind(Subscriptions::class, fn ($c) => new Subscriptions($c->make(Connection::class), $c->make(Plans::class), $c->make(Billing::class)));
         $this->app->bind(Billing::class, fn ($c) => new Billing($c->make(Plans::class), $c->make(Connection::class), $c->make(PhotoAllowance::class)));
         $this->app->bind(PhotoStorage::class, fn ($c) => new PhotoStorage(
             $c->make(StorageManager::class),
@@ -70,6 +72,9 @@ final class AppServiceProvider extends ServiceProvider
             (string) $c->make(Repository::class)->get('saas.payments.paymongo.webhook_secret', ''),
             array_map('strval', (array) $c->make(Repository::class)->get('saas.payments.paymongo.methods', ['gcash', 'paymaya', 'card'])),
             (string) $c->make(Repository::class)->get('app.url', 'http://localhost'),
+            null,
+            (string) $c->make(Repository::class)->get('saas.payments.paymongo.public_key', ''),
+            (bool) $c->make(Repository::class)->get('saas.payments.paymongo.subscriptions', false),
         ));
         $this->app->singleton(XenditGateway::class, fn ($c) => new XenditGateway(
             (string) $c->make(Repository::class)->get('saas.payments.xendit.secret_key', ''),
@@ -84,7 +89,12 @@ final class AppServiceProvider extends ServiceProvider
                 }
                 return $gateway;
             };
-            return match ((string) $config->get('saas.payments.driver', 'none')) {
+            $driver = (string) $config->get('saas.payments.driver', 'auto');
+            // `auto` (the default): PayMongo as soon as its secret key is set, manual payments until then
+            if ($driver === 'auto') {
+                $driver = $c->make(PayMongoGateway::class)->configured() ? 'paymongo' : 'none';
+            }
+            return match ($driver) {
                 'fake' => new FakeGateway((string) $config->get('app.env', 'production')),
                 'paymongo' => $hosted($c->make(PayMongoGateway::class)),
                 'xendit' => $hosted($c->make(XenditGateway::class)),

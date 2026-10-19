@@ -29,6 +29,27 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   cannot sign in (password or Google/Facebook) and are signed out on their next request; a suspension can carry a reason shown
   to them. Not on yourself, and not a status change on another administrator. Delete removes the account, pages, photos and
   files, and is refused for accounts with paid orders. New: `users.status`, `status_reason`, `status_changed_at`.
+- **GCash, PayMaya, Credit card and Mastercard, with subscriptions.** PayMongo is the default (`PAYMENTS_DRIVER=auto`). The
+  order page lists the four ways to pay and opens the chosen one's form beneath it. GCash and PayMaya take the mobile number
+  and offer Subscribe (default) or One-time; a card always subscribes (a card number goes from the browser straight to
+  PayMongo and never reaches this server). Cards and PayMaya subscriptions are charged automatically by PayMongo
+  (`PAYMONGO_SUBSCRIPTIONS=true` once PayMongo enables them); GCash cannot be charged again by itself, so its subscription
+  asks the customer to approve each renewal. The dashboard lists every subscription with an Unsubscribe button. New:
+  `payment_attempts`, `subscriptions`, `provider_refs`, `orders.method/billing/subscription_id`, `PAYMONGO_PUBLIC_KEY`.
+- **Payment data is encrypted in the database.** The provider's payment, subscription, invoice and customer ids and the
+  approval pages are sealed with APP_KEY (authenticated XChaCha20-Poly1305) and read back decrypted by the models; provider ids
+  keep a keyed blind index so webhooks can still find a payment and an id stays unique. `bin/reseal-payments.php` re-seals
+  after a key rotation (`APP_PREVIOUS_KEYS`); a migration seals what was already stored. Card and phone numbers are never stored.
+- **Photos can be bought again, paid like a plan.** "Need more photos? 12 for ₱100" is back on the photos box (dashboard and page),
+  now sending the customer to the same order page as a plan: GCash, PayMaya or card, one-time. Beside it, an *Upgrade plan* button
+  appears when a higher plan is on sale.
+- **Invitation occasion.** A fifth occasion with ten invitations (wedding, debut, baptism, baby shower, engagement party, save the
+  date, wedding program, gender reveal, class reunion, graduation): starter letters with [blanks] to fill in, ten designs, and
+  a formal look (small caps headings, ornaments).
+- **"Current" plan.** The Plan section now marks the plan a page is on (once its payment went through) with a *Current* tag and when
+  it is online until, or *Expired* when it has run out; a plan above it is offered as an upgrade, and Forever shows as current.
+- **Layout fixes.** Plan price buttons and the "Add photos" tile are centred, the photo count no longer wraps, the landing plans no
+  longer overflow at tablet width, and a hidden header cell no longer made the admin users page scroll sideways on phones, and on a phone the page editor's cards no longer stretch wider than the screen (which pushed the *Buy photos* button off the edge).
 - **Accounts and dashboard.** Sign up and sign in (e-mail + password, Argon2id, rate limited). Each account lists its
   pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
   browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design

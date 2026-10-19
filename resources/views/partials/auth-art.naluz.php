@@ -1,7 +1,7 @@
 @php
   $samples = \App\Services\OccasionTemplates::all();
-  $names = ['anniversary' => 'Jinelin', 'wedding' => 'my husband', 'partner' => 'Mara', 'birthday' => 'Lola'];
-  $says = ['anniversary' => 'Happy anniversary! Got something sweet to say?', 'wedding' => 'A wedding! I will carry every word of your vows.', 'partner' => 'Tell them how you feel. I will deliver it.', 'birthday' => 'Make their day! Cake not included.'];
+  $names = ['anniversary' => 'Jinelin', 'wedding' => 'my husband', 'partner' => 'Mara', 'birthday' => 'Lola', 'invitation' => 'our guests'];
+  $says = ['anniversary' => 'Happy anniversary! Got something sweet to say?', 'wedding' => 'A wedding! I will carry every word of your vows.', 'partner' => 'Tell them how you feel. I will deliver it.', 'birthday' => 'Make their day! Cake not included.', 'invitation' => 'Weddings, debuts, baptisms: I will deliver every invitation.'];
   $first = array_key_first(\App\Services\Designs::OCCASIONS);
 @endphp
 <aside class="auth-art" data-auth-art data-active="{{ $first }}">

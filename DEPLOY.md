@@ -152,6 +152,63 @@ Forever, never expires. Monthly plans are paid again each month the same way unt
 changes nothing. Prices and limits are in `config/saas.php`. For testing, `PAYMENTS_DRIVER=fake` adds a "pay (test)"
 button; it refuses to run with `APP_ENV=production`.
 
+### GCash, PayMaya and cards, and subscriptions (PayMongo, the default)
+
+`PAYMENTS_DRIVER=auto` (the default) uses PayMongo as soon as `PAYMONGO_SECRET_KEY` is set. With `PAYMONGO_PUBLIC_KEY` as
+well, the order page lists **GCash, PayMaya, Credit card and Mastercard**; choosing one opens its form beneath it:
+
+| | What the customer does | Subscription |
+|---|---|---|
+| GCash, PayMaya | enters their mobile number, then approves the payment in the wallet | *Subscribe* is selected by default; *One-time payment* is the other choice |
+| Credit card, Mastercard | enters the card on the page | always a subscription |
+
+A plan bought once (Forever) is always one-time. A renewal always continues its subscription. The card number goes from the
+browser straight to PayMongo with the public key (the form's fields have no `name`, so it is never posted here; CSP
+`connect-src` allows `api.paymongo.com`); this server only starts the payment and learns whether it was paid.
+
+The order page waits for the payment: PayMongo's `payment.paid` webhook credits the order (register
+`<APP_URL>/api/webhooks/paymongo` for `payment.paid` and `checkout_session.payment.paid`), and while the page waits it also
+asks PayMongo every few seconds, so it works before the webhook is set up. A customer who changes method starts another
+payment; paying an earlier one still reaches the order.
+
+**Who charges a subscription, by method** (docs.paymongo.com, Subscriptions):
+
+- **Cards and PayMaya: PayMongo charges them automatically** each period, once you set `PAYMONGO_SUBSCRIPTIONS=true`.
+  PayMongo support has to enable Subscriptions on your account first (and Card Vaulting for cards), so it is off by default.
+  This app starts the subscription (customer, plan, subscription; the plan and customer are made once and reused), the
+  customer pays the first invoice, and from then on it only asks PayMongo about the subscription (hourly by
+  `php naluz schedule:run`, and whenever the owner opens the dashboard): each new paid invoice extends the page, and a
+  subscription PayMongo cancels or gives up on ends here. PayMongo's subscription webhooks are not documented, so this is polling.
+- **GCash cannot be charged again by itself** (PayMongo does not list it as recurring), and neither can anything while
+  `PAYMONGO_SUBSCRIPTIONS` is off. Those subscriptions are *manual*: three days before the page expires a renewal order is
+  made, the dashboard shows "Renewal due: pay …", and the customer approves each payment. The pages say which kind a
+  subscription is.
+- **Unsubscribing:** the dashboard lists every subscription with an *Unsubscribe* button (and the page's Plan section has
+  one). For an automatic subscription PayMongo is told to stop first; if that fails the subscription stays on and the
+  customer is told, so it is never shown as cancelled while it can still be charged. The time already paid stays.
+
+I could not try any of this against live PayMongo here; run it with sandbox keys first. The PayMongo response fields it reads
+(`next_action.redirect.url`, `latest_invoice.payment_intent.id`, `latest_invoice.status`, subscription `status`) are the ones in
+its documentation.
+
+### Payment data is encrypted
+
+What identifies a payment at the provider is stored **encrypted** in the database (XChaCha20-Poly1305, with `APP_KEY`) and is
+decrypted when the app reads it: the provider's payment, subscription, invoice and customer ids, and the pages that approve a
+payment (`orders.provider_ref`/`checkout_url`, `payment_attempts.provider_ref`/`redirect_url`/`subscription_ref`,
+`subscriptions.provider_ref`/`last_invoice_ref`, `provider_refs.ref`). Card numbers and phone numbers are never stored. The
+amounts, status, plan and the order reference stay readable on purpose: they are what the dashboards add up and what
+customers quote.
+
+- **An encrypted id cannot be searched or made unique**, so each provider id also has a *blind index* (an HMAC of it under a
+  key derived from `APP_KEY`): webhooks find their payment by it. On the admin Payments page a provider id is therefore found
+  by the whole id, not a part of it.
+- **Back up `APP_KEY` with the database.** Without it these ids cannot be read, and a webhook can no longer find its payment.
+- **Rotating `APP_KEY`:** put the old key in `APP_PREVIOUS_KEYS` (comma separated), set the new `APP_KEY`, and run
+  `php bin/reseal-payments.php` at once (until then webhooks cannot find payments sealed under the old key). It stops
+  without changing anything if a value cannot be read. When it reports success the old key can go.
+- The migration that introduced this seals the values already in the database.
+
 ### PayMongo or Xendit (hosted checkout)
 
 Both are built in and off until you choose one with `PAYMENTS_DRIVER` (they have not been tried against the live

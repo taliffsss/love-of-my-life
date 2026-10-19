@@ -86,7 +86,9 @@ final class Billing
                 ->update([
                     'status' => Order::PAID,
                     'provider' => $provider,
-                    'provider_ref' => $providerRef,
+                    // raw SQL does not go through the model, so the sealing is done here (App\Services\PaymentVault)
+                    'provider_ref' => PaymentVault::seal($providerRef),
+                    'provider_ref_idx' => PaymentVault::index($providerRef),
                     'paid_at' => $now->format('Y-m-d H:i:s'),
                     'updated_at' => $now->format('Y-m-d H:i:s'),
                 ]);
@@ -106,6 +108,7 @@ final class Billing
                 logger()->warning('[billing] order {reference} was paid but its page no longer exists: refund it', ['reference' => $order->reference]);
             }
             $order->refresh();
+            (new Subscriptions($this->db, $this->plans, $this))->recordPaid($order); // a subscription order starts or renews the subscription
             return true;
         });
     }

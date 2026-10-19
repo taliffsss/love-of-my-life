@@ -14,7 +14,7 @@ final class OccasionTemplatesTest extends TestCase
     public function testEveryOccasionHasTenTemplates(): void
     {
         $all = OccasionTemplates::all();
-        $this->assertSame(['anniversary', 'wedding', 'partner', 'birthday'], array_keys($all));
+        $this->assertSame(['anniversary', 'wedding', 'partner', 'birthday', 'invitation'], array_keys($all));
         $this->assertSame(array_keys(OccasionTemplates::OCCASIONS), array_keys($all));
         foreach ($all as $occasion => $templates) {
             $this->assertCount(10, $templates, $occasion);
@@ -42,6 +42,17 @@ final class OccasionTemplatesTest extends TestCase
             // ten templates, ten different looks
             $this->assertCount(10, array_unique($layouts), $occasion);
         }
+    }
+
+    public function testTheInvitationsCoverTheUsualEvents(): void
+    {
+        $invitations = OccasionTemplates::all()['invitation'];
+        $this->assertCount(10, $invitations);
+        $this->assertSame('envelope', OccasionTemplates::find('invitation-wedding')['layout'], 'a wedding invitation is a sealed envelope');
+        foreach ($invitations as $t) {
+            $this->assertMatchesRegularExpression('/\[[a-zA-Z ]+\]/', implode(' ', $t['letter']), $t['key'] . ' leaves blanks ([date], [venue]) for the owner to fill in');
+        }
+        $this->assertCount(10, \App\Services\Designs::OCCASION_DESIGNS['invitation']);
     }
 
     public function testFindReturnsATemplateOrNull(): void

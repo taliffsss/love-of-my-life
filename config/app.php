@@ -16,7 +16,8 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
     'timezone' => env('APP_TIMEZONE', 'UTC'),
     'key' => env('APP_KEY', ''),
-    'previous_keys' => [],
+    // Keys APP_KEY replaced, comma separated: encrypted data written with them is still read (then php bin/reseal-payments.php).
+    'previous_keys' => array_values(array_filter(array_map('trim', explode(',', (string) env('APP_PREVIOUS_KEYS', ''))))),
     'cache' => env('CACHE_DRIVER', 'file'),
 
     /** Composer packages whose auto-discovered providers should NOT be registered (or ['*'] for none). */

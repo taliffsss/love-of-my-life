@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 // The "buy" form posts to us and is answered with a redirect to the provider's hosted checkout; a browser applies form-action
 // to that redirect too, so the active provider's checkout host has to be allowed (and only that one).
-$formAction = "'self'" . match ((string) env('PAYMENTS_DRIVER', 'none')) {
+$driver = (string) env('PAYMENTS_DRIVER', 'auto');
+if ($driver === 'auto') {
+    $driver = (string) env('PAYMONGO_SECRET_KEY', '') !== '' ? 'paymongo' : 'none';
+}
+// a card is sent from the browser straight to PayMongo (its number never reaches this server), which needs connect-src
+$connectSrc = "'self'" . ($driver === 'paymongo' ? ' https://api.paymongo.com' : '');
+$formAction = "'self'" . match ($driver) {
     'paymongo' => ' https://checkout.paymongo.com',
     'xendit' => ' https://checkout.xendit.co https://checkout-staging.xendit.co',
     default => '',
@@ -27,7 +33,7 @@ return [
             "media-src 'self'",
             // 'self': the dashboard shows a live preview of the page in an iframe
             "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-            "connect-src 'self'",
+            "connect-src {$connectSrc}",
         ]),
     ],
 

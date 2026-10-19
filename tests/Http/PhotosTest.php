@@ -120,7 +120,7 @@ final class PhotosTest extends TestCase
             $this->assertSame(422, $response->getStatusCode(), 'the free preview includes 6 photos for the whole account');
             $this->assertSame('photo_limit', $body['code']);
             $this->assertSame(['used' => 6, 'total' => 6, 'remaining' => 0, 'over' => 0, 'packs_needed' => 1], $body['usage']);
-            $this->assertSame('You have used all 6 photos of your account. Buy 12 more for ₱100 to keep adding, or delete one to make room.', $body['message']);
+            $this->assertSame('You have used all 6 photos of your account. Buy 12 more for ₱100 or upgrade a plan to keep adding, or delete one to make room.', $body['message']);
         }
         $this->assertSame(11, Photo::query()->count());
         $this->assertCount(11, $this->disk->files, 'a refused upload is never stored');
@@ -166,7 +166,7 @@ final class PhotosTest extends TestCase
         $this->assertSame(422, $response->getStatusCode());
         $this->assertSame(['used' => 20, 'total' => 6, 'remaining' => 0, 'over' => 14, 'packs_needed' => 2], $body['usage'], '15 more to fit one: 2 packs');
         $this->assertStringContainsString('since a plan ended', $body['message']);
-        $this->assertStringContainsString('delete 15 or buy 12 more for ₱100', $body['message']);
+        $this->assertStringContainsString('delete 15, buy 12 more for ₱100 or upgrade a plan', $body['message']);
         $this->assertSame(20, Photo::query()->count(), 'nothing is deleted');
         $this->assertSame([], $this->disk->deleted);
 

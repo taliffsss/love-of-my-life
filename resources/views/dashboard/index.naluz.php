@@ -46,8 +46,33 @@
     </button>
   </form>
 
+  @foreach ($renewals as $renewal)
+  <div class="notice notice-brand" role="status" style="margin-bottom:14px">A subscription renewal is due: <a href="/dashboard/orders/{{ $renewal->reference }}">pay {{ \App\Services\Plans::money($renewal->amount, $renewal->currency) }}</a> ({{ $renewal->reference }}).</div>
+  @endforeach
+
+  @if (count($accountSubscriptions) > 0)
+  <section class="card subs-card" aria-labelledby="subs-title">
+    <h2 id="subs-title">Your subscriptions</h2>
+    <ul class="subs-list">
+      @foreach ($accountSubscriptions as $sub)
+      @php $forPage = null; foreach ($pages as $p) { if ($p->id === $sub->page_id) { $forPage = $p; } } @endphp
+      <li>
+        <div>
+          <strong>{{ $plans[$sub->plan]['name'] ?? $sub->plan }}@if ($forPage !== null) for {{ $forPage->recipient }}@endif</strong>
+          <span class="small muted">{{ \App\Services\Plans::money($sub->amount, $sub->currency) }} {{ ['month' => 'every month', 'year' => 'every year'][$sub->period] ?? '' }} · {{ \App\Models\Order::METHODS[$sub->method] ?? $sub->method }} · {{ $sub->mode === 'auto' ? 'renews automatically' : 'you approve each payment' }}@if ($forPage !== null && $forPage->expires_at !== null) · paid until {{ \App\Support\Time::show($forPage->expires_at) }}@endif</span>
+        </div>
+        <form method="post" action="/dashboard/subscriptions/{{ $sub->id }}/cancel" data-confirm="Stop this subscription? Your page stays online until the time you paid for runs out.">
+          @csrf
+          <button class="btn btn-ghost btn-sm" type="submit" style="color:var(--danger)">Unsubscribe</button>
+        </form>
+      </li>
+      @endforeach
+    </ul>
+  </section>
+  @endif
+
   <section class="card usage-card" aria-label="Photos on your account">
-    @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs])
+    @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs, 'upgradeUrl' => $upgradeUrl])
   </section>
 
   @if (count($pages) === 0)

@@ -79,7 +79,7 @@
           <span class="small muted" id="photo-count">{{ $photoCount }} on this page</span>
         </div>
         <div class="section-body stack">
-          @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs, 'pageSlug' => $page->slug])
+          @include('partials.photo-usage', ['usage' => $usage, 'packs' => $packs, 'pageSlug' => $page->slug, 'upgradeUrl' => $canUpgrade ? '#plan' : null])
           <div class="thumbs" id="thumbs">
             @foreach ($photos as $i => $photo)
             <figure class="thumb" data-id="{{ $photo->id }}" style="margin:0">
@@ -313,14 +313,47 @@
         </div>
         <div class="section-body stack" style="--gap:18px">
           @include('partials.errors', ['field' => 'plan'])
-          @if (count($purchasable) > 0)
+          @if ($subscription !== null)
+          <div class="notice notice-brand sub-box">
+            <div class="stack" style="--gap:6px">
+              <strong>Subscribed: {{ $plans[$subscription->plan]['name'] ?? $subscription->plan }}, renews {{ ['month' => 'every month', 'year' => 'every year'][$subscription->period] ?? 'each period' }}</strong>
+              <span class="small">Paid by {{ \App\Models\Order::METHODS[$subscription->method] ?? $subscription->method }}. @if ($subscription->mode === 'auto')It renews automatically: the payment provider charges you each time.@else A reminder appears here and on your dashboard {{ \App\Services\Subscriptions::LEAD_DAYS }} days before it is due, and you approve each payment.@endif</span>
+              @if ($renewal !== null)
+              <a class="btn btn-primary btn-sm" href="/dashboard/orders/{{ $renewal->reference }}" style="width:fit-content">Renewal due: pay {{ \App\Services\Plans::money($renewal->amount, $renewal->currency) }}</a>
+              @endif
+              <form method="post" action="/dashboard/pages/{{ $page->slug }}/subscription/cancel" data-confirm="Stop this subscription? Your page stays online until it expires.">
+                @csrf
+                <button class="btn btn-ghost btn-sm" type="submit" style="color:var(--danger)">Cancel subscription</button>
+              </form>
+            </div>
+          </div>
+          @endif
+          @php
+            // the plan the page is on (marked Current once its payment went through) and the plans it can buy
+            $cards = [];
+            foreach ($plans as $key => $candidate) {
+              if (!$candidate['publish']) {
+                continue;
+              }
+              $isCurrent = $status !== 'draft' && $page->plan === $key;
+              if ($isCurrent || isset($purchasable[$key])) {
+                $cards[$key] = ['plan' => $purchasable[$key] ?? ($candidate + ['offers' => []]), 'current' => $isCurrent];
+              }
+            }
+          @endphp
+          @if (count($cards) > 0)
           <div class="plan-row">
-            @foreach ($purchasable as $key => $option)
-            <div class="plan-option {{ $option['popular'] ? 'featured' : '' }}">
+            @foreach ($cards as $key => $card)
+            @php $option = $card['plan']; $current = $card['current']; @endphp
+            <div class="plan-option {{ $option['popular'] ? 'featured' : '' }} {{ $current ? 'current' : '' }}">
+              @if ($current)<span class="tag tag-current">{{ $status === 'expired' ? 'Expired' : 'Current' }}</span>@endif
               @if ($option['popular'])<span class="tag">Most popular</span>@endif
-              <strong>{{ $key === $page->plan ? 'Renew ' . $option['name'] : ($status === 'draft' ? $option['name'] : 'Upgrade to ' . $option['name']) }}</strong>
+              <strong>{{ $current ? (count($option['offers']) > 0 ? 'Renew ' . $option['name'] : $option['name']) : ($status === 'draft' ? $option['name'] : 'Upgrade to ' . $option['name']) }}</strong>
               <span class="small muted">{{ $option['blurb'] }}</span>
               <span class="small">{{ $option['photos'] }} photos · {{ $option['templates'] === 'all' ? 'all ' . count($layouts) . ' templates' : count($option['templates']) . ' templates' }}{{ $option['subdomain'] ? ' · its own address' : '' }}</span>
+              @if ($current)
+              <span class="small current-note">{{ $status === 'expired' ? 'Expired on ' . \App\Support\Time::show($page->expires_at) : ($page->expires_at !== null ? 'Online until ' . \App\Support\Time::show($page->expires_at) : 'Online forever') }}</span>
+              @endif
               @foreach ($option['offers'] as $period => $price)
               <form method="post" action="/dashboard/pages/{{ $page->slug }}/orders">
                 @csrf

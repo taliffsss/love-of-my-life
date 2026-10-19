@@ -31,7 +31,7 @@ final class SeedersTest extends TestCase
         $this->assertInstanceOf(User::class, $demo);
         $this->assertFalse($demo->is_admin);
         $pages = Page::query()->where('user_id', $demo->id)->get()->all();
-        $this->assertSame(['anniversary', 'birthday', 'partner', 'wedding'], $this->sorted(array_map(static fn (Page $p) => $p->occasion, $pages)));
+        $this->assertSame(['anniversary', 'birthday', 'invitation', 'partner', 'wedding'], $this->sorted(array_map(static fn (Page $p) => $p->occasion, $pages)));
     }
 
     /** @param list<string> $values @return list<string> */

@@ -182,7 +182,8 @@ final class AdminStats
             $query->whereRaw('1 = 0');
         } elseif ($q !== '') {
             $like = '%' . $q . '%';
-            $query->whereRaw('(lower(reference) like ? or lower(provider_ref) like ? or user_id in (select id from users where lower(email) like ?))', [$like, $like, $like]);
+            // the provider's ids are encrypted: they are found by the whole id (its blind index), not by a part of it
+            $query->whereRaw('(lower(reference) like ? or provider_ref_idx = ? or user_id in (select id from users where lower(email) like ?))', [$like, PaymentVault::index($typed), $like]);
         }
         if (in_array($filters['status'] ?? '', Order::STATUSES, true)) {
             $query->where('status', $filters['status']);

@@ -12,7 +12,7 @@ final class WebhookNotice
 
     public function __construct(
         public readonly string $kind,
-        /** Our order reference (LM-XXXX-XXXX) */
+        /** Our order reference (LM-XXXX-XXXX); '' when the event only names the provider's own id (GCash, PayMaya and card payments) */
         public readonly string $reference,
         /** The provider's checkout session / invoice id */
         public readonly string $providerRef,

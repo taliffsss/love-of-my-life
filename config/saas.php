@@ -32,10 +32,14 @@ return [
     // fake   = a test checkout that marks the order paid (refused when APP_ENV=production)
     // paymongo / xendit = a hosted checkout; the provider's webhook marks the order paid (see App\Services\Payments)
     'payments' => [
-        'driver' => env('PAYMENTS_DRIVER', 'none'), // none | fake | paymongo | xendit
+        'driver' => env('PAYMENTS_DRIVER', 'auto'), // auto (PayMongo once its key is set, else none) | none | fake | paymongo | xendit
         // PayMongo checkout sessions. The webhook (<APP_URL>/api/webhooks/paymongo) is checked with its signing secret.
         'paymongo' => [
             'secret_key' => (string) env('PAYMONGO_SECRET_KEY', ''),
+            // PayMongo Subscriptions (cards and Maya charged again by PayMongo) must be enabled on the account by PayMongo support first
+            'subscriptions' => filter_var(env('PAYMONGO_SUBSCRIPTIONS', false), FILTER_VALIDATE_BOOLEAN),
+            // needed with the secret key to take GCash, PayMaya and cards on our own page (PayMongo makes the payment method and attaches it with the public key)
+            'public_key' => (string) env('PAYMONGO_PUBLIC_KEY', ''),
             'webhook_secret' => (string) env('PAYMONGO_WEBHOOK_SECRET', ''),
             'methods' => array_values(array_filter(array_map('trim', explode(',', (string) env('PAYMONGO_METHODS', 'gcash,paymaya,card,grab_pay'))))),
         ],

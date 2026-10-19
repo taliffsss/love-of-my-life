@@ -42,7 +42,7 @@ foreach (array_slice($argv, 1) as $arg) {
 $billing = $app->make(Billing::class);
 $providerRef = isset($options['ref']) ? mb_substr((string) $options['ref'], 0, 100) : null;
 
-if ($providerRef !== null && Order::query()->where('provider_ref', $providerRef)->exists()) {
+if ($providerRef !== null && Order::withProviderRef($providerRef) !== null) {
     fwrite(STDERR, "The payment reference {$providerRef} is already recorded on another order.\n");
     exit(1);
 }

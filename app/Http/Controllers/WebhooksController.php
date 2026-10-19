@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\PaymentAttempt;
 use App\Services\Billing;
 use App\Services\Payments\HostedGateway;
 use App\Services\Payments\InvalidWebhook;
@@ -55,8 +56,16 @@ final class WebhooksController
             return Response::json(['ok' => true, 'ignored' => true]);
         }
         $provider = $gateway->name();
-        $order = Order::query()->withoutCache()->useWritePdo()->where('reference', $notice->reference)->where('provider', $provider)->first();
-        if (!$order instanceof Order || (string) $order->provider_ref !== $notice->providerRef) {
+        if ($notice->reference === '') {
+            // a payment names only the provider's id for it: every payment started for an order is on record, so a payment of
+            // an earlier one (the customer changed method, then approved the first) still reaches its order
+            $attempt = PaymentAttempt::withProviderRef($provider, $notice->providerRef);
+            $order = $attempt instanceof PaymentAttempt ? Order::query()->withoutCache()->useWritePdo()->find($attempt->order_id) : null;
+        } else {
+            $order = Order::query()->withoutCache()->useWritePdo()->where('reference', $notice->reference)->where('provider', $provider)->first();
+        }
+        $known = $order instanceof Order && ($notice->reference === '' || (string) $order->provider_ref === $notice->providerRef);
+        if (!$known) {
             logger()->warning('[payments] {provider} event for an unknown order {reference}', ['provider' => $provider, 'reference' => $notice->reference]);
             return Response::json(['ok' => true, 'ignored' => true]);
         }

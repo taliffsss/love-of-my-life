@@ -115,7 +115,7 @@ final class DashboardPagesTest extends TestCase
     {
         $page = $this->makePage($this->owner);
         $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
-        $this->assertSame(5, substr_count($html, 'class="choice-grid design-grid"'));
+        $this->assertSame(6, substr_count($html, 'class="choice-grid design-grid"'), 'Plain and the five occasions');
         foreach (Designs::OCCASION_DESIGNS as $occasion => $designs) {
             $this->assertCount(10, $designs, $occasion);
             $this->assertSame(array_keys(Designs::LAYOUTS), array_keys($designs));
@@ -137,7 +137,7 @@ final class DashboardPagesTest extends TestCase
         foreach (OccasionTemplates::OCCASIONS as $occasion) {
             $this->assertStringContainsString($occasion['name'], $html);
         }
-        $this->assertSame(40, substr_count($html, 'name="template"'));
+        $this->assertSame(50, substr_count($html, 'name="template"'));
     }
 
     public function testEveryPageCardHasADeleteButtonAndConfirmation(): void
@@ -337,6 +337,32 @@ final class DashboardPagesTest extends TestCase
         $this->assertStringContainsString('Renew Sweetheart', $html);
         $this->assertStringContainsString('Upgrade to Forever', $html);
         $this->assertStringNotContainsString('₱200 a month', $html, 'no way down');
+    }
+
+    public function testThePlanThePageIsOnIsMarkedCurrent(): void
+    {
+        $page = $this->makePage($this->owner);
+        $url = '/dashboard/pages/' . $page->slug;
+        $this->assertStringNotContainsString('tag-current', (string) $this->get($url)->getBody(), 'a free draft is on no plan');
+
+        $page->forceFill(['plan' => 'sweetheart', 'expires_at' => '2099-01-01 00:00:00', 'published_at' => '2026-01-01 00:00:00'])->save();
+        $html = (string) $this->get($url)->getBody();
+        $this->assertSame(1, substr_count($html, 'tag-current'));
+        $this->assertMatchesRegularExpression('#tag-current">Current</span>.*?Renew Sweetheart#s', $html, 'the Current tag is on the plan it is on');
+        $this->assertStringContainsString('Online until', $html);
+        $this->assertStringContainsString('Upgrade to Forever', $html);
+        $this->assertStringNotContainsString('<strong>Sweet</strong>', $html, 'a lower plan is not offered');
+
+        $page->forceFill(['plan' => 'forever', 'expires_at' => null])->save();
+        $html = (string) $this->get($url)->getBody();
+        $this->assertSame(1, substr_count($html, 'tag-current'), 'Forever has nothing more to buy but is still shown as the current plan');
+        $this->assertStringContainsString('Online forever', $html);
+        $this->assertStringNotContainsString('name="plan" value="forever"', $html);
+
+        $page->forceFill(['plan' => 'sweet', 'expires_at' => '2020-01-01 00:00:00', 'published_at' => '2019-01-01 00:00:00'])->save();
+        $html = (string) $this->get($url)->getBody();
+        $this->assertStringContainsString('tag-current">Expired</span>', $html);
+        $this->assertStringContainsString('Renew Sweet', $html);
     }
 
     public function testEveryTemplateCanBeChosenWithEveryTheme(): void

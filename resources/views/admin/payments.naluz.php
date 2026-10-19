@@ -47,7 +47,7 @@
           <td>{{ $emails[$o->user_id] ?? 'Deleted user' }}</td>
           <td>{{ $o->isPhotoPack() ? $o->photos . ' photos' : (($plans[$o->plan]['name'] ?? $o->plan) . ', ' . ($o->period ?? '')) }}</td>
           <td class="num">{{ $money((int) $o->amount, $o->currency) }}</td>
-          <td>{{ $o->provider }}</td>
+          <td>{{ $o->provider }}@if ($o->method !== null)<br><span class="small muted">{{ \App\Models\Order::METHODS[$o->method] ?? $o->method }} · {{ $o->billing === 'subscription' ? 'subscription' : 'one-time' }}</span>@endif</td>
           <td><span class="pill {{ $pillFor[$o->status] ?? 'pill-draft' }}">{{ $statusNames[$o->status] ?? ucfirst($o->status) }}</span></td>
           <td>{{ \App\Support\Time::show($o->paid_at ?? $o->created_at, 'M j, Y g:i A') }}</td>
         </tr>

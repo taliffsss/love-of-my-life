@@ -113,14 +113,14 @@ final class PhotoAllowance
         $pack = sprintf('%d more for %s', $this->packPhotos, Plans::money($this->packPrice, $this->plans->currency()));
         if ($usage['over'] > 0) {
             return sprintf(
-                'Your account holds %d photos and now includes %d, since a plan ended. Your photos stay as they are; to add new ones, delete %d or buy %s.',
+                'Your account holds %d photos and now includes %d, since a plan ended. Your photos stay as they are; to add new ones, delete %d, buy %s or upgrade a plan.',
                 $usage['used'],
                 $usage['total'],
                 $usage['over'] + 1,
                 $pack,
             );
         }
-        return sprintf('You have used all %d photos of your account. Buy %s to keep adding, or delete one to make room.', $usage['total'], $pack);
+        return sprintf('You have used all %d photos of your account. Buy %s or upgrade a plan to keep adding, or delete one to make room.', $usage['total'], $pack);
     }
 
     /** The allowance of an account with no live page: the free preview's. */
