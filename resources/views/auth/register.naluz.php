@@ -2,11 +2,7 @@
 @section('title', 'Create your account · ' . $brand)
 @section('content')
 <div class="auth">
-  <aside class="auth-art">
-    @include('partials.brand')
-    <blockquote>Build it tonight. Send it when it feels just right.</blockquote>
-    <p class="muted small">Building and previewing are free. You pay only when you send it.</p>
-  </aside>
+  @include('partials.auth-art', ['quote' => 'Build it tonight. Send it when it feels just right.', 'note' => 'Building and previewing are free. You pay only when you send it.'])
   <main class="auth-main">
     <div class="auth-card">
       <div class="row" style="justify-content:space-between">

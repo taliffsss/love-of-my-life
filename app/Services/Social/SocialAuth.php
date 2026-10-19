@@ -38,6 +38,25 @@ final class SocialAuth
     ) {
     }
 
+    /** Whether the buttons show before the keys are set (see config/social.php). */
+    public function preview(): bool
+    {
+        return (bool) ($this->config['preview'] ?? false);
+    }
+
+    /** @return list<string> the providers to show buttons for: the enabled ones, or all of them in preview */
+    public function visibleProviders(): array
+    {
+        return $this->preview() ? self::PROVIDERS : $this->enabledProviders();
+    }
+
+    /** What to tell a developer who clicks a button whose keys are not set. */
+    public function missingMessage(string $provider): string
+    {
+        $keys = $provider === 'google' ? 'GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET' : 'FACEBOOK_APP_ID and FACEBOOK_APP_SECRET';
+        return ucfirst($provider) . ' sign-in is not set up yet. Add ' . $keys . ' to .env (see .env.example), then try again.';
+    }
+
     public function enabled(string $provider): bool
     {
         return in_array($provider, self::PROVIDERS, true)

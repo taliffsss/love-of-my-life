@@ -21,7 +21,7 @@ final class Screen
         $session = app(Store::class);
         $user = app(Auth::class)->user();
         return view($view, $data + [
-            'socialProviders' => app(SocialAuth::class)->enabledProviders(),
+            'socialProviders' => app(SocialAuth::class)->visibleProviders(),
             'brand' => (string) config('saas.brand'),
             'user' => $user instanceof User ? $user : null,
             'errors' => (array) ($session->get('errors') ?? []),

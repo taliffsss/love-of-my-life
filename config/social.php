@@ -9,6 +9,11 @@ declare(strict_types=1);
 //   Google:   <APP_URL>/auth/google/callback
 //   Facebook: <APP_URL>/auth/facebook/callback
 return [
+    // Show both buttons even before the keys are set, so the screens can be seen and designed (a click says what is missing).
+    // Always on for APP_ENV local, testing, development and staging; elsewhere only with SOCIAL_LOGIN_PREVIEW=true.
+    'preview' => in_array((string) env('APP_ENV', 'production'), ['local', 'testing', 'development', 'staging'], true)
+        || filter_var(env('SOCIAL_LOGIN_PREVIEW', false), FILTER_VALIDATE_BOOLEAN),
+
     'google' => [
         'client_id' => (string) env('GOOGLE_CLIENT_ID', ''),
         'client_secret' => (string) env('GOOGLE_CLIENT_SECRET', ''),

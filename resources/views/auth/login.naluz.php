@@ -2,11 +2,7 @@
 @section('title', 'Sign in · ' . $brand)
 @section('content')
 <div class="auth">
-  <aside class="auth-art">
-    @include('partials.brand')
-    <blockquote>“Some things are easier to write than to say.”</blockquote>
-    <p class="muted small">Your pages, your photos and your letters are waiting.</p>
-  </aside>
+  @include('partials.auth-art', ['quote' => '“Some things are easier to write than to say.”', 'note' => 'Your pages, your photos and your letters are waiting.'])
   <main class="auth-main">
     <div class="auth-card">
       <span class="hide-art">@include('partials.brand')</span>

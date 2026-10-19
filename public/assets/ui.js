@@ -366,3 +366,128 @@ if (editor) {
     for (const dialog of [statusDialog, deleteDialog]) for (const closer of $$("[data-close]", dialog)) closer.addEventListener("click", () => dialog.close());
   }
 }
+
+// ---------- sign-in / sign-up: the left panel ----------
+// A sample page for each occasion: tabs (or the arrow keys) switch it, it also rotates by itself until someone picks one,
+// the letter types itself out, the card tilts towards the mouse and a click makes hearts. All of it is decoration: without
+// script, or with reduced motion, the first sample is simply shown.
+{
+  const art = $("[data-auth-art]");
+  if (art) {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const tabs = $$(".art-tab", art);
+    const samples = $$(".art-sample", art);
+    const glows = $$(".art-glow", art);
+    const card = $("[data-art-card]", art);
+    const lettie = $("[data-lettie]", art);
+    const bubble = $("[data-bubble]", art);
+    let index = 0;
+    let typer = 0;
+    let rotate = 0;
+    let picked = false;
+    const visible = () => art.offsetParent !== null && !document.hidden;
+
+    const type = (el) => {
+      clearInterval(typer);
+      const text = el.dataset.text || el.textContent;
+      if (reduce) return (el.textContent = text);
+      el.textContent = "";
+      el.classList.add("typing");
+      lettie?.classList.add("talking");
+      let i = 0;
+      typer = setInterval(() => {
+        i += 2;
+        el.textContent = text.slice(0, i);
+        if (i >= text.length) {
+          clearInterval(typer);
+          el.classList.remove("typing");
+          lettie?.classList.remove("talking");
+        }
+      }, 28);
+    };
+
+    const show = (next, focus = false) => {
+      index = (next + samples.length) % samples.length;
+      const key = samples[index].dataset.sample;
+      art.dataset.active = key;
+      samples.forEach((s, i) => {
+        s.hidden = i !== index;
+        s.classList.toggle("on", i === index);
+      });
+      tabs.forEach((t, i) => {
+        t.setAttribute("aria-selected", String(i === index));
+        t.tabIndex = i === index ? 0 : -1;
+      });
+      glows.forEach((g) => g.classList.toggle("on", g.dataset.for === key));
+      if (bubble) {
+        bubble.textContent = samples[index].dataset.says || "";
+        bubble.style.animation = "none";
+        void bubble.offsetWidth; // restart the pop-in
+        bubble.style.animation = "";
+      }
+      type($(".art-letter", samples[index]));
+      if (focus) tabs[index].focus();
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => {
+        picked = true;
+        show(i);
+      });
+      tab.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+        event.preventDefault();
+        picked = true;
+        show(index + (event.key === "ArrowRight" ? 1 : -1), true);
+      });
+    });
+
+    if (!reduce) {
+      rotate = setInterval(() => {
+        if (!picked && visible()) show(index + 1);
+      }, 8000);
+      type($(".art-letter", samples[0]));
+
+      // tilt towards the pointer
+      art.addEventListener("pointermove", (event) => {
+        if (!card) return;
+        const box = card.getBoundingClientRect();
+        const x = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
+        const y = (event.clientY - (box.top + box.height / 2)) / (box.height / 2);
+        card.classList.add("moving");
+        card.style.setProperty("--rx", `${Math.max(-1, Math.min(1, x)) * 7}deg`);
+        card.style.setProperty("--ry", `${Math.max(-1, Math.min(1, y)) * -6}deg`);
+      });
+      art.addEventListener("pointerleave", () => {
+        card?.classList.remove("moving");
+        card?.style.setProperty("--rx", "0deg");
+        card?.style.setProperty("--ry", "0deg");
+      });
+
+      // Lettie waves and hugs a heart when clicked
+      $("[data-lettie-btn]", art)?.addEventListener("click", () => {
+        lettie.classList.add("love");
+        document.getElementById("l-wave")?.beginElement?.();
+        setTimeout(() => lettie.classList.remove("love"), 1600);
+      });
+
+      // hearts where the panel is clicked (not on the tabs)
+      art.addEventListener("click", (event) => {
+        if (event.target.closest(".art-tab, a")) return;
+        const box = art.getBoundingClientRect();
+        for (let n = 0; n < 7; n++) {
+          const heart = document.createElement("span");
+          heart.className = "art-burst";
+          heart.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.9-8-11.1C4 6.7 6.3 5 8.6 5c1.5 0 2.9.8 3.4 2 .5-1.2 1.9-2 3.4-2C17.7 5 20 6.7 20 9.9 20 16.1 12 21 12 21z"/></svg>';
+          heart.style.left = `${event.clientX - box.left}px`;
+          heart.style.top = `${event.clientY - box.top}px`;
+          heart.style.setProperty("--dx", `${(Math.random() - 0.5) * 160}px`);
+          heart.style.setProperty("--dy", `${-40 - Math.random() * 130}px`);
+          heart.style.setProperty("--r", `${(Math.random() - 0.5) * 80}deg`);
+          art.append(heart);
+          setTimeout(() => heart.remove(), 1200);
+        }
+      });
+    }
+  }
+}

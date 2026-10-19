@@ -25,6 +25,9 @@ final class SocialController
 
     public function redirect(string $provider, SocialAuth $social, Store $session): ResponseInterface
     {
+        if (!$social->enabled($provider) && $social->preview()) {
+            return Screen::back('/login', $social->missingMessage($provider));
+        }
         $this->ensureEnabled($provider, $social);
         $state = bin2hex(random_bytes(24));
         $verifier = bin2hex(random_bytes(32));

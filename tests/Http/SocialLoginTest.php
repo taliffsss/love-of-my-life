@@ -66,10 +66,25 @@ final class SocialLoginTest extends TestCase
 
     public function testNothingShowsWhenNoProviderIsConfigured(): void
     {
-        $this->providers([], ['google' => ['client_id' => '', 'client_secret' => ''], 'facebook' => ['client_id' => 'x', 'client_secret' => '']]);
+        $this->providers([], ['preview' => false, 'google' => ['client_id' => '', 'client_secret' => ''], 'facebook' => ['client_id' => 'x', 'client_secret' => '']]);
         $this->assertStringNotContainsString('Continue with', (string) $this->get('/login')->getBody());
         $this->assertSame(404, $this->get('/auth/google/redirect')->getStatusCode());
         $this->assertSame(404, $this->get('/auth/facebook/callback?code=a&state=b')->getStatusCode());
+    }
+
+    public function testPreviewShowsTheButtonsBeforeTheKeysAreSetAndSaysWhatIsMissing(): void
+    {
+        $this->providers([], ['preview' => true, 'google' => ['client_id' => '', 'client_secret' => ''], 'facebook' => ['client_id' => '', 'client_secret' => '']]);
+        foreach (['/login', '/register'] as $uri) {
+            $html = (string) $this->get($uri)->getBody();
+            $this->assertStringContainsString('Continue with Google', $html);
+            $this->assertStringContainsString('Continue with Facebook', $html);
+        }
+        $response = $this->get('/auth/facebook/redirect');
+        $this->assertSame('/login', $response->getHeaderLine('Location'));
+        $this->assertStringContainsString('FACEBOOK_APP_ID', (string) $this->get('/login')->getBody());
+        // the callback stays closed, and no account can come out of it
+        $this->assertSame(404, $this->get('/auth/google/callback?code=a&state=b')->getStatusCode());
     }
 
     public function testBothButtonsAppearOnSignInAndSignUp(): void
