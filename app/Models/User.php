@@ -14,12 +14,35 @@ use Naluz\Database\Orm\Relations\HasMany;
  * @property string $name
  * @property string $email
  * @property bool $is_admin
+ * @property string $status active, deactivated or suspended: only an active account can sign in
+ * @property ?string $status_reason
+ * @property string $login_type manual, google or facebook: how the account was made
  */
 final class User extends Model
 {
+    public const ACTIVE = 'active';
+    public const DEACTIVATED = 'deactivated';
+    public const SUSPENDED = 'suspended';
+    public const STATUSES = [self::ACTIVE, self::DEACTIVATED, self::SUSPENDED];
+
     protected array $fillable = ['name', 'email', 'password'];
     protected array $hidden = ['password'];
-    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean'];
+    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'status_changed_at' => 'datetime'];
+
+    public function isActive(): bool
+    {
+        return $this->status === self::ACTIVE;
+    }
+
+    /** What a person who cannot sign in is told. */
+    public function inactiveMessage(): string
+    {
+        if ($this->status === self::SUSPENDED) {
+            $why = trim((string) $this->status_reason);
+            return 'This account is suspended' . ($why !== '' ? ': ' . $why : '.') . ' Contact support if you think this is a mistake.';
+        }
+        return 'This account has been deactivated. Contact support to have it reactivated.';
+    }
 
     public function pages(): HasMany
     {

@@ -12,6 +12,23 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   template, `public/assets/occasions.css`). New column `pages.occasion`; plans still decide by template, so they are unchanged.
 - **Seeders.** `php naluz db:seed` makes the administrator (`ADMIN_EMAIL` / `ADMIN_PASSWORD`; the password is required outside
   local environments) and, outside production, the demo account `demo@lovable.local` / `demo1234` with a page per occasion.
+- **Sign in with Google or Facebook.** One flow for sign-in and sign-up, server-side OAuth (no provider scripts), `state`
+  checked and used once, PKCE for Google. A provider account is identified by its own id; a new one makes an account only
+  with an address the provider vouches for. Never linked to an existing account by e-mail (accounts made by password are
+  not e-mail verified, so linking would allow a pre-hijack), never into an administrator, and the account gets an unusable
+  password. New: `users.login_type`, `social_accounts`, `config/social.php`, `GOOGLE_*` / `FACEBOOK_*` in `.env`.
+- **Admin dashboard** at `/admin` (administrators only, anyone else gets a 404): users, new users, subscribers (accounts with
+  a live paid page), pages by status and plan, revenue, a 30-day sign-up chart, how people sign up; and `/admin/users` with
+  search, filters (sign-up method, subscribers, administrators) and paging. Read-only.
+- **Payments, prepared for PayMongo and Xendit.** `PAYMENTS_DRIVER=paymongo|xendit` opens a hosted checkout per order and
+  the provider's webhook (`/api/webhooks/paymongo`, `/api/webhooks/xendit`, signature/token checked, amount and checkout id
+  matched, idempotent) marks it paid; expired Xendit invoices cancel the order. A pending order keeps its checkout
+  (`orders.checkout_url`). `/admin/payments` lists every order with totals, search and filters. Manual and fake drivers unchanged.
+- **Managing users (admin).** Each row of `/admin/users` has icons for Edit, Deactivate / Reactivate, Suspend and Delete (a
+  dialog; without script they open the user's edit page, which has the same actions). Deactivated and suspended accounts
+  cannot sign in (password or Google/Facebook) and are signed out on their next request; a suspension can carry a reason shown
+  to them. Not on yourself, and not a status change on another administrator. Delete removes the account, pages, photos and
+  files, and is refused for accounts with paid orders. New: `users.status`, `status_reason`, `status_changed_at`.
 - **Accounts and dashboard.** Sign up and sign in (e-mail + password, Argon2id, rate limited). Each account lists its
   pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
   browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design

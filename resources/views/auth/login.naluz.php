@@ -12,6 +12,7 @@
       <span class="hide-art">@include('partials.brand')</span>
       <h1 class="display">Welcome back</h1>
       <p class="muted">Sign in to edit your pages.</p>
+      @include('partials.social')
       <form method="post" action="/login" class="stack" novalidate>
         @csrf
         <div class="field">

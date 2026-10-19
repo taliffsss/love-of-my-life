@@ -24,11 +24,26 @@ return [
 
     'currency' => 'PHP',
 
+    // Dates are stored in UTC; screens show them in this time zone (App\Support\Time).
+    'display_timezone' => env('DISPLAY_TIMEZONE', 'Asia/Manila'),
+
     // none   = no online checkout yet: the dashboard explains how to pay and an admin activates the plan
     //          (php bin/grant-plan.php <page> <plan>)
     // fake   = a test checkout that marks the order paid (refused when APP_ENV=production)
+    // paymongo / xendit = a hosted checkout; the provider's webhook marks the order paid (see App\Services\Payments)
     'payments' => [
-        'driver' => env('PAYMENTS_DRIVER', 'none'),
+        'driver' => env('PAYMENTS_DRIVER', 'none'), // none | fake | paymongo | xendit
+        // PayMongo checkout sessions. The webhook (<APP_URL>/api/webhooks/paymongo) is checked with its signing secret.
+        'paymongo' => [
+            'secret_key' => (string) env('PAYMONGO_SECRET_KEY', ''),
+            'webhook_secret' => (string) env('PAYMONGO_WEBHOOK_SECRET', ''),
+            'methods' => array_values(array_filter(array_map('trim', explode(',', (string) env('PAYMONGO_METHODS', 'gcash,paymaya,card,grab_pay'))))),
+        ],
+        // Xendit invoices. The webhook (<APP_URL>/api/webhooks/xendit) is checked with the dashboard's verification token.
+        'xendit' => [
+            'secret_key' => (string) env('XENDIT_SECRET_KEY', ''),
+            'callback_token' => (string) env('XENDIT_CALLBACK_TOKEN', ''),
+        ],
         // shown to customers while payments are manual
         'manual_instructions' => env('PAYMENTS_MANUAL_INSTRUCTIONS', 'Send the amount by GCash or Maya and reply with your order reference; your page goes live as soon as we confirm it.'),
     ],

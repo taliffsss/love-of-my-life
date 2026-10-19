@@ -37,6 +37,7 @@ final class SeoController
             // people's pages, the dashboard and JSON endpoints stay out of search results
             . "Disallow: /p/\n"
             . "Disallow: /dashboard\n"
+            . "Disallow: /admin\n"
             . "Disallow: /api/\n"
             . 'Sitemap: ' . $this->siteUrl() . "sitemap.xml\n";
 

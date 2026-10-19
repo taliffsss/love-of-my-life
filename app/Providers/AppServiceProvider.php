@@ -9,12 +9,15 @@ use App\Services\CarouselStore;
 use App\Services\LetterStore;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\ManualGateway;
+use App\Services\Payments\PayMongoGateway;
 use App\Services\Payments\PaymentGateway;
+use App\Services\Payments\XenditGateway;
 use App\Services\PhotoAllowance;
 use App\Services\PhotoCatalog;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
 use App\Services\Sites;
+use App\Services\Social\SocialAuth;
 use App\Services\SongStore;
 use App\Services\SpacesFilesystem;
 use App\Services\Subdomains;
@@ -33,6 +36,10 @@ final class AppServiceProvider extends ServiceProvider
             (array) $c->make(Repository::class)->get('saas.plans', []),
             (string) $c->make(Repository::class)->get('saas.currency', 'PHP'),
             (array) $c->make(Repository::class)->get('saas.periods', Plans::DEFAULT_PERIODS),
+        ));
+        $this->app->singleton(SocialAuth::class, fn ($c) => new SocialAuth(
+            (array) $c->make(Repository::class)->get('social', []),
+            (string) $c->make(Repository::class)->get('app.url', 'http://localhost'),
         ));
         $this->app->singleton(Sites::class, fn ($c) => new Sites(
             (string) $c->make(Repository::class)->get('saas.domain', ''),
@@ -58,10 +65,29 @@ final class AppServiceProvider extends ServiceProvider
             trim((string) $c->make(Repository::class)->get('filesystems.disks.spaces.folder', ''), '/'),
             (int) $c->make(Repository::class)->get('saas.max_upload_bytes', 10 * 1024 * 1024),
         ));
+        $this->app->singleton(PayMongoGateway::class, fn ($c) => new PayMongoGateway(
+            (string) $c->make(Repository::class)->get('saas.payments.paymongo.secret_key', ''),
+            (string) $c->make(Repository::class)->get('saas.payments.paymongo.webhook_secret', ''),
+            array_map('strval', (array) $c->make(Repository::class)->get('saas.payments.paymongo.methods', ['gcash', 'paymaya', 'card'])),
+            (string) $c->make(Repository::class)->get('app.url', 'http://localhost'),
+        ));
+        $this->app->singleton(XenditGateway::class, fn ($c) => new XenditGateway(
+            (string) $c->make(Repository::class)->get('saas.payments.xendit.secret_key', ''),
+            (string) $c->make(Repository::class)->get('saas.payments.xendit.callback_token', ''),
+            (string) $c->make(Repository::class)->get('app.url', 'http://localhost'),
+        ));
         $this->app->bind(PaymentGateway::class, function ($c) {
             $config = $c->make(Repository::class);
+            $hosted = static function (\App\Services\Payments\HostedGateway $gateway): \App\Services\Payments\HostedGateway {
+                if (!$gateway->configured()) {
+                    throw new \LogicException('PAYMENTS_DRIVER=' . $gateway->name() . ' needs its secret key in .env (see .env.example).');
+                }
+                return $gateway;
+            };
             return match ((string) $config->get('saas.payments.driver', 'none')) {
                 'fake' => new FakeGateway((string) $config->get('app.env', 'production')),
+                'paymongo' => $hosted($c->make(PayMongoGateway::class)),
+                'xendit' => $hosted($c->make(XenditGateway::class)),
                 default => new ManualGateway(),
             };
         });

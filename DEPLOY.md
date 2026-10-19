@@ -152,6 +152,24 @@ Forever, never expires. Monthly plans are paid again each month the same way unt
 changes nothing. Prices and limits are in `config/saas.php`. For testing, `PAYMENTS_DRIVER=fake` adds a "pay (test)"
 button; it refuses to run with `APP_ENV=production`.
 
+### PayMongo or Xendit (hosted checkout)
+
+Both are built in and off until you choose one with `PAYMENTS_DRIVER` (they have not been tried against the live
+providers; test with each one's sandbox keys first).
+
+| | PayMongo | Xendit |
+|---|---|---|
+| `PAYMENTS_DRIVER` | `paymongo` | `xendit` |
+| Keys in `.env` | `PAYMONGO_SECRET_KEY`, `PAYMONGO_WEBHOOK_SECRET` | `XENDIT_SECRET_KEY`, `XENDIT_CALLBACK_TOKEN` |
+| Webhook URL to register | `<APP_URL>/api/webhooks/paymongo`, event `checkout_session.payment.paid` | `<APP_URL>/api/webhooks/xendit`, Invoices paid and expired |
+| Checks | `Paymongo-Signature` (HMAC-SHA256, test vs live) | `x-callback-token` |
+
+Choosing a plan creates the order, opens a checkout at the provider and sends the customer there. The order turns paid
+(and the plan starts) only when the provider's webhook arrives and checks out: signature or token, our order reference,
+the checkout id we stored, and the exact amount. A wrong amount is logged and not credited. Delivering a webhook twice
+changes nothing. If the provider is down the customer is told and the order stays pending. The checkout host is added
+to the page's `form-action` CSP for the active provider only. `/admin/payments` lists every order and its status.
+
 ## Without Docker (bare metal)
 
 Requirements: PHP 8.2+ (`mbstring`, `openssl`, `sodium`, `fileinfo`, `curl`, `pdo_sqlite` or your database's driver),

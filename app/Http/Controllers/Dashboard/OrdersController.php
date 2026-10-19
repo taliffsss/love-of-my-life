@@ -10,6 +10,8 @@ use App\Models\Page;
 use App\Services\Billing;
 use App\Services\Designs;
 use App\Services\Payments\FakeGateway;
+use App\Services\Payments\HostedGateway;
+use App\Services\Payments\PaymentException;
 use App\Services\Payments\PaymentGateway;
 use App\Services\PhotoAllowance;
 use App\Services\Plans;
@@ -54,7 +56,7 @@ final class OrdersController
         if (!$order instanceof Order) {
             $order = $billing->createOrder((int) $auth->id(), $page, $plan, $period, $gateway->name());
         }
-        return Response::redirect($gateway->checkoutUrl($order), 303);
+        return $this->checkout($gateway, $order, $this->editUrl($page, 'plan'));
     }
 
     /**
@@ -81,7 +83,7 @@ final class OrdersController
         if (!$order instanceof Order) {
             $order = $billing->createPhotoOrder((int) $auth->id(), $page, $packs, $gateway->name());
         }
-        return Response::redirect($gateway->checkoutUrl($order), 303);
+        return $this->checkout($gateway, $order, $page instanceof Page ? $this->editUrl($page, 'photos') : '/dashboard');
     }
 
     public function show(string $reference, Auth $auth, Plans $plans, PaymentGateway $gateway): ResponseInterface
@@ -92,6 +94,7 @@ final class OrdersController
             'order' => $order,
             'page' => $page instanceof Page ? $page : null,
             'plan' => $plans->get($order->plan),
+            'hosted' => $gateway instanceof HostedGateway && $order->provider === $gateway->name(),
             'canFakePay' => $gateway instanceof FakeGateway && $order->provider === 'fake' && $order->status === Order::PENDING,
             'instructions' => (string) config('saas.payments.manual_instructions'),
         ]);
@@ -114,6 +117,16 @@ final class OrdersController
             );
         }
         return Screen::back($page instanceof Page ? $this->editUrl($page, 'plan') : '/dashboard', 'Payment received. Your page is live!');
+    }
+
+    /** Sends the customer to pay; when the provider cannot open a checkout the order stays pending and they hear why. */
+    private function checkout(PaymentGateway $gateway, Order $order, string $backTo): ResponseInterface
+    {
+        try {
+            return Response::redirect($gateway->checkoutUrl($order), 303);
+        } catch (PaymentException $e) {
+            return Screen::back($backTo, $e->getMessage());
+        }
     }
 
     private function ownedOrder(Auth $auth, string $reference): Order

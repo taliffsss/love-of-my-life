@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http;
 
 use App\Models\User;
+use App\Services\Social\SocialAuth;
 use Naluz\Auth\Auth;
 use Naluz\Http\Response;
 use Naluz\Session\Store;
@@ -20,6 +21,7 @@ final class Screen
         $session = app(Store::class);
         $user = app(Auth::class)->user();
         return view($view, $data + [
+            'socialProviders' => app(SocialAuth::class)->enabledProviders(),
             'brand' => (string) config('saas.brand'),
             'user' => $user instanceof User ? $user : null,
             'errors' => (array) ($session->get('errors') ?? []),

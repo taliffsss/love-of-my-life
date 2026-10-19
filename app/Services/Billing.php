@@ -110,6 +110,14 @@ final class Billing
         });
     }
 
+    /** A pending order the provider says will not be paid (its checkout expired). Returns false when it was not pending. */
+    public function markCancelled(Order $order, ?\DateTimeImmutable $now = null): bool
+    {
+        $now ??= new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        return $this->db->table('orders')->where('id', '=', $order->id)->where('status', '=', Order::PENDING)
+            ->update(['status' => Order::CANCELLED, 'updated_at' => $now->format('Y-m-d H:i:s')]) === 1;
+    }
+
     /**
      * Puts the plan on the page for the period paid. A month or a year is added to whatever time is left (a renewal
      * never loses days; Jan 31 + 1 month is the end of February); a plan bought once clears the expiry. A lower plan

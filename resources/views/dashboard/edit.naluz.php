@@ -18,7 +18,7 @@
         <span class="pill pill-{{ $status }}">{{ $status === 'draft' ? 'Draft: only you can see it' : ($status === 'active' ? 'Live' : 'Expired') }}</span>
         <span class="pill pill-plan">{{ $plan['name'] }}</span>
         @if ($status === 'active' && $page->expires_at !== null)
-        <span class="small muted">Online until {{ $page->expires_at->format('M j, Y') }}</span>
+        <span class="small muted">Online until {{ \App\Support\Time::show($page->expires_at) }}</span>
         @elseif ($status === 'active')
         <span class="small muted">Online forever</span>
         @endif
@@ -302,9 +302,9 @@
               @if ($status === 'draft')
                 This page is a free draft. Choose a plan to put it online.
               @elseif ($status === 'expired')
-                This page expired on {{ $page->expires_at?->format('M j, Y') }}. Renew it to bring it back; nothing was deleted.
+                This page expired on {{ \App\Support\Time::show($page->expires_at) }}. Renew it to bring it back; nothing was deleted.
               @elseif ($page->expires_at !== null)
-                {{ $plan['name'] }}: online until {{ $page->expires_at->format('M j, Y') }}.
+                {{ $plan['name'] }}: online until {{ \App\Support\Time::show($page->expires_at) }}.
               @else
                 {{ $plan['name'] }}: online forever. Nothing more to buy.
               @endif

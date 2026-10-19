@@ -2,6 +2,14 @@
 
 declare(strict_types=1);
 
+// The "buy" form posts to us and is answered with a redirect to the provider's hosted checkout; a browser applies form-action
+// to that redirect too, so the active provider's checkout host has to be allowed (and only that one).
+$formAction = "'self'" . match ((string) env('PAYMENTS_DRIVER', 'none')) {
+    'paymongo' => ' https://checkout.paymongo.com',
+    'xendit' => ' https://checkout.xendit.co https://checkout-staging.xendit.co',
+    default => '',
+};
+
 return [
     // Override or disable (null) any default security header.
     'headers' => [
@@ -9,7 +17,7 @@ return [
         'Content-Security-Policy' => implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action {$formAction}",
             "frame-ancestors 'self'",
             "script-src 'self' https://www.youtube.com",
             "style-src 'self' https://fonts.googleapis.com",

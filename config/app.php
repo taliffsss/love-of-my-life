@@ -41,6 +41,8 @@ return [
         'csrf' => Middleware\VerifyCsrfToken::class,
         // the framework's Throttle never resets its counters (see App\Http\Middleware\RateLimit)
         'throttle' => \App\Http\Middleware\RateLimit::class,
+        'active' => \App\Http\Middleware\EnsureActiveAccount::class,
+        'admin' => \App\Http\Middleware\EnsureAdmin::class,
         'noindex' => \App\Http\Middleware\NoIndex::class,
         'auth' => Middleware\Authenticate::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
@@ -49,7 +51,7 @@ return [
 
     /** `web` wraps routes/web.php; `api` wraps routes/api.php (stateless: no cookies, no CSRF). */
     'middleware_groups' => [
-        'web' => ['session', 'csrf'],
+        'web' => ['session', 'active', 'csrf'],
         'api' => ['throttle:60,1', 'noindex'],
     ],
 ];

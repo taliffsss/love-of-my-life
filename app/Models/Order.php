@@ -25,12 +25,15 @@ use Naluz\Database\Orm\Model;
  * @property string $provider
  * @property ?string $provider_ref
  * @property ?\DateTimeImmutable $paid_at
+ * @property ?string $checkout_url the provider's hosted checkout for a pending order
+ * @property ?\DateTimeImmutable $updated_at
  */
 final class Order extends Model
 {
     public const PENDING = 'pending';
     public const PAID = 'paid';
     public const CANCELLED = 'cancelled';
+    public const STATUSES = [self::PENDING, self::PAID, self::CANCELLED];
 
     /** The `plan` of a photo pack order (never a key of config/saas.php plans). */
     public const PHOTO_PACK = 'photos';
@@ -42,6 +45,7 @@ final class Order extends Model
         'photos' => 'integer',
         'paid_at' => 'datetime',
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function isPhotoPack(): bool

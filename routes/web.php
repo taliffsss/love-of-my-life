@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\SessionController;
+use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\Dashboard\OrdersController;
 use App\Http\Controllers\Dashboard\PagesController;
 use App\Http\Controllers\Dashboard\PhotosController;
@@ -26,7 +29,20 @@ $router->get('/register', [RegisterController::class, 'show'])->middleware(['gue
 $router->post('/register', [RegisterController::class, 'store'])->middleware(['throttle:6,1', 'guest']);
 $router->get('/login', [SessionController::class, 'show'])->middleware(['guest'])->name('login');
 $router->post('/login', [SessionController::class, 'store'])->middleware(['throttle:10,1', 'guest']);
+$router->get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
+$router->get('/auth/{provider}/callback', [SocialController::class, 'callback'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
 $router->post('/logout', [SessionController::class, 'destroy'])->middleware(['auth'])->name('logout');
+
+// ── Admin (administrators only; anyone else gets a 404) ──────────────────────────────────────────
+$router->group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'noindex']], static function (Router $router): void {
+    $router->get('/', [AdminController::class, 'index'])->name('admin');
+    $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
+    $router->get('/users/{user}/edit', [UsersController::class, 'edit'])->where('user', '\d+');
+    $router->put('/users/{user}', [UsersController::class, 'update'])->where('user', '\d+');
+    $router->post('/users/{user}/status', [UsersController::class, 'status'])->where('user', '\d+')->middleware(['throttle:60,1']);
+    $router->delete('/users/{user}', [UsersController::class, 'destroy'])->where('user', '\d+')->middleware(['throttle:30,1']);
+    $router->get('/payments', [AdminController::class, 'payments'])->name('admin.payments');
+});
 
 // ── Dashboard (signed in; every page and order is looked up within the owner's own) ─
 $slug = '[a-z2-9]{4,16}';

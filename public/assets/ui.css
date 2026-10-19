@@ -422,3 +422,38 @@ dialog.modal .section-foot { border-radius: 0 0 var(--radius-lg) var(--radius-lg
 .template-card:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
 .js .template-grid { display: none; }
 .js .template-grid.on { display: grid; }
+
+/* ---------- sign in with Google / Facebook ---------- */
+.social { display: grid; gap: 10px; margin-top: 24px; }
+.btn-social { width: 100%; gap: 10px; justify-content: center; }
+.social-or { display: flex; align-items: center; gap: 12px; margin: 6px 0 -8px; text-align: center; }
+.social-or::before, .social-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ---------- admin ---------- */
+.admin-tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--line); }
+.admin-tabs a { padding: 9px 14px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--ink-2); text-decoration: none; font-weight: 500; }
+.admin-tabs a[aria-current="page"] { color: var(--brand-ink); border-bottom-color: var(--brand); }
+.stat-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 18px; }
+.stat { display: grid; gap: 2px; padding: 16px 18px; text-decoration: none; color: var(--ink); }
+.stat .n { font-family: var(--font-display); font-size: 2.3rem; line-height: 1.1; }
+.stat .l { font-weight: 500; }
+.stat .s { font-size: .82rem; color: var(--ink-3); }
+a.stat:hover { box-shadow: var(--shadow-2); }
+.admin-card { padding: 18px; margin-bottom: 18px; }
+.admin-card h2 { font-size: 1.1rem; margin-bottom: 10px; }
+.admin-cols { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin: 8px 0; }
+.bars .bar { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.bars .bar i { display: block; width: 100%; background: var(--brand); border-radius: 3px 3px 0 0; opacity: .85; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+.table th { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 500; }
+.table .num { text-align: right; white-space: nowrap; }
+.admin-filter { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; padding: 14px 16px; margin-bottom: 18px; }
+.admin-filter .field { flex: 1 1 200px; }
+.admin-filter .check { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; }
+.table td.actions { white-space: nowrap; text-align: right; }
+.table td.actions .icon-btn { width: 30px; height: 30px; margin-left: 4px; text-decoration: none; }
+.pill-active { color: var(--ok); background: var(--ok-soft); }
+.pill-deactivated { color: var(--ink-2); background: var(--surface-2); }
+.pill-suspended { color: var(--danger); background: var(--danger-soft); }

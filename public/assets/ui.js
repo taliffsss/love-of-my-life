@@ -329,3 +329,40 @@ if (editor) {
     show();
   }
 }
+
+// ---------- admin users: the row's icons act in a dialog (without script they open the user's own page) ----------
+{
+  const links = $$("[data-user-action]");
+  const statusDialog = $("#user-status-dialog");
+  const deleteDialog = $("#user-delete-dialog");
+  if (links.length && statusDialog?.showModal && deleteDialog?.showModal) {
+    const status = {
+      activate: { title: "Reactivate", text: "can sign in again.", value: "active", go: "Reactivate", reason: false },
+      deactivate: { title: "Deactivate", text: "keeps everything but can no longer sign in, and is signed out now.", value: "deactivated", go: "Deactivate", reason: false },
+      suspend: { title: "Suspend", text: "keeps everything but can no longer sign in, and is signed out now.", value: "suspended", go: "Suspend", reason: true },
+    };
+    for (const link of links) {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const { userAction: action, userId: id, userName: name } = link.dataset;
+        if (action === "delete") {
+          deleteDialog.querySelector("form").action = `/admin/users/${id}`;
+          $("#user-delete-title").textContent = `Delete ${name}?`;
+          deleteDialog.showModal();
+          $("#confirm-user-delete").focus();
+          return;
+        }
+        const copy = status[action];
+        statusDialog.querySelector("form").action = `/admin/users/${id}/status`;
+        statusDialog.querySelector('input[name="status"]').value = copy.value;
+        $("#user-status-title").textContent = `${copy.title} ${name}?`;
+        $("#user-status-text").textContent = `${name} ${copy.text}`;
+        $("#user-status-go").textContent = copy.go;
+        $("#user-status-reason").hidden = !copy.reason;
+        statusDialog.showModal();
+        (copy.reason ? $("#reason") : $("#user-status-go")).focus();
+      });
+    }
+    for (const dialog of [statusDialog, deleteDialog]) for (const closer of $$("[data-close]", dialog)) closer.addEventListener("click", () => dialog.close());
+  }
+}

@@ -29,6 +29,13 @@ final class SessionController
             // one message for "no such account" and "wrong password", so the form does not reveal who has an account
             throw new ValidationException(['email' => ['That e-mail and password do not match an account.']], ['email' => $email]);
         }
+        // the password was right, so it is safe to say why this account cannot come in
+        $user = $auth->user();
+        if ($user instanceof User && !$user->isActive()) {
+            $auth->logout();
+            throw new ValidationException(['email' => [$user->inactiveMessage()]], ['email' => $email]);
+        }
+
         return Screen::back('/dashboard');
     }
 

@@ -3,6 +3,9 @@
     @include('partials.brand')
     <nav aria-label="Main" class="hide-sm">
       <a href="/dashboard">Your pages</a>
+      @if ($user !== null && $user->is_admin)
+      <a href="/admin">Admin</a>
+      @endif
     </nav>
     <span class="spacer"></span>
     @if ($user !== null)

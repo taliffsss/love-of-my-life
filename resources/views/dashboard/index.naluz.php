@@ -77,7 +77,7 @@
         @if ($status === 'active')
         <a class="link" href="{{ $urls[$page->id] }}" target="_blank" rel="noopener">{{ preg_replace('#^https?://#', '', $urls[$page->id]) }}</a>
         @elseif ($status === 'expired')
-        <p class="small muted">Expired {{ $page->expires_at?->format('M j, Y') }}. Renew to bring it back.</p>
+        <p class="small muted">Expired {{ \App\Support\Time::show($page->expires_at) }}. Renew to bring it back.</p>
         @else
         <p class="small muted">Only you can see it until you publish it.</p>
         @endif

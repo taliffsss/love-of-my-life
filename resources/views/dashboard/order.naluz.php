@@ -29,7 +29,7 @@
         <dt>Amount</dt><dd>{{ \App\Services\Plans::money($order->amount, $order->currency) }}</dd>
         <dt>Reference</dt><dd>{{ $order->reference }}</dd>
         @if ($order->paid_at !== null)
-        <dt>Paid</dt><dd>{{ $order->paid_at->format('M j, Y g:i A') }} UTC</dd>
+        <dt>Paid</dt><dd>{{ \App\Support\Time::show($order->paid_at, 'M j, Y g:i A') }} {{ \App\Support\Time::label() }}</dd>
         @endif
       </dl>
 
@@ -40,6 +40,11 @@
           @csrf
           <button class="btn btn-primary btn-lg" type="submit">Pay {{ \App\Services\Plans::money($order->amount, $order->currency) }} (test)</button>
         </form>
+        @elseif ($hosted)
+        <div class="notice notice-brand">Pay securely on {{ ucfirst($order->provider) }}'s page. Once it confirms, this order turns paid and your page goes live; if you have just paid, this can take a minute: reload to check.</div>
+        @if ((string) $order->checkout_url !== '')
+        <a class="btn btn-primary btn-lg" href="{{ $order->checkout_url }}" rel="noopener">Pay {{ \App\Services\Plans::money($order->amount, $order->currency) }}</a>
+        @endif
         @else
         <div class="notice notice-brand">
           <div class="stack" style="--gap:6px">

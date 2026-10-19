@@ -14,6 +14,7 @@
       </div>
       <h1 class="display">Create your account</h1>
       <p class="muted">Free to build and preview. Takes a minute.</p>
+      @include('partials.social')
       <form method="post" action="/register" class="stack" novalidate>
         @csrf
         <div class="field">
