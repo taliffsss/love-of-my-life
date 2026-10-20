@@ -5,6 +5,9 @@
 - **First-visit tour.** A new account sees a six-step popover tour on its dashboard (welcome, who the page is for, occasions, creating the page, photos and
   plans, done), with spotlight, Back / Next / End tour, arrow keys and Esc. Finishing or skipping it is remembered (`users.tour_seen_at`), so it shows once;
   accounts that exist already are marked as having seen it. New migration `2026_10_21_000014_add_tour_seen_at_to_users`.
+- **The page editor has its own tour**, shown the first time an account opens an editor: the tabs, letter, photos (a plan first), song, lock question, design,
+  the live preview, sharing and the plan, ten steps. Remembered separately (`users.editor_tour_seen_at`, migration `2026_10_21_000015`); a step whose target is
+  not on screen (the preview on a phone) is shown centred.
 
 ## 3.1.1 (2026-10-21, branch `main-v2`)
 

@@ -444,4 +444,7 @@
     </div>
   </form>
 </dialog>
+@if ($user !== null && $user->editor_tour_seen_at === null)
+@include('partials.tour-editor')
+@endif
 @endsection

@@ -59,10 +59,15 @@ for (const btn of $$("[data-copy]")) {
       '<button type="button" class="btn btn-primary btn-sm" data-tour="next">Next</button></span></div>';
     let index = 0;
     let finished = false;
+    // a target that is not on screen (the preview is hidden on a phone) makes its step a centred one
+    const targetOf = (step) => {
+      const el = step.target ? $(step.target) : null;
+      return el && el.getClientRects().length ? el : null;
+    };
 
     const place = () => {
       const step = steps[index];
-      const el = step.target ? $(step.target) : null;
+      const el = targetOf(step);
       const gap = 12;
       backdrop.style.background = el ? "transparent" : "rgba(23, 11, 20, .55)"; // a targeted step is dimmed by the spotlight itself
       if (!el) {
@@ -94,7 +99,7 @@ for (const btn of $$("[data-copy]")) {
       $('[data-tour="prev"]', pop).hidden = i === 0;
       $('[data-tour="end"]', pop).hidden = i === steps.length - 1;
       $('[data-tour="next"]', pop).textContent = i === steps.length - 1 ? "Done" : "Next";
-      const el = step.target ? $(step.target) : null;
+      const el = targetOf(step);
       el?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
       place();
       // the page may still be scrolling: settle the popover once it has stopped
@@ -105,7 +110,7 @@ for (const btn of $$("[data-copy]")) {
     const finish = () => {
       if (finished) return;
       finished = true;
-      fetch(list.dataset.url, { method: "POST", credentials: "same-origin", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" } }).catch(() => {});
+      fetch(list.dataset.url, { method: "POST", credentials: "same-origin", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json", "Content-Type": "application/json" }, body: JSON.stringify({ tour: list.dataset.tour }) }).catch(() => {});
       removeEventListener("resize", place);
       removeEventListener("scroll", place, true);
       removeEventListener("keydown", onKey);

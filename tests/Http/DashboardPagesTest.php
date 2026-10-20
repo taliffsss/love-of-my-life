@@ -191,6 +191,19 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame(200, $this->ajax('POST', '/dashboard/tour')->getStatusCode(), 'asking twice is harmless');
     }
 
+    public function testTheEditorHasItsOwnTourThatShowsOnce(): void
+    {
+        $page = $this->makePage($this->owner);
+        $url = '/dashboard/pages/' . $page->slug;
+        $this->assertStringContainsString('data-tour="editor"', (string) $this->get($url)->getBody());
+
+        $this->ajax('POST', '/dashboard/tour', ['tour' => 'dashboard']);
+        $this->assertStringContainsString('data-tour="editor"', (string) $this->get($url)->getBody(), 'finishing the dashboard tour does not finish the editor\'s');
+
+        $this->ajax('POST', '/dashboard/tour', ['tour' => 'editor']);
+        $this->assertStringNotContainsString('id="tour-steps"', (string) $this->get($url)->getBody());
+    }
+
     public function testFreeDraftsAreLimited(): void
     {
         for ($i = 0; $i < PagesController::MAX_DRAFTS; $i++) {

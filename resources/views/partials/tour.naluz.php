@@ -1,6 +1,6 @@
 {{-- The first-visit tour of the dashboard, shown once: a popover that steps over the page (public/assets/ui.js, "tour"). Finishing
      or skipping it POSTs to /dashboard/tour, which remembers it on the account. A step without a target is centred. --}}
-<ol id="tour-steps" data-url="/dashboard/tour" hidden>
+<ol id="tour-steps" data-url="/dashboard/tour" data-tour="dashboard" hidden>
   <li data-title="Welcome to {{ $brand }} 💌">A page is a love letter for one person: your photos, your song and your words, opened with a question only they can answer. This 1-minute tour shows you how.</li>
   <li data-target="#recipient" data-title="Who is it for?">Start with a name, or what you call them. Every page is for one person.</li>
   <li data-target=".occasions" data-title="Start from an occasion">Pick an occasion and a ready-made design for a letter, question and colours. You can change all of it afterwards.</li>
