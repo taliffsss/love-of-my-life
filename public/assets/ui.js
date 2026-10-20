@@ -25,6 +25,18 @@ for (const btn of $$("[data-copy]")) {
   });
 }
 
+// ---------- landing header: transparent over the dark hero, dark text once a light section is under it ----------
+{
+  const nav = $(".hero-nav");
+  const hero = $(".hero");
+  if (nav && hero) {
+    const sync = () => nav.classList.toggle("on-light", hero.getBoundingClientRect().bottom <= nav.offsetHeight / 2);
+    addEventListener("scroll", sync, { passive: true });
+    addEventListener("resize", sync);
+    sync();
+  }
+}
+
 // ---------- dialogs ----------
 for (const opener of $$("[data-open]")) {
   const dialog = $(opener.dataset.open);

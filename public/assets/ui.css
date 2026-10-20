@@ -235,6 +235,11 @@ p { margin: 0; }
 .hero-nav a:not(.btn) { color: var(--night-muted); text-decoration: none; padding: 8px 12px; border-radius: 999px; font-size: .92rem; }
 .hero-nav a:not(.btn):hover { color: #fff; background: rgba(255, 255, 255, .08); }
 .hero-nav .brand { color: #fff; }
+/* over a light section (scrolled past the hero) the same links take the dark ink of the signed-in top bar */
+.hero-nav.on-light a:not(.btn) { color: var(--ink-2); }
+.hero-nav.on-light a:not(.btn):hover { color: var(--ink); background: var(--surface-2); }
+.hero-nav.on-light .brand { color: var(--ink); }
+.hero-nav.on-light .btn-light { color: #fff; background: var(--night); }
 @media (max-width: 720px) { .hero-nav .hide-sm { display: none; } }
 @media (min-width: 960px) { .hero > .container { grid-template-columns: 1.1fr .9fr; padding: 40px 0 88px; } }
 
