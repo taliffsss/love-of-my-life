@@ -52,7 +52,7 @@ final class LegalPagesTest extends TestCase
     public function testTheTermsCoverTheMoneyAndTheRules(): void
     {
         $terms = (string) $this->get('/terms')->getBody();
-        foreach (['at least 16', 'parent or legal guardian', 'Automatic renewal', 'No refunds', 'non-refundable', 'Reports and takedowns', 'laws of the Republic of the Philippines'] as $text) {
+        foreach (['at least 16', 'parent or legal guardian', 'Automatic renewal', 'No refunds', 'all plans and subscriptions', 'Reports and takedowns', 'laws of the Republic of the Philippines'] as $text) {
             $this->assertStringContainsString($text, $terms, $text);
         }
         $this->assertSame(['₱1,000'], array_values(array_unique(preg_match_all('/₱[\d,]+/u', $terms, $m) ? $m[0] : [])), 'only the liability floor is a peso amount: plan prices would drift from config/saas.php');

@@ -39,7 +39,7 @@ and **other people’s personal data** (R3). All can be reduced a lot with what 
 | # | Decision | Default in the documents | Why it matters |
 |---|---|---|---|
 | 1 | Minimum age | 16; under 18 with a parent/guardian, who must pay | PH age of majority is 18; the audience requirement was “16 and above” |
-| 2 | Refunds | **None** (owner’s decision): payments are final; only a charge taken by mistake is reversed (30-day window); non-waivable legal rights untouched | A flat “no refund” is common for digital goods but is not enforceable against rights that cannot be waived; keep the mistake-reversal and answer chargebacks with the order record |
+| 2 | Refunds | **None** (owner’s decision): payments are final on all plans and subscriptions, with no exception (also stated on the order page); non-waivable legal rights untouched | A flat “no refund” is common for digital goods but is not enforceable against rights that cannot be waived, and a double charge you keep invites chargebacks and complaints; answer chargebacks with the order record |
 | 3 | Closing the service | 60 days’ notice, export, pages stay online to the end of the notice, no new recurring charges; **no refund** | With no refund, “Forever” depends on the notice-and-export promise; counsel should say whether that is fair enough |
 | 4 | Liability cap | Greater of 12 months’ payments and ₱1,000 | Typical consumer-service cap; cannot exclude fraud/wilful misconduct |
 | 5 | Who is the operator | “Love of My Life”, address “Philippines” (`LEGAL_OPERATOR_NAME`, `LEGAL_ADDRESS`) | A policy needs a real controller and contact; **set them before launch** |

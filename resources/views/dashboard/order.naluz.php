@@ -35,6 +35,7 @@
         <dt>Paid</dt><dd>{{ \App\Support\Time::show($order->paid_at, 'M j, Y g:i A') }} {{ \App\Support\Time::label() }}</dd>
         @endif
       </dl>
+      <p class="small muted" id="no-refund"><strong>No refunds.</strong> Every plan, subscription and photo pack is non-refundable. To stop renewals, cancel a subscription before its next date. See the <a href="/terms#refunds">Terms</a>.</p>
 
       @if ($order->status === 'pending')
         @if ($online)
