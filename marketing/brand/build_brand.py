@@ -13,6 +13,8 @@ Writes into public/ (everything the site serves):
     icons/favicon-16|32|48.png, icon-192|512.png (rounded), icon-maskable-192|512.png (full bleed, mark inside the safe zone),
     icons/mstile-150.png, logo.png (mark + words on transparent, 1200 px wide)
     og-image.png                 1200x630 for link previews (Open Graph, Twitter)
+Also writes marketing/brand/app-icon-1024.png: the 1024x1024 app icon for the App Store / Google Play (opaque, square, full bleed:
+the stores round the corners themselves; no transparency).
 
 The mark is drawn once, in HEART/KEYHOLE below, and both the SVGs and the PNGs come from those numbers, so they match.
 The words are set in Cormorant Garamond Italic (SIL Open Font License), fetched into a cache folder on the first run.
@@ -37,6 +39,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 PUBLIC = ROOT / "public"
+HERE = Path(__file__).resolve().parent
 CACHE = Path(os.environ.get("BRAND_FONT_CACHE", Path.home() / ".cache" / "love-of-my-life-brand"))
 FONT_URL = "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf"
 FONT_FILE = CACHE / "CormorantGaramond-Italic[wght].ttf"
@@ -242,6 +245,11 @@ def icon(px: int, *, background: bool, heart_fraction: float, rounded: float = 0
     return out
 
 
+def app_icon() -> Image.Image:
+    """1024x1024 store icon: the night background to the edges, the mark in the middle, and no alpha channel (the App Store rejects one)."""
+    return icon(1024, background=True, heart_fraction=0.56).convert("RGB")
+
+
 def png_bytes(image: Image.Image) -> bytes:
     import io
     buffer = io.BytesIO()
@@ -327,6 +335,7 @@ def main() -> int:
     icon(256, background=False, heart_fraction=0.94, glow=False).save(ico, format="ICO", sizes=[(16, 16), (32, 32), (48, 48)])
     write(PUBLIC / "favicon.ico", ico.getvalue())
 
+    write(HERE / "app-icon-1024.png", png_bytes(app_icon()))
     write(PUBLIC / "logo.png", png_bytes(logo_png(INK)))
     write(PUBLIC / "og-image.png", png_bytes(og_image()))
     write(PUBLIC / "browserconfig.xml",

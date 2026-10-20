@@ -56,6 +56,11 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   1200x630 link-preview image. Every page links the icons (with a version so browsers fetch the new ones), the manifest lists them
   with the right `purpose`, and the landing page carries schema.org `Organization` (with the logo) and `WebSite` data plus fuller
   Open Graph and Twitter tags. All of it is built by `python3 marketing/brand/build_brand.py` (needs `fonttools` and `pillow`).
+- **Terms and Conditions and Privacy Policy.** Public, indexable pages at `/terms` and `/privacy` (text in `resources/views/legal/`), linked from
+  the footer and the sign-up form, listed in the sitemap, written for this service (private pages with a lock, plans and renewals, GCash/Maya/card
+  through PayMongo/Xendit, Google/Facebook sign-in, Google Analytics, cloud storage, ages 16+ with a parent under 18) under the Data Privacy Act. The
+  operator and contact come from `LEGAL_OPERATOR_NAME`, `LEGAL_ADDRESS`, `LEGAL_CONTACT_EMAIL`, `LEGAL_DPO_NAME`. `docs/legal/` has the risk
+  assessment, a review of the Terms and ready reply templates. Also a 1024 px store icon at `marketing/brand/app-icon-1024.png`.
 - **Own addresses are behind a feature flag, off for now.** `SUBDOMAINS_ENABLED` (`config/saas.php` → `features.subdomains`, default
   false). While it is off the Sweetheart and Forever plans keep their `subdomain` entitlement but nothing sells, shows, claims or
   serves an address: the landing page lists none, the dashboard's "Dedicated address" section and the FAQ entry are hidden, the

@@ -34,6 +34,19 @@ return [
         'subdomains' => filter_var(env('SUBDOMAINS_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
+    // Who is behind the Terms and the Privacy Policy (resources/views/legal). Set these in production: the operator is the person or
+    // registered business that runs the service (the "personal information controller" of the Data Privacy Act), and `email` must be a
+    // mailbox that is read (privacy requests, reports, support). `version` and `updated` are printed on both documents: change them
+    // whenever the text changes in a way that matters to users.
+    'legal' => [
+        'operator' => (string) env('LEGAL_OPERATOR_NAME', 'Love of My Life'),
+        'address' => (string) env('LEGAL_ADDRESS', 'Philippines'),
+        'email' => (string) env('LEGAL_CONTACT_EMAIL', 'hello@loveofmylife.love'),
+        'dpo' => (string) env('LEGAL_DPO_NAME', ''),
+        'version' => '1.0',
+        'updated' => '2026-10-20',
+    ],
+
     'currency' => 'PHP',
 
     // Dates are stored in UTC; screens show them in this time zone (App\Support\Time).

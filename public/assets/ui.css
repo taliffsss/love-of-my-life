@@ -564,3 +564,16 @@ a.stat:hover { box-shadow: var(--shadow-2); }
 .pack-form .field { flex: 1 1 240px; max-width: 340px; }
 .usage-more .hint { margin: 0; }
 @media (max-width: 520px) { .pack-form .field { flex-basis: 100%; max-width: none; } }
+
+/* Terms and Privacy Policy */
+.legal { padding-bottom: 56px; }
+.legal h1 { margin: 6px 0 10px; }
+.legal h2 { margin: 34px 0 10px; font-size: 1.25rem; }
+.legal p, .legal li { line-height: 1.65; }
+.legal ul { padding-left: 1.2em; display: grid; gap: 8px; margin: 10px 0; }
+.legal code { font-size: .88em; background: var(--surface-2, rgba(0,0,0,.05)); padding: 1px 6px; border-radius: 6px; }
+.legal-table { overflow-x: auto; margin: 12px 0; border: 1px solid var(--line); border-radius: 14px; }
+.legal-table table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .92rem; }
+.legal-table th, .legal-table td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.legal-table tr:last-child td { border-bottom: 0; }
+.legal-table th { font-weight: 600; background: var(--surface-2, rgba(0,0,0,.04)); }

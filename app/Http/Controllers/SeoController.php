@@ -19,7 +19,7 @@ final class SeoController
     {
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         $urls = '';
-        foreach (['' => '1.0', 'demo' => '0.6', 'register' => '0.5'] as $path => $priority) {
+        foreach (['' => '1.0', 'demo' => '0.6', 'register' => '0.5', 'terms' => '0.3', 'privacy' => '0.3'] as $path => $priority) {
             $urls .= '<url><loc>' . $esc($this->siteUrl() . $path) . '</loc><changefreq>monthly</changefreq><priority>' . $priority . '</priority></url>';
         }
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"

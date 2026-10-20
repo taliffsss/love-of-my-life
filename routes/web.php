@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\OrdersController;
 use App\Http\Controllers\Dashboard\PagesController;
 use App\Http\Controllers\Dashboard\PhotosController;
 use App\Http\Controllers\Dashboard\SubdomainController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\SiteController;
@@ -21,6 +22,8 @@ use Naluz\Routing\Router;
 // ── The product ──────────────────────────────────────────────────────────────
 $router->get('/', [LandingController::class, 'index'])->name('home');
 $router->get('/demo', [LandingController::class, 'demo'])->name('demo');
+$router->get('/terms', [LegalController::class, 'terms'])->name('terms');
+$router->get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 $router->get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 $router->get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 $router->get('/manifest.webmanifest', [SeoController::class, 'manifest'])->name('manifest');

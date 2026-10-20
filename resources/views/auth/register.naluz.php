@@ -33,6 +33,7 @@
           <label for="password_confirmation">Password again</label>
           <input class="input" id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required />
         </div>
+        <p class="hint">By creating an account you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>, and you are 16 or older (under 18 with a parent or guardian’s permission).</p>
         <button class="btn btn-primary btn-lg" type="submit" style="width:100%">Create account</button>
         <p class="small muted" style="text-align:center">Already have an account? <a href="/login">Sign in</a></p>
       </form>
