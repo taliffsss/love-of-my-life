@@ -93,6 +93,7 @@ final class DeploymentFilesTest extends TestCase
         $this->assertStringContainsString('vars.SAAS_DOCKER_IMAGE', $release);
         $this->assertStringContainsString('secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH', $release);
         $this->assertStringContainsString('"main-v2"', $release);
+        $this->assertStringContainsString("secrets.SAAS_DOCKERHUB_TOKEN || secrets.DOCKERHUB_TOKEN", $release, 'main-v2 pushes with its own Docker Hub token');
         $this->assertStringContainsString('v2: ${{ steps.c.outputs.v2 }}', $release);
         $this->assertStringContainsString("secrets.DOCKER_IMAGE || vars.DOCKER_IMAGE || 'taliffsss/loveofmylife'", $release, 'the image name may be a secret or a variable');
         $this->assertSame(3, substr_count($release, 'Image name needs the Docker Hub namespace'), 'every job that uses the image adds the account name when it is missing');

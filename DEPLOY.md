@@ -52,7 +52,7 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
    Keep `PAYMENTS_DRIVER=none` in production (`fake` is refused there).
 3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
-   - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
+   - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` (a release of branch `main-v2` uses **`SAAS_DOCKERHUB_TOKEN`** instead, falling back to `DOCKERHUB_TOKEN` when it is empty); for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
    - Variables: `DOCKER_IMAGE` (default `taliffsss/loveofmylife`; **`SAAS_DOCKER_IMAGE`** for a release of branch `main-v2`, same default; either may be a variable or a secret), `AUTO_DEPLOY` (`true` turns the deploy job on),
      `SITE_URL` (checked after each deploy; default `https://loveofmylife.love`; `/api/ping` answers on every host).
    - **Deploy path and image:** a release of **branch `main-v2`** pushes the image named by **`SAAS_DOCKER_IMAGE`** and deploys to **`SAAS_DEPLOY_PATH`** (variable or secret; required, with no
