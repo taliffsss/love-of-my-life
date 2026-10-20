@@ -23,7 +23,7 @@ PORT=8095
 mkdir -p "$OUT"
 PY="uv run --no-project --python 3.12 --with playwright==1.63.0"
 
-php -r 'require "vendor/autoload.php"; file_put_contents($argv[1], App\Services\QrCode::svg("https://love.markanthonynaluz.com"));' "$OUT/qr.svg"
+php -r 'require "vendor/autoload.php"; file_put_contents($argv[1], App\Services\QrCode::svg("https://loveofmylife.love"));' "$OUT/qr.svg"
 
 if [ "${1:-}" != "render" ]; then
   if lsof -nP -iTCP:$PORT -sTCP:LISTEN >/dev/null 2>&1; then

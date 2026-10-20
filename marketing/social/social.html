@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Love of My Life: Facebook and TikTok kit</title>
+    <!-- One image per URL: social.html?card=fb-profile (see social.js CARDS). render_social.py screenshots them. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600;700&display=block" rel="stylesheet" />
+    <style>
+      :root { --bg: #160a14; --bg-2: #2a1220; --text: #fbeef0; --muted: rgba(251, 238, 240, .74); --accent: #f2a7b8; --gold: #f0cfa8; --paper: #fffaf3; --ink: #3a2230; --heart: #e0607e; --btn-ink: #2a1220; --glow: #3a1630; }
+      /* One theme per occasion: the colours change, the layout stays the same. */
+      .t-gold { --bg: #1b0d10; --bg-2: #3a1a1f; --glow: #5a2a2a; --accent: #f0cfa8; --gold: #f6d98f; }
+      .t-ivory { --bg: #f7ecde; --bg-2: #fbf3e8; --glow: #fffaf3; --text: #3a2230; --muted: rgba(58, 34, 48, .72); --accent: #b4874a; --gold: #9a6b34; --heart: #c2577a; --btn-ink: #fffaf3; }
+      .t-party { --bg: #1d0f2a; --bg-2: #3a1a4a; --glow: #5a2a66; --accent: #ff9ec1; --gold: #ffd36e; }
+      .t-navy { --bg: #0b1226; --bg-2: #16213f; --glow: #243460; --accent: #c9d4ff; --gold: #f0cfa8; }
+      .t-cream { --bg: #fbf0ec; --bg-2: #fff8f2; --glow: #ffffff; --text: #3a2230; --muted: rgba(58, 34, 48, .72); --accent: #c2577a; --gold: #b4874a; --heart: #c2577a; --btn-ink: #fffaf3; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: transparent; }
+      .card { position: relative; overflow: hidden; color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+        background: radial-gradient(110% 90% at 28% 12%, var(--glow), var(--bg-2) 48%, var(--bg) 88%); }
+      .card.clear { background: transparent; }
+      .abs { position: absolute; }
+      /* A flowing column keeps words from ever overlapping; padding is set per card. */
+      .col { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .col > * { flex: none; }
+      .grow { flex: 1 1 auto !important; min-height: 0; }
+      .hearts span { position: absolute; color: var(--accent); opacity: .28; line-height: 1; filter: drop-shadow(0 0 10px rgba(242, 167, 184, .4)); }
+      .kicker { font-size: 28px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); }
+      .headline { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; line-height: 1.04; }
+      .sub { font-size: 34px; line-height: 1.38; color: var(--muted); }
+      .hand { font-family: 'Caveat', cursive; font-weight: 700; color: var(--gold); }
+      .url { display: inline-block; padding: 16px 30px; border-radius: 999px; font-size: 32px; font-weight: 600; color: var(--btn-ink); background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 16px 40px rgba(0, 0, 0, .28); }
+      .logo { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 42px; }
+      .logo svg { width: 1.05em; height: 1.05em; color: var(--heart); }
+      .phone { border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #3a2434, #120810); box-shadow: 0 0 0 2px rgba(255, 255, 255, .08) inset, 0 34px 80px rgba(0, 0, 0, .45); flex: none; }
+      .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: #000; }
+      .phone img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .phone .island { position: absolute; left: 50%; top: 10px; width: 30%; height: 22px; margin-left: -15%; border-radius: 14px; background: #000; }
+      .lettie svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .3)); }
+      .clear .lettie svg { filter: none; }
+      .row { display: flex; align-items: center; justify-content: center; }
+      .pill { display: inline-block; padding: 12px 26px; border-radius: 999px; font-size: 30px; font-weight: 600; border: 2px solid var(--accent); color: var(--text); }
+      .panel { border-radius: 40px; padding: 44px 40px; background: rgba(255, 255, 255, .07); border: 2px solid rgba(255, 255, 255, .12); }
+      .t-ivory .panel, .t-cream .panel { background: rgba(255, 255, 255, .7); border-color: rgba(58, 34, 48, .12); }
+      .price { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; line-height: 1; }
+      .tick { display: flex; gap: 16px; align-items: flex-start; text-align: left; font-size: 34px; line-height: 1.3; }
+      .tick::before { content: '♥'; color: var(--heart); flex: none; }
+      .num { display: flex; align-items: center; justify-content: center; width: 84px; height: 84px; border-radius: 50%; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 54px; font-weight: 600; color: var(--btn-ink); background: linear-gradient(135deg, var(--gold), var(--accent)); }
+      .orn svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="card" class="card"></div>
+    <script src="social.js"></script>
+  </body>
+</html>

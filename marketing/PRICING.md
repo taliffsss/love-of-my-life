@@ -13,7 +13,7 @@ charging exists (see "What is left").
 | One time | none | none | **₱4,999** |
 | Photos it adds to the account | 12 | 40 | 60 |
 | Templates | 5: Classic, Cinematic, Polaroid, Envelope, Timeline | all 10 | all 10 |
-| Own address `name.love.markanthonynaluz.com` | no | **yes** | yes |
+| Own address `name.loveofmylife.love` | no | **yes** | yes |
 | Song, lock question, link, QR code, change anything any time | yes | yes | yes |
 | Stays online | while paid | while paid | always |
 

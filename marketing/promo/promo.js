@@ -37,11 +37,11 @@
     shareSub: "Send the link, or print the QR code on a card.",
     bubble: "Open this when you miss me ♥",
     previewTitle: "For Alex",
-    previewHost: "alex.love.markanthonynaluz.com",
+    previewHost: "alex.loveofmylife.love",
     scan: "Scan me",
     brand: "Love of My Life",
     tagline: "Make one for someone you love.",
-    url: "love.markanthonynaluz.com",
+    url: "loveofmylife.love",
     note: "Sample photos and letter. Your own address comes with Sweetheart and Forever.",
   };
 

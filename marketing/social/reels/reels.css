@@ -1,0 +1,9 @@
+/* Themes for the Facebook videos: they re-colour the promo's stage (promo.css) the way the social images do. */
+#stage { background: radial-gradient(110% 90% at 30% 15%, var(--glow, #3a1630), var(--bg-2) 45%, var(--bg) 82%); }
+#stage.t-navy { --bg: #0b1226; --bg-2: #16213f; --glow: #243460; --accent: #c9d4ff; --gold: #f0cfa8; }
+#stage.t-gold { --bg: #1b0d10; --bg-2: #3a1a1f; --glow: #5a2a2a; --accent: #f0cfa8; --gold: #f6d98f; }
+#stage.t-party { --bg: #1d0f2a; --bg-2: #3a1a4a; --glow: #5a2a66; --accent: #ff9ec1; --gold: #ffd36e; }
+#stage.t-sunset { --bg: #1d0c08; --bg-2: #3a1810; --glow: #5a2a1c; --accent: #ff9a76; --gold: #ffd39a; }
+.portrait .headline { font-size: 108px; }
+.portrait .headline.long { font-size: 92px; }
+.deco { color: var(--gold); line-height: 1; }

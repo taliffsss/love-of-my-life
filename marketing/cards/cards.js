@@ -3,7 +3,7 @@
 // marketing/promo/make_promo.sh first.
 (() => {
   const SHOTS = "/marketing/out/promo/shots/";
-  const URL_TEXT = "love.markanthonynaluz.com";
+  const URL_TEXT = "loveofmylife.love";
   const HEART = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.9-8-11.1C4 6.7 6.3 5 8.6 5c1.5 0 2.9.8 3.4 2 .5-1.2 1.9-2 3.4-2C17.7 5 20 6.7 20 9.9 20 16.1 12 21 12 21z"/></svg>';
   const logo = (size = 44) => `<div class="logo" style="font-size:${size}px">${HEART}<span>Love of My Life</span></div>`;
   const phone = (src, w) => `<div class="phone" style="width:${w}px;height:${Math.round((w - 24) / 0.4621 + 24)}px"><div class="screen"><img src="${src}" alt="" /><span class="island"></span></div></div>`;
