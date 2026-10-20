@@ -9,8 +9,8 @@
 # One-time setup (repo → Settings):
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
-#   Variables DOCKER_IMAGE (default taliffsss/loveofmylife)
-#             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife)
+#   Variables DOCKER_IMAGE (default taliffsss/loveofmylife; may also be a secret)
+#             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife; secret or variable)
 #             SITE_URL     (public address checked after a deploy; default https://loveofmylife.love)
 #             SAAS_DEPLOY_PATH (REQUIRED for a release of branch main-v2: the dir on the server holding that deploy's
 #                           deploy/.env.production; may also be a secret. No default, so v2 can never overwrite the old deploy)
@@ -71,16 +71,12 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       v2: ${{ steps.c.outputs.v2 }}
-      image: ${{ steps.c.outputs.image }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
           fetch-depth: 0 # the branch check needs history
       - id: c
-        env:
-          DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE }}
-          SAAS_DOCKER_IMAGE: ${{ vars.SAAS_DOCKER_IMAGE }}
         run: |
           sha=$(git rev-parse HEAD)
           v2=false
@@ -89,10 +85,8 @@ jobs:
           elif git merge-base --is-ancestor "$sha" origin/main-v2 2>/dev/null && ! git merge-base --is-ancestor "$sha" origin/main 2>/dev/null; then
             v2=true
           fi
-          if [ "$v2" = "true" ]; then image="${SAAS_DOCKER_IMAGE:-taliffsss/loveofmylife}"; else image="${DOCKER_IMAGE:-taliffsss/loveofmylife}"; fi
           echo "v2=$v2" >> "$GITHUB_OUTPUT"
-          echo "image=$image" >> "$GITHUB_OUTPUT"
-          echo "Branch main-v2: $v2; image: $image"
+          echo "Branch main-v2: $v2"
 
   verify:
     name: Checks (same as CI)
@@ -104,7 +98,7 @@ jobs:
     needs: [verify, context]
     runs-on: ubuntu-24.04
     env:
-      IMAGE: ${{ needs.context.outputs.image }}
+      IMAGE: ${{ needs.context.outputs.v2 == 'true' && (secrets.SAAS_DOCKER_IMAGE || vars.SAAS_DOCKER_IMAGE || 'taliffsss/loveofmylife') || (secrets.DOCKER_IMAGE || vars.DOCKER_IMAGE || 'taliffsss/loveofmylife') }}
     outputs:
       prerelease: ${{ steps.pre.outputs.prerelease }}
     steps:
@@ -143,7 +137,7 @@ jobs:
     needs: [image, context]
     runs-on: ubuntu-24.04
     env:
-      IMAGE: ${{ needs.context.outputs.image }}
+      IMAGE: ${{ needs.context.outputs.v2 == 'true' && (secrets.SAAS_DOCKER_IMAGE || vars.SAAS_DOCKER_IMAGE || 'taliffsss/loveofmylife') || (secrets.DOCKER_IMAGE || vars.DOCKER_IMAGE || 'taliffsss/loveofmylife') }}
     permissions:
       contents: write
     steps:
@@ -172,7 +166,7 @@ jobs:
     environment: production # configure required reviewers here: nothing deploys unapproved
     env:
       HOST: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
-      IMAGE: ${{ needs.context.outputs.image }}
+      IMAGE: ${{ needs.context.outputs.v2 == 'true' && (secrets.SAAS_DOCKER_IMAGE || vars.SAAS_DOCKER_IMAGE || 'taliffsss/loveofmylife') || (secrets.DOCKER_IMAGE || vars.DOCKER_IMAGE || 'taliffsss/loveofmylife') }}
       V2: ${{ needs.context.outputs.v2 }}
       LEGACY_DIR: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
       SAAS_DIR: ${{ secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH }}

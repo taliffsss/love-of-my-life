@@ -53,7 +53,7 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
    Keep `PAYMENTS_DRIVER=none` in production (`fake` is refused there).
 3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/loveofmylife`; **`SAAS_DOCKER_IMAGE`** for a release of branch `main-v2`, same default), `AUTO_DEPLOY` (`true` turns the deploy job on),
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/loveofmylife`; **`SAAS_DOCKER_IMAGE`** for a release of branch `main-v2`, same default; either may be a variable or a secret), `AUTO_DEPLOY` (`true` turns the deploy job on),
      `SITE_URL` (checked after each deploy; default `https://loveofmylife.love`; `/api/ping` answers on every host).
    - **Deploy path and image:** a release of **branch `main-v2`** pushes the image named by **`SAAS_DOCKER_IMAGE`** and deploys to **`SAAS_DEPLOY_PATH`** (variable or secret; required, with no
      default). A release of any other branch uses `DOCKER_IMAGE` and `DEPLOY_PATH` (default `/opt/love-of-my-life`). The deploy job decides from

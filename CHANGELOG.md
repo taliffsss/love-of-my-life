@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.0 (unreleased, branch `feature/saas-platform`)
+## 3.0.0 (2026-10-20, branch `main-v2`)
 
 The single page becomes a product: anyone can sign up, make love pages and publish them.
 
