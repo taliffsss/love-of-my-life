@@ -85,6 +85,20 @@ Hi {{name}}, your request {{ref}} needs more time because {{reason}}. We expect 
 
 ---
 
+## T6b. Decline a refund request
+
+**Subject**: About your payment · Order {{order_ref}}
+
+Hi {{name}},
+
+Thank you for writing. Payments for {{brand}} plans are final and non-refundable, as set out in section 4 of our Terms ({{terms_url}}), and we are not able to refund order {{order_ref}}. You can still use your plan until {{date}}, and you can cancel renewal in your dashboard so you are not charged again.
+
+{{if_mistake: We did find that you were charged {{twice / after cancelling}}. We have reversed {{amount}} and it should reach your {{method}} in {{days}} days.}}
+
+If you think we are wrong, reply with your order reference and what happened and we will look again.
+
+(Escalate instead if the person says they were charged without agreeing, is a minor, or has started a chargeback or a complaint with a regulator.)
+
 ## T7. Receive a report about a page or photo (takedown)
 
 **Subject**: We received your report · Ref {{ref}}

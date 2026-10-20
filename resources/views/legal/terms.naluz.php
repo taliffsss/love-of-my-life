@@ -30,7 +30,7 @@
     <li><strong>Paying.</strong> Payment is handled by our payment providers (currently PayMongo and, where offered, Xendit) by GCash, Maya or card, or by another method we show you. We do not receive or store your full card number or e-wallet login. Some payments are confirmed by us by hand and may take time to appear.</li>
     <li><strong>What a plan gives you.</strong> Monthly and yearly plans keep a page online for that period (a year is twelve months, with no discount) and add to the time you have left. A one-time plan (Forever) keeps the page online for as long as the service runs, subject to section 10. Photo packs add photo space for good.</li>
     <li><strong>Automatic renewal.</strong> Where you choose a card or Maya subscription, it renews until you cancel; we charge the price shown when you subscribed unless we told you of a change before the renewal. GCash payments renew only when you approve each payment. You can cancel a subscription in your dashboard at any time; it then stops at the end of the period you have paid for.</li>
-    <li><strong>Refunds.</strong> Because you can build and preview for free before you pay, payments are not refundable once a plan starts, except where the law gives you a right to a refund, where we charged you by mistake or twice, or where we could not provide what you paid for. Write to us within 30 days at {{ $legal['email'] }} with your order reference (it looks like LM-XXXX-XXXX).</li>
+    <li><strong>No refunds.</strong> All payments are final and non-refundable, including unused time on a monthly or yearly plan, a one-time plan and photo packs. You can build and preview for free before you pay, so please do so. To avoid paying again, cancel a subscription before its next renewal date. The one thing we do put right is a payment taken by mistake (for example charged twice, or charged after you cancelled): tell us within 30 days at {{ $legal['email'] }} with your order reference (it looks like LM-XXXX-XXXX) and we will reverse that charge. This does not take away any right you have under Philippine law that cannot be waived.</li>
     <li><strong>When a plan ends.</strong> The page stops being shown to visitors and uploads are blocked; nothing is deleted. Renewing brings it back with the same link. If you do not renew we may delete the page after a reasonable period and a reminder, but we will not delete content of a paid page without notice.</li>
     <li><strong>Changing plans.</strong> You can upgrade at any time from your dashboard. Moving to a plan with fewer photos or templates may hide content that no longer fits.</li>
   </ul>
@@ -70,8 +70,8 @@
   <h2>10. Suspension and ending</h2>
   <ul>
     <li><strong>By you.</strong> You can stop using the service at any time and delete your pages in the dashboard. To delete your account, write to us (section 17). An account with paid orders is deactivated, not erased, because we must keep records of payments; we remove everything else.</li>
-    <li><strong>By us.</strong> We may deactivate, suspend or close an account or take down a page if you break these Terms, if we must by law, if your payment is reversed or charged back, or if you put others or the service at risk. Where we can, we will warn you first. If we close your account without cause, we refund the unused part of what you paid for monthly and yearly plans, and a pro-rata part of a one-time plan.</li>
-    <li><strong>Closing the service.</strong> If we stop offering the service, we will tell you at least 60 days before, let you download your photos and letter, and refund the unused part of recurring plans and a fair part of any one-time plan.</li>
+    <li><strong>By us.</strong> We may deactivate, suspend or close an account or take down a page if you break these Terms, if we must by law, if your payment is reversed or charged back, or if you put others or the service at risk. Where we can, we will warn you first. As stated in section 4, payments are not refunded when we suspend or close an account for a breach.</li>
+    <li><strong>Closing the service.</strong> If we stop offering the service, we will tell you at least 60 days before, and let you download your photos and letter. Pages stay online until the end of the notice period, and recurring plans are not charged again after the day we tell you the service will end.</li>
   </ul>
 
   <h2>11. Availability and changes to the service</h2>
@@ -90,7 +90,7 @@
   <p>Disputes between users, or between you and a person on a page, are yours to resolve; we are not a party. You agree to compensate us for loss and claims (including reasonable legal costs) caused by your content or by your breach of section 5 or 6, to the extent the law allows.</p>
 
   <h2>16. Changes to these Terms</h2>
-  <p>We may update these Terms. We will post the new version here with a new date and, for changes that matter, tell you in the service or by e-mail at least 14 days before they apply to you. If you keep using the service after that date you accept the new Terms; if you do not agree, you may stop and ask for a refund of the unused part of a recurring plan.</p>
+  <p>We may update these Terms. We will post the new version here with a new date and, for changes that matter, tell you in the service or by e-mail at least 14 days before they apply to you. If you keep using the service after that date you accept the new Terms; if you do not agree, you may stop using the service and cancel any subscription before its next renewal.</p>
 
   <h2>17. Contact</h2>
   <p>{{ $legal['operator'] }} · {{ $legal['address'] }} · <strong>{{ $legal['email'] }}</strong>. For privacy requests see the <a href="/privacy">Privacy Policy</a>.</p>
