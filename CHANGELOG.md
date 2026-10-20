@@ -2,7 +2,7 @@
 
 ## 3.1.1 (2026-10-21, branch `main-v2`)
 
-- The landing page header is transparent again (no added colour) and still stays at the top while scrolling.
+- The landing page header is transparent again (no added colour), stays at the top while scrolling, and takes the dark ink of the signed-in top bar when a light section is under it.
 
 ## 3.1.0 (2026-10-20, branch `main-v2`)
 
