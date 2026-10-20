@@ -10,7 +10,7 @@ return [
     // Brand shown in the dashboard, the landing page and e-mails.
     'brand' => env('APP_NAME', 'Love of My Life'),
 
-    // Main domain of the product. Sweetheart and Forever pages can get <name>.<domain>; point a wildcard DNS record (*.domain) and
+    // Main domain of the product. With the `subdomains` feature on, Sweetheart and Forever pages can get <name>.<domain>; point a wildcard DNS record (*.domain) and
     // a wildcard certificate at this app and new subdomains work the moment they are claimed (see DEPLOY.md).
     'domain' => strtolower(trim((string) (env('SAAS_DOMAIN') ?: $appHost), '. ')),
 
@@ -26,6 +26,13 @@ return [
     // tests send nothing. Only the marketing site, sign-in and dashboard carry the tag: never a page someone made for their
     // loved one (those are not part of the product layout) and never the admin area (see App\Http\Screen).
     'analytics_id' => (string) env('GA_MEASUREMENT_ID', env('APP_ENV', 'production') === 'production' ? 'G-M62J7X95ED' : ''),
+
+    // Feature flags. `subdomains`: <name>.<domain> addresses for Sweetheart and Forever pages (claiming a name, serving it, the
+    // wildcard DNS and certificate in DEPLOY.md). Off for now: the plans still say which one will include it (`subdomain`), but
+    // nothing sells, shows, claims or serves an address until SUBDOMAINS_ENABLED=true (App\Services\Plans::flagged()).
+    'features' => [
+        'subdomains' => filter_var(env('SUBDOMAINS_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+    ],
 
     'currency' => 'PHP',
 
@@ -76,10 +83,11 @@ return [
             'blurb' => 'Your page online, with 12 photos and 5 templates.'],
         'sweetheart' => ['name' => 'Sweetheart', 'prices' => ['month' => 35000, 'year' => 420000], 'photos' => 40, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => true,
-            'blurb' => 'All 10 templates, 40 photos and an address of its own.'],
+            'blurb' => 'All 10 templates and 40 photos.', 'blurb_subdomain' => 'All 10 templates, 40 photos and an address of its own.'],
         'forever' => ['name' => 'Forever', 'prices' => ['once' => 499900], 'photos' => 60, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => false,
-            'blurb' => 'Pay once and it stays online for good: 60 photos, every template, its own address.'],
+            'blurb' => 'Pay once and it stays online for good: 60 photos and every template.',
+            'blurb_subdomain' => 'Pay once and it stays online for good: 60 photos, every template, its own address.'],
     ],
 
     // More photos for an account that has used its allowance: bought once, kept for good, shared by all its pages.

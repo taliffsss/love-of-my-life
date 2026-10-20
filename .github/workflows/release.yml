@@ -9,11 +9,17 @@
 # One-time setup (repo → Settings):
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
-#   Variables DOCKER_IMAGE (default taliffsss/jinelin-basela)
-#             SITE_URL     (public address checked after a deploy; default https://jinelin-basela.markanthonynaluz.com)
-#             DEPLOY_PATH  (dir on the server holding deploy/.env.production; default /opt/love-of-my-life; may also be a secret)
+#   Variables DOCKER_IMAGE (default taliffsss/loveofmylife)
+#             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife)
+#             SITE_URL     (public address checked after a deploy; default https://loveofmylife.love)
+#             SAAS_DEPLOY_PATH (REQUIRED for a release of branch main-v2: the dir on the server holding that deploy's
+#                           deploy/.env.production; may also be a secret. No default, so v2 can never overwrite the old deploy)
+#             DEPLOY_PATH  (same, for a release of any other branch; default /opt/love-of-my-life; may also be a secret)
 #             AUTO_DEPLOY  ("true" turns the deploy job on; keep it off until you trust the pipeline)
 #   Environment `production` → add required reviewers so a human approves every deploy.
+# Branch main-v2: the `context` job checks the tagged commit (a manual run started from main-v2, or a tag whose commit is in
+# main-v2 and not in main). Such a release pushes the image named by SAAS_DOCKER_IMAGE and deploys to SAAS_DEPLOY_PATH;
+# anything else uses DOCKER_IMAGE and DEPLOY_PATH.
 # Secrets in deploy/.env.production stay on the server; they never reach GitHub or the image.
 name: Release
 
@@ -35,9 +41,8 @@ permissions:
   contents: read
 
 env:
-  IMAGE: ${{ vars.DOCKER_IMAGE || 'taliffsss/jinelin-basela' }}
   TAG: ${{ github.event.inputs.tag || github.ref_name }}
-  STACK: jinelin
+  STACK: loveofmylife
 
 jobs:
   # A manual run may name a tag that does not exist yet: create it on the chosen commit (pushes made with
@@ -59,6 +64,36 @@ jobs:
             echo "::error::Tag $TAG does not exist."; exit 1
           fi
 
+  # Is this a release of branch main-v2? That decides the image variable (SAAS_DOCKER_IMAGE) and the deploy path (SAAS_DEPLOY_PATH).
+  context:
+    name: Which branch is this release from?
+    needs: tag
+    runs-on: ubuntu-24.04
+    outputs:
+      v2: ${{ steps.c.outputs.v2 }}
+      image: ${{ steps.c.outputs.image }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0 # the branch check needs history
+      - id: c
+        env:
+          DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE }}
+          SAAS_DOCKER_IMAGE: ${{ vars.SAAS_DOCKER_IMAGE }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          v2=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.ref_name }}" = "main-v2" ]; then
+            v2=true
+          elif git merge-base --is-ancestor "$sha" origin/main-v2 2>/dev/null && ! git merge-base --is-ancestor "$sha" origin/main 2>/dev/null; then
+            v2=true
+          fi
+          if [ "$v2" = "true" ]; then image="${SAAS_DOCKER_IMAGE:-taliffsss/loveofmylife}"; else image="${DOCKER_IMAGE:-taliffsss/loveofmylife}"; fi
+          echo "v2=$v2" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "Branch main-v2: $v2; image: $image"
+
   verify:
     name: Checks (same as CI)
     needs: tag
@@ -66,8 +101,10 @@ jobs:
 
   image:
     name: Build and push image
-    needs: verify
+    needs: [verify, context]
     runs-on: ubuntu-24.04
+    env:
+      IMAGE: ${{ needs.context.outputs.image }}
     outputs:
       prerelease: ${{ steps.pre.outputs.prerelease }}
     steps:
@@ -103,8 +140,10 @@ jobs:
 
   release:
     name: GitHub Release
-    needs: image
+    needs: [image, context]
     runs-on: ubuntu-24.04
+    env:
+      IMAGE: ${{ needs.context.outputs.image }}
     permissions:
       contents: write
     steps:
@@ -127,18 +166,31 @@ jobs:
 
   deploy:
     name: Deploy to production
-    needs: [image, release]
+    needs: [image, release, context]
     if: ${{ vars.AUTO_DEPLOY == 'true' && needs.image.outputs.prerelease == 'false' }}
     runs-on: ubuntu-24.04
     environment: production # configure required reviewers here: nothing deploys unapproved
     env:
       HOST: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
-      DIR: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
+      IMAGE: ${{ needs.context.outputs.image }}
+      V2: ${{ needs.context.outputs.v2 }}
+      LEGACY_DIR: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
+      SAAS_DIR: ${{ secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH }}
       HAS_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ env.TAG }}
+
+      - name: Choose the deploy path (main-v2 uses SAAS_DEPLOY_PATH)
+        run: |
+          if [ "$V2" = "true" ]; then
+            [ -n "$SAAS_DIR" ] || { echo "::error title=Deployment configuration::Branch main-v2 deploys to SAAS_DEPLOY_PATH, which is not set (variable or secret)."; exit 1; }
+            echo "DIR=$SAAS_DIR" >> "$GITHUB_ENV"
+          else
+            echo "DIR=$LEGACY_DIR" >> "$GITHUB_ENV"
+          fi
+          echo "Branch main-v2: $V2"
 
       - name: Validate the deployment configuration
         run: |
@@ -190,7 +242,7 @@ jobs:
 
       - name: Check the live site answers
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://jinelin-basela.markanthonynaluz.com' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://loveofmylife.love' }}
         run: |
           # a request through Traefik and TLS to the new container: the real proof that the deploy works
           for i in $(seq 1 24); do

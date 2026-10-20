@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Moves the original single-page site into the product: creates (or reuses) the owner's account and a Forever page with
  * the same letter, song, photos and lock-screen answer, served on the original domain. Run it once on the server:
  *
- *   php bin/import-legacy.php --email=you@example.com --domain=jinelin-basela.markanthonynaluz.com --answer=yam [--name="Your Name"]
+ *   php bin/import-legacy.php --email=you@example.com --domain=old-site.example.com --answer=yam [--name="Your Name"]
  *
  * A new account gets a random password, printed once: sign in with it and change nothing else. Refuses to run twice for
  * the same domain.

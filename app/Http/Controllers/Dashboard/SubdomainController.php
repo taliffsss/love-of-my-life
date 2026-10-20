@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Screen;
 use App\Services\Sites;
+use App\Services\Plans;
 use App\Services\Subdomains;
 use Naluz\Auth\Auth;
 use Naluz\Database\QueryException;
@@ -23,9 +24,18 @@ final class SubdomainController
 {
     use OwnsPages;
 
+    /** Own addresses are behind the `subdomains` feature flag (config/saas.php): while it is off these routes do not exist. */
+    private function requireFeature(): void
+    {
+        if (!app(Plans::class)->subdomainsEnabled()) {
+            throw new HttpException(404, 'Not Found');
+        }
+    }
+
     /** GET ?name= — live availability for the form. */
     public function check(ServerRequestInterface $request, Subdomains $subdomains, Sites $sites): array
     {
+        $this->requireFeature();
         $name = $subdomains->normalise((string) ($request->getQueryParams()['name'] ?? ''));
         $problem = $subdomains->problem($name);
         if ($problem === null && $subdomains->isTaken($name)) {
@@ -40,6 +50,7 @@ final class SubdomainController
 
     public function update(string $slug, ServerRequestInterface $request, Auth $auth, Subdomains $subdomains, Sites $sites): ResponseInterface
     {
+        $this->requireFeature();
         $page = $this->ownedPage($auth, $slug);
         if (!$page->allowsSubdomain()) {
             throw new HttpException(403, 'A dedicated address comes with the Sweetheart and Forever plans.');
@@ -62,6 +73,7 @@ final class SubdomainController
 
     public function destroy(string $slug, Auth $auth): ResponseInterface
     {
+        $this->requireFeature();
         $page = $this->ownedPage($auth, $slug);
         $page->forceFill(['subdomain' => null])->save();
         return Screen::back($this->editUrl($page, 'share'), 'The dedicated address was released.');

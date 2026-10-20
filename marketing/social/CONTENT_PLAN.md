@@ -13,8 +13,8 @@ One idea: **a private love-letter page: your photos, your song, your words, lock
 | Five occasions | Boyfriend/Girlfriend, Anniversary, Wedding, Birthday, Invitation: ten designs each | `svc-*` |
 | Ten ways to open it | Envelope, scratch card, storybook, memory game, timeline, gift box, stars, three slideshows | `poll-*`, `car-templates-*`, promo `feed-templates` |
 | Sweet, ₱200/mo (₱2,400/yr) | Online, 12 photos, 5 templates | `plan-sweet` |
-| Sweetheart, ₱350/mo (₱4,200/yr) | 40 photos, all 10 templates, an address of its own | `plan-sweetheart` |
-| Forever, ₱4,999 once | 60 photos, all templates, own address, online for good | `plan-forever` |
+| Sweetheart, ₱350/mo (₱4,200/yr) | 40 photos, all 10 templates | `plan-sweetheart` |
+| Forever, ₱4,999 once | 60 photos, all templates, online for good | `plan-forever` |
 | Photo packs, ₱100 | 12 more photos, kept for good | `plan-photos` |
 | Free preview | Build everything and preview it; only you can see it | `free-first` |
 | QR code | Print on a card, bouquet or box | `qr-card` |
@@ -42,7 +42,7 @@ the post is about home, family or monthsaries. Use Lettie's stickers in comments
   Once there are, ask for permission and show only what the owner agrees to.
 - The phone screens in the kit show **sample content** from the app's demo.
 - Prices: only the ones in the plan cards. "From ₱200 a month". A year costs twelve months: never advertise a yearly discount or free months.
-- "Own address" is for Sweetheart and Forever only.
+- Don't mention "own address" (`name.loveofmylife.love`): it is switched off in the app (feature flag `SUBDOMAINS_ENABLED`) until the flag is on.
 - Don't say how to pay until checkout is live (`PAGE_SETUP.md`, "Before you post").
 - No giveaways or contests until you've decided the prize and the rules (Meta and TikTok both require specific wording).
 

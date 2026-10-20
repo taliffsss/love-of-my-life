@@ -11,7 +11,7 @@ your words, opened in a way that feels like a gift.
 1. It's personal: your photos, your song, your letter.
 2. It's private: locked with a question only they can answer.
 3. It's playful: break a seal, scratch a card, turn the pages, light up the stars (10 templates).
-4. It's easy to share: a link or a QR code on a card. Sweetheart and Forever pages get their own address.
+4. It's easy to share: a link or a QR code on a card.
 
 ## What to post where
 
@@ -107,7 +107,7 @@ Boost the Valentine's post from the first week of February.
 - **Prices.** The plans in the app: Sweet ₱200 a month (₱2,400 a year), Sweetheart ₱350 a month (₱4,200 a year),
   Forever ₱4,999 once; extra photos 12 for ₱100. A year costs twelve months: never advertise free months or a yearly
   discount. When you quote them, say "from ₱200 a month" and keep the free preview in front: "Try it free".
-- **Own address.** "Own address" (`name.loveofmylife.love`) comes with Sweetheart and Forever; the video's end
-  note says so.
+- **Own address.** Switched off in the app for now (feature flag `SUBDOMAINS_ENABLED`): don't advertise `name.loveofmylife.love`
+  until it is on.
 - **Payments.** Don't claim online checkout until it is live; payments are confirmed by hand for now.
 - **The domain must be live first.** Before posting, `loveofmylife.love` needs its DNS records and the 3.0 deploy.

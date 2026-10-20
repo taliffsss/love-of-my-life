@@ -1,26 +1,29 @@
 # Deploying to your own server
 
 Since 3.0 this repository is a product: people sign up, build love pages in a dashboard and publish them with a plan.
-Every page is served at `/p/<id>`; a **Sweetheart** or **Forever** page can also claim its own address, `<name>.<SAAS_DOMAIN>`. The
-original single page (`jinelin-basela.markanthonynaluz.com`) becomes one of those pages, on its old domain
+Every page is served at `/p/<id>`. A **Sweetheart** or **Forever** page can also claim its own address, `<name>.<SAAS_DOMAIN>`,
+but that is **switched off for now** behind a feature flag (`SUBDOMAINS_ENABLED`, see
+[Own addresses](#own-addresses-feature-flag)). The original single page can be moved into the product on a domain of its own
 (see [Moving the original site into the product](#moving-the-original-site-into-the-product)).
+
+The product runs at **https://loveofmylife.love**, as the Swarm stack `loveofmylife` (image `taliffsss/loveofmylife`).
 
 ## What the server needs
 
 | Thing | Why |
 |---|---|
-| `APP_URL` | the product's address: landing page, sign-in, dashboard (`https://love.markanthonynaluz.com`) |
-| `SAAS_DOMAIN` | the domain page addresses live under (defaults to the host of `APP_URL`) |
-| DNS `A` record for `SAAS_DOMAIN` **and** a wildcard `A` record `*.SAAS_DOMAIN` | every claimed name works immediately, with nothing to add per page |
-| A **wildcard** TLS certificate for `*.SAAS_DOMAIN` | Let's Encrypt only issues wildcards through the DNS-01 challenge (see below) |
+| `APP_URL` | the product's address: landing page, sign-in, dashboard (`https://loveofmylife.love`) |
+| `SAAS_DOMAIN` | the domain page addresses live under (defaults to the host of `APP_URL`: `loveofmylife.love`) |
+| DNS `A` record for `loveofmylife.love` | the product itself |
+| `SUBDOMAINS_ENABLED` | **off by default.** When `true`: a wildcard `A` record `*.loveofmylife.love` and a **wildcard** TLS certificate (DNS-01 challenge, see below) |
 | A database | SQLite in the `storage` volume by default (`storage/database.sqlite`); MySQL/PostgreSQL work too (`DB_*`) |
 | DigitalOcean Spaces (`SPACES_*`) | where photos are stored; without it photos go to `public/storage` (development only) |
 
 How a request finds its page: `App\Http\Middleware\ResolveSiteHost` runs before routing. `SAAS_DOMAIN`, `www.`,
-`localhost` and IP addresses are the product. `<name>.SAAS_DOMAIN` is the Sweetheart or Forever page that claimed `<name>` (404 when
-none did). Any other host is looked up as a page's custom domain (set by an admin, e.g. by the import below), otherwise
-it is the product. On a page's own host only `/`, `/unlock`, `/robots.txt` and `/sitemap.xml` exist: the dashboard and
-sign-in are never served there.
+`localhost` and IP addresses are the product. With the subdomain feature on, `<name>.SAAS_DOMAIN` is the Sweetheart or Forever page
+that claimed `<name>` (404 when none did); with it off, every `<name>.SAAS_DOMAIN` is a 404. Any other host is looked up as a page's
+custom domain (set by an admin, e.g. by the import below), otherwise it is the product. On a page's own host only `/`, `/unlock`,
+`/robots.txt` and `/sitemap.xml` exist: the dashboard and sign-in are never served there.
 
 ## Docker Swarm + Traefik
 
@@ -28,53 +31,57 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
 `app_network`, the `redirect-to-https@file` middleware from your main Traefik stack. The image (`Dockerfile`) runs nginx
 + PHP-FPM under Supervisor; `deploy/entrypoint.sh` runs pending migrations at start (`RUN_MIGRATIONS=false` to skip).
 
+> **The stack is named `loveofmylife`.** Swarm prefixes volumes with the stack name, so this stack gets its own, empty
+> `loveofmylife_lom_storage` volume. If an older stack under another name holds data you want (SQLite database, uploaded
+> files), copy its `…_lom_storage` volume into the new one before the first deploy, and remove the old stack afterwards.
+
 ### One-time setup
 
-The product lives at `love.markanthonynaluz.com` (`SAAS_DOMAIN`), so Sweetheart and Forever pages are
-`<name>.love.markanthonynaluz.com`.
-
-1. **DNS** (DigitalOcean, domain `markanthonynaluz.com`): two `A` records at the server running Traefik
-   (`152.42.252.125`, the same address as `jinelin-basela`): `love` and the wildcard `*.love`. With the API:
+1. **DNS** (your DNS provider): an `A` record `loveofmylife.love` pointing at the server running Traefik. Check:
+   `dig +short loveofmylife.love`. The existing `letsencrypt` resolver (HTTP challenge) issues its certificate, so nothing
+   else is needed in the main Traefik stack while own addresses are off.
+2. **Server folder** (the value of the `SAAS_DEPLOY_PATH` variable, e.g. `/opt/loveofmylife`):
    ```bash
-   for name in love '*.love'; do
-     curl -s -X POST https://api.digitalocean.com/v2/domains/markanthonynaluz.com/records \
-       -H "Authorization: Bearer $DO_AUTH_TOKEN" -H "Content-Type: application/json" \
-       -d "{\"type\":\"A\",\"name\":\"$name\",\"data\":\"152.42.252.125\",\"ttl\":1800}"
-   done
-   dig +short love.markanthonynaluz.com anything.love.markanthonynaluz.com   # both print 152.42.252.125
+   mkdir -p /opt/loveofmylife/deploy
+   cp deploy/.env.production.example /opt/loveofmylife/deploy/.env.production   # then fill it in
+   chmod 600 /opt/loveofmylife/deploy/.env.production
    ```
-   The token needs only the `domain:read`, `domain:create` and `domain:delete` scopes.
-2. **Wildcard certificate.** The existing `letsencrypt` resolver uses the HTTP challenge, which cannot issue
-   `*.love.markanthonynaluz.com`. Add a DNS-challenge resolver named `letsencrypt-dns` to the main Traefik stack:
-   ```yaml
-   # Traefik static configuration (command flags or traefik.yml)
-   - "--certificatesresolvers.letsencrypt-dns.acme.email=you@example.com"
-   - "--certificatesresolvers.letsencrypt-dns.acme.storage=/letsencrypt/acme-dns.json"
-   - "--certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=digitalocean"
-   # and, on the Traefik service only (never in the app's .env.production): DO_AUTH_TOKEN=<the same scoped token>
-   ```
-   The routers that use it are already in `deploy/docker-stack.yml` (`lom-saas` and `lom-saas-http`, Traefik v3
-   `HostRegexp` syntax). Traefik asks for the certificate the first time the stack is deployed with them; if the resolver
-   has another name on your server, change `tls.certresolver` there. In that file a literal `$` is written `$$`:
-   `docker stack deploy` refuses a lone `$` ("invalid interpolation format"). The existing `jinelin-basela` router keeps
-   serving the old domain.
-3. **Server folder** (default `/opt/love-of-my-life`):
-   ```bash
-   mkdir -p /opt/love-of-my-life/deploy
-   cp deploy/.env.production.example /opt/love-of-my-life/deploy/.env.production   # then fill it in
-   chmod 600 /opt/love-of-my-life/deploy/.env.production
-   ```
-   Fill in `APP_URL` and `SAAS_DOMAIN` (the product's new domain, **not** `jinelin-basela.markanthonynaluz.com`, which
-   becomes a page), `APP_KEY`, `JWT_SECRET`, the `SPACES_*` values and `PAYMENTS_MANUAL_INSTRUCTIONS`.
+   Fill in `APP_KEY`, `JWT_SECRET`, the `SPACES_*` values and `PAYMENTS_MANUAL_INSTRUCTIONS` (`APP_URL` and `SAAS_DOMAIN` are
+   already `loveofmylife.love`; leave `SUBDOMAINS_ENABLED=false`).
    Generate the keys with `php -r "echo 'base64:'.base64_encode(random_bytes(32)), PHP_EOL;"` (`APP_KEY`) and
    `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"` (`JWT_SECRET`). Write values **without quotes**.
    Keep `PAYMENTS_DRIVER=none` in production (`fake` is refused there).
-4. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
+3. **GitHub** (repo → Settings), as in `.github/workflows/release.yml`:
    - Secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`; for deploys also `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
-   - Variables: `DOCKER_IMAGE` (default `taliffsss/jinelin-basela`), `DEPLOY_PATH` (default `/opt/love-of-my-life`),
-     `AUTO_DEPLOY` (`true` turns the deploy job on), `SITE_URL` (checked after each deploy; set it to the product's
-     `APP_URL`. `/api/ping` answers on every host, page hosts included).
+   - Variables: `DOCKER_IMAGE` (default `taliffsss/loveofmylife`; **`SAAS_DOCKER_IMAGE`** for a release of branch `main-v2`, same default), `AUTO_DEPLOY` (`true` turns the deploy job on),
+     `SITE_URL` (checked after each deploy; default `https://loveofmylife.love`; `/api/ping` answers on every host).
+   - **Deploy path and image:** a release of **branch `main-v2`** pushes the image named by **`SAAS_DOCKER_IMAGE`** and deploys to **`SAAS_DEPLOY_PATH`** (variable or secret; required, with no
+     default). A release of any other branch uses `DOCKER_IMAGE` and `DEPLOY_PATH` (default `/opt/love-of-my-life`). The deploy job decides from
+     the tagged commit: a manual run started from `main-v2`, or a tag whose commit is in `main-v2` and not in `main`.
    - Environment `production` with required reviewers, so every deploy needs a human approval.
+
+### Own addresses (feature flag)
+
+`SUBDOMAINS_ENABLED=false` (the default, in `config/saas.php` → `features.subdomains`) means: the Sweetheart and Forever plans
+do not mention or sell an address, the dashboard's "Dedicated address" section and the landing page's FAQ entry are hidden,
+the `/dashboard/subdomains/check` and `/dashboard/pages/{page}/subdomain` routes answer 404, and `<name>.loveofmylife.love`
+answers 404. The plans keep their `subdomain` entitlement in `config/saas.php`, so nothing needs migrating when it is turned on.
+Addresses already claimed stay in the database but are not served while the flag is off.
+
+To turn it on:
+1. DNS: add a wildcard `A` record `*.loveofmylife.love` at the server.
+2. Wildcard certificate: Let's Encrypt only issues wildcards through the DNS-01 challenge. Add a resolver named
+   `letsencrypt-dns` to the main Traefik stack:
+   ```yaml
+   # Traefik static configuration (command flags or traefik.yml); use your DNS provider's name and token
+   - "--certificatesresolvers.letsencrypt-dns.acme.email=you@example.com"
+   - "--certificatesresolvers.letsencrypt-dns.acme.storage=/letsencrypt/acme-dns.json"
+   - "--certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=digitalocean"
+   # and, on the Traefik service only (never in the app's .env.production): the provider's token, e.g. DO_AUTH_TOKEN=...
+   ```
+3. Uncomment the `loveofmylife-pages` labels in `deploy/docker-stack.yml` (in that file a literal `$` is written `$$`:
+   `docker stack deploy` refuses a lone `$`).
+4. Set `SUBDOMAINS_ENABLED=true` in `.env.production` and run `docker stack deploy` again.
 
 ### Releasing
 
@@ -90,11 +97,11 @@ a pre-release: no `latest`, no deploy.
 ### Manual build and deploy
 
 ```bash
-docker build -t taliffsss/jinelin-basela:3.0.0 .
-docker push taliffsss/jinelin-basela:3.0.0
-# on the server, in /opt/love-of-my-life (with deploy/docker-stack.yml and deploy/.env.production):
-LOM_IMAGE=taliffsss/jinelin-basela LOM_VERSION=3.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth jinelin
-docker service logs -f jinelin_web
+docker build -t taliffsss/loveofmylife:3.0.0 .
+docker push taliffsss/loveofmylife:3.0.0
+# on the server, in the SAAS_DEPLOY_PATH folder (with deploy/docker-stack.yml and deploy/.env.production):
+LOM_IMAGE=taliffsss/loveofmylife LOM_VERSION=3.0.0 docker stack deploy -c deploy/docker-stack.yml --with-registry-auth loveofmylife
+docker service logs -f loveofmylife_web
 ```
 
 After editing `.env.production`, run `docker stack deploy` again: Swarm copies the env file into the service definition.
@@ -103,10 +110,10 @@ After editing `.env.production`, run `docker stack deploy` again: Swarm copies t
 
 - `storage/` is a named volume (`lom_storage`): the SQLite database, logs and sessions survive redeploys. **Back up the
   database** (accounts, pages, orders), e.g. daily from cron:
-  `docker exec $(docker ps -q -f name=jinelin_web) php bin/backup-db.php` writes a consistent copy to
+  `docker exec $(docker ps -q -f name=loveofmylife_web) php bin/backup-db.php` writes a consistent copy to
   `storage/backups/`; copy it off the server. Photos are in Spaces.
 - **Empty the photo trash**, e.g. daily from cron, next to the backup:
-  `docker exec $(docker ps -q -f name=jinelin_web) php bin/empty-trash.php`. Deleted photos' files are normally removed
+  `docker exec $(docker ps -q -f name=loveofmylife_web) php bin/empty-trash.php`. Deleted photos' files are normally removed
   at once; this retries any that Spaces refused or that a cut-off request left behind (it exits 1 while some still
   fail, so cron mails you).
 - One replica: SQLite in a volume is fine for one container. Before scaling out, move to MySQL/PostgreSQL (`DB_*`).
@@ -123,13 +130,14 @@ The old single page (letter, song, photos, the `yam` answer) becomes a Forever p
 domain. Run this once, after the first 3.0 deploy (until then that domain shows the landing page):
 
 ```bash
-docker exec -it $(docker ps -q -f name=jinelin_web) php bin/import-legacy.php \
-  --email=you@example.com --domain=jinelin-basela.markanthonynaluz.com --answer=yam --name="Your Name"
+docker exec -it $(docker ps -q -f name=loveofmylife_web) php bin/import-legacy.php \
+  --email=you@example.com --domain=old-site.example.com --answer=yam --name="Your Name"
 ```
 
 It reads `config/site.php`, `storage/app/{carousel,letter,song}.json` and `public/photos`, creates your account if it does
 not exist (the random password is printed once), and serves the page on that domain behind the same answer, in the
 original Classic layout and Rose colours. Then sign in and manage it like any other page. Running it twice is refused.
+The stack file has no router for that domain any more: add Traefik labels for its `Host()` (copy the `loveofmylife` router pair) and point its DNS at the server.
 
 What changes for that page: the answer is now checked on the server and the photos and letter are sent only after it,
 so the image sitemap of 2.x is gone (the photos are no longer public). The page stays indexable (`searchable`), and the
@@ -141,7 +149,7 @@ There is no online checkout yet (`PAYMENTS_DRIVER=none`). Choosing a plan in the
 reference (e.g. `LM-7KQ2-9XDA`) and shows `PAYMENTS_MANUAL_INSTRUCTIONS`. When the money arrives:
 
 ```bash
-docker exec -it $(docker ps -q -f name=jinelin_web) php bin/grant-plan.php LM-7KQ2-9XDA --ref="GCash 1234567890"
+docker exec -it $(docker ps -q -f name=loveofmylife_web) php bin/grant-plan.php LM-7KQ2-9XDA --ref="GCash 1234567890"
 # no order yet? php bin/grant-plan.php --page=<page id from the URL> --plan=sweetheart --period=month --ref=...
 #   periods: month or year (Sweet, Sweetheart), once (Forever)
 ```

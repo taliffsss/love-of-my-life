@@ -69,9 +69,9 @@ final class LegacyImportTest extends TestCase
     public function testTheSiteBecomesAForeverPageOnItsDomain(): void
     {
         $owner = $this->makeUser();
-        $page = $this->importer()->import($owner, 'Jinelin-Basela.Example.com', ' Yam ');
+        $page = $this->importer()->import($owner, 'Old-Site.Example.com', ' Yam ');
 
-        $this->assertSame('jinelin-basela.example.com', $page->custom_domain);
+        $this->assertSame('old-site.example.com', $page->custom_domain);
         $this->assertSame('forever', $page->plan);
         $this->assertNull($page->expires_at);
         $this->assertTrue($page->isLive());
@@ -93,9 +93,9 @@ final class LegacyImportTest extends TestCase
         $this->assertNull($photos[2]->disk, 'files shipped with the site are not storage the page owns');
 
         // and the old domain serves it, behind the same answer
-        $this->assertStringContainsString('For Jinelin', (string) $this->get('https://jinelin-basela.example.com/')->getBody());
-        $token = $this->csrf('https://jinelin-basela.example.com/');
-        $open = $this->json('POST', 'https://jinelin-basela.example.com/unlock', ['answer' => 'YAM'], ['X-CSRF-TOKEN' => $token]);
+        $this->assertStringContainsString('For Jinelin', (string) $this->get('https://old-site.example.com/')->getBody());
+        $token = $this->csrf('https://old-site.example.com/');
+        $open = $this->json('POST', 'https://old-site.example.com/unlock', ['answer' => 'YAM'], ['X-CSRF-TOKEN' => $token]);
         $this->assertSame(200, $open->getStatusCode());
         $this->assertCount(4, $this->decode($open)['photos']);
     }

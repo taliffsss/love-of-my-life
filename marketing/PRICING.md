@@ -13,7 +13,7 @@ charging exists (see "What is left").
 | One time | none | none | **₱4,999** |
 | Photos it adds to the account | 12 | 40 | 60 |
 | Templates | 5: Classic, Cinematic, Polaroid, Envelope, Timeline | all 10 | all 10 |
-| Own address `name.loveofmylife.love` | no | **yes** | yes |
+| Own address `name.loveofmylife.love` (**switched off for now**, feature flag `SUBDOMAINS_ENABLED`) | no | **yes** | yes |
 | Song, lock question, link, QR code, change anything any time | yes | yes | yes |
 | Stays online | while paid | while paid | always |
 
@@ -28,7 +28,7 @@ charging exists (see "What is left").
 
 **Why these numbers:**
 - **₱200 is the entry price you set.** Sweetheart at ₱350 is 1.75 times that. It adds 28 photos, worth ₱233 in packs,
-  plus every template and the own address, so upgrading is the better deal for anyone who wants more than Sweet.
+  plus every template (and, once the feature flag is on, the own address), so upgrading is the better deal for anyone who wants more than Sweet.
 - **Forever at ₱4,999** is about 14 months of Sweetheart, and a little more than one year of it (₱4,200). Couples who
   plan to keep the page pay once; for everyone else the monthly price looks small next to it.
 

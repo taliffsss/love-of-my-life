@@ -252,6 +252,7 @@
               <p class="small muted">Permanent link (never changes): <a href="{{ $pathUrl }}" target="_blank" rel="noopener">{{ preg_replace('#^https?://#', '', $pathUrl) }}</a></p>
               @endif
 
+              @if (config('saas.features.subdomains'))
               <div class="stack" style="--gap:10px">
                 <h3 class="label" style="font-size:1rem">Dedicated address</h3>
                 @if ($page->allowsSubdomain())
@@ -283,6 +284,7 @@
                 </div>
                 @endif
               </div>
+              @endif
             </div>
             <div class="qr-box">
               <img src="/dashboard/pages/{{ $page->slug }}/qr" alt="QR code that opens {{ $pathUrl }}" width="150" height="150" />

@@ -156,8 +156,8 @@
 
     // ---- Facebook feed: the plans (prices checked against config/saas.php) ----
     "plan-sweet": price({ plan: "Sweet", line: "Your page, online.", price: "₱200", per: "a month", alt: "or ₱2,400 for a year", ticks: ["12 photos", "5 templates", "Your link and QR code"], note: "Build and preview free. Pay when you are ready to send it." }),
-    "plan-sweetheart": price({ theme: "t-gold", plan: "Sweetheart", line: "All ten ways to open it.", price: "₱350", per: "a month", alt: "or ₱4,200 for a year", ticks: ["40 photos", "All 10 templates", "An address of its own: yourname.loveofmylife.love"], note: "Build and preview free. Pay when you are ready to send it." }),
-    "plan-forever": price({ theme: "t-ivory", plan: "Forever", line: "Pay once. Keep it for good.", price: "₱4,999", per: "one time, no renewals", ticks: ["60 photos", "All 10 templates", "An address of its own", "Stays online for good"], note: "Build and preview free. Pay when you are ready to send it." }),
+    "plan-sweetheart": price({ theme: "t-gold", plan: "Sweetheart", line: "All ten ways to open it.", price: "₱350", per: "a month", alt: "or ₱4,200 for a year", ticks: ["40 photos", "All 10 templates", "Link and printable QR code"], note: "Build and preview free. Pay when you are ready to send it." }),
+    "plan-forever": price({ theme: "t-ivory", plan: "Forever", line: "Pay once. Keep it for good.", price: "₱4,999", per: "one time, no renewals", ticks: ["60 photos", "All 10 templates", "Link and printable QR code", "Stays online for good"], note: "Build and preview free. Pay when you are ready to send it." }),
     "plan-photos": { size: [1080, 1080], theme: "", build: () => scatter(1080, 1080, "heart", 12, 19) + col("84px 80px 60px",
       K("Photo packs") + H("Too many memories? Add more room.", 100, 900, 18) + SPACE +
       `<div class="panel" style="width:760px"><div class="price" style="font-size:130px;color:var(--gold)">₱100</div><div class="sub" style="font-size:38px;margin-top:8px">for 12 more photos</div><div class="sub" style="font-size:30px;margin-top:10px">Yours for good, shared by all your pages.</div></div>` +

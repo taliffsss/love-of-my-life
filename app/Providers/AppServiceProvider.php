@@ -37,6 +37,7 @@ final class AppServiceProvider extends ServiceProvider
             (array) $c->make(Repository::class)->get('saas.plans', []),
             (string) $c->make(Repository::class)->get('saas.currency', 'PHP'),
             (array) $c->make(Repository::class)->get('saas.periods', Plans::DEFAULT_PERIODS),
+            fn (): bool => (bool) $c->make(Repository::class)->get('saas.features.subdomains', false),
         ));
         $this->app->singleton(SocialAuth::class, fn ($c) => new SocialAuth(
             (array) $c->make(Repository::class)->get('social', []),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Services\Plans;
 use Naluz\Database\Orm\Model;
 use Naluz\Database\Orm\Relations\BelongsTo;
 use Naluz\Database\Orm\Relations\HasMany;
@@ -71,7 +72,7 @@ final class Page extends Model
     public function planDetails(): array
     {
         $plans = (array) config('saas.plans');
-        return $plans[$this->plan] ?? $plans['free'];
+        return app(Plans::class)->flagged($plans[$this->plan] ?? $plans['free']);
     }
 
     public function status(?\DateTimeImmutable $now = null): string
@@ -89,7 +90,7 @@ final class Page extends Model
         return $this->status($now) === self::ACTIVE;
     }
 
-    /** Only plans that include it (Sweetheart and Forever) may have a dedicated subdomain. */
+    /** Only plans that include it (Sweetheart and Forever) may have a dedicated subdomain, and only while the `subdomains` feature is on. */
     public function allowsSubdomain(): bool
     {
         return (bool) $this->planDetails()['subdomain'];

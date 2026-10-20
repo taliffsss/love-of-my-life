@@ -56,6 +56,13 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   1200x630 link-preview image. Every page links the icons (with a version so browsers fetch the new ones), the manifest lists them
   with the right `purpose`, and the landing page carries schema.org `Organization` (with the logo) and `WebSite` data plus fuller
   Open Graph and Twitter tags. All of it is built by `python3 marketing/brand/build_brand.py` (needs `fonttools` and `pillow`).
+- **Own addresses are behind a feature flag, off for now.** `SUBDOMAINS_ENABLED` (`config/saas.php` → `features.subdomains`, default
+  false). While it is off the Sweetheart and Forever plans keep their `subdomain` entitlement but nothing sells, shows, claims or
+  serves an address: the landing page lists none, the dashboard's "Dedicated address" section and the FAQ entry are hidden, the
+  subdomain routes answer 404 and `<name>.<domain>` is a 404. Turning it on later needs no migration (DEPLOY.md, "Own addresses").
+- **Deployment renamed to `loveofmylife`.** The product is `https://loveofmylife.love`; the stack, image (`taliffsss/loveofmylife`),
+  Traefik routers and docs no longer name the original site, and the wildcard routers are comments until the flag is on. A release of
+  branch `main-v2` uses the `SAAS_DOCKER_IMAGE` and `SAAS_DEPLOY_PATH` variables (release workflow, DEPLOY.md).
 - **Google Analytics.** The Google tag (`G-M62J7X95ED`, `GA_MEASUREMENT_ID`) is on the landing page, sign-in, sign-up and dashboard, only in
   production unless you set the variable. It is never on a page someone made for their loved one or in the admin area, its start-up is
   `/assets/analytics.js` (the CSP has no inline scripts), and the CSP allows Google's hosts only while analytics is on.

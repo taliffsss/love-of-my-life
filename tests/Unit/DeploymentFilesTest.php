@@ -29,9 +29,9 @@ final class DeploymentFilesTest extends TestCase
 
     public function testTheStackDeploysTheImageTheReleasePushes(): void
     {
-        $this->assertStringContainsString('image: ${LOM_IMAGE:-taliffsss/jinelin-basela}:${LOM_VERSION:-latest}', $this->file('deploy/docker-stack.yml'));
+        $this->assertStringContainsString('image: ${LOM_IMAGE:-taliffsss/loveofmylife}:${LOM_VERSION:-latest}', $this->file('deploy/docker-stack.yml'));
         $release = $this->file('.github/workflows/release.yml');
-        $this->assertStringContainsString("vars.DOCKER_IMAGE || 'taliffsss/jinelin-basela'", $release);
+        $this->assertStringContainsString('IMAGE: ${{ needs.context.outputs.image }}', $release);
         $this->assertStringContainsString("LOM_IMAGE='\${IMAGE}'", $release);
     }
 
@@ -58,24 +58,44 @@ final class DeploymentFilesTest extends TestCase
         $this->assertStringContainsString('set_real_ip_from 10.0.0.0/8;', $nginx, 'the Swarm overlay network');
     }
 
-    /** The product's domain and every <name>.<domain> page address reach the app, on the wildcard certificate. */
-    public function testTheStackRoutesTheProductAndEveryPageAddress(): void
+    /** The product's domain reaches the app on a normal certificate; own addresses are off, so their wildcard routers are only comments. */
+    public function testTheStackRoutesTheProductAndKeepsOwnAddressesOff(): void
     {
         $stack = $this->file('deploy/docker-stack.yml');
         $this->assertSame(1, preg_match('/^SAAS_DOMAIN=(\S+)$/m', $this->file('deploy/.env.production.example'), $m));
         $domain = $m[1];
-        $regex = '^[a-z0-9-]+\\\\.' . str_replace('.', '\\\\.', $domain) . '$$';
-        foreach (['lom-saas', 'lom-saas-http'] as $router) {
-            $this->assertStringContainsString(
-                "traefik.http.routers.{$router}.rule=Host(`{$domain}`) || HostRegexp(`{$regex}`)",
-                $stack,
-                "{$router} matches {$domain} and <name>.{$domain}",
-            );
+        $this->assertSame('loveofmylife.love', $domain);
+        $this->assertStringContainsString("traefik.http.routers.loveofmylife.rule=Host(`{$domain}`)", $stack);
+        $this->assertStringContainsString("traefik.http.routers.loveofmylife-http.rule=Host(`{$domain}`)", $stack);
+        $this->assertStringContainsString('traefik.http.routers.loveofmylife.tls.certresolver=letsencrypt"', $stack);
+        $this->assertStringContainsString('traefik.http.routers.loveofmylife-http.middlewares=redirect-to-https@file', $stack);
+
+        $live = (string) preg_replace('/^\s*#.*$/m', '', $stack);
+        $this->assertStringNotContainsString('HostRegexp', $live, 'no wildcard router while own addresses are off');
+        $this->assertStringNotContainsString('letsencrypt-dns', $live);
+        $this->assertStringContainsString('# - "traefik.http.routers.loveofmylife-pages.tls.domains[0].sans=*.' . $domain . '"', $stack, 'the wildcard labels are ready to uncomment');
+        $this->assertMatchesRegularExpression('/^SUBDOMAINS_ENABLED=false$/m', $this->file('deploy/.env.production.example'));
+    }
+
+    public function testNothingNamesTheOldSiteAnyMore(): void
+    {
+        foreach (['deploy/docker-stack.yml', '.github/workflows/release.yml', 'deploy/.env.production.example', 'docker-compose.yml', 'DEPLOY.md', 'README.md'] as $file) {
+            $text = $this->file($file);
+            $this->assertStringNotContainsString('jinelin', $text, $file);
+            $this->assertStringNotContainsString('markanthonynaluz', $text, $file);
         }
-        $this->assertStringContainsString('traefik.http.routers.lom-saas.tls.certresolver=letsencrypt-dns', $stack, 'only the DNS challenge issues wildcards');
-        $this->assertStringContainsString("traefik.http.routers.lom-saas.tls.domains[0].main={$domain}", $stack);
-        $this->assertStringContainsString("traefik.http.routers.lom-saas.tls.domains[0].sans=*.{$domain}", $stack);
-        $this->assertStringContainsString('traefik.http.routers.lom-saas-http.middlewares=redirect-to-https@file', $stack);
+    }
+
+    /** A release of branch main-v2 uses its own image variable and deploy path. */
+    public function testReleasesOfMainV2UseTheirOwnImageAndDeployPath(): void
+    {
+        $release = $this->file('.github/workflows/release.yml');
+        $this->assertStringContainsString('vars.SAAS_DOCKER_IMAGE', $release);
+        $this->assertStringContainsString('secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH', $release);
+        $this->assertStringContainsString('"main-v2"', $release);
+        $this->assertStringContainsString('v2: ${{ steps.c.outputs.v2 }}', $release);
+        $this->assertStringContainsString('IMAGE: ${{ needs.context.outputs.image }}', $release);
+        $this->assertStringContainsString('SAAS_DEPLOY_PATH, which is not set', $release, 'main-v2 never falls back to the old deploy path');
     }
 
     /** docker stack deploy interpolates `$`: a lone one ("…com$`") is refused with "invalid interpolation format". */

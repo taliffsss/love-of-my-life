@@ -27,7 +27,7 @@ final class LegacyImporter
     }
 
     /**
-     * @param string $domain the host the site was served on, e.g. jinelin-basela.markanthonynaluz.com
+     * @param string $domain the host the site was served on, e.g. old-site.example.com
      * @param string $answer the answer of the old lock screen (it lived in app.js)
      * @throws \RuntimeException when that domain already belongs to a page
      */

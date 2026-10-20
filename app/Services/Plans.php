@@ -25,6 +25,7 @@ final class Plans
         private readonly array $plans,
         private readonly string $currency = 'PHP',
         private readonly array $periods = self::DEFAULT_PERIODS,
+        private readonly bool|\Closure $subdomains = true,
     ) {
         if (array_key_exists(Order::PHOTO_PACK, $plans)) {
             throw new \InvalidArgumentException('"' . Order::PHOTO_PACK . '" names photo pack orders; give the plan another key.');
@@ -36,9 +37,33 @@ final class Plans
     {
         $out = [];
         foreach ($this->plans as $key => $plan) {
-            $out[$key] = ['key' => (string) $key] + $plan + ['prices' => [], 'templates' => 'all', 'popular' => false];
+            $out[$key] = ['key' => (string) $key] + $this->flagged($plan) + ['prices' => [], 'templates' => 'all', 'popular' => false];
         }
         return $out;
+    }
+
+    /**
+     * Whether pages may have an address of their own (<name>.<domain>): the `subdomains` feature flag in config/saas.php.
+     * Given to the constructor as a closure so the flag is read each time (tests and long-running workers see a change).
+     */
+    public function subdomainsEnabled(): bool
+    {
+        return (bool) ($this->subdomains instanceof \Closure ? ($this->subdomains)() : $this->subdomains);
+    }
+
+    /**
+     * A plan as it is sold right now: what it includes (`subdomain`) only counts while the feature is on, and the blurb
+     * that mentions the address (`blurb_subdomain`) is used only then.
+     *
+     * @param array<string,mixed> $plan
+     * @return array<string,mixed>
+     */
+    public function flagged(array $plan): array
+    {
+        if ($this->subdomainsEnabled()) {
+            return isset($plan['blurb_subdomain']) ? ['blurb' => $plan['blurb_subdomain']] + $plan : $plan;
+        }
+        return ['subdomain' => false] + array_diff_key($plan, ['subdomain' => true]);
     }
 
     /** @return array<string,mixed>|null */

@@ -91,6 +91,7 @@ abstract class TestCase extends BaseTestCase
             'app.url' => 'https://love.test',
             'saas.domain' => 'love.test',
             'saas.payments.driver' => 'none',
+            'saas.features.subdomains' => true, // the feature has its own tests; tests/Http/SubdomainsFlagTest.php covers it being off
             'saas.analytics_id' => '', // a developer's .env may be production's: tests never carry the Google tag unless they ask
             // a developer's .env may hold real Spaces credentials and a folder: tests never use them
             'filesystems.disks.spaces.key' => '',

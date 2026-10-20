@@ -8,7 +8,7 @@ declare(strict_types=1);
  * request cut short). They wait in the storage_trash table; a file another photo still uses is kept. Safe to run any
  * time and as often as you like, for example daily from cron:
  *
- *   docker exec $(docker ps -q -f name=jinelin_web) php bin/empty-trash.php
+ *   docker exec $(docker ps -q -f name=loveofmylife_web) php bin/empty-trash.php
  */
 
 use App\Services\PhotoStorage;

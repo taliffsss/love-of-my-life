@@ -59,7 +59,7 @@ to build and preview". Post times are PHT guesses to test, not facts about your 
 
 > Build it free. Pick a plan when you're ready to send it. 💌
 > • Sweet: ₱200 a month, 12 photos, 5 templates
-> • Sweetheart: ₱350 a month, 40 photos, all 10 templates, an address of your own
+> • Sweetheart: ₱350 a month, 40 photos, all 10 templates
 > • Forever: ₱4,999 once, 60 photos, all templates, online for good
 > Need more room? 12 more photos for ₱100.
 > loveofmylife.love
@@ -67,7 +67,7 @@ to build and preview". Post times are PHT guesses to test, not facts about your 
 > Libre munang gawin at i-preview. Pumili ng plan kapag handa mo na itong ipadala.
 > #LoveOfMyLife #giftideasph
 
-*Don't post this before own addresses (`yourname.loveofmylife.love`) work, since two plans promise one.*
+*Own addresses are switched off in the app for now, so this post does not mention them.*
 
 ### Photo post 5: Engagement poll (single image, 4:5)
 **Image:** `poll-open.png` (backup poll: `poll-gift.png`)

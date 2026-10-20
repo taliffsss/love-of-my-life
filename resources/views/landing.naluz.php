@@ -169,10 +169,12 @@
           <summary>Can I change it after I send it?</summary>
           <p>Yes. Change the letter, the photos, the song, the question, the template or the colours whenever you like. The link and the QR code stay the same.</p>
         </details>
+        @if (config('saas.features.subdomains'))
         <details>
           <summary>What is the dedicated address?</summary>
           <p>With the Sweetheart and Forever plans your page can live at its own address, like <strong>yourname.{{ $domain }}</strong>. Pick the name in your dashboard and it works right away.</p>
         </details>
+        @endif
         <details>
           <summary>How many photos can I add?</summary>
           <p>Photos belong to your account and are shared by all your pages. The free preview includes {{ $freePhotos }}; each live page adds the photos of its plan: @foreach (array_values($plans) as $i => $p){{ $i > 0 ? ($i === count($plans) - 1 ? ' and ' : ', ') : '' }}{{ $p['name'] }} {{ $p['photos'] }}@endforeach. Every photo counts until you delete it. When you run out, add {{ $pack['photos'] }} more for {{ \App\Services\Plans::money($pack['price']) }}; they never expire. Each photo can be up to {{ $maxPhoto }} and fits every template without being stretched.</p>

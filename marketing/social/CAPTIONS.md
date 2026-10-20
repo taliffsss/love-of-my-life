@@ -42,11 +42,11 @@ none yet), no claims beyond what the product does.
 - TL: Sweet: online na ang page mo sa ₱200 kada buwan (o ₱2,400 kada taon). 12 photos, 5 templates. Libre munang gawin at i-preview.
 
 **plan-sweetheart**
-- EN: Sweetheart: all ten ways to open it. ₱350 a month (or ₱4,200 for a year), 40 photos, every template and an address of your own. Build and preview free first.
+- EN: Sweetheart: all ten ways to open it. ₱350 a month (or ₱4,200 for a year), 40 photos and every template. Build and preview free first.
 - TL: Sweetheart: lahat ng 10 templates, 40 photos at sariling address. ₱350 kada buwan (o ₱4,200 kada taon).
 
 **plan-forever**
-- EN: Forever: pay once, keep it for good. ₱4,999 one time, 60 photos, every template, an address of your own. Build and preview free first.
+- EN: Forever: pay once, keep it for good. ₱4,999 one time, 60 photos and every template. Build and preview free first.
 - TL: Forever: isang bayad lang, habambuhay na. ₱4,999 once, 60 photos, lahat ng template.
 
 **plan-photos**

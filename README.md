@@ -42,7 +42,7 @@ values photos are stored in `public/storage`.
 
 ```sh
 php bin/grant-plan.php LM-7KQ2-9XDA            # confirm a manual (GCash/Maya) payment and start the plan
-php bin/import-legacy.php --email=... --domain=jinelin-basela.markanthonynaluz.com --answer=yam
+php bin/import-legacy.php --email=... --domain=old-site.example.com --answer=yam
 ```
 
 ## Deploy

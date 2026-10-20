@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Copies the photos of public/photos to Spaces and lists them in storage/app/carousel.json, so they are served from
  * Spaces like every uploaded photo. Run it once on the server, where the SPACES_* settings are:
  *
- *   docker exec -it $(docker ps -q -f name=jinelin_web) php bin/migrate-photos.php [--dry-run]
+ *   docker exec -it $(docker ps -q -f name=loveofmylife_web) php bin/migrate-photos.php [--dry-run]
  *
  * Safe to run again: photos already migrated are skipped. The files stay in public/photos, but the carousel no
  * longer shows a file once its copy is listed. The migrated photos come after every uploaded one, in filename order.

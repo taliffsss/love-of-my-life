@@ -36,7 +36,7 @@ Invitation) and the three plans, with the `svc-*` and `plan-*` images.
 
 | They ask | Reply |
 |---|---|
-| "How much?" | "You can build and preview it free. When you're ready to send it, plans start at ₱200 a month; there's also ₱350 a month with all 10 templates and your own address, or ₱4,999 once for good." |
+| "How much?" | "You can build and preview it free. When you're ready to send it, plans start at ₱200 a month; there's also ₱350 a month with all 10 templates, or ₱4,999 once for good." |
 | "Is it private?" | "Yes. Only people with the link can open it, and if you set a question, only someone who knows the answer. The photos and letter aren't even sent to the browser until the right answer is typed." |
 | "Can I edit it after I send it?" | "Yes, any time. The link and QR code stay the same." |
 | "Can I use it for a wedding/birthday invite?" | "Yes! There are designs for weddings, birthdays, debuts, christenings, baby showers and more." |
@@ -65,8 +65,9 @@ restricted: use the app's Commercial Music Library or original sound for videos 
    and `promo/make_promo.sh`, and re-render.
 2. **Checkout wording.** The kit never says how to pay. Say "GCash, Maya or card" only once the PayMongo keys are set and
    checkout is live in production; until then the dashboard asks people to pay by GCash/Maya and confirm by reply.
-3. **Own address** (`yourname.loveofmylife.love`) needs the wildcard DNS and certificate (`DEPLOY.md`); Sweetheart
-   and Forever advertise it, so don't post those cards before it works.
+3. **Own address** (`yourname.loveofmylife.love`) is switched off in the app (feature flag `SUBDOMAINS_ENABLED`, see
+   `DEPLOY.md`), so nothing in this kit mentions it. Don't add it to a post until the flag is on and the wildcard DNS and
+   certificate work.
 4. **Age.** The audience includes 16–17-year-olds. Paying is for adults (a minor can't hold the payment methods), and
    Meta/TikTok limit advertising to under-18s. Keep teen posts organic and wholesome (they are), don't target ads
    below 18, and consider an age line in the terms. This is a decision for you; nothing here was changed in the app.

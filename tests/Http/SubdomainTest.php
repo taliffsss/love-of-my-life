@@ -142,12 +142,12 @@ final class SubdomainTest extends TestCase
 
     public function testACustomDomainServesItsPage(): void
     {
-        $page = $this->makeLivePage($this->owner, ['custom_domain' => 'jinelin-basela.example.com', 'recipient' => 'Jinelin Basela', 'searchable' => true]);
-        $html = (string) $this->get('https://jinelin-basela.example.com/')->getBody();
+        $page = $this->makeLivePage($this->owner, ['custom_domain' => 'old-site.example.com', 'recipient' => 'Jinelin Basela', 'searchable' => true]);
+        $html = (string) $this->get('https://old-site.example.com/')->getBody();
         $this->assertStringContainsString('For Jinelin Basela', $html);
-        $this->assertStringContainsString('<link rel="canonical" href="https://jinelin-basela.example.com/"', $html);
-        $this->assertStringContainsString('Sitemap: https://jinelin-basela.example.com/sitemap.xml', (string) $this->get('https://jinelin-basela.example.com/robots.txt')->getBody());
-        $this->assertSame(404, $this->get('https://jinelin-basela.example.com/dashboard')->getStatusCode());
+        $this->assertStringContainsString('<link rel="canonical" href="https://old-site.example.com/"', $html);
+        $this->assertStringContainsString('Sitemap: https://old-site.example.com/sitemap.xml', (string) $this->get('https://old-site.example.com/robots.txt')->getBody());
+        $this->assertSame(404, $this->get('https://old-site.example.com/dashboard')->getStatusCode());
         $this->assertNotNull($page->fresh());
     }
 
