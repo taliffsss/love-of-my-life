@@ -22,6 +22,11 @@ return [
         'signup', 'smtp', 'staging', 'static', 'status', 'support', 'terms', 'test', 'webmail', 'www',
     ],
 
+    // Google Analytics 4 measurement id. On in production by default; empty (GA_MEASUREMENT_ID=) turns it off, and development and
+    // tests send nothing. Only the marketing site, sign-in and dashboard carry the tag: never a page someone made for their
+    // loved one (those are not part of the product layout) and never the admin area (see App\Http\Screen).
+    'analytics_id' => (string) env('GA_MEASUREMENT_ID', env('APP_ENV', 'production') === 'production' ? 'G-M62J7X95ED' : ''),
+
     'currency' => 'PHP',
 
     // Dates are stored in UTC; screens show them in this time zone (App\Support\Time).

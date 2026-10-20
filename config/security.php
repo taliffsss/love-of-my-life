@@ -9,7 +9,9 @@ if ($driver === 'auto') {
     $driver = (string) env('PAYMONGO_SECRET_KEY', '') !== '' ? 'paymongo' : 'none';
 }
 // a card is sent from the browser straight to PayMongo (its number never reaches this server), which needs connect-src
-$connectSrc = "'self'" . ($driver === 'paymongo' ? ' https://api.paymongo.com' : '');
+$analytics = (string) env('GA_MEASUREMENT_ID', env('APP_ENV', 'production') === 'production' ? 'G-M62J7X95ED' : '') !== '';  // see config/saas.php
+$connectSrc = "'self'" . ($driver === 'paymongo' ? ' https://api.paymongo.com' : '')
+    . ($analytics ? ' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com' : '');
 $formAction = "'self'" . match ($driver) {
     'paymongo' => ' https://checkout.paymongo.com',
     'xendit' => ' https://checkout.xendit.co https://checkout-staging.xendit.co',
@@ -25,7 +27,7 @@ return [
             "base-uri 'self'",
             "form-action {$formAction}",
             "frame-ancestors 'self'",
-            "script-src 'self' https://www.youtube.com",
+            "script-src 'self' https://www.youtube.com" . ($analytics ? ' https://www.googletagmanager.com' : ''),
             "style-src 'self' https://fonts.googleapis.com",
             "style-src-attr 'unsafe-inline'",
             "font-src https://fonts.gstatic.com",

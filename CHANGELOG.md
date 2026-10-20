@@ -50,6 +50,15 @@ The single page becomes a product: anyone can sign up, make love pages and publi
   it is online until, or *Expired* when it has run out; a plan above it is offered as an upgrade, and Forever shows as current.
 - **Layout fixes.** Plan price buttons and the "Add photos" tile are centred, the photo count no longer wraps, the landing plans no
   longer overflow at tablet width, and a hidden header cell no longer made the admin users page scroll sideways on phones, and on a phone the page editor's cards no longer stretch wider than the screen (which pushed the *Buy photos* button off the edge).
+- **Logo and icons, ready for search engines.** A new mark (a heart with a keyhole: the question that opens a page) and logo (`/logo.svg`,
+  `/logo-dark.svg`, `/logo-mark.svg`, with the name drawn as outlines, so no font is needed), `favicon.ico` (16/32/48), `favicon.svg`,
+  PNG favicons, a 180 px Apple icon, rounded and *maskable* 192/512 app icons, a Safari pinned-tab icon, a Windows tile, and a new
+  1200x630 link-preview image. Every page links the icons (with a version so browsers fetch the new ones), the manifest lists them
+  with the right `purpose`, and the landing page carries schema.org `Organization` (with the logo) and `WebSite` data plus fuller
+  Open Graph and Twitter tags. All of it is built by `python3 marketing/brand/build_brand.py` (needs `fonttools` and `pillow`).
+- **Google Analytics.** The Google tag (`G-M62J7X95ED`, `GA_MEASUREMENT_ID`) is on the landing page, sign-in, sign-up and dashboard, only in
+  production unless you set the variable. It is never on a page someone made for their loved one or in the admin area, its start-up is
+  `/assets/analytics.js` (the CSP has no inline scripts), and the CSP allows Google's hosts only while analytics is on.
 - **Accounts and dashboard.** Sign up and sign in (e-mail + password, Argon2id, rate limited). Each account lists its
   pages and edits every part of one: who it is for and the letter, photos (uploaded from the phone, resized in the
   browser, reordered and deleted), a YouTube song, the lock screen (on/off, small heading, question, answer), the design

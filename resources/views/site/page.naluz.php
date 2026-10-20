@@ -19,10 +19,11 @@
     <meta property="og:image" content="{{ $productUrl }}og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="{{ $brand }}: a love letter they unlock with a word only they know" />
+    <meta property="og:site_name" content="{{ $brand }}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="twitter:image" content="{{ $productUrl }}og-image.png" />
+    @include('partials.icons')
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

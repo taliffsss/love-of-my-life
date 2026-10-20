@@ -53,16 +53,26 @@ final class SeoController
             'name' => $brand,
             'short_name' => $brand,
             'description' => 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.',
+            'id' => '/',
             'start_url' => '/',
             'scope' => '/',
+            'categories' => ['lifestyle', 'social'],
             'display' => 'standalone',
             'background_color' => '#160a14',
             'theme_color' => '#1a0d17',
             'lang' => 'en',
+            // "any" icons keep their rounded corners; "maskable" ones are full-bleed with the mark inside the safe zone, for the
+            // shapes Android crops icons to (files made by marketing/brand/build_brand.py)
             'icons' => [
-                ['src' => '/icons/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png'],
-                ['src' => '/icons/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png'],
-                ['src' => '/icons/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => '/icons/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => '/icons/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+                ['src' => '/icons/icon-maskable-192.png', 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => '/icons/icon-maskable-512.png', 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
+                ['src' => '/favicon.svg', 'sizes' => 'any', 'type' => 'image/svg+xml', 'purpose' => 'any'],
+            ],
+            'shortcuts' => [
+                ['name' => 'Create a page', 'short_name' => 'New page', 'url' => '/register', 'icons' => [['src' => '/icons/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png']]],
+                ['name' => 'Your pages', 'short_name' => 'Pages', 'url' => '/dashboard', 'icons' => [['src' => '/icons/icon-192.png', 'sizes' => '192x192', 'type' => 'image/png']]],
             ],
         ])
             ->withHeader('Content-Type', 'application/manifest+json; charset=utf-8')

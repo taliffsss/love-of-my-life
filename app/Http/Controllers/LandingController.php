@@ -30,11 +30,42 @@ final class LandingController
             'freePhotos' => $allowance->freePhotos(),
             'pack' => $allowance->packOptions()[1],
             'maxPhoto' => PhotoStorage::megabytes((int) config('saas.max_upload_bytes')),
+            'structuredData' => $this->structuredData(),
             'layouts' => Designs::LAYOUTS,
             'themes' => Designs::THEMES,
             'domain' => $sites->domain(),
             'siteUrl' => rtrim((string) config('app.url'), '/') . '/',
         ]);
+    }
+
+    /** Who the site is, for search engines: the organisation with its logo, and the site itself (schema.org, JSON-LD). */
+    private function structuredData(): array
+    {
+        $site = rtrim((string) config('app.url'), '/') . '/';
+        $brand = (string) config('saas.brand');
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => $site . '#organization',
+                    'name' => $brand,
+                    'url' => $site,
+                    // a square logo at least 112 px, as Google asks for; the file is public/icons/icon-512.png
+                    'logo' => ['@type' => 'ImageObject', 'url' => $site . 'icons/icon-512.png', 'width' => 512, 'height' => 512],
+                    'image' => $site . 'og-image.png',
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $site . '#website',
+                    'url' => $site,
+                    'name' => $brand,
+                    'description' => 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.',
+                    'inLanguage' => 'en',
+                    'publisher' => ['@id' => $site . '#organization'],
+                ],
+            ],
+        ];
     }
 
     /** /demo?layout=cinematic&theme=midnight — the real page, with sample content; any answer opens it. */

@@ -23,6 +23,8 @@ final class Screen
         return view($view, $data + [
             'socialProviders' => app(SocialAuth::class)->visibleProviders(),
             'brand' => (string) config('saas.brand'),
+            // Google Analytics: not in the admin area (layouts/product.naluz.php prints the tag when this is not empty)
+            'analyticsId' => str_starts_with($view, 'admin.') ? '' : (string) config('saas.analytics_id'),
             'user' => $user instanceof User ? $user : null,
             'errors' => (array) ($session->get('errors') ?? []),
             'old' => (array) ($session->get('old') ?? []),

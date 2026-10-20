@@ -9,9 +9,12 @@
     <meta name="description" content="@yield('description', 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.')" />
     <meta name="robots" content="@yield('robots', 'noindex, nofollow')" />
     @stack('head')
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    @if (! empty($analyticsId))
+    <!-- Google tag (gtag.js): the init lives in /assets/analytics.js because the CSP allows no inline scripts -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
+    <script src="/assets/analytics.js?v={{ (string) @filemtime(base_path('public/assets/analytics.js')) }}" data-id="{{ $analyticsId }}"></script>
+    @endif
+    @include('partials.icons')
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -4,11 +4,20 @@
 @push('head')
     <link rel="canonical" href="{{ $siteUrl }}" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{ $brand }}" />
     <meta property="og:title" content="{{ $brand }}: a love letter they unlock" />
     <meta property="og:description" content="Your photos, your song and a letter on one private page, opened with a question only they can answer." />
     <meta property="og:url" content="{{ $siteUrl }}" />
     <meta property="og:image" content="{{ $siteUrl }}og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="{{ $brand }}: a love letter they unlock with a word only they know" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="{{ $brand }}: a love letter they unlock" />
+    <meta name="twitter:description" content="Your photos, your song and a letter on one private page, opened with a question only they can answer." />
+    <meta name="twitter:image" content="{{ $siteUrl }}og-image.png" />
+    <meta name="twitter:image:alt" content="{{ $brand }}: a love letter they unlock with a word only they know" />
+    <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
 @endpush
 @section('content')
 <div class="hero">
