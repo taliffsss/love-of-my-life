@@ -70,7 +70,7 @@
     <li><strong>Reports and requests:</strong> as long as needed to handle them and show we did.</li>
   </ul>
 
-  <h2>8. Your rights</h2>
+  <h2 id="rights">8. Your rights</h2>
   <p>Under the Data Privacy Act you have the right to: be informed; access your personal information; object to its processing or withdraw consent; have it corrected; have it erased or blocked in the cases the law allows; receive a copy in a common format (data portability); claim compensation for damage from unlawful processing; and complain to the National Privacy Commission.</p>
   <p>To use any of them, write to <strong>{{ $legal['email'] }}</strong> from the e-mail address on your account, say what you want, and, for a page, give its link. We may ask for proof it is you. We aim to reply within 30 days. We may refuse or limit a request where the law allows (for example to protect another person’s privacy, or because we must keep payment records), and we will tell you why.</p>
   <p>You can also correct your own content in the dashboard, delete a page or photo yourself at any time, cancel a subscription, and sign out of Google or Facebook access in those services’ settings.</p>
