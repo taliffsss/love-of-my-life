@@ -9,6 +9,8 @@
 # One-time setup (repo → Settings):
 #   Secrets   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN              (required for the image)
 #             SAAS_DOCKERHUB_TOKEN                              (the Docker Hub token used instead of DOCKERHUB_TOKEN for a release of branch main-v2)
+#             SAAS_SPACES_ACCESS_KEY, _SECRET_KEY, _BUCKET, _REGION, _ENDPOINT_URL, _FOLDER, _CDN_URL
+#                                                               (main-v2 only: written to the server's .env.production as SPACES_* on every deploy)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
 #   Variables DOCKER_IMAGE (default taliffsss/loveofmylife; may also be a secret)
 #             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife; secret or variable)
@@ -180,6 +182,7 @@ jobs:
       LEGACY_DIR: ${{ secrets.DEPLOY_PATH || vars.DEPLOY_PATH || '/opt/love-of-my-life' }}
       SAAS_DIR: ${{ secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH }}
       HAS_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+      HAS_SAAS_SPACES: ${{ secrets.SAAS_SPACES_ACCESS_KEY != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -219,6 +222,33 @@ jobs:
           scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes deploy/docker-stack.yml "$HOST:$DIR/deploy/docker-stack.yml"
           $SSH "$HOST" "test -f '$DIR/deploy/.env.production'" \
             || { echo "::error::$DIR/deploy/.env.production is missing on the server (copy deploy/.env.production.example and fill it in)."; exit 1; }
+
+      - name: Apply the SAAS_SPACES_* secrets to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_SAAS_SPACES == 'true' }}
+        env:
+          SAAS_SPACES_ACCESS_KEY: ${{ secrets.SAAS_SPACES_ACCESS_KEY }}
+          SAAS_SPACES_SECRET_KEY: ${{ secrets.SAAS_SPACES_SECRET_KEY }}
+          SAAS_SPACES_BUCKET: ${{ secrets.SAAS_SPACES_BUCKET }}
+          SAAS_SPACES_REGION: ${{ secrets.SAAS_SPACES_REGION }}
+          SAAS_SPACES_ENDPOINT_URL: ${{ secrets.SAAS_SPACES_ENDPOINT_URL }}
+          SAAS_SPACES_FOLDER: ${{ secrets.SAAS_SPACES_FOLDER }}
+          SAAS_SPACES_CDN_URL: ${{ secrets.SAAS_SPACES_CDN_URL }}
+        run: |
+          # SAAS_SPACES_X on GitHub becomes SPACES_X in deploy/.env.production on the server: any older SPACES_ lines are replaced.
+          # The values travel in a file (chmod 600), not on a command line; Docker's env_file keeps quotes, so none are written.
+          umask 077
+          : > spaces.env
+          for k in ACCESS_KEY SECRET_KEY BUCKET REGION ENDPOINT_URL FOLDER CDN_URL; do
+            v="SAAS_SPACES_$k"
+            printf 'SPACES_%s=%s\n' "$k" "$(printf '%s' "${!v}" | tr -d '\r\n')" >> spaces.env
+          done
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes spaces.env "$HOST:$DIR/deploy/.spaces.env.tmp"
+          rm -f spaces.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v '^SPACES_' .env.production > .env.production.new || true
+            cat .spaces.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .spaces.env.tmp
+            echo 'SPACES_* updated:'; grep -c '^SPACES_' .env.production"
 
       - name: Pull the release image and roll out the stack
         run: |

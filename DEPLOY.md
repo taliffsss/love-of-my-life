@@ -58,6 +58,10 @@ Same pattern as hris-api and dink: a Swarm stack (`deploy/docker-stack.yml`) wit
    - **Deploy path and image:** a release of **branch `main-v2`** pushes the image named by **`SAAS_DOCKER_IMAGE`** and deploys to **`SAAS_DEPLOY_PATH`** (variable or secret; required, with no
      default). A release of any other branch uses `DOCKER_IMAGE` and `DEPLOY_PATH` (default `/opt/love-of-my-life`). The deploy job decides from
      the tagged commit: a manual run started from `main-v2`, or a tag whose commit is in `main-v2` and not in `main`.
+   - **Spaces (photo storage) for `main-v2`:** the secrets `SAAS_SPACES_ACCESS_KEY`, `SAAS_SPACES_SECRET_KEY`, `SAAS_SPACES_BUCKET`, `SAAS_SPACES_REGION`,
+     `SAAS_SPACES_ENDPOINT_URL`, `SAAS_SPACES_FOLDER`, `SAAS_SPACES_CDN_URL`. On every `main-v2` deploy they are written to the server's
+     `deploy/.env.production` as `SPACES_*` (replacing older lines), so the server file does not need them. Leave `SAAS_SPACES_ACCESS_KEY`
+     unset to keep the server's own `SPACES_*` values.
    - Environment `production` with required reviewers, so every deploy needs a human approval.
 
 ### Own addresses (feature flag)
