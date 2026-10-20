@@ -37,6 +37,109 @@ for (const btn of $$("[data-copy]")) {
   }
 }
 
+// ---------- first-visit tour (partials/tour): a popover that walks over the dashboard once ----------
+{
+  const list = $("#tour-steps");
+  const steps = list ? Array.from(list.children).map((li) => ({ target: li.dataset.target || "", title: li.dataset.title || "", text: li.textContent.trim() })) : [];
+  if (steps.length) {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const backdrop = document.createElement("div");
+    backdrop.className = "tour-backdrop";
+    const spot = document.createElement("div");
+    spot.className = "tour-spot";
+    const pop = document.createElement("div");
+    pop.className = "tour-pop";
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-modal", "true");
+    pop.setAttribute("aria-labelledby", "tour-title");
+    pop.innerHTML =
+      '<h2 id="tour-title"></h2><p id="tour-text"></p><div class="tour-foot"><span class="tour-count small muted"></span>' +
+      '<span class="tour-actions"><button type="button" class="btn btn-ghost btn-sm" data-tour="end">End tour</button>' +
+      '<button type="button" class="btn btn-secondary btn-sm" data-tour="prev">Back</button>' +
+      '<button type="button" class="btn btn-primary btn-sm" data-tour="next">Next</button></span></div>';
+    let index = 0;
+    let finished = false;
+
+    const place = () => {
+      const step = steps[index];
+      const el = step.target ? $(step.target) : null;
+      const gap = 12;
+      backdrop.style.background = el ? "transparent" : "rgba(23, 11, 20, .55)"; // a targeted step is dimmed by the spotlight itself
+      if (!el) {
+        spot.hidden = true;
+        pop.style.top = "50%";
+        pop.style.left = "50%";
+        pop.style.transform = "translate(-50%, -50%)";
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      spot.hidden = false;
+      Object.assign(spot.style, { top: `${r.top - 6}px`, left: `${r.left - 6}px`, width: `${r.width + 12}px`, height: `${r.height + 12}px` });
+      const w = Math.min(pop.offsetWidth || 340, innerWidth - 24);
+      const h = pop.offsetHeight;
+      const below = r.bottom + gap + h <= innerHeight - 12;
+      const top = below ? r.bottom + gap : Math.max(12, r.top - gap - h);
+      const left = Math.min(Math.max(12, r.left + r.width / 2 - w / 2), innerWidth - w - 12);
+      pop.style.transform = "none";
+      pop.style.top = `${top}px`;
+      pop.style.left = `${left}px`;
+    };
+
+    const show = (i) => {
+      index = i;
+      const step = steps[i];
+      $("#tour-title", pop).textContent = step.title;
+      $("#tour-text", pop).textContent = step.text;
+      $(".tour-count", pop).textContent = `${i + 1} of ${steps.length}`;
+      $('[data-tour="prev"]', pop).hidden = i === 0;
+      $('[data-tour="end"]', pop).hidden = i === steps.length - 1;
+      $('[data-tour="next"]', pop).textContent = i === steps.length - 1 ? "Done" : "Next";
+      const el = step.target ? $(step.target) : null;
+      el?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+      place();
+      // the page may still be scrolling: settle the popover once it has stopped
+      setTimeout(place, reduce ? 0 : 350);
+      $('[data-tour="next"]', pop).focus({ preventScroll: true });
+    };
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      fetch(list.dataset.url, { method: "POST", credentials: "same-origin", headers: { "X-CSRF-TOKEN": csrf, Accept: "application/json" } }).catch(() => {});
+      removeEventListener("resize", place);
+      removeEventListener("scroll", place, true);
+      removeEventListener("keydown", onKey);
+      backdrop.remove();
+      spot.remove();
+      pop.remove();
+    };
+    const next = () => (index >= steps.length - 1 ? finish() : show(index + 1));
+    const onKey = (e) => {
+      if (e.key === "Escape") finish();
+      else if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft" && index > 0) show(index - 1);
+      else if (e.key === "Tab") {
+        const focusable = $$("button:not([hidden])", pop);
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) (e.preventDefault(), last.focus());
+        else if (!e.shiftKey && document.activeElement === last) (e.preventDefault(), first.focus());
+      }
+    };
+    pop.addEventListener("click", (e) => {
+      const action = e.target.closest("[data-tour]")?.dataset.tour;
+      if (action === "next") next();
+      else if (action === "prev" && index > 0) show(index - 1);
+      else if (action === "end") finish();
+    });
+    document.body.append(backdrop, spot, pop);
+    addEventListener("resize", place);
+    addEventListener("scroll", place, true);
+    addEventListener("keydown", onKey);
+    show(0);
+  }
+}
+
 // ---------- dialogs ----------
 for (const opener of $$("[data-open]")) {
   const dialog = $(opener.dataset.open);

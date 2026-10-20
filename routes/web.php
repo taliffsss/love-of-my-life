@@ -11,6 +11,7 @@ use App\Http\Controllers\Dashboard\OrdersController;
 use App\Http\Controllers\Dashboard\PagesController;
 use App\Http\Controllers\Dashboard\PhotosController;
 use App\Http\Controllers\Dashboard\SubdomainController;
+use App\Http\Controllers\Dashboard\TourController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\SeoController;
@@ -65,6 +66,8 @@ $router->group(['prefix' => 'dashboard', 'middleware' => ['auth', 'noindex']], s
     $router->post('/pages/{slug}/photos', [PhotosController::class, 'store'])->where('slug', $slug)->middleware(['throttle:60,1']);
     $router->post('/pages/{slug}/photos/order', [PhotosController::class, 'reorder'])->where('slug', $slug);
     $router->delete('/pages/{slug}/photos/{photo}', [PhotosController::class, 'destroy'])->where('slug', $slug)->where('photo', '\d+');
+
+    $router->post('/tour', [TourController::class, 'complete'])->middleware(['throttle:20,1']);
 
     $router->get('/subdomains/check', [SubdomainController::class, 'check'])->middleware(['throttle:60,1']);
     $router->put('/pages/{slug}/subdomain', [SubdomainController::class, 'update'])->where('slug', $slug);

@@ -137,4 +137,7 @@
   @endforeach
   @endif
 </main>
+@if ($user !== null && $user->tour_seen_at === null)
+@include('partials.tour')
+@endif
 @endsection

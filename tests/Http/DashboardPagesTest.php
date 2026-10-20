@@ -176,6 +176,21 @@ final class DashboardPagesTest extends TestCase
         $this->assertStringNotContainsString('name="page"', $html, 'bought from the dashboard: no page to come back to');
     }
 
+    public function testTheTourShowsOnceAndIsRemembered(): void
+    {
+        $html = (string) $this->get('/dashboard')->getBody();
+        $this->assertStringContainsString('id="tour-steps"', $html, 'a new account is shown the tour');
+        $this->assertStringContainsString('data-target="#recipient"', $html);
+
+        $response = $this->ajax('POST', '/dashboard/tour');
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertNotNull(User::query()->where('id', $this->owner->id)->first()->tour_seen_at);
+
+        $html = (string) $this->get('/dashboard')->getBody();
+        $this->assertStringNotContainsString('id="tour-steps"', $html, 'finished or skipped: never again');
+        $this->assertSame(200, $this->ajax('POST', '/dashboard/tour')->getStatusCode(), 'asking twice is harmless');
+    }
+
     public function testFreeDraftsAreLimited(): void
     {
         for ($i = 0; $i < PagesController::MAX_DRAFTS; $i++) {

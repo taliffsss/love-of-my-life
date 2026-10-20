@@ -579,3 +579,14 @@ a.stat:hover { box-shadow: var(--shadow-2); }
 .legal-table th, .legal-table td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
 .legal-table tr:last-child td { border-bottom: 0; }
 .legal-table th { font-weight: 600; background: var(--surface-2, rgba(0,0,0,.04)); }
+
+/* ---------- first-visit tour ---------- */
+.tour-backdrop { position: fixed; inset: 0; z-index: 90; }
+.tour-spot { position: fixed; z-index: 91; border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(23, 11, 20, .55); transition: top .25s var(--ease), left .25s var(--ease), width .25s var(--ease), height .25s var(--ease); }
+.tour-spot[hidden] { display: block; visibility: hidden; }
+.tour-pop { position: fixed; z-index: 92; width: min(360px, calc(100% - 24px)); padding: 18px 18px 14px; border-radius: var(--radius-lg); background: var(--surface); color: var(--ink); box-shadow: 0 30px 80px rgba(0, 0, 0, .3); display: grid; gap: 8px; }
+.tour-pop h2 { font-size: 1.1rem; }
+.tour-pop p { color: var(--ink-2); font-size: .94rem; }
+.tour-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.tour-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: reduce) { .tour-spot { transition: none; } }

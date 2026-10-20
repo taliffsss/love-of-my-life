@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.0 (2026-10-21, branch `main-v2`)
+
+- **First-visit tour.** A new account sees a six-step popover tour on its dashboard (welcome, who the page is for, occasions, creating the page, photos and
+  plans, done), with spotlight, Back / Next / End tour, arrow keys and Esc. Finishing or skipping it is remembered (`users.tour_seen_at`), so it shows once;
+  accounts that exist already are marked as having seen it. New migration `2026_10_21_000014_add_tour_seen_at_to_users`.
+
 ## 3.1.1 (2026-10-21, branch `main-v2`)
 
 - The landing page header is transparent again (no added colour), stays at the top while scrolling, and takes the hero's dark gradient (`--night` to `--night-2`) as its background once a light section is under it.

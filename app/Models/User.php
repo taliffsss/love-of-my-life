@@ -16,6 +16,7 @@ use Naluz\Database\Orm\Relations\HasMany;
  * @property bool $is_admin
  * @property string $status active, deactivated or suspended: only an active account can sign in
  * @property ?string $status_reason
+ * @property ?\DateTimeInterface $tour_seen_at when the dashboard tour was finished or skipped (null: not yet, so it shows)
  * @property string $login_type manual, google or facebook: how the account was made
  */
 final class User extends Model
@@ -27,7 +28,7 @@ final class User extends Model
 
     protected array $fillable = ['name', 'email', 'password'];
     protected array $hidden = ['password'];
-    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'status_changed_at' => 'datetime'];
+    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'status_changed_at' => 'datetime', 'tour_seen_at' => 'datetime'];
 
     public function isActive(): bool
     {
