@@ -95,6 +95,7 @@ final class DeploymentFilesTest extends TestCase
         $this->assertStringContainsString('"main-v2"', $release);
         $this->assertStringContainsString('v2: ${{ steps.c.outputs.v2 }}', $release);
         $this->assertStringContainsString("secrets.DOCKER_IMAGE || vars.DOCKER_IMAGE || 'taliffsss/loveofmylife'", $release, 'the image name may be a secret or a variable');
+        $this->assertSame(3, substr_count($release, 'Image name needs the Docker Hub namespace'), 'every job that uses the image adds the account name when it is missing');
         $this->assertStringContainsString('SAAS_DEPLOY_PATH, which is not set', $release, 'main-v2 never falls back to the old deploy path');
     }
 
