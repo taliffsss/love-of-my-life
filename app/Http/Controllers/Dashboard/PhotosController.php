@@ -32,6 +32,9 @@ final class PhotosController
         $page = $this->ownedPage($auth, $slug);
         $userId = (int) $auth->id();
         $usage = $allowance->of($userId);
+        if (!$usage['subscribed']) {
+            return Response::json(['message' => $allowance->subscribeMessage(), 'code' => 'subscription_required', 'usage' => self::usage($usage)], 422);
+        }
         if ($usage['remaining'] <= 0) {
             return $this->full($allowance, $usage);
         }
@@ -149,7 +152,7 @@ final class PhotosController
         return Response::json(['message' => $allowance->fullMessage($usage), 'code' => 'photo_limit', 'usage' => self::usage($usage)], 422);
     }
 
-    /** @param array<string,mixed> $usage @return array{used:int,total:int,remaining:int,over:int,packs_needed:int} */
+    /** @param array<string,mixed> $usage @return array{used:int,total:int,remaining:int,over:int,packs_needed:int,subscribed:bool} */
     private static function usage(array $usage): array
     {
         return [
@@ -158,6 +161,7 @@ final class PhotosController
             'remaining' => (int) $usage['remaining'],
             'over' => (int) $usage['over'],
             'packs_needed' => (int) $usage['packs_needed'],
+            'subscribed' => (bool) $usage['subscribed'],
         ];
     }
 

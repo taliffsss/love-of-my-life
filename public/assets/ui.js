@@ -123,8 +123,19 @@ if (editor) {
     return new Promise((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("That photo could not be read."))), "image/jpeg", 0.9));
   }
 
+  // Photos need a plan first: without one, asking to add photos opens the "subscribe first" dialog instead.
+  const subscribed = () => editor.dataset.subscribed !== "0";
+  const subscribeDialog = $("#subscribe-dialog");
+  if (subscribeDialog) for (const closer of $$("[data-close]", subscribeDialog)) closer.addEventListener("click", () => subscribeDialog.close());
+  function askToSubscribe() {
+    if (input) input.value = "";
+    if (subscribeDialog?.showModal) subscribeDialog.showModal();
+    else say("Subscribe to a plan first, then you can add photos. Choose one under Plan.");
+  }
+
   async function upload(files) {
     if (!files.length) return;
+    if (!subscribed()) return askToSubscribe();
     // the server checks all of this again; checking first saves uploading what it would refuse
     const tooBig = files.filter((f) => f.size > maxBytes);
     let queue = files.filter((f) => f.size <= maxBytes);
@@ -167,6 +178,10 @@ if (editor) {
         setTimeout(() => location.reload(), 4000);
       }
     } catch (e) {
+      if (e.code === "subscription_required") {
+        editor.dataset.subscribed = "0";
+        askToSubscribe();
+      }
       if (e.code === "photo_limit") {
         showUsage(e.usage);
         usageBox?.querySelector("details")?.setAttribute("open", "");
@@ -179,6 +194,12 @@ if (editor) {
     }
   }
   input?.addEventListener("change", () => upload(Array.from(input.files || [])));
+  // the picker itself must not open for an account without a plan
+  zone?.addEventListener("click", (e) => {
+    if (subscribed()) return;
+    e.preventDefault();
+    askToSubscribe();
+  });
   if (zone) {
     zone.addEventListener("dragover", (e) => {
       e.preventDefault();

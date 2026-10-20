@@ -63,10 +63,11 @@ final class PhotoAllowance
      * The account's photos right now. Read from the primary database, never a cache, so a check made just before an
      * upload sees the latest photos, plans and payments.
      *
-     * @return array{used:int,total:int,remaining:int,over:int,included:int,bought:int,packs_needed:int,sources:list<array{recipient:string,plan:string,photos:int}>}
+     * @return array{used:int,total:int,remaining:int,over:int,included:int,bought:int,packs_needed:int,subscribed:bool,sources:list<array{recipient:string,plan:string,photos:int}>}
      *         `included`: from the plans (`sources`: one entry per live page; empty while the free preview's applies),
      *         `bought`: from packs, `over`: photos beyond the allowance, `packs_needed`: packs to buy before one more
-     *         photo fits (0 while there is room)
+     *         photo fits (0 while there is room), `subscribed`: whether photos may be added at all, which takes a live
+     *         plan (or packs bought earlier); the free preview's allowance alone does not
      */
     public function of(int $userId, ?\DateTimeImmutable $now = null): array
     {
@@ -103,8 +104,15 @@ final class PhotoAllowance
             'included' => $included,
             'bought' => $bought,
             'packs_needed' => $remaining > 0 ? 0 : (int) ceil(($over + 1) / $this->packPhotos),
+            'subscribed' => $sources !== [] || $bought > 0,
             'sources' => $sources,
         ];
+    }
+
+    /** Why an account without a live plan cannot add photos yet. */
+    public function subscribeMessage(): string
+    {
+        return 'Subscribe to a plan first, then you can add photos. Choose one under Plan to put this page online.';
     }
 
     /** Why an upload was refused, and what to do about it. @param array{used:int,total:int,over:int} $usage */

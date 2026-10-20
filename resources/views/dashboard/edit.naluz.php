@@ -6,10 +6,11 @@
   $status = $page->status();
   $plan = $page->planDetails();
   $photoCount = count($photos);
-  $canAdd = $usage['remaining'] > 0;
+  $subscribed = $usage['subscribed'];
+  $canAdd = !$subscribed || $usage['remaining'] > 0; // unsubscribed: the zone stays, and opens the "subscribe first" dialog
   $letterText = isset($old['message']) ? (string) $old['message'] : implode("\n\n", $page->paragraphs());
 @endphp
-<main class="container" data-page="{{ $page->slug }}" data-max-bytes="{{ $maxUploadBytes }}">
+<main class="container" data-page="{{ $page->slug }}" data-subscribed="{{ $subscribed ? '1' : '0' }}" data-max-bytes="{{ $maxUploadBytes }}">
   <div class="page-head">
     <div style="min-width:0">
       <a class="small" href="/dashboard">&larr; Your pages</a>
@@ -96,7 +97,7 @@
             @endforeach
             <label class="upload-zone" id="upload-zone" @if (!$canAdd) hidden @endif>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V5M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
-              <span>Add photos</span>
+              <span>Add photos@if ($subscribed && $usage['remaining'] > 0) <small class="muted">(up to {{ $usage['remaining'] }})</small>@endif</span>
               <input id="photo-input" type="file" accept="image/*" multiple class="sr-only" />
             </label>
           </div>
@@ -413,6 +414,17 @@
     </aside>
   </div>
 </main>
+
+<dialog class="modal" id="subscribe-dialog" aria-labelledby="subscribe-dialog-title">
+  <div class="modal-body">
+    <h2 id="subscribe-dialog-title">Subscribe first</h2>
+    <p class="muted">Photos are stored on your account, so a plan comes first. Choose a plan, then add the photos for {{ $page->recipient }}.</p>
+  </div>
+  <div class="section-foot">
+    <button class="btn btn-ghost" type="button" data-close>Not now</button>
+    <a class="btn btn-primary" href="#plan" data-close>Choose a plan</a>
+  </div>
+</dialog>
 
 <dialog class="modal" id="delete-dialog" aria-labelledby="delete-dialog-title">
   <form method="post" action="/dashboard/pages/{{ $page->slug }}">

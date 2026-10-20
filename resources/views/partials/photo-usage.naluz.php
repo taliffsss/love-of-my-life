@@ -20,6 +20,9 @@
   $selected = max(1, min(count($packs), $u['packs_needed']));
 @endphp
 <div class="usage usage-{{ $state }}" id="photo-usage" data-remaining="{{ $u['remaining'] }}" data-pack="{{ $packText }}">
+  @if (!$u['subscribed'])
+  <p class="notice notice-warn" id="usage-subscribe" role="status">Subscribe to a plan to add photos. Choose one under Plan{{ !empty($upgradeUrl) ? '' : ' on a page' }} first.@if (!empty($upgradeUrl)) <a href="{{ $upgradeUrl }}">See plans</a>@endif</p>
+  @endif
   <div class="usage-head">
     <strong>Photos on your account</strong>
     <span class="usage-count"><b id="usage-used">{{ $u['used'] }}</b> of <span id="usage-total">{{ $u['total'] }}</span> used · <span id="usage-left">{{ $u['over'] > 0 ? $u['over'] . ' over' : $u['remaining'] . ' left' }}</span></span>
@@ -35,6 +38,7 @@
       Only {{ $u['remaining'] }} left. When they are used up, add {{ $packText }} or upgrade your plan.
     @endif
   </p>
+  @if ($u['subscribed'])
   <div class="usage-more">
     <form method="post" action="/dashboard/photo-packs" class="pack-form" novalidate>
       @csrf
@@ -57,4 +61,5 @@
     @include('partials.errors', ['field' => 'packs'])
     <p class="hint">Photos are paid once and kept for good, shared by all your pages. You pay the same way as a plan: GCash, PayMaya or a card.</p>
   </div>
+  @endif
 </div>

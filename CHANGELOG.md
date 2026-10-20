@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.0 (2026-10-20, branch `main-v2`)
+
+- **Photos need a plan first.** An account with no live plan (and no photo packs bought earlier) can no longer upload photos: the server refuses
+  the upload before it reaches storage (`subscription_required`), and the editor opens a "Subscribe first" dialog instead of the file picker.
+  The free preview's photos are gone; the letter, song and design stay free to build.
+- "Add photos" shows how many photos are left; a selection larger than that uploads only the first ones that fit.
+- The landing page header stays at the top while scrolling.
+
 ## 3.0.2 (2026-10-20, branch `main-v2`)
 
 - **Sign in with Facebook is ready to switch on:** set `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` in the server's `.env.production` (placeholders added to

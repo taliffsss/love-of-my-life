@@ -397,6 +397,11 @@ final class OnlinePaymentsTest extends TestCase
     {
         $this->usePayMongo();
         $html = (string) $this->get('/dashboard/pages/' . $this->page->slug)->getBody();
+        $this->assertStringContainsString('Subscribe to a plan to add photos.', $html, 'photos come after a plan');
+        $this->assertStringNotContainsString('action="/dashboard/photo-packs"', $html);
+
+        $this->freshPage()->forceFill(['plan' => 'sweet', 'expires_at' => '2099-01-01 00:00:00', 'published_at' => '2026-01-01 00:00:00'])->save();
+        $html = (string) $this->get('/dashboard/pages/' . $this->page->slug)->getBody();
         $this->assertStringContainsString('Need more photos? 12 for ₱100', $html);
         $this->assertStringContainsString('action="/dashboard/photo-packs"', $html);
         $this->assertStringContainsString('<a class="btn btn-secondary btn-sm" href="#plan">Upgrade plan</a>', $html);

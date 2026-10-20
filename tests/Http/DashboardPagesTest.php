@@ -164,7 +164,13 @@ final class DashboardPagesTest extends TestCase
         $this->makePhoto($this->makePage($this->owner), 'https://cdn.test/a.jpg', 1);
         $this->makePhoto($this->makePage($this->owner), 'https://cdn.test/b.jpg', 1);
         $html = (string) $this->get('/dashboard')->getBody();
-        $this->assertMatchesRegularExpression('#<b id="usage-used">2</b> of <span id="usage-total">6</span> used · <span id="usage-left">4 left</span>#', $html);
+        $this->assertStringContainsString('Subscribe to a plan to add photos.', $html, 'no live plan: subscribe first');
+        $this->assertStringNotContainsString('action="/dashboard/photo-packs"', $html);
+
+        $this->makeLivePage($this->owner, ['plan' => 'sweet', 'expires_at' => '2099-01-01 00:00:00']);
+        $html = (string) $this->get('/dashboard')->getBody();
+        $this->assertStringNotContainsString('Subscribe to a plan to add photos.', $html);
+        $this->assertMatchesRegularExpression('#<b id="usage-used">2</b> of <span id="usage-total">12</span> used · <span id="usage-left">10 left</span>#', $html);
         $this->assertStringContainsString('Need more photos? 12 for ₱100', $html);
         $this->assertStringContainsString('action="/dashboard/photo-packs"', $html);
         $this->assertStringNotContainsString('name="page"', $html, 'bought from the dashboard: no page to come back to');

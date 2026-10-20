@@ -20,24 +20,24 @@
     <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
 @endpush
 @section('content')
+<header class="hero-nav">
+  <div class="container">
+    @include('partials.brand')
+    <span class="spacer"></span>
+    <nav aria-label="Main" class="row">
+      <a class="hide-sm" href="#templates">Templates</a>
+      <a class="hide-sm" href="#pricing">Pricing</a>
+      <a class="hide-sm" href="/demo">Demo</a>
+      @if ($user !== null)
+      <a class="btn btn-light btn-sm" href="/dashboard">Your pages</a>
+      @else
+      <a href="/login">Sign in</a>
+      <a class="btn btn-light btn-sm" href="/register">Create a page</a>
+      @endif
+    </nav>
+  </div>
+</header>
 <div class="hero">
-  <header class="hero-nav">
-    <div class="container">
-      @include('partials.brand')
-      <span class="spacer"></span>
-      <nav aria-label="Main" class="row">
-        <a class="hide-sm" href="#templates">Templates</a>
-        <a class="hide-sm" href="#pricing">Pricing</a>
-        <a class="hide-sm" href="/demo">Demo</a>
-        @if ($user !== null)
-        <a class="btn btn-light btn-sm" href="/dashboard">Your pages</a>
-        @else
-        <a href="/login">Sign in</a>
-        <a class="btn btn-light btn-sm" href="/register">Create a page</a>
-        @endif
-      </nav>
-    </div>
-  </header>
   <div class="container">
     <div>
       <p class="eyebrow">For monthsaries, anniversaries and “just because”</p>
