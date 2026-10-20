@@ -244,6 +244,8 @@ jobs:
             done
             echo 'Timed out waiting for '\$svc' to run '\$want >&2
             docker service ps \"\$svc\" --no-trunc | head -5
+            echo '--- last log lines of the service ---' >&2
+            docker service logs --tail 60 --no-task-ids \"\$svc\" 2>&1 | tail -60 >&2
             exit 1"
 
       - name: Check the live site answers
