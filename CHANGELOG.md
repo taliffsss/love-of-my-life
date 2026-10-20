@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.2 (2026-10-20, branch `main-v2`)
+
+- **Sign in with Facebook is ready to switch on:** set `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` in the server's `.env.production` (placeholders added to
+  the example) and register `https://loveofmylife.love/auth/facebook/callback` at Meta; Google works the same way with `/auth/google/callback`.
+- The Privacy Policy's rights section has an anchor (`/privacy#rights`) for Meta's data-deletion instructions URL.
+
 ## 3.0.1 (2026-10-20, branch `main-v2`)
 
 - **Docker image has the PostgreSQL and MySQL drivers** (`pdo_pgsql`, `pdo_mysql`). The first deploy of 3.0.0 crashed with "could not find driver" when `DB_CONNECTION` was not `sqlite`.
