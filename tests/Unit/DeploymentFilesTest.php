@@ -20,6 +20,14 @@ final class DeploymentFilesTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/^\s*HEALTHCHECK\b/mi', $dockerfile);
     }
 
+    public function testTheImageHasEveryDatabaseDriverTheDocsPromise(): void
+    {
+        $dockerfile = $this->file('Dockerfile');
+        foreach (['pdo_pgsql', 'pdo_mysql'] as $driver) {
+            $this->assertStringContainsString($driver, $dockerfile, $driver . ': "could not find driver" stopped the first deploy of 3.0.0');
+        }
+    }
+
     public function testTheStackRunsNoHealthChecks(): void
     {
         $stack = $this->file('deploy/docker-stack.yml');

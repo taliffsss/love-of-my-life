@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1 (2026-10-20, branch `main-v2`)
+
+- **Docker image has the PostgreSQL and MySQL drivers** (`pdo_pgsql`, `pdo_mysql`). The first deploy of 3.0.0 crashed with "could not find driver" when `DB_CONNECTION` was not `sqlite`.
+
 ## 3.0.0 (2026-10-20, branch `main-v2`)
 
 The single page becomes a product: anyone can sign up, make love pages and publish them.

@@ -23,8 +23,11 @@ RUN composer dump-autoload --classmap-authoritative --no-dev --no-scripts \
 FROM php:8.3-fpm-alpine AS production
 
 # NaluzPHP needs mbstring, openssl, sodium, fileinfo and curl: all already compiled into the official image.
-RUN apk add --no-cache nginx supervisor curl \
-    && docker-php-ext-install opcache \
+# pdo_pgsql and pdo_mysql so DB_CONNECTION=pgsql|mysql work (SQLite is built in); DEPLOY.md promises all three.
+RUN apk add --no-cache nginx supervisor curl libpq \
+    && apk add --no-cache --virtual .build-deps postgresql-dev \
+    && docker-php-ext-install opcache pdo_pgsql pdo_mysql \
+    && apk del .build-deps \
     && rm -rf /tmp/* /var/cache/apk/*
 
 COPY docker/php/php.ini                 /usr/local/etc/php/conf.d/app.ini
