@@ -47,9 +47,11 @@ final class SocialController
         }
         $state = is_string($query['state'] ?? null) ? $query['state'] : '';
         $code = is_string($query['code'] ?? null) ? $query['code'] : '';
-        if (!is_array($saved) || $state === '' || $code === ''
+        if (
+            !is_array($saved) || $state === '' || $code === ''
             || !hash_equals((string) ($saved['state'] ?? ''), $state)
-            || time() - (int) ($saved['at'] ?? 0) > self::MAX_AGE) {
+            || time() - (int) ($saved['at'] ?? 0) > self::MAX_AGE
+        ) {
             return Screen::back('/login', 'That sign-in link expired. Please try again.');
         }
 

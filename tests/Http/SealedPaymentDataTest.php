@@ -95,8 +95,10 @@ final class SealedPaymentDataTest extends TestCase
             'method' => 'card', 'provider' => 'paymongo', 'mode' => 'auto', 'provider_ref' => 'sub_secret', 'last_invoice_ref' => 'inv_secret'])->save();
         ProviderRef::remember('paymongo', 'customer', 'user:1', 'cus_secret');
 
-        foreach ([['payment_attempts', $attempt->id, ['provider_ref', 'redirect_url', 'subscription_ref']], ['subscriptions', $sub->id, ['provider_ref', 'last_invoice_ref']],
-            ['provider_refs', (int) $this->db()->table('provider_refs')->first()['id'], ['ref']]] as [$table, $id, $columns]) {
+        foreach (
+            [['payment_attempts', $attempt->id, ['provider_ref', 'redirect_url', 'subscription_ref']], ['subscriptions', $sub->id, ['provider_ref', 'last_invoice_ref']],
+            ['provider_refs', (int) $this->db()->table('provider_refs')->first()['id'], ['ref']]] as [$table, $id, $columns]
+        ) {
             $raw = $this->raw($table, $id);
             foreach ($columns as $column) {
                 $this->assertNotNull($raw[$column], "$table.$column");

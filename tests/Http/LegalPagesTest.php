@@ -39,10 +39,12 @@ final class LegalPagesTest extends TestCase
     public function testThePolicyDescribesWhatTheAppDoes(): void
     {
         $privacy = (string) $this->get('/privacy')->getBody();
-        foreach ([
+        foreach (
+            [
             'Republic Act No. 10173', 'National Privacy Commission', 'Argon2id', 'Google Analytics', 'PayMongo', 'Xendit', 'YouTube',
             'naluz_session', 'data portability', 'within the time the law requires',
-        ] as $fact) {
+            ] as $fact
+        ) {
             $this->assertStringContainsString($fact, $privacy, $fact);
         }
         $this->assertSame('naluz_session', config('session.cookie'), 'the cookie the policy names');

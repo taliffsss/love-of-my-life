@@ -49,8 +49,13 @@ final class OnlinePaymentsTest extends TestCase
         $stack->push(Middleware::history($this->history));
         $this->app->make(Repository::class)->set('saas.payments.driver', 'paymongo');
         $this->app->instance(PayMongoGateway::class, new PayMongoGateway(
-            'sk_test_sec', self::WEBHOOK_SECRET, ['gcash'], 'https://love.test',
-            new Client(['handler' => $stack, 'http_errors' => false]), 'pk_test_pub', $subscriptions,
+            'sk_test_sec',
+            self::WEBHOOK_SECRET,
+            ['gcash'],
+            'https://love.test',
+            new Client(['handler' => $stack, 'http_errors' => false]),
+            'pk_test_pub',
+            $subscriptions,
         ));
     }
 
