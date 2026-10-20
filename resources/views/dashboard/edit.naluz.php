@@ -180,6 +180,9 @@
             <div><h2 id="design-title">Design</h2><p>Pick an occasion, then one of its {{ count($layouts) }} designs and a colour theme; every design works with every theme. Change them any time: the preview updates before you save.</p></div>
           </div>
           <div class="section-body stack" style="--gap:18px">
+            @if ($planFilter !== null)
+            <p class="notice notice-brand" role="status">@if ($planFilter['all'])Showing all {{ count($layouts) }} templates. <a href="?">Show only the {{ $planFilter['count'] }} that come with {{ $planFilter['name'] }}</a>@else Showing the {{ $planFilter['count'] }} templates that come with {{ $planFilter['name'] }}, the plan you chose. <a href="?templates=all#design">Show all {{ count($layouts) }}</a>@endif</p>
+            @endif
             <fieldset style="border:0;margin:0;padding:0">
               <legend class="label" style="margin-bottom:10px">Occasion</legend>
               @include('partials.errors', ['field' => 'occasion'])
@@ -197,7 +200,7 @@
               @foreach ($groups as $okey => $occasion)
               @php $okey = (string) $okey; $current = (string) $page->occasion === $okey; @endphp
               <div class="choice-grid design-grid" data-occasion="{{ $okey }}">
-                @foreach ($layouts as $key => $layout)
+                @foreach ($shownLayouts as $key => $layout)
                 @php $label = $okey === '' ? $layout['name'] : $occasionDesigns[$okey][$key][0]; $about = $okey === '' ? $layout['description'] : $occasionDesigns[$okey][$key][1]; @endphp
                 <label class="choice">
                   <input type="radio" name="layout" value="{{ $key }}" @if ($current && $page->layout === $key) checked @endif @if ($templateNotes[$key]['locked']) data-locked="{{ $label }} comes with {{ $templateNotes[$key]['plans'] }}. Preview it here, then upgrade the plan to use it." @endif />

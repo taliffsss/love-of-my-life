@@ -28,6 +28,44 @@ final class AuthTest extends TestCase
         $this->assertSame(200, $this->get('/dashboard')->getStatusCode(), 'the new account is signed in');
     }
 
+    public function testThePlanChosenBeforeSigningUpIsSavedWithTheNewAccount(): void
+    {
+        $this->assertStringContainsString('You chose <strong>Sweet</strong>', (string) $this->get('/register?plan=sweet')->getBody());
+        $this->form('POST', '/register', [
+            '_token' => $this->csrf('/register'),
+            'name' => 'Mark', 'email' => 'mark@example.com', 'password' => 'long enough', 'password_confirmation' => 'long enough',
+        ]);
+        $this->assertSame('sweet', User::query()->where('email', 'mark@example.com')->first()->intended_plan);
+
+        // the dashboard shows only the 5 templates of Sweet for each occasion, with a way to see them all
+        $html = (string) $this->get('/dashboard')->getBody();
+        $this->assertStringContainsString('Showing the 5 templates per occasion that come with Sweet', $html);
+        $this->assertSame(5 * 5, substr_count($html, 'name="template"'), '5 occasions, 5 templates each');
+        $this->assertSame(10 * 5, substr_count((string) $this->get('/dashboard?templates=all')->getBody(), 'name="template"'));
+    }
+
+    public function testAnUnknownOrFreePlanIsNotKept(): void
+    {
+        foreach (['free', 'nonsense', '<script>'] as $plan) {
+            $this->get('/register?plan=' . urlencode($plan));
+        }
+        $this->form('POST', '/register', [
+            '_token' => $this->csrf('/register'),
+            'name' => 'Mark', 'email' => 'mark@example.com', 'password' => 'long enough', 'password_confirmation' => 'long enough',
+        ]);
+        $this->assertNull(User::query()->where('email', 'mark@example.com')->first()->intended_plan);
+        $this->assertSame(50, substr_count((string) $this->get('/dashboard')->getBody(), 'name="template"'), 'no plan chosen: every template, as before');
+    }
+
+    public function testSigningInKeepsThePlanPickedOnThePricingSection(): void
+    {
+        $user = $this->makeUser('mark@example.com', 'long enough');
+        $this->get('/login?plan=sweetheart');
+        $this->form('POST', '/login', ['_token' => $this->csrf('/login'), 'email' => 'mark@example.com', 'password' => 'long enough']);
+        $this->assertSame('sweetheart', User::query()->where('id', $user->id)->first()->intended_plan);
+        $this->assertSame(50, substr_count((string) $this->get('/dashboard')->getBody(), 'name="template"'), 'Sweetheart has every template: nothing to narrow');
+    }
+
     public function testRegistrationValidatesTheFields(): void
     {
         $this->makeUser('taken@example.com');

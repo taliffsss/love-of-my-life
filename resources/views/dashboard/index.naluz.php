@@ -38,6 +38,9 @@
       </div>
       @endforeach
       @include('partials.errors', ['field' => 'template'])
+      @if ($filterable)
+      <p class="notice notice-brand" role="status">@if ($planFilter !== null)Showing the {{ $planFilter['count'] }} templates per occasion that come with {{ $user->intended_plan !== null ? $planFilter['name'] : '' }}, the plan you chose. <a href="/dashboard?templates=all">Show all templates</a>@else Showing every template. <a href="/dashboard">Show only the ones in your plan</a>@endif</p>
+      @endif
       <p class="small muted">Pick one for a ready-made letter, question, layout and colours. You can change all of it afterwards.</p>
     </fieldset>
     <button class="btn btn-primary" type="submit">

@@ -6,20 +6,24 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Screen;
 use App\Models\User;
+use App\Services\IntendedPlan;
 use Naluz\Auth\Auth;
+use Naluz\Database\Connection;
 use Naluz\Http\Request;
+use Naluz\Session\Store;
 use Naluz\Validation\ValidationException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class SessionController
 {
-    public function show(): ResponseInterface
+    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session): ResponseInterface
     {
+        $intended->remember($session, $request->getQueryParams()['plan'] ?? null);
         return Screen::render('auth.login');
     }
 
-    public function store(ServerRequestInterface $request, Auth $auth): ResponseInterface
+    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session): ResponseInterface
     {
         $input = Request::body($request);
         $email = User::normaliseEmail((string) ($input['email'] ?? ''));
@@ -36,6 +40,9 @@ final class SessionController
             throw new ValidationException(['email' => [$user->inactiveMessage()]], ['email' => $email]);
         }
 
+        if ($user instanceof User) {
+            $intended->claim($session, $user, $db);
+        }
         return Screen::back('/dashboard');
     }
 

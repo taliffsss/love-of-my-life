@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3.0 (2026-10-21, branch `main-v2`)
+
+- **The plan you pick on the pricing section follows you.** "Start with Sweet" now goes to `/register?plan=sweet` (or `/dashboard?plan=sweet` when already
+  signed in). The choice is kept through sign-up or sign-in, including Google and Facebook, and saved with the account (`users.intended_plan`, migration
+  `2026_10_21_000016`). Only plans that can be bought are kept.
+- **Only the templates of that plan are shown.** With Sweet chosen, the dashboard's occasion templates (5 of 10 per occasion) and a draft page's Design picker
+  (5 of 10 layouts) list just what Sweet includes, with a "Show all" link. Plans with every template, accounts that chose none, and pages that are already
+  live behave as before.
+
 ## 3.2.0 (2026-10-21, branch `main-v2`)
 
 - **First-visit tour.** A new account sees a six-step popover tour on its dashboard (welcome, who the page is for, occasions, creating the page, photos and

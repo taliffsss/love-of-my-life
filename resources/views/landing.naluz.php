@@ -122,7 +122,7 @@
     <div class="container">
       <p class="eyebrow">Pricing</p>
       <h2 id="pricing-title" style="margin-top:10px">Monthly, yearly, or once for good.</h2>
-      <p class="sub">Build your page and preview it for free, with every template. Choose a plan only when you are ready to send it.</p>
+      <p class="sub">Build your page and preview it for free. Choose a plan when you are ready to send it; pick one now and we show you the templates it includes.</p>
       <div class="plans">
         @foreach ($plans as $key => $plan)
         @php $monthly = $plan['prices']['month'] ?? null; $yearly = $plan['prices']['year'] ?? null; $once = $plan['prices']['once'] ?? null; @endphp
@@ -148,7 +148,7 @@
             <li>Its own address: <strong>yourname.{{ $domain }}</strong></li>
             @endif
           </ul>
-          <a class="btn {{ $plan['popular'] ? 'btn-primary' : 'btn-secondary' }}" href="/register">Start with {{ $plan['name'] }}</a>
+          <a class="btn {{ $plan['popular'] ? 'btn-primary' : 'btn-secondary' }}" href="{{ $user !== null ? '/dashboard' : '/register' }}?plan={{ $key }}">Start with {{ $plan['name'] }}</a>
         </article>
         @endforeach
       </div>

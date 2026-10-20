@@ -7,9 +7,11 @@ namespace App\Http\Controllers\Dashboard;
 use App\Http\Controllers\SiteController;
 use App\Http\Screen;
 use App\Models\Order;
+use App\Models\User;
 use App\Models\Page;
 use App\Models\Photo;
 use App\Services\Designs;
+use App\Services\IntendedPlan;
 use App\Services\LetterStore;
 use App\Services\OccasionTemplates;
 use App\Services\PhotoAllowance;
@@ -71,8 +73,20 @@ final class PagesController
         return null;
     }
 
-    public function index(Auth $auth, Sites $sites, PhotoAllowance $allowance, Subscriptions $subscriptions, Plans $plans): ResponseInterface
+    public function index(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Sites $sites, PhotoAllowance $allowance, Subscriptions $subscriptions, Plans $plans): ResponseInterface
     {
+        $query = $request->getQueryParams();
+        $user = $auth->user();
+        $chosen = $intended->valid($query['plan'] ?? null); // "Start with Sweet" while already signed in
+        if ($user instanceof User && $chosen !== null) {
+            $intended->save($user, $db, $chosen);
+        }
+        $showAll = ($query['templates'] ?? '') === 'all';
+        $onlyLayouts = $showAll || !$user instanceof User ? null : $intended->layouts($user->intended_plan);
+        $templates = OccasionTemplates::all();
+        if ($onlyLayouts !== null) {
+            $templates = array_map(static fn (array $list): array => array_values(array_filter($list, static fn (array $t): bool => in_array($t['layout'], $onlyLayouts, true))), $templates);
+        }
         $subscriptions->syncAuto((int) $auth->id()); // periods the provider charged by itself
         $subscriptions->createDueRenewals((int) $auth->id()); // a renewal that has come due is waiting here
         $renewals = Order::query()->where('user_id', (int) $auth->id())->where('status', Order::PENDING)->whereNotNull('subscription_id')->get()->all();
@@ -95,7 +109,9 @@ final class PagesController
             'accountSubscriptions' => $subscriptions->forUser((int) $auth->id()),
             'plans' => $plans->all(),
             'occasions' => Designs::OCCASIONS,
-            'templates' => OccasionTemplates::all(),
+            'templates' => $templates,
+            'planFilter' => $onlyLayouts === null ? null : ['name' => $intended->name($user->intended_plan), 'count' => count($onlyLayouts)],
+            'filterable' => $user instanceof User && $intended->layouts($user->intended_plan) !== null,
             'pages' => $pages,
             'usage' => $allowance->of((int) $auth->id()),
             'covers' => $covers,
@@ -149,7 +165,7 @@ final class PagesController
         return Screen::back($this->editUrl($page), 'Your page for ' . $recipient . ' is ready to fill in.');
     }
 
-    public function edit(string $slug, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance, Subscriptions $subscriptions): ResponseInterface
+    public function edit(string $slug, ServerRequestInterface $request, IntendedPlan $intended, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance, Subscriptions $subscriptions): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $subscriptions->syncAuto((int) $auth->id());
@@ -159,7 +175,17 @@ final class PagesController
         $orders = Order::query()->where('page_id', $page->id)->where('user_id', (int) $auth->id())
             ->orderBy('id', 'desc')->limit(5)->get()->all();
 
+        // a draft of someone who chose a plan with fewer templates is shown just those (and the page's own), with a way to show all
+        $user = $auth->user();
+        $planLayouts = $user instanceof User && $page->status() === Page::DRAFT ? $intended->layouts($user->intended_plan) : null;
+        $shownLayouts = Designs::LAYOUTS;
+        if ($planLayouts !== null && ($request->getQueryParams()['templates'] ?? '') !== 'all') {
+            $shownLayouts = array_filter(Designs::LAYOUTS, static fn (string $key): bool => in_array($key, $planLayouts, true) || $key === $page->layout, ARRAY_FILTER_USE_KEY);
+        }
+
         return Screen::render('dashboard.edit', [
+            'shownLayouts' => $shownLayouts,
+            'planFilter' => $planLayouts !== null ? ['name' => $intended->name($user->intended_plan), 'count' => count($planLayouts), 'all' => count($shownLayouts) === count(Designs::LAYOUTS)] : null,
             'page' => $page,
             'packs' => $allowance->packOptions(),
             // a plan above this page's is on sale (or the page is a draft): the photos box offers to upgrade

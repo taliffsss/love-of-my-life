@@ -10,6 +10,9 @@
       </div>
       <h1 class="display">Create your account</h1>
       <p class="muted">Free to build and preview. Takes a minute.</p>
+      @if (!empty($chosenPlan))
+      <p class="notice notice-brand" role="status">You chose <strong>{{ $chosenPlan }}</strong>. It is saved with your account, and you will see the templates it includes.</p>
+      @endif
       @include('partials.social')
       <form method="post" action="/register" class="stack" novalidate>
         @csrf

@@ -204,6 +204,28 @@ final class DashboardPagesTest extends TestCase
         $this->assertStringNotContainsString('id="tour-steps"', (string) $this->get($url)->getBody());
     }
 
+    public function testASignedInVisitorWhoPicksAPlanSeesItsTemplates(): void
+    {
+        $this->assertSame(50, substr_count((string) $this->get('/dashboard')->getBody(), 'name="template"'));
+        $html = (string) $this->get('/dashboard?plan=sweet')->getBody();
+        $this->assertSame('sweet', User::query()->where('id', $this->owner->id)->first()->intended_plan);
+        $this->assertSame(25, substr_count($html, 'name="template"'));
+    }
+
+    public function testADraftEditorShowsOnlyThePlansTemplatesAndTheOnesTheyAskedFor(): void
+    {
+        $page = $this->makePage($this->owner, ['layout' => 'classic']);
+        $url = '/dashboard/pages/' . $page->slug;
+        $this->assertSame(10 * 6, substr_count((string) $this->get($url)->getBody(), 'name="layout"'), 'no plan chosen: all 10 in each of the 6 groups');
+
+        $this->get('/dashboard?plan=sweet');
+        $html = (string) $this->get($url)->getBody();
+        $this->assertSame(5 * 6, substr_count($html, 'name="layout"'), 'Sweet: 5 templates');
+        $this->assertStringContainsString('Showing the 5 templates that come with Sweet', $html);
+        $this->assertStringNotContainsString('value="stars"', $html);
+        $this->assertSame(10 * 6, substr_count((string) $this->get($url . '?templates=all')->getBody(), 'name="layout"'));
+    }
+
     public function testFreeDraftsAreLimited(): void
     {
         for ($i = 0; $i < PagesController::MAX_DRAFTS; $i++) {

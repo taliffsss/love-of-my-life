@@ -6,21 +6,24 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Screen;
 use App\Models\User;
+use App\Services\IntendedPlan;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
 use Naluz\Http\Request;
+use Naluz\Session\Store;
 use Naluz\Validation\Validator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class RegisterController
 {
-    public function show(): ResponseInterface
+    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session): ResponseInterface
     {
-        return Screen::render('auth.register');
+        $intended->remember($session, $request->getQueryParams()['plan'] ?? null); // "Start with Sweet" on the pricing section
+        return Screen::render('auth.register', ['chosenPlan' => $intended->name($intended->valid($session->get('intended_plan')))]);
     }
 
-    public function store(ServerRequestInterface $request, Auth $auth, Connection $db): ResponseInterface
+    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session): ResponseInterface
     {
         $input = Request::body($request);
         $data = [
@@ -48,6 +51,7 @@ final class RegisterController
             'is_admin' => false,
         ])->save();
 
+        $intended->claim($session, $user, $db); // the plan chosen before signing up is saved with the new account
         $auth->login($user);
         return Screen::back('/dashboard', 'Welcome, ' . $user->name . '! Create your first page below.');
     }
