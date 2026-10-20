@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1 (2026-10-21, branch `main-v2`)
+
+- The landing page header is transparent again (no added colour) and still stays at the top while scrolling.
+
 ## 3.1.0 (2026-10-20, branch `main-v2`)
 
 - **Photos need a plan first.** An account with no live plan (and no photo packs bought earlier) can no longer upload photos: the server refuses
