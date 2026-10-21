@@ -106,6 +106,19 @@
       const w = hero.clientWidth, h = hero.clientHeight;
       spawn(Math.random() * w, h * (0.55 + Math.random() * 0.4));
     }, 900);
+    // the seasonal backdrop (partials/landing-scene) leans with the pointer: its layers read --sx / --sy
+    const scenes = $$(".lp-scene");
+    if (scenes.length && !reduced) {
+      let frame = 0, ex = 0, ey = 0;
+      addEventListener("pointermove", (e) => {
+        ex = e.clientX; ey = e.clientY;
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          for (const sc of scenes) { sc.style.setProperty("--sx", ((ex / innerWidth - 0.5) * 2).toFixed(3)); sc.style.setProperty("--sy", ((ey / innerHeight - 0.5) * 2).toFixed(3)); }
+        });
+      }, { passive: true });
+    }
     let lastTrail = 0;
     hero.addEventListener("pointermove", (e) => {
       const now = performance.now();

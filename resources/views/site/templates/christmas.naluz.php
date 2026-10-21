@@ -2,6 +2,14 @@
 <div class="chrome">@include('site.partials.music')</div>
 <div class="xm scroller" id="xm">
   <div class="xm-stage">
+    <div class="xm-scene" aria-hidden="true">
+      <span class="xm-moon"></span>
+      <span class="xm-twinkle" style="left:10%;top:14%">✦</span><span class="xm-twinkle" style="left:26%;top:8%;animation-delay:.7s">✦</span><span class="xm-twinkle" style="left:44%;top:16%;animation-delay:1.2s">✦</span><span class="xm-twinkle" style="left:64%;top:7%;animation-delay:.3s">✦</span><span class="xm-twinkle" style="left:82%;top:17%;animation-delay:1.6s">✦</span>
+      @for ($i = 0; $i < 22; $i++)<i class="xm-flake" style="--x:{{ ($i * 37 + 11) % 100 }}%;--s:{{ 3 + ($i * 5) % 6 }}px;--d:{{ 8 + ($i * 3) % 8 }}s;--w:{{ ($i * 17 % 60) - 30 }}px;animation-delay:-{{ ($i * 7) % 12 }}s"></i>@endfor
+      <span class="xm-hills"></span>
+      <span class="xm-pines"><b>🌲</b><b>🎄</b><b>🌲</b><b>🌲</b><b>🎄</b><b>🌲</b></span>
+      <span class="xm-present xm-pr1">🎁</span><span class="xm-present xm-pr2">🎁</span>
+    </div>
     <p class="eyebrow">For {{ $page->recipient }}</p>
     <div class="xm-tilt">
     <div class="xm-globe" id="xmGlobe" role="img" aria-label="A snow globe with a Christmas tree">

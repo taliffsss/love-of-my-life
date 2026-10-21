@@ -41,6 +41,7 @@
   </div>
 </header>
 <div class="hero lp-hero" id="hero" data-season="love" data-seasons="{{ implode(',', $openSeasons) }}">
+  @include('partials.landing-scene', ['theme' => $theme])
   <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
   <div class="lp-wrap lp-hero-grid">
     <div class="lp-hero-copy">
@@ -153,10 +154,10 @@
         @endforeach
       </div>
       <div class="lp-swatches" aria-label="Colour themes">
-        @foreach ($themes as $key => $theme)
+        @foreach ($themes as $key => $swatch)
         <a href="/demo?theme={{ $key }}">
-          <span class="dots" aria-hidden="true">@foreach ($theme['colors'] as $c)<i style="background:{{ $c }}"></i>@endforeach</span>
-          {{ $theme['name'] }}
+          <span class="dots" aria-hidden="true">@foreach ($swatch['colors'] as $c)<i style="background:{{ $c }}"></i>@endforeach</span>
+          {{ $swatch['name'] }}
         </a>
         @endforeach
       </div>
@@ -250,6 +251,7 @@
   </section>
 
   <section class="lp-close" aria-labelledby="close-title">
+    @include('partials.landing-scene', ['theme' => $theme, 'mini' => 1])
     <div class="lp-wrap">
       <h2 id="close-title" class="lp-h2">Make it tonight.</h2>
       <p class="lp-sub">Write the letter, pick the question, send the link. They will remember opening it.</p>
@@ -273,8 +275,8 @@
   <iframe class="demo-frame" id="demoFrame" title="Live demo of the template" loading="lazy"></iframe>
   <div class="demo-foot">
     <div class="chips" role="group" aria-label="Colour theme" id="demoThemes">
-      @foreach ($themes as $key => $theme)
-      <button type="button" class="chip chip-dark" data-theme="{{ $key }}" aria-pressed="{{ $key === array_key_first($themes) ? 'true' : 'false' }}"><span class="dots" aria-hidden="true">@foreach ($theme['colors'] as $c)<i style="background:{{ $c }}"></i>@endforeach</span> {{ $theme['name'] }}</button>
+      @foreach ($themes as $key => $swatch)
+      <button type="button" class="chip chip-dark" data-theme="{{ $key }}" aria-pressed="{{ $key === array_key_first($themes) ? 'true' : 'false' }}"><span class="dots" aria-hidden="true">@foreach ($swatch['colors'] as $c)<i style="background:{{ $c }}"></i>@endforeach</span> {{ $swatch['name'] }}</button>
       @endforeach
     </div>
     <div class="row">

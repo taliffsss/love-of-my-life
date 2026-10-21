@@ -248,3 +248,56 @@ dialog.demo-modal[open] { display: flex; }
   .lp-btn, .chip, .lp-btn:hover, .chip:hover { transition: none; transform: none; }
   .lp .phone { transform: none; }
 }
+
+/* ---------- the seasonal backdrop: layers at different distances (like the Halloween template's scene); landing.js sets --sx / --sy from the pointer ---------- */
+.lp-scene { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; --sx: 0; --sy: 0; }
+.lp-scene .sc { position: absolute; line-height: 1; will-change: transform; }
+.lp .hero { isolation: isolate; }
+.lp-close { position: relative; overflow: hidden; }
+.lp-close > .lp-wrap { position: relative; z-index: 2; }
+.lp-scene-mini { opacity: .75; }
+
+/* Halloween: a moon, bats, pumpkins, a ghost */
+.sc-moon { top: 7%; right: 6%; width: clamp(86px, 13vw, 180px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff7d6, #f2d98a 70%); box-shadow: 0 0 70px 20px rgba(255, 233, 160, .3);
+  translate: calc(var(--sx) * -16px) calc(var(--sy) * -10px); }
+.sc-bat { font-size: clamp(1.4rem, 3.4vw, 2.6rem); animation: scFly 8s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(0, 0, 0, .5)); translate: calc(var(--sx) * -30px) calc(var(--sy) * -20px); }
+.sc-b1 { top: 12%; left: 8%; } .sc-b2 { top: 30%; right: 30%; animation-duration: 10s; animation-delay: -3s; } .sc-b3 { top: 6%; left: 44%; animation-duration: 12s; animation-delay: -6s; }
+@keyframes scFly { 0%, 100% { transform: translate3d(0, 0, 0) rotate(-6deg); } 50% { transform: translate3d(46px, -24px, 0) rotate(8deg); } }
+.sc-pump { bottom: 2%; font-size: clamp(2.6rem, 8vw, 6rem); filter: drop-shadow(0 0 22px rgba(255, 140, 40, .7)); animation: scGlow 3.6s ease-in-out infinite; translate: calc(var(--sx) * -40px) calc(var(--sy) * -16px); }
+.sc-p1 { left: 2%; } .sc-p2 { right: 4%; animation-delay: -1.8s; font-size: clamp(2rem, 6vw, 4.4rem); }
+@keyframes scGlow { 50% { filter: drop-shadow(0 0 10px rgba(255, 140, 40, .35)); } }
+.sc-ghost { top: 46%; left: 3%; font-size: clamp(2rem, 5vw, 3.4rem); opacity: .85; animation: scFloat 5s ease-in-out infinite; translate: calc(var(--sx) * -50px) calc(var(--sy) * -26px); }
+.sc-cand { font-size: clamp(1.4rem, 3vw, 2.2rem); opacity: .8; }
+.sc-c1 { bottom: 4%; left: 22%; animation: scGlow 2.8s ease-in-out infinite; } .sc-c2 { top: 2%; right: 30%; }
+@keyframes scFloat { 50% { transform: translateY(-16px); } }
+
+/* Christmas: a moon, twinkling stars, a string of lights, snowfall, pines, presents */
+.lp-scene-christmas .sc-moon { box-shadow: 0 0 70px 18px rgba(240, 217, 140, .22); background: radial-gradient(circle at 35% 35%, #fffdf0, #f0e2a8 70%); }
+.sc-star { color: var(--lp-gilt); font-size: clamp(.8rem, 1.6vw, 1.3rem); animation: scTwinkle 2.6s ease-in-out infinite; }
+@keyframes scTwinkle { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.2); } }
+.sc-lights { top: 0; left: 0; right: 0; height: 46px; display: flex; justify-content: space-around; align-items: flex-start; border-top: 2px solid rgba(255, 255, 255, .16); border-radius: 0 0 50% 50% / 0 0 100% 100%; }
+.sc-lights i { width: 10px; height: 14px; margin-top: 8px; border-radius: 50% 50% 55% 55%; background: #ff5a6e; box-shadow: 0 0 12px 3px currentColor; color: #ff5a6e; animation: scTwinkle 2.2s ease-in-out infinite; }
+.sc-lights i:nth-child(3n+2) { background: #ffd94a; color: #ffd94a; animation-delay: .4s; } .sc-lights i:nth-child(3n) { background: #6fd0ff; color: #6fd0ff; animation-delay: .9s; } .sc-lights i:nth-child(4n) { background: #7fdca6; color: #7fdca6; animation-delay: 1.3s; }
+.sc-snow { position: absolute; top: -4%; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: #fff; opacity: .85; animation: scSnow var(--d) linear infinite; }
+@keyframes scSnow { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(var(--w), 112vh, 0); } }
+.sc-trees { left: 0; right: 0; bottom: -1%; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 1%; opacity: .6; translate: calc(var(--sx) * -24px) 0; }
+.sc-trees b { font-size: clamp(2.4rem, 7vw, 5.4rem); font-weight: 400; }
+.sc-trees b:nth-child(2n) { font-size: clamp(3rem, 9vw, 7rem); } .sc-trees b:nth-child(3n) { font-size: clamp(1.8rem, 5vw, 3.8rem); }
+.sc-gift { bottom: 3%; font-size: clamp(1.8rem, 4.4vw, 3.4rem); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .4)); translate: calc(var(--sx) * -44px) calc(var(--sy) * -14px); }
+.sc-g1 { right: 22%; } .sc-g2 { left: 30%; }
+
+/* Valentine: a soft heart glow, hearts rising, petals drifting, love letters */
+.sc-bigheart { top: 8%; right: 4%; font-size: clamp(14rem, 34vw, 30rem); color: var(--lp-wax); opacity: .13; filter: blur(2px); translate: calc(var(--sx) * -24px) calc(var(--sy) * -16px); animation: scBeat 4.4s ease-in-out infinite; }
+@keyframes scBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.sc-heart { left: var(--x); bottom: -8%; font-size: var(--s); color: var(--lp-wax-2); opacity: 0; animation: scRise var(--d) ease-in infinite; }
+@keyframes scRise { 0% { transform: translate3d(0, 0, 0) scale(.7); opacity: 0; } 12% { opacity: .75; } 100% { transform: translate3d(18px, -112vh, 0) scale(1.15); opacity: 0; } }
+.sc-petal { left: var(--x); top: -6%; font-size: var(--s); opacity: .85; animation: scPetal var(--d) linear infinite; }
+@keyframes scPetal { from { transform: translate3d(0, 0, 0) rotate(0); } to { transform: translate3d(var(--w), 112vh, 0) rotate(340deg); } }
+.sc-note { font-size: clamp(1.6rem, 3.6vw, 2.6rem); opacity: .9; animation: scFloat 5.5s ease-in-out infinite; translate: calc(var(--sx) * -40px) calc(var(--sy) * -20px); }
+.sc-n1 { bottom: 6%; left: 3%; } .sc-n2 { top: 14%; left: 38%; animation-delay: -2.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sc, .sc-snow, .sc-heart, .sc-petal { animation: none !important; }
+  .sc-heart, .sc-petal, .sc-snow { opacity: .5; }
+}
+@media (max-width: 720px) { .sc-moon { top: 3%; right: 3%; opacity: .8; } .sc-ghost, .sc-cand, .sc-n2, .sc-g2 { display: none; } }

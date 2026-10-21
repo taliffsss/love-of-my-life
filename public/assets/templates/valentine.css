@@ -33,3 +33,18 @@ body[data-layout="valentine"] .vl-letter { width: min(100%, 640px); }
   body[data-layout="valentine"] .vl-petal.gone { animation: none; opacity: 0; }
   body[data-layout="valentine"] .vl.done .vl-heart, body[data-layout="valentine"] .vl-open { animation: none; }
 }
+
+/* the scene: a soft heart glow, hearts rising, petals drifting and love letters at different distances (kit.tilt sets --px / --py) */
+body[data-layout="valentine"] .vl-stage { position: relative; overflow: hidden; }
+body[data-layout="valentine"] .vl-scene { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+body[data-layout="valentine"] .vl-stage > :not(.vl-scene) { position: relative; z-index: 1; }
+body[data-layout="valentine"] .vl-glow { position: absolute; top: 6%; left: 50%; margin-left: -.5em; font-size: clamp(16rem, 46vw, 34rem); line-height: 1; color: var(--accent); opacity: .12; filter: blur(3px); translate: calc(var(--px, 0) * -20px) calc(var(--py, 0) * -14px); animation: vlBeat2 4.4s ease-in-out infinite; }
+@keyframes vlBeat2 { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+body[data-layout="valentine"] .vl-rise { position: absolute; left: var(--x); bottom: -8%; font-size: var(--s); color: var(--accent); opacity: 0; animation: vlRise2 var(--d) ease-in infinite; }
+@keyframes vlRise2 { 0% { transform: translate3d(0, 0, 0) scale(.7); opacity: 0; } 12% { opacity: .75; } 100% { transform: translate3d(18px, -112vh, 0) scale(1.15); opacity: 0; } }
+body[data-layout="valentine"] .vl-drift { position: absolute; left: var(--x); top: -6%; font-size: var(--s); opacity: .85; animation: vlPetal var(--d) linear infinite; }
+@keyframes vlPetal { from { transform: translate3d(0, 0, 0) rotate(0); } to { transform: translate3d(var(--w), 112vh, 0) rotate(340deg); } }
+body[data-layout="valentine"] .vl-note { position: absolute; font-size: clamp(1.6rem, 3.6vw, 2.6rem); animation: vlFloat 5.5s ease-in-out infinite; translate: calc(var(--px, 0) * -40px) calc(var(--py, 0) * -20px); }
+body[data-layout="valentine"] .vl-n1 { bottom: 8%; left: 6%; } body[data-layout="valentine"] .vl-n2 { top: 14%; right: 8%; animation-delay: -2.4s; }
+@keyframes vlFloat { 50% { transform: translateY(-16px); } }
+@media (prefers-reduced-motion: reduce) { body[data-layout="valentine"] .vl-rise, body[data-layout="valentine"] .vl-drift, body[data-layout="valentine"] .vl-glow, body[data-layout="valentine"] .vl-note { animation: none; } }

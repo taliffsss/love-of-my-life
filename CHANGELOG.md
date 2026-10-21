@@ -6,6 +6,9 @@
   The look follows the season that is on (`App\Services\Seasons::theme`: Halloween 17 – 31 Oct, Christmas 11 – 25 Dec, Valentine's 31 Jan – 14 Feb) and goes back to the default after it.
   A look is only a set of colour tokens in `landing.css`. Outside production (or with `THEME_PREVIEW=true`), `/?theme=halloween|christmas|valentine|default` previews any of them, and
   `marketing/make.sh themes` photographs all four into `marketing/out/theme-preview/index.html`.
+- **Each season has a backdrop, like the Halloween template's scene.** The landing hero and its closing section carry layered decoration that drifts and shifts with the pointer: Halloween (moon, bats, pumpkins, a ghost, candles), Christmas
+  (moon, twinkling stars, a string of lights, snowfall, pines, presents) and Valentine's Day (a soft heart glow, hearts rising, petals, love letters). The Christmas and Valentine templates get the same kind of scene
+  (moon, stars, snowfall, snowy hills, pines, presents; hearts, petals, love letters) behind the globe and the flower, so all three seasonal templates are as rich as the Halloween door.
 
 ## 3.8.0 (2026-10-21, branch `main-v2`)
 

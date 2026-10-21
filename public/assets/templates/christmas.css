@@ -57,3 +57,20 @@ body[data-layout="christmas"] .xm-letter { width: min(100%, 640px); }
 @media (prefers-reduced-motion: reduce) {
   body[data-layout="christmas"] .xm-snow i, body[data-layout="christmas"] .xm.shaking .xm-globe, body[data-layout="christmas"] .xm.lit .xm-o, body[data-layout="christmas"] .xm-open { animation: none; }
 }
+
+/* the scene: a moon, stars, snowfall, snowy hills, pines and presents at different distances (the pointer moves them: kit.tilt sets --px / --py) */
+body[data-layout="christmas"] .xm-stage { position: relative; overflow: hidden; }
+body[data-layout="christmas"] .xm-scene { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+body[data-layout="christmas"] .xm-stage > :not(.xm-scene) { position: relative; z-index: 1; }
+body[data-layout="christmas"] .xm-moon { position: absolute; top: 8%; right: 9%; width: clamp(70px, 14vw, 130px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fffdf0, #f0e2a8 70%); box-shadow: 0 0 60px 16px rgba(240, 226, 168, .3); translate: calc(var(--px, 0) * -16px) calc(var(--py, 0) * -10px); }
+body[data-layout="christmas"] .xm-twinkle { position: absolute; color: var(--gold); font-size: 1.1rem; animation: xmTw 2.6s ease-in-out infinite; translate: calc(var(--px, 0) * -22px) calc(var(--py, 0) * -14px); }
+@keyframes xmTw { 0%, 100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.25); } }
+body[data-layout="christmas"] .xm-flake { position: absolute; top: -4%; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: #fff; opacity: .85; animation: xmSnow var(--d) linear infinite; }
+@keyframes xmSnow { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(var(--w), 112vh, 0); } }
+body[data-layout="christmas"] .xm-hills { position: absolute; left: -10%; right: -10%; bottom: -6%; height: 22%; border-radius: 50% 50% 0 0 / 100% 100% 0 0; background: linear-gradient(#f4f8ff, #cfdcf0); opacity: .92; translate: calc(var(--px, 0) * -30px) 0; }
+body[data-layout="christmas"] .xm-pines { position: absolute; left: 0; right: 0; bottom: 8%; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 3%; opacity: .75; translate: calc(var(--px, 0) * -40px) 0; }
+body[data-layout="christmas"] .xm-pines b { font-weight: 400; font-size: clamp(2.2rem, 7vw, 4.6rem); }
+body[data-layout="christmas"] .xm-pines b:nth-child(2n) { font-size: clamp(3rem, 9vw, 6.4rem); }
+body[data-layout="christmas"] .xm-present { position: absolute; bottom: 4%; font-size: clamp(1.8rem, 4.4vw, 3rem); filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35)); translate: calc(var(--px, 0) * -50px) calc(var(--py, 0) * -16px); }
+body[data-layout="christmas"] .xm-pr1 { left: 16%; } body[data-layout="christmas"] .xm-pr2 { right: 18%; }
+@media (prefers-reduced-motion: reduce) { body[data-layout="christmas"] .xm-flake, body[data-layout="christmas"] .xm-twinkle { animation: none; } }
