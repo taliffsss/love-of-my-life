@@ -247,7 +247,11 @@ abstract class TestCase extends BaseTestCase
     protected function seasons(?string $date = null, bool $always = false): void
     {
         $this->app->instance(\App\Services\Seasons::class, new \App\Services\Seasons(
-            (array) config('saas.seasons.events'), 14, $always, 'UTC', $date === null ? null : fn () => new \DateTimeImmutable($date),
+            (array) config('saas.seasons.events'),
+            14,
+            $always,
+            'UTC',
+            $date === null ? null : fn () => new \DateTimeImmutable($date),
         ));
     }
 

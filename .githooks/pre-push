@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# pre-push: everything CI runs, before anything leaves the machine: the PHP style check, the JavaScript syntax check and the whole PHPUnit suite.
+# Skip once with `git push --no-verify` (CI will still run these).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# a hook runs with GIT_DIR and friends set; tests that run git themselves must not inherit them
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_OBJECT_DIRECTORY GIT_ALTERNATE_OBJECT_DIRECTORIES
+
+[ -x vendor/bin/phpunit ] || { echo "pre-push: vendor/bin/phpunit is missing; run 'composer install'." >&2; exit 1; }
+
+echo "pre-push: PHP style (phpcs)"
+vendor/bin/phpcs -q --runtime-set ignore_warnings_on_exit 1
+
+if command -v node >/dev/null 2>&1; then
+  echo "pre-push: JavaScript syntax"
+  for f in public/assets/*.js public/assets/templates/*.js; do node --check "$f"; done
+fi
+
+echo "pre-push: PHPUnit"
+vendor/bin/phpunit --no-progress

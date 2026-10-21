@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# pre-commit: format the staged PHP files (phpcbf, the PSR-12 ruleset of phpcs.xml.dist), then check them (phpcs).
+# A file with changes that are not staged is only checked, never rewritten, so the formatter cannot sneak unstaged work into the commit.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+[ -x vendor/bin/phpcbf ] || { echo "pre-commit: vendor/bin/phpcbf is missing; run 'composer install'." >&2; exit 1; }
+
+staged=()
+while IFS= read -r f; do [ -n "$f" ] && staged+=("$f"); done < <(git diff --cached --name-only --diff-filter=ACM -- '*.php')
+[ "${#staged[@]}" -gt 0 ] || exit 0
+
+fixable=()
+checkonly=()
+for f in "${staged[@]}"; do
+  if git diff --quiet -- "$f"; then fixable+=("$f"); else checkonly+=("$f"); fi
+done
+
+if [ "${#fixable[@]}" -gt 0 ]; then
+  # phpcbf exits 1 when it fixed something and 2 when something is left that it cannot fix: both are handled by the check below
+  vendor/bin/phpcbf -q "${fixable[@]}" >/dev/null 2>&1 || true
+  git add -- "${fixable[@]}"
+fi
+
+if ! vendor/bin/phpcs -q --runtime-set ignore_warnings_on_exit 1 "${staged[@]}"; then
+  echo "" >&2
+  echo "pre-commit: PHP style errors remain (above). Fix them, or run 'composer cs-fix'." >&2
+  [ "${#checkonly[@]}" -gt 0 ] && echo "pre-commit: ${checkonly[*]} have unstaged changes, so they were not auto-formatted." >&2
+  exit 1
+fi

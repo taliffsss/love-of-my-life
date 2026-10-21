@@ -24,6 +24,15 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
 - **Private by default:** with a question set, the page's HTML holds no photo and no letter; they are sent only after the
   right answer (checked on the server, rate limited). Pages are hidden from search engines.
 
+
+## Git hooks
+
+`composer install` points git at `.githooks/` (`composer hooks` does it by hand):
+
+- **pre-commit** formats the staged PHP files with `phpcbf` (PSR-12, `phpcs.xml.dist`), stages the result and then checks them with `phpcs`. A file that also has unstaged changes is only checked.
+- **commit-msg** asks for Conventional Commits: `type(scope): summary` (`feat fix docs style refactor perf test build ci chore revert`).
+- **pre-push** runs what CI runs: `phpcs`, a syntax check of the JavaScript and the whole PHPUnit suite. `git push --no-verify` skips it once; CI still runs.
+
 ## Run it locally
 
 ```sh

@@ -34,6 +34,10 @@
         ],
         "cs": "phpcs --runtime-set ignore_warnings_on_exit 1",
         "cs-fix": "phpcbf",
+        "hooks": "@php -r \"is_dir('.git') && shell_exec('git config core.hooksPath .githooks');\"",
+        "post-install-cmd": [
+            "@hooks"
+        ],
         "check": [
             "@cs",
             "@test"
