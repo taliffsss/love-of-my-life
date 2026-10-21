@@ -11,7 +11,11 @@ from __future__ import annotations
 
 import re
 import shutil
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import utm  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 SOCIAL = HERE.parent / "out" / "social"
@@ -51,8 +55,9 @@ def main() -> None:
                 for extra, new in ((f"{source.stem}.en_US.srt", "captions.srt"), (f"{source.stem}-poster.png", "thumbnail.png")):
                     if (REELS / extra).exists():
                         shutil.copy(REELS / extra, target / new)
-        (target / "CAPTION-copy-paste.txt").write_text(caption(section) + "\n")
+        (target / "CAPTION-copy-paste.txt").write_text(utm.resolve(caption(section)) + "\n")
         print(f"  {target.name}: {len(list(target.iterdir()))} files")
+    (OUT / "LINKS.md").write_text("# Tagged links for the Halloween campaign\n\nEvery caption already uses its own link. Use these for bios and anything else.\nSee marketing/UTM.md for how the tags are read.\n\n" + utm.table())
     if missing:
         print("  NOT BUILT YET (run marketing/make.sh halloween):\n    " + "\n    ".join(sorted(set(missing))))
 

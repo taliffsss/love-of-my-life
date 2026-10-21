@@ -11,7 +11,14 @@ None of this is part of the app; `.dockerignore` keeps it out of the image. Ever
 | `social/` | The Facebook and TikTok kit: profile pictures, covers, 56 post images, captions, plan, TikTok scripts |
 | `social/reels/` | Seven ~15 s Facebook/Reels videos (five everyday, two Halloween) |
 | `social/HALLOWEEN.md` | The Halloween campaign: captions, Meta ad copy, schedule and honesty rules; `build_halloween.py` collects it |
-| `make.sh` | One script that builds any or all of the above |
+| `make.sh` | One script that builds any or all of the above (`make.sh links` prints the UTM links) |
+| `UTM.md` | How links are tagged and where the traffic shows (Admin → Traffic) |
+| `ADS_GUIDE.md` | Step by step: from audience to a first customer with Meta ads |
+| `CAMPAIGN_PLAN_HALLOWEEN.md` | The Halloween campaign plan: audience, messages, channels, calendar, metrics, risks |
+| `reviews/HALLOWEEN_BRAND_REVIEW.md` | The Halloween copy checked against Lettie's voice and the honesty rules |
+| `content/` | Drafts: the Halloween blog post and landing copy |
+| `SEO_AUDIT.md` | The site's SEO audit with a quick-wins list |
+| `EMAIL_SEQUENCES.md` | Onboarding, upgrade and seasonal e-mail sequences |
 | `social/build_post_now.py` | Collects the 10 ready-to-upload Facebook posts into folders |
 | `brand/` | `LETTIE.md` (the mascot) and `build_brand.py` (logo and icons) |
 | `copy/SOCIAL.md` | Earlier posts, ad copy, hashtags, two-week plan, honesty rules |

@@ -15,6 +15,13 @@ Everything below is built by `marketing/make.sh halloween` (see the README). Cap
 - The Halloween template is a **Sweetheart / Forever** template. Say "Halloween template", not "free Halloween".
 - Don't say how to pay; send people to the site.
 
+## Tracking
+
+Every link in this file is a placeholder like `{link:post-1}`. `build_halloween.py` (and `make.sh collect`) replaces it with the
+UTM-tagged link of that placement, defined in `utm.py`, so the admin dashboard (**Admin → Traffic**) shows which post, reel
+or ad brought each visitor, sign-up and customer. The TikTok, Instagram and Facebook **bio** links are in `out/social/halloween/LINKS.md`.
+How the tags work and how to name new ones: `marketing/UTM.md`.
+
 ## Ready-to-post pictures and videos
 
 Each section: the files it uses (in backticks) and the caption to paste. `>` lines are the text.
@@ -26,7 +33,7 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 >
 > They knock three times. The door creaks open. Your letter is waiting inside. 🦇
 >
-> Start free → loveofmylife.love
+> Start free (send with Sweetheart or Forever) → {link:post-1}
 >
 > Spooky na, sweet pa 🎃 Gawan mo siya ng haunted door na bubukas sa sulat mo.
 > Tag the one you would haunt with love 👇
@@ -35,9 +42,9 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 ### Post 2: `hw-door.png`
 > Knock. Knock. Knock. 🚪🎃
 >
-> Three knocks and a haunted door creaks open on your photos, your song and your letter. It is the sweetest jump scare they will ever get.
+> Three knocks and a haunted door creaks open on your photos, your song and your letter. A sweet little jump scare, made by you.
 >
-> Make theirs before the 31st → loveofmylife.love
+> Make theirs before the 31st → {link:post-2}
 >
 > Tatlong katok, bubukas ang pinto 👻 Sulat mo ang nasa loob.
 > #halloween #trickortreat #halloweenph #LoveOfMyLife
@@ -45,9 +52,9 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 ### Post 3: `hw-lock.png`
 > Spooky on the outside. Soft on the inside. 🕯️
 >
-> The Halloween lock screen floats and turns as they move. Behind it, a question only the two of you know: the costume, the first date, the nickname. Get it right and the page opens.
+> On a computer, the Halloween lock screen turns as you move the mouse. Behind it, a question only the two of you know: the costume, the first date, the nickname. Get it right and the page opens.
 >
-> Start free → loveofmylife.love
+> Start free (send with Sweetheart or Forever) → {link:post-3}
 >
 > Kayo lang ang may alam ng sagot 🎃
 > #halloween #loveletter #giftideasph #LoveOfMyLife
@@ -58,7 +65,7 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 > 2. Choose the Halloween template: a haunted door, three knocks, a treat inside.
 > 3. Send the link. They knock. The door opens. Boo. 👻
 >
-> Open until the 31st → loveofmylife.love
+> Open until the 31st → {link:post-4}
 >
 > Tatlong hakbang lang, spooky-sweet na. 🦇
 > #halloween #halloweenph #LoveOfMyLife
@@ -76,7 +83,7 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 >
 > Knock three times and a haunted door creaks open on your photos and your letter. Make them a Halloween surprise they will want to open again and again.
 >
-> Start free → loveofmylife.love
+> Start free (send with Sweetheart or Forever) → {link:reel-1}
 >
 > Tatlong katok, bubukas ang pinto 👻
 > Tag who you would knock for 👇
@@ -87,7 +94,7 @@ Each section: the files it uses (in backticks) and the caption to paste. `>` lin
 >
 > Lock your letter behind a question only they know, then watch the pumpkin lock screen open for them. Only the right answer lets them in. Boo. 👻
 >
-> Start free → loveofmylife.love
+> Start free (send with Sweetheart or Forever) → {link:reel-2}
 >
 > Kayo lang ang may alam ng sagot 🎃
 > #halloween #halloweenph #loveletter #LoveOfMyLife
@@ -99,7 +106,7 @@ audience, budget and bid in Ads Manager; nothing about the audience is assumed h
 analytics yet, so test two audiences for a week and keep the one that gets cheaper landing-page views).
 
 ### Ad carousel (5 square cards): `ad-hw-1.png` `ad-hw-2.png` `ad-hw-3.png` `ad-hw-4.png` `ad-hw-5.png`
-> Primary text: Boo! A love letter with a twist. 🎃 Knock three times and a haunted door opens on your photos, your song and your letter. Start free and send it before the 31st.
+> Primary text: Boo! A love letter with a twist. 🎃 Knock three times and a haunted door opens on your photos, your song and your letter. Start free: build and preview it. Send it before the 31st with Sweetheart or Forever.
 >
 > Headline (1): A love letter with a twist
 > Headline (2): They knock three times
@@ -107,24 +114,24 @@ analytics yet, so test two audiences for a week and keep the one that gets cheap
 > Headline (4): Locked with a question
 > Headline (5): Start free, send by the 31st
 >
-> Description: Halloween template, 17 to 31 October
+> Description: Halloween template with Sweetheart or Forever, 17 to 31 October
 > Call to action: Learn more
-> Website: loveofmylife.love
+> Website: {link:ad-carousel}
 
 ### Feed link ad (1.91:1): `ad-hw-feed.png`
 > Primary text: Trick or treat? Send a haunted love letter. 🎃 Your photos, your song and your words behind a door that opens after three knocks. Start free.
 >
 > Headline: Send a haunted love letter
-> Description: Halloween template, 17 to 31 October
+> Description: Halloween template with Sweetheart or Forever, 17 to 31 October
 > Call to action: Learn more
-> Website: loveofmylife.love
+> Website: {link:ad-feed}
 
 ### Story / Reel ad (9:16): `ad-hw-story.png` `halloween-knock.mp4`
 > Primary text: Knock three times. 🎃 A haunted love letter, free to start.
 >
 > Headline: Knock three times
 > Call to action: Learn more
-> Website: loveofmylife.love
+> Website: {link:ad-story}
 
 ## TikTok / Reels photo carousel (post the five slides in order): `car-hw-1.png` `car-hw-2.png` `car-hw-3.png` `car-hw-4.png` `car-hw-5.png`
 > A spooky-sweet love letter 🎃 Swipe: they knock three times, the door creaks open, your letter is inside. Start free → link in bio #halloween #halloweenph #loveletter #LoveOfMyLife

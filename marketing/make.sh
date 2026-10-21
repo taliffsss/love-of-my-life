@@ -23,6 +23,7 @@
 #   reels      voice + video for the reels                                              marketing/social/reels/render_reels.py
 #   collect    the ready-to-upload folders: out/social/post-now and out/social/halloween
 #   halloween  footage + images + ads + carousel + reels (Halloween only) + collect
+#   links      the UTM-tagged links of the campaign (marketing/UTM.md)
 #   list       the image names and reel ids you can ask for
 #
 # Needs `uv`, PHP with vendor/ and an internet connection (Google Fonts); see marketing/README.md. Output: marketing/out/ (git-ignored).
@@ -112,6 +113,7 @@ t_list() {
   echo; echo "Halloween images: $HALLOWEEN_IMAGES"
 }
 
+t_links()    { say "UTM-tagged links"; run python3 marketing/social/utm.py "$@"; }
 t_help() { sed -n '2,/^set -euo/p' "$SELF" | sed '$d' | sed 's/^# \{0,1\}//'; }
 
 t_all() {
@@ -142,6 +144,7 @@ case "$target" in
   reels)     t_reels "$@" ;;
   reel)      [ "$#" -gt 0 ] || { echo "reel: name at least one id (see: marketing/make.sh list)" >&2; exit 2; }; t_reels "$@" ;;
   collect)   t_collect ;;
+  links)     t_links "$@" ;;
   halloween) t_halloween "$@" ;;
   *) echo "unknown target '$target'" >&2; t_help >&2; exit 2 ;;
 esac

@@ -255,7 +255,7 @@
     "ad-hw-2": adSquare({ kicker: "2/5", headline: "They knock three times.", size: 96, still: "halloween" }),
     "ad-hw-3": adSquare({ kicker: "3/5", headline: "The door creaks open.", size: 96, sub: "On your photos, your song and your letter." }),
     "ad-hw-4": adSquare({ kicker: "4/5", headline: "Locked with a question only they know.", size: 80, still: "halloween" }),
-    "ad-hw-5": adSquare({ headline: "Start free. Send it before the 31st.", size: 88, pose: "love", end: true }),
+    "ad-hw-5": adSquare({ headline: "Start free. Send it before the 31st.", size: 84, sub: "Halloween template with Sweetheart or Forever.", pose: "love", end: true }),
     // Single ads: the feed link ad (1.91:1) and the story / reel ad (9:16, words inside the safe zone)
     "ad-hw-feed": { size: [1200, 628], theme: "t-halloween", build: () => scatter(1200, 628, "halloween", 8, 41) +
       abs(60, 70, K("Halloween", 24) + H("Trick or treat?<br>Send a haunted love letter.", 64, 620, 14) + S("Knock three times. The door opens on your letter.", 560, 28, 18) + GAP(22) + `<span class="url" style="font-size:26px">${URL_TEXT}</span>`, "text-align:left") +
