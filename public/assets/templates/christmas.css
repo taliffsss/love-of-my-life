@@ -1,0 +1,53 @@
+/* Template "christmas": a snow globe to shake. The tree, snow and ornaments are the season's own; the background, the
+   letter paper and the text follow the colour theme (themes.css). */
+
+body[data-layout="christmas"] .show { background: radial-gradient(80% 60% at 50% 30%, color-mix(in srgb, #1f5a45 30%, var(--bg-2)), var(--bg) 78%); }
+body[data-layout="christmas"] .xm-stage { min-height: 100%; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 84px 18px 48px; }
+body[data-layout="christmas"] .xm-stage .eyebrow { margin: 0; }
+body[data-layout="christmas"] .xm-globe { position: relative; width: min(74vw, 330px, 46svh); aspect-ratio: .9; touch-action: none; cursor: grab; }
+body[data-layout="christmas"] .xm-glass {
+  position: absolute; inset: 0 0 14% 0; border-radius: 50%; overflow: hidden;
+  background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, .5), transparent 22%), radial-gradient(circle at 50% 60%, #12304a, #0a1a2c 72%);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .22), inset 0 -24px 40px rgba(0, 0, 0, .35), 0 24px 60px rgba(0, 0, 0, .45);
+}
+body[data-layout="christmas"] .xm-base { position: absolute; left: 12%; right: 12%; bottom: 0; height: 18%; border-radius: 10px 10px 18px 18px; background: linear-gradient(160deg, #8a1f2b, #5a0f1a); box-shadow: 0 10px 22px rgba(0, 0, 0, .4); }
+body[data-layout="christmas"] .xm-ground { position: absolute; left: -10%; right: -10%; bottom: -12%; height: 30%; border-radius: 50%; background: #f4f8ff; }
+body[data-layout="christmas"] .xm-snow { position: absolute; inset: 0; }
+body[data-layout="christmas"] .xm-snow i { position: absolute; top: -6%; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: #fff; opacity: .85; animation: xmFall var(--d) linear infinite; }
+@keyframes xmFall { from { top: -6%; } to { top: 104%; transform: translate3d(var(--w), 0, 0); } }
+body[data-layout="christmas"] .xm.shaking .xm-snow i { animation-duration: calc(var(--d) / 5); }
+body[data-layout="christmas"] .xm.shaking .xm-globe { animation: xmShake .22s linear infinite; }
+@keyframes xmShake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-3deg) translateX(-4px); } 75% { transform: rotate(3deg) translateX(4px); } }
+
+body[data-layout="christmas"] .xm-tree { position: absolute; left: 50%; bottom: 14%; width: 46%; aspect-ratio: .78; transform: translateX(-50%); }
+body[data-layout="christmas"] .xm-tree i { position: absolute; left: 50%; transform: translateX(-50%); background: linear-gradient(#2f8a5c, #1d6341); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+body[data-layout="christmas"] .xm-t1 { top: 6%; width: 52%; height: 36%; }
+body[data-layout="christmas"] .xm-t2 { top: 28%; width: 74%; height: 40%; }
+body[data-layout="christmas"] .xm-t3 { top: 52%; width: 98%; height: 46%; }
+body[data-layout="christmas"] .xm-tree .xm-star { top: -6%; width: 16%; height: 14%; background: #ffd94a; clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%); filter: drop-shadow(0 0 6px #ffd94a); opacity: .35; transition: opacity .8s var(--soft); }
+body[data-layout="christmas"] .xm-o { position: absolute; width: 8%; aspect-ratio: 1; border-radius: 50%; background: #9aa3ad; opacity: .55; transition: background .6s var(--soft), box-shadow .6s var(--soft), opacity .6s var(--soft); }
+body[data-layout="christmas"] .xm-o1 { left: 44%; top: 30%; } body[data-layout="christmas"] .xm-o2 { left: 30%; top: 52%; } body[data-layout="christmas"] .xm-o3 { left: 60%; top: 56%; }
+body[data-layout="christmas"] .xm-o4 { left: 20%; top: 78%; } body[data-layout="christmas"] .xm-o5 { left: 68%; top: 80%; }
+body[data-layout="christmas"] .xm.lit .xm-star { opacity: 1; }
+body[data-layout="christmas"] .xm.lit .xm-o { opacity: 1; animation: xmTwinkle 1.6s ease-in-out infinite; }
+body[data-layout="christmas"] .xm.lit .xm-o1 { background: #ff5a6e; box-shadow: 0 0 12px #ff5a6e; }
+body[data-layout="christmas"] .xm.lit .xm-o2 { background: #ffd94a; box-shadow: 0 0 12px #ffd94a; animation-delay: .3s; }
+body[data-layout="christmas"] .xm.lit .xm-o3 { background: #6fd0ff; box-shadow: 0 0 12px #6fd0ff; animation-delay: .6s; }
+body[data-layout="christmas"] .xm.lit .xm-o4 { background: #ffd94a; box-shadow: 0 0 12px #ffd94a; animation-delay: .9s; }
+body[data-layout="christmas"] .xm.lit .xm-o5 { background: #ff5a6e; box-shadow: 0 0 12px #ff5a6e; animation-delay: 1.2s; }
+@keyframes xmTwinkle { 50% { opacity: .55; } }
+
+body[data-layout="christmas"] .xm-meter { width: min(60vw, 240px); height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--text) 18%, transparent); overflow: hidden; }
+body[data-layout="christmas"] .xm-meter i { display: block; height: 100%; width: 0; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width .3s var(--ease); }
+body[data-layout="christmas"] .xm-stage .hint { min-height: 1.2em; }
+body[data-layout="christmas"] .xm.lit .pill { visibility: hidden; }
+body[data-layout="christmas"] .xm.open .xm-stage { display: none; }
+
+body[data-layout="christmas"] .xm-open { min-height: 100%; display: grid; justify-items: center; align-content: center; gap: 36px; padding: 84px 18px 56px; animation: xmRise 1.1s var(--ease) both; }
+body[data-layout="christmas"] .xm-gifts { width: min(100%, 760px); }
+body[data-layout="christmas"] .xm-letter { width: min(100%, 640px); }
+@keyframes xmRise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-layout="christmas"] .xm-snow i, body[data-layout="christmas"] .xm.shaking .xm-globe, body[data-layout="christmas"] .xm.lit .xm-o, body[data-layout="christmas"] .xm-open { animation: none; }
+}

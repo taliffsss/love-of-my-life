@@ -52,7 +52,7 @@ final class OccasionTemplatesTest extends TestCase
         foreach ($invitations as $t) {
             $this->assertMatchesRegularExpression('/\[[a-zA-Z ]+\]/', implode(' ', $t['letter']), $t['key'] . ' leaves blanks ([date], [venue]) for the owner to fill in');
         }
-        $this->assertCount(10, \App\Services\Designs::OCCASION_DESIGNS['invitation']);
+        $this->assertCount(13, \App\Services\Designs::OCCASION_DESIGNS['invitation']);
     }
 
     public function testFindReturnsATemplateOrNull(): void

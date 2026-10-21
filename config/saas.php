@@ -96,7 +96,7 @@ return [
             'blurb' => 'Your page online, with 12 photos and 5 templates.'],
         'sweetheart' => ['name' => 'Sweetheart', 'prices' => ['month' => 35000, 'year' => 420000], 'photos' => 40, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => true,
-            'blurb' => 'All 10 templates and 40 photos.', 'blurb_subdomain' => 'All 10 templates, 40 photos and an address of its own.'],
+            'blurb' => 'All 13 templates and 40 photos.', 'blurb_subdomain' => 'All 13 templates, 40 photos and an address of its own.'],
         'forever' => ['name' => 'Forever', 'prices' => ['once' => 499900], 'photos' => 60, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => false,
             'blurb' => 'Pay once and it stays online for good: 60 photos and every template.',

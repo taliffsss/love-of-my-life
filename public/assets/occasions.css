@@ -46,3 +46,6 @@ body[data-occasion][data-layout="memory"] { --i1: auto 0 0 0; --w1: auto; --h1: 
 body[data-occasion][data-layout="timeline"] { --i1: 0 0 0 auto; --w1: 36px; --h1: auto; --s1: 36px 36px; --r1: repeat-y; --o1: .5; --i2: auto auto 14px 14px; --w2: 80px; --h2: 80px; --o2: .4; }
 body[data-occasion][data-layout="gift"] { --i1: 12px auto auto calc(50% - 60px); --w1: 120px; --h1: 120px; --o1: .45; --i2: auto 0 0 0; --w2: auto; --h2: 30px; --s2: 30px 30px; --r2: repeat-x; --o2: .5; }
 body[data-occasion][data-layout="stars"] { --i1: 0; --w1: auto; --h1: auto; --s1: 90px 90px; --r1: repeat; --o1: .14; --i2: auto 14px 14px auto; --w2: 140px; --h2: 140px; --o2: .4; }
+body[data-occasion][data-layout="halloween"] { --i1: 0; --w1: auto; --h1: auto; --s1: 90px 90px; --r1: repeat; --o1: .12; --i2: auto 14px 14px auto; --w2: 120px; --h2: 120px; --o2: .35; }
+body[data-occasion][data-layout="christmas"] { --i1: 0; --w1: auto; --h1: auto; --s1: 90px 90px; --r1: repeat; --o1: .12; --i2: auto 14px 14px auto; --w2: 120px; --h2: 120px; --o2: .35; }
+body[data-occasion][data-layout="valentine"] { --i1: 12px auto auto 12px; --w1: 110px; --h1: 110px; --o1: .4; --i2: auto 12px 12px auto; --w2: 110px; --h2: 110px; --o2: .4; }

@@ -111,13 +111,13 @@ final class DashboardPagesTest extends TestCase
         $this->assertNull(Page::query()->where('slug', $page->slug)->first()->occasion);
     }
 
-    public function testTheDesignPickerHasTenDesignsForEveryOccasion(): void
+    public function testTheDesignPickerHasADesignPerTemplateForEveryOccasion(): void
     {
         $page = $this->makePage($this->owner);
         $html = (string) $this->get('/dashboard/pages/' . $page->slug)->getBody();
         $this->assertSame(6, substr_count($html, 'class="choice-grid design-grid"'), 'Plain and the five occasions');
         foreach (Designs::OCCASION_DESIGNS as $occasion => $designs) {
-            $this->assertCount(10, $designs, $occasion);
+            $this->assertCount(13, $designs, $occasion);
             $this->assertSame(array_keys(Designs::LAYOUTS), array_keys($designs));
             foreach ($designs as [$name]) {
                 $this->assertStringContainsString('<b>' . $name . '</b>', $html);
@@ -216,14 +216,14 @@ final class DashboardPagesTest extends TestCase
     {
         $page = $this->makePage($this->owner, ['layout' => 'classic']);
         $url = '/dashboard/pages/' . $page->slug;
-        $this->assertSame(10 * 6, substr_count((string) $this->get($url)->getBody(), 'name="layout"'), 'no plan chosen: all 10 in each of the 6 groups');
+        $this->assertSame(13 * 6, substr_count((string) $this->get($url)->getBody(), 'name="layout"'), 'no plan chosen: all 13 in each of the 6 groups');
 
         $this->get('/dashboard?plan=sweet');
         $html = (string) $this->get($url)->getBody();
         $this->assertSame(5 * 6, substr_count($html, 'name="layout"'), 'Sweet: 5 templates');
         $this->assertStringContainsString('Showing the 5 templates that come with Sweet', $html);
         $this->assertStringNotContainsString('value="stars"', $html);
-        $this->assertSame(10 * 6, substr_count((string) $this->get($url . '?templates=all')->getBody(), 'name="layout"'));
+        $this->assertSame(13 * 6, substr_count((string) $this->get($url . '?templates=all')->getBody(), 'name="layout"'));
     }
 
     public function testFreeDraftsAreLimited(): void

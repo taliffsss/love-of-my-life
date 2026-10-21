@@ -6,15 +6,15 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
 
 - **Dashboard:** create pages, write the letter, upload and order photos, pick a YouTube song, set the lock-screen
   question and answer, choose a template and colours with a live preview, share the link or a printable QR code.
-- **10 templates**, each with any of the colour themes (Rose, Midnight, Sunset, Blush): the slideshows Classic,
-  Cinematic and Polaroid, and the interactive Envelope, Scratch card, Storybook, Memory game, Timeline, Gift box and
-  Starry sky. A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
+- **13 templates**, each with any of the colour themes (Rose, Midnight, Sunset, Blush): the slideshows Classic,
+  Cinematic and Polaroid, and the interactive Envelope, Scratch card, Storybook, Memory game, Timeline, Gift box,
+  Starry sky, and the seasonal Halloween (knock on a haunted door), Christmas (shake a snow globe) and Valentine (pluck the petals). A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
   `<key>.js` and `resources/views/site/templates/<key>.naluz.php`; the contract its script follows is at the top of
   `public/assets/site.js`. A theme is a block of variables in `public/assets/themes.css`.
 - **Plans** (`config/saas.php`, reasoning in `marketing/PRICING.md`), from ₱200 a month; a year costs twelve months:
   - a free draft preview, with every template;
   - **Sweet**, ₱200 a month or ₱2,400 a year: 12 photos and 5 templates;
-  - **Sweetheart**, ₱350 a month or ₱4,200 a year: 40 photos, all 10 templates, and its own address
+  - **Sweetheart**, ₱350 a month or ₱4,200 a year: 40 photos, all 13 templates, and its own address
     `<name>.<SAAS_DOMAIN>`, which works the moment it is saved;
   - **Forever**, ₱4,999 once: never expires, 60 photos, everything.
   A live page shows only its plan's templates; a draft can try them all.

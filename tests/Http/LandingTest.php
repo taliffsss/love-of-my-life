@@ -25,7 +25,7 @@ final class LandingTest extends TestCase
         $this->assertStringContainsString('Sweet 12, Sweetheart 40 and Forever 60', $html, 'what each plan includes, shared by the account');
         $this->assertStringContainsString('up to 10 MB', $html);
         $this->assertStringNotContainsString('Free preview</h3>', $html, 'the free draft is not sold as a plan');
-        $this->assertStringContainsString('10 templates', $html);
+        $this->assertStringContainsString('13 templates', $html);
         foreach (Designs::LAYOUTS as $key => $template) {
             $this->assertStringContainsString('<h3>' . $template['name'] . '</h3>', $html);
             $this->assertStringContainsString('href="/demo?layout=' . $key . '"', $html);

@@ -168,7 +168,7 @@ final class SaasRulesTest extends TestCase
 
     public function testDesignsFallBackToTheDefaults(): void
     {
-        $this->assertCount(10, Designs::LAYOUTS, 'ten templates');
+        $this->assertCount(13, Designs::LAYOUTS, 'ten everyday templates and three seasonal ones');
         $this->assertGreaterThanOrEqual(3, count(Designs::THEMES));
         $this->assertSame('polaroid', Designs::layout('polaroid'));
         $this->assertSame('stars', Designs::layout('stars'));

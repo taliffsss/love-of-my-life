@@ -12,12 +12,12 @@ charging exists (see "What is left").
 | Yearly (twelve months, paid at once) | ₱2,400 / year | ₱4,200 / year | none |
 | One time | none | none | **₱4,999** |
 | Photos it adds to the account | 12 | 40 | 60 |
-| Templates | 5: Classic, Cinematic, Polaroid, Envelope, Timeline | all 10 | all 10 |
+| Templates | 5: Classic, Cinematic, Polaroid, Envelope, Timeline | all 13 | all 13 |
 | Own address `name.loveofmylife.love` (**switched off for now**, feature flag `SUBDOMAINS_ENABLED`) | no | **yes** | yes |
 | Song, lock question, link, QR code, change anything any time | yes | yes | yes |
 | Stays online | while paid | while paid | always |
 
-- **Free preview:** build everything and preview it privately, with all 10 templates and 6 photos, before paying.
+- **Free preview:** build everything and preview it privately, with all 13 templates and 6 photos, before paying.
 - **Extra photos:** 12 for ₱100, 1 to 10 packs an order. Paid once, kept for good, shared by all the account's pages.
 
 **What changed from the first monthly plans (₱59 / ₱99 / ₱1,499):**

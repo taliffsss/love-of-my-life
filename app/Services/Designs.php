@@ -18,7 +18,7 @@ namespace App\Services;
  *
  * An occasion (Anniversary, Wedding, Boyfriend / Girlfriend, Birthday; stored in the page's nullable `occasion` column) dresses
  * every template in its own style: public/assets/occasions.css (the typeface and two ornaments, placed differently for
- * each template). Each occasion therefore offers the same ten templates as ten designs of its own, OCCASION_DESIGNS. The
+ * each template). Each occasion therefore offers the same templates as designs of its own, OCCASION_DESIGNS. The
  * template (layout) alone decides what a plan includes, so plans are unaffected by occasions.
  *
  * A theme is a block of CSS variables in public/assets/themes.css plus an entry in THEMES.
@@ -86,6 +86,24 @@ final class Designs
             'play' => 'Tap every star.',
             'kind' => 'interactive',
         ],
+        'halloween' => [
+            'name' => 'Halloween',
+            'description' => 'A haunted door under the moon. Knock three times; it creaks open on your photos and your letter.',
+            'play' => 'Knock three times.',
+            'kind' => 'interactive',
+        ],
+        'christmas' => [
+            'name' => 'Christmas',
+            'description' => 'A snow globe to shake. The snow swirls, the tree lights up, and the gift inside is your letter.',
+            'play' => 'Shake the globe.',
+            'kind' => 'interactive',
+        ],
+        'valentine' => [
+            'name' => 'Valentine',
+            'description' => 'Loves me, loves me not: pluck the petals one by one. The last one always says yes.',
+            'play' => 'Pluck every petal.',
+            'kind' => 'interactive',
+        ],
     ];
 
     /** colors: background, accent, highlight (the swatches in the dashboard); scheme: light or dark background */
@@ -104,7 +122,7 @@ final class Designs
         'invitation' => ['name' => 'Invitation', 'blurb' => 'Weddings, debuts, baptisms and parties: invite them in style.'],
     ];
 
-    /** The ten designs of every occasion: layout key => [name, what makes it that occasion's]. */
+    /** The designs of every occasion (one per template): layout key => [name, what makes it that occasion's]. */
     public const OCCASION_DESIGNS = [
         'anniversary' => [
             'classic' => ['Love Letter', 'Your letter beside the photos, with gold anniversary sparkles.'],
@@ -117,6 +135,9 @@ final class Designs
             'timeline' => ['Years Together', 'Your story, chapter by chapter, down a sparkling edge.'],
             'gift' => ['Anniversary Gift', 'A wrapped present of photos and words.'],
             'stars' => ['Written in the Stars', 'A heart of stars, each holding a memory.'],
+            'halloween' => ['Haunted Love', 'Our spooky-sweet night: knock, and the door opens on our memories.'],
+            'christmas' => ['Winter Anniversary', 'A snow globe of the year we shared, lit up when you shake it.'],
+            'valentine' => ['Loves Me Still', 'Pluck the petals: after all these years, the answer is still yes.'],
         ],
         'wedding' => [
             'classic' => ['Our Vows', 'The letter as your vows, in wedding script with rings.'],
@@ -129,6 +150,9 @@ final class Designs
             'timeline' => ['Journey to I Do', 'From hello to the altar, one chapter at a time.'],
             'gift' => ['Wedding Gift', 'A wrapped gift for the new husband or wife.'],
             'stars' => ['Meant to Be', 'Stars aligned in the shape of a heart.'],
+            'halloween' => ['Spooky Vows', 'A haunted door that opens on your vows, for an autumn wedding.'],
+            'christmas' => ['Winter Wedding', 'A snow globe for the winter day you said yes.'],
+            'valentine' => ['Forever Yes', 'Loves me, loves me not, and then the vows.'],
         ],
         'partner' => [
             'classic' => ['Sweet Note', 'A handwritten-style letter with little hearts.'],
@@ -141,6 +165,9 @@ final class Designs
             'timeline' => ['How We Began', 'The story of you two, down a line of hearts.'],
             'gift' => ['Just Because', 'A present for no reason except love.'],
             'stars' => ['My Person', 'A heart of stars, just for them.'],
+            'halloween' => ['Trick or Treat', 'You are my treat. Knock to open it.'],
+            'christmas' => ['Christmas With You', 'A snow globe for our first Christmas.'],
+            'valentine' => ['Loves Me, Loves Me Not', 'Pluck the petals to find out how I feel.'],
         ],
         'birthday' => [
             'classic' => ['Birthday Wishes', 'Your letter beside the photos, with confetti.'],
@@ -153,6 +180,9 @@ final class Designs
             'timeline' => ['Year in Review', 'The year in moments, down a confetti edge.'],
             'gift' => ['Surprise Box', 'A box to open with photos inside.'],
             'stars' => ['Make a Wish', 'A star for every wish.'],
+            'halloween' => ['Spooky Birthday', 'A haunted door for an October birthday.'],
+            'christmas' => ['Christmas Birthday', 'A snow globe for a birthday in December.'],
+            'valentine' => ['Birthday Petals', 'A petal for every wish, and the last one comes true.'],
         ],
         'invitation' => [
             'classic' => ['Debut', 'An 18th birthday invitation, the details beside the photos.'],
@@ -165,6 +195,9 @@ final class Designs
             'timeline' => ['Wedding Program', 'The day in order: ceremony, reception and more.'],
             'gift' => ['Baby Shower', 'A wrapped surprise with the shower details inside.'],
             'stars' => ['Graduation Party', 'A sky of stars, each with a bit of the celebration.'],
+            'halloween' => ['Halloween Party', 'Knock to find out where the party is.'],
+            'christmas' => ['Christmas Party', 'Shake the globe to open the invitation.'],
+            'valentine' => ['Valentine Party', 'Pluck the petals to see the party details.'],
         ],
     ];
 

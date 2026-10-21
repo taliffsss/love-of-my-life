@@ -1,0 +1,54 @@
+/* Template "halloween": a haunted door under the moon; three knocks open it. The emoji and the door's wood are the season's
+   own; the background, the letter paper and the text follow the colour theme (themes.css). */
+
+body[data-layout="halloween"] .show { background: radial-gradient(80% 60% at 50% 18%, color-mix(in srgb, #5b2a86 38%, var(--bg-2)), var(--bg) 78%); }
+body[data-layout="halloween"] .hw-stage { position: relative; min-height: 100%; display: grid; place-content: end center; justify-items: center; gap: 14px; padding: 84px 18px 56px; overflow: hidden; }
+body[data-layout="halloween"] .hw-stage .eyebrow { position: relative; z-index: 2; margin: 0; }
+body[data-layout="halloween"] .hw-scene { position: absolute; inset: 0; pointer-events: none; }
+body[data-layout="halloween"] .hw-moon { position: absolute; top: 12%; right: 14%; width: clamp(70px, 18vw, 120px); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff7d6, #f2d98a 70%); box-shadow: 0 0 60px 18px rgba(255, 233, 160, .35); }
+body[data-layout="halloween"] .hw-bat { position: absolute; font-size: clamp(1.4rem, 5vw, 2.2rem); animation: hwFly 7s ease-in-out infinite; filter: drop-shadow(0 0 6px rgba(0, 0, 0, .5)); }
+body[data-layout="halloween"] .hw-bat1 { top: 18%; left: 10%; }
+body[data-layout="halloween"] .hw-bat2 { top: 30%; left: 62%; animation-duration: 9s; animation-delay: -3s; }
+body[data-layout="halloween"] .hw-bat3 { top: 9%; left: 38%; animation-duration: 11s; animation-delay: -6s; }
+body[data-layout="halloween"] .hw-pumpkin { position: absolute; bottom: 7%; font-size: clamp(2.6rem, 11vw, 4.4rem); filter: drop-shadow(0 0 18px rgba(255, 140, 40, .65)); animation: hwFlicker 3.4s ease-in-out infinite; }
+body[data-layout="halloween"] .hw-p1 { left: calc(50% - min(48vw, 250px)); }
+body[data-layout="halloween"] .hw-p2 { right: calc(50% - min(48vw, 250px)); animation-delay: -1.7s; }
+body[data-layout="halloween"] .hw-ghost { position: absolute; left: calc(50% + min(26vw, 130px)); top: 40%; font-size: clamp(2rem, 7vw, 3rem); opacity: .85; animation: hwFloat 5s ease-in-out infinite; }
+@keyframes hwFly { 0%, 100% { transform: translate3d(0, 0, 0) rotate(-6deg); } 50% { transform: translate3d(40px, -22px, 0) rotate(8deg); } }
+@keyframes hwFlicker { 0%, 100% { filter: drop-shadow(0 0 18px rgba(255, 140, 40, .65)); } 45% { filter: drop-shadow(0 0 8px rgba(255, 140, 40, .3)); } 55% { filter: drop-shadow(0 0 26px rgba(255, 170, 60, .85)); } }
+@keyframes hwFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+
+body[data-layout="halloween"] .hw-door {
+  position: relative; z-index: 2; width: min(46vw, 190px); height: min(68vw, 280px); padding: 0; border: 0; cursor: pointer;
+  border-radius: 999px 999px 6px 6px; background: radial-gradient(60% 70% at 50% 60%, #ffcf7a, #ff8a2b 70%); perspective: 900px;
+  box-shadow: 0 0 40px 6px rgba(255, 140, 40, .35), 0 30px 60px rgba(0, 0, 0, .45);
+}
+body[data-layout="halloween"] .hw-door:focus-visible { outline: 3px solid var(--text); outline-offset: 8px; }
+body[data-layout="halloween"] .hw-light { position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 50% 70%, #fff2c4, transparent 70%); opacity: 0; transition: opacity 1s var(--soft); }
+body[data-layout="halloween"] .hw-leaf {
+  position: absolute; inset: 0; border-radius: inherit; transform-origin: 0 50%; transition: transform 1.3s var(--ease);
+  background: repeating-linear-gradient(90deg, #4a2a18 0 14px, #3d2113 14px 16px), #3d2113; box-shadow: inset 0 0 0 6px rgba(0, 0, 0, .25);
+}
+body[data-layout="halloween"] .hw-knob { position: absolute; right: 14%; top: 56%; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe9a8, #b9862e); box-shadow: 0 2px 4px rgba(0, 0, 0, .4); }
+body[data-layout="halloween"] .hw-knocks { display: flex; gap: 10px; margin: 0; z-index: 2; }
+body[data-layout="halloween"] .hw-knocks i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--gold); transition: background .3s var(--soft), transform .3s var(--ease); }
+body[data-layout="halloween"] .hw-knocks i.on { background: var(--gold); transform: scale(1.2); }
+body[data-layout="halloween"] .hw-stage .hint { position: relative; z-index: 2; min-height: 1.2em; }
+
+body[data-layout="halloween"] .hw.knock .hw-door { animation: hwKnock .42s var(--ease); }
+@keyframes hwKnock { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px) rotate(-1deg); } 45% { transform: translateX(5px) rotate(1deg); } 70% { transform: translateX(-3px); } }
+body[data-layout="halloween"] .hw.knock .hw-pumpkin { animation-duration: .5s; }
+body[data-layout="halloween"] .hw.opening .hw-door { pointer-events: none; }
+body[data-layout="halloween"] .hw.opening .hw-leaf { transform: rotateY(-78deg); }
+body[data-layout="halloween"] .hw.opening .hw-light { opacity: 1; }
+body[data-layout="halloween"] .hw.open .hw-stage { display: none; }
+
+body[data-layout="halloween"] .hw-open { min-height: 100%; display: grid; justify-items: center; align-content: center; gap: 36px; padding: 84px 18px 56px; animation: hwRise 1.1s var(--ease) both; }
+body[data-layout="halloween"] .hw-treats { width: min(100%, 760px); }
+body[data-layout="halloween"] .hw-letter { width: min(100%, 640px); }
+@keyframes hwRise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-layout="halloween"] .hw-bat, body[data-layout="halloween"] .hw-pumpkin, body[data-layout="halloween"] .hw-ghost, body[data-layout="halloween"] .hw.knock .hw-door, body[data-layout="halloween"] .hw-open { animation: none; }
+  body[data-layout="halloween"] .hw-leaf { transition: none; }
+}
