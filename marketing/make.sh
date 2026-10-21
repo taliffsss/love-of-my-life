@@ -5,7 +5,7 @@
 #   marketing/make.sh                      # same as: marketing/make.sh help
 #   marketing/make.sh all                  # everything (the promo takes ~20 min the first time)
 #   marketing/make.sh halloween            # the whole Halloween campaign: footage, pictures, ads, carousels, reels, folders
-#   marketing/make.sh halloween reels      # only part of it: footage | images | ads | carousel | reels | collect
+#   marketing/make.sh halloween reels      # only part of it: footage | images | ads | carousel | reels | collect | links
 #   marketing/make.sh images               # all post images (Facebook + TikTok + Halloween)
 #   marketing/make.sh image hw-door ad-hw-1   # only these images
 #   marketing/make.sh reels                # voice + video for every reel
@@ -23,7 +23,8 @@
 #   reels      voice + video for the reels                                              marketing/social/reels/render_reels.py
 #   collect    the ready-to-upload folders: out/social/post-now and out/social/halloween
 #   halloween  footage + images + ads + carousel + reels (Halloween only) + collect
-#   links      the UTM-tagged links of the campaign (marketing/UTM.md)
+#   links      the UTM-tagged links of the campaign (marketing/UTM.md); `collect` also writes them to out/social/halloween/LINKS.md
+#   guides     where the how-to documents are: ads guide, campaign plan, UTM, SEO audit, e-mail sequences
 #   list       the image names and reel ids you can ask for
 #
 # Needs `uv`, PHP with vendor/ and an internet connection (Google Fonts); see marketing/README.md. Output: marketing/out/ (git-ignored).
@@ -99,8 +100,9 @@ t_halloween() {
     carousel) t_images $HALLOWEEN_CAROUSEL ;;
     reels)    t_reels $HALLOWEEN_REELS ;;
     collect)  run python3 marketing/social/build_halloween.py ;;
-    all)      t_footage $HALLOWEEN_CLIPS; t_images $HALLOWEEN_IMAGES; t_reels $HALLOWEEN_REELS; run python3 marketing/social/build_halloween.py ;;
-    *) echo "halloween: unknown part '$part' (footage|images|ads|carousel|reels|collect)" >&2; exit 2 ;;
+    all)      t_footage $HALLOWEEN_CLIPS; t_images $HALLOWEEN_IMAGES; t_reels $HALLOWEEN_REELS; run python3 marketing/social/build_halloween.py; t_links ;;
+    links)    t_links ;;
+    *) echo "halloween: unknown part '$part' (footage|images|ads|carousel|reels|collect|links)" >&2; exit 2 ;;
   esac
 }
 
@@ -114,6 +116,19 @@ t_list() {
 }
 
 t_links()    { say "UTM-tagged links"; run python3 marketing/social/utm.py "$@"; }
+t_guides() {
+  say "Marketing documents (read these, they are not built)"
+  printf '  %-46s %s\n' \
+    "marketing/ADS_GUIDE.md" "step by step: from audience to a first customer with Meta ads" \
+    "marketing/CAMPAIGN_PLAN_HALLOWEEN.md" "the Halloween plan: audience, messages, channels, calendar, metrics" \
+    "marketing/UTM.md" "how links are tagged; the numbers are at Admin → Traffic" \
+    "marketing/social/HALLOWEEN.md" "captions, ad copy and the schedule (edit here, then: make.sh collect)" \
+    "marketing/reviews/HALLOWEEN_BRAND_REVIEW.md" "the copy checked against Lettie's voice and the honesty rules" \
+    "marketing/SEO_AUDIT.md" "SEO audit with the quick wins" \
+    "marketing/EMAIL_SEQUENCES.md" "onboarding, upgrade and seasonal e-mails" \
+    "marketing/content/" "blog and landing drafts" \
+    "marketing/README.md" "everything, with the build order"
+}
 t_help() { sed -n '2,/^set -euo/p' "$SELF" | sed '$d' | sed 's/^# \{0,1\}//'; }
 
 t_all() {
@@ -123,12 +138,15 @@ t_all() {
   t_images
   t_reels
   t_collect
+  t_links
 }
 
 target="${1:-help}"; [ "$#" -gt 0 ] && shift
 case "$target" in
   help|-h|--help) t_help; exit 0 ;;
   list)           t_list; exit 0 ;;
+  guides)         t_guides; exit 0 ;;
+  links)          t_links "$@"; exit 0 ;;
 esac
 check_tools
 case "$target" in
@@ -145,6 +163,7 @@ case "$target" in
   reel)      [ "$#" -gt 0 ] || { echo "reel: name at least one id (see: marketing/make.sh list)" >&2; exit 2; }; t_reels "$@" ;;
   collect)   t_collect ;;
   links)     t_links "$@" ;;
+  guides)    t_guides ;;
   halloween) t_halloween "$@" ;;
   *) echo "unknown target '$target'" >&2; t_help >&2; exit 2 ;;
 esac

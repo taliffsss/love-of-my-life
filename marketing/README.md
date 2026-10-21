@@ -11,7 +11,7 @@ None of this is part of the app; `.dockerignore` keeps it out of the image. Ever
 | `social/` | The Facebook and TikTok kit: profile pictures, covers, 56 post images, captions, plan, TikTok scripts |
 | `social/reels/` | Seven ~15 s Facebook/Reels videos (five everyday, two Halloween) |
 | `social/HALLOWEEN.md` | The Halloween campaign: captions, Meta ad copy, schedule and honesty rules; `build_halloween.py` collects it |
-| `make.sh` | One script that builds any or all of the above (`make.sh links` prints the UTM links) |
+| `make.sh` | One script that builds any or all of the above (`make.sh links` prints the UTM links, `make.sh guides` lists the guides) |
 | `UTM.md` | How links are tagged and where the traffic shows (Admin → Traffic) |
 | `ADS_GUIDE.md` | Step by step: from audience to a first customer with Meta ads |
 | `CAMPAIGN_PLAN_HALLOWEEN.md` | The Halloween campaign plan: audience, messages, channels, calendar, metrics, risks |
@@ -33,7 +33,7 @@ marketing/make.sh halloween               # the whole Halloween campaign (footag
 marketing/make.sh halloween ads           # only part of it: footage | images | ads | carousel | reels | collect
 marketing/make.sh images                  # every post image         marketing/make.sh image hw-door ad-hw-1   # just these
 marketing/make.sh reels                   # every reel               marketing/make.sh reel halloween-knock    # just this one
-marketing/make.sh carousel | ads | cards | voice | collect | promo | footage [clips]
+marketing/make.sh carousel | ads | cards | voice | collect | links | guides | promo | footage [clips]
 marketing/make.sh list                    # image names, reel ids and clips you can ask for
 marketing/make.sh --dry-run halloween     # print what would run, run nothing
 ```
