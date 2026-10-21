@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.9.0 (2026-10-21, branch `main-v2`)
+
+- **Four looks for the landing page:** the default (midnight, wax red, gilt), Halloween (purple night, pumpkin), Christmas (pine night, berry red, gold) and Valentine's Day (burgundy night, rose).
+  The look follows the season that is on (`App\Services\Seasons::theme`: Halloween 17 – 31 Oct, Christmas 11 – 25 Dec, Valentine's 31 Jan – 14 Feb) and goes back to the default after it.
+  A look is only a set of colour tokens in `landing.css`. Outside production (or with `THEME_PREVIEW=true`), `/?theme=halloween|christmas|valentine|default` previews any of them, and
+  `marketing/make.sh themes` photographs all four into `marketing/out/theme-preview/index.html`.
+
 ## 3.8.0 (2026-10-21, branch `main-v2`)
 
 - **Deleting is always soft.** Deleting a photo, a page or (as an administrator) an account only hides it: the row gets `deleted_at` and the file stays in storage. A deleted page's link

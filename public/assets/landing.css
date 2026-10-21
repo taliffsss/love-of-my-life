@@ -6,10 +6,32 @@
 .lp {
   --lp-ink: #130a18; --lp-ink-2: #1c0e26; --lp-ink-3: #2c1838;
   --lp-wax: #d6334f; --lp-wax-2: #ee5b74; --lp-gilt: #e9cf9a;
+  --lp-glow-1: rgba(214, 51, 79, .34); --lp-glow-2: rgba(233, 207, 154, .16); --lp-wax-shadow: rgba(214, 51, 79, .35);
   --lp-paper: #fffaf6; --lp-vellum: #f3ebf1; --lp-text: #2a1623; --lp-soft: #6b5260;
   --lp-mist: rgba(255, 244, 248, .72); --lp-line-d: rgba(255, 255, 255, .14); --lp-line-l: rgba(42, 22, 35, .16);
   background: var(--lp-ink); color: #fff4f8;
   font-family: 'Bricolage Grotesque', Inter, system-ui, sans-serif; font-size: 17px; line-height: 1.6; font-optical-sizing: auto;
+}
+
+/* ---------- the four looks: the default, and one for each season (App\Services\Seasons::theme picks it by the date) ----------
+   A look is only these tokens: the page ink, the one action colour, the gilt detail, the vellum and paper of the light sections, and the glow of the hero. */
+.lp.lp-t-halloween {
+  --lp-ink: #130a1c; --lp-ink-2: #1f0f2e; --lp-ink-3: #321a4a;
+  --lp-wax: #c2410c; --lp-wax-2: #f0742f; --lp-gilt: #ffd27a;
+  --lp-paper: #fffaf3; --lp-vellum: #f1e9f6; --lp-text: #2a1633; --lp-soft: #6a5478;
+  --lp-glow-1: rgba(255, 140, 40, .32); --lp-glow-2: rgba(130, 70, 190, .36); --lp-wax-shadow: rgba(194, 65, 12, .4);
+}
+.lp.lp-t-christmas {
+  --lp-ink: #0a1814; --lp-ink-2: #0f2820; --lp-ink-3: #17392d;
+  --lp-wax: #c8233b; --lp-wax-2: #e5485d; --lp-gilt: #f0d98c;
+  --lp-paper: #fcfef9; --lp-vellum: #eaf2ec; --lp-text: #152a21; --lp-soft: #4f6a5d;
+  --lp-glow-1: rgba(60, 170, 110, .34); --lp-glow-2: rgba(230, 70, 80, .28); --lp-wax-shadow: rgba(200, 35, 59, .38);
+}
+.lp.lp-t-valentine {
+  --lp-ink: #1d0610; --lp-ink-2: #2c0a1a; --lp-ink-3: #461227;
+  --lp-wax: #d61a52; --lp-wax-2: #f04375; --lp-gilt: #ffc9d6;
+  --lp-paper: #fff7f9; --lp-vellum: #fbe9ef; --lp-text: #3a1120; --lp-soft: #7c4f5d;
+  --lp-glow-1: rgba(255, 70, 110, .4); --lp-glow-2: rgba(255, 170, 190, .26); --lp-wax-shadow: rgba(214, 26, 82, .4);
 }
 .lp a:not(.btn):not(.lp-btn), .lp a:not(.btn):not(.lp-btn):hover { color: inherit; } /* plain links take their surroundings' colour; the buttons keep their own */
 .lp .btn-light, .lp .btn-light:hover { color: var(--lp-ink); background: #fff; }
@@ -26,7 +48,7 @@
 .lp-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; min-height: 50px; padding: 0 28px; border-radius: 999px; border: 1.5px solid transparent;
   font: 600 1rem/1 'Bricolage Grotesque', system-ui, sans-serif; text-decoration: none; cursor: pointer; transition: transform .2s var(--ease), background .2s, border-color .2s, color .2s; }
 .lp-btn:hover { transform: translateY(-2px); }
-.lp-btn-wax { background: var(--lp-wax); color: #fff; box-shadow: 0 12px 30px rgba(214, 51, 79, .35); }
+.lp-btn-wax { background: var(--lp-wax); color: #fff; box-shadow: 0 12px 30px var(--lp-wax-shadow); }
 .lp-btn-wax:hover { background: var(--lp-wax-2); }
 .lp-btn-line { border-color: rgba(255, 255, 255, .38); color: #fff; background: transparent; }
 .lp-btn-line:hover { background: rgba(255, 255, 255, .1); border-color: #fff; }
@@ -49,7 +71,7 @@
 .dots i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
 /* ---------- hero ---------- */
-.lp .hero { padding-top: 70px; --glow-1: rgba(214, 51, 79, .34); --glow-2: rgba(233, 207, 154, .16); background: var(--lp-ink); color: #fff4f8; }
+.lp .hero { padding-top: 70px; --glow-1: var(--lp-glow-1); --glow-2: var(--lp-glow-2); background: var(--lp-ink); color: #fff4f8; }
 .lp .hero[data-season="valentine"] { --glow-1: rgba(255, 90, 120, .42); --glow-2: rgba(255, 170, 190, .22); }
 .lp .hero[data-season="halloween"] { --glow-1: rgba(255, 140, 40, .34); --glow-2: rgba(130, 70, 190, .34); }
 .lp .hero[data-season="christmas"] { --glow-1: rgba(60, 170, 110, .34); --glow-2: rgba(230, 70, 80, .26); }

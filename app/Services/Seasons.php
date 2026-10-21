@@ -46,6 +46,21 @@ final class Seasons
         return $today >= $day->modify("-{$this->leadDays} days") && $today <= $day;
     }
 
+    /**
+     * The look of the landing page today: the season that is on (Halloween, Christmas or Valentine, which never overlap) or "default" the rest of the year.
+     * The season's keys are the layout keys of its template, which is also its theme's name.
+     */
+    public function theme(?\DateTimeImmutable $now = null): string
+    {
+        $now ??= $this->now();
+        foreach (array_keys($this->events) as $season) {
+            if ($this->isOpen($season, $now)) {
+                return $season;
+            }
+        }
+        return 'default';
+    }
+
     /** The first day a closed seasonal template is offered again: "Halloween opens on 17 Oct". */
     public function opensOn(string $layout, ?\DateTimeImmutable $now = null): ?\DateTimeImmutable
     {

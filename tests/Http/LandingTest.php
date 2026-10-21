@@ -26,6 +26,24 @@ final class LandingTest extends TestCase
         $this->assertStringNotContainsString('data-key="christmas"', $html);
     }
 
+    public function testTheLandingPageWearsTheLookOfTheSeasonThatIsOnAndAnyOtherOnlyAsAPreview(): void
+    {
+        $this->seasons('2026-07-01');
+        $this->assertStringContainsString('<body class="lp lp-t-default"', (string) $this->get('/')->getBody());
+        $this->seasons('2026-10-20');
+        $this->assertStringContainsString('<body class="lp lp-t-halloween"', (string) $this->get('/')->getBody());
+        $this->seasons('2026-11-02');
+        $this->assertStringContainsString('<body class="lp lp-t-default"', (string) $this->get('/')->getBody(), 'after Halloween it goes back');
+
+        // outside production, ?theme= previews a look, with its template and hero chip
+        $html = (string) $this->get('/?theme=christmas')->getBody();
+        $this->assertStringContainsString('<body class="lp lp-t-christmas"', $html);
+        $this->assertStringContainsString('data-season="christmas"', $html);
+        $this->assertStringContainsString('data-key="christmas"', $html);
+        $this->assertStringNotContainsString('data-key="halloween"', $html);
+        $this->assertStringContainsString('lp-t-default', (string) $this->get('/?theme=nonsense')->getBody(), 'only the four looks');
+    }
+
     public function testTheLandingPageSellsThePlansAndLayouts(): void
     {
         $response = $this->get('/');

@@ -35,6 +35,9 @@ return [
         'events' => ['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]],
     ],
 
+    // THEME_PREVIEW=true lets ?theme=halloween|christmas|valentine|default preview a look of the landing page even in production (never needed there).
+    'theme_preview' => filter_var(env('THEME_PREVIEW', false), FILTER_VALIDATE_BOOLEAN),
+
     // Feature flags. `subdomains`: <name>.<domain> addresses for Sweetheart and Forever pages (claiming a name, serving it, the
     // wildcard DNS and certificate in DEPLOY.md). Off for now: the plans still say which one will include it (`subdomain`), but
     // nothing sells, shows, claims or serves an address until SUBDOMAINS_ENABLED=true (App\Services\Plans::flagged()).

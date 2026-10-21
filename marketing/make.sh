@@ -24,6 +24,7 @@
 #   collect    the ready-to-upload folders: out/social/post-now and out/social/halloween
 #   halloween  footage + images + ads + carousel + reels (Halloween only) + collect
 #   links      the UTM-tagged links of the campaign (marketing/UTM.md); `collect` also writes them to out/social/halloween/LINKS.md
+#   themes     photographs the landing page in its four looks (default, Halloween, Christmas, Valentine) into out/theme-preview/index.html
 #   guides     where the how-to documents are: ads guide, campaign plan, UTM, SEO audit, e-mail sequences
 #   list       the image names and reel ids you can ask for
 #
@@ -115,6 +116,13 @@ t_list() {
   echo; echo "Halloween images: $HALLOWEEN_IMAGES"
 }
 
+t_themes()   {
+  say "The landing page in its four looks"
+  if [ "$DRY" = 1 ]; then echo "  would run: start the app on :$PORT, then marketing/theme_preview.py"; return; fi
+  start_app
+  $PW python marketing/theme_preview.py --base "http://127.0.0.1:$PORT"
+  kill "$APP_PID" 2>/dev/null || true; APP_PID=""
+}
 t_links()    { say "UTM-tagged links"; run python3 marketing/social/utm.py "$@"; }
 t_guides() {
   say "Marketing documents (read these, they are not built)"
@@ -164,6 +172,7 @@ case "$target" in
   collect)   t_collect ;;
   links)     t_links "$@" ;;
   guides)    t_guides ;;
+  themes)    t_themes ;;
   halloween) t_halloween "$@" ;;
   *) echo "unknown target '$target'" >&2; t_help >&2; exit 2 ;;
 esac

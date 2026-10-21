@@ -51,6 +51,19 @@ final class SeasonsTest extends TestCase
         $this->assertSame(13, count($this->at('2026-07-01', always: true)->offered(Designs::LAYOUTS)));
     }
 
+    public function testTheLandingLookFollowsTheSeasonThatIsOn(): void
+    {
+        $this->assertSame('halloween', $this->at('2026-10-20')->theme());
+        $this->assertSame('default', $this->at('2026-11-01')->theme(), 'after Halloween: back to the default look');
+        $this->assertSame('default', $this->at('2026-12-10')->theme());
+        $this->assertSame('christmas', $this->at('2026-12-11')->theme());
+        $this->assertSame('christmas', $this->at('2026-12-25')->theme());
+        $this->assertSame('default', $this->at('2026-12-26')->theme());
+        $this->assertSame('valentine', $this->at('2027-02-14')->theme());
+        $this->assertSame('default', $this->at('2027-02-15')->theme());
+        $this->assertSame('default', $this->at('2027-07-01')->theme());
+    }
+
     public function testItSaysWhenAClosedTemplateOpens(): void
     {
         $this->assertSame('2026-12-11', $this->at('2026-10-20')->opensOn('christmas')->format('Y-m-d'));

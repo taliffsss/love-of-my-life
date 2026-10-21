@@ -1,6 +1,6 @@
 @extends('layouts.product')
 @section('title', $brand . ' · A love letter they unlock with a word only they know')
-@section('bodyClass', 'lp')
+@section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
 @push('head')
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />

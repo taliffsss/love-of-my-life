@@ -24,11 +24,22 @@ final class LandingController
         'I do not need anything grand. Just you, and more days like these. Happy monthsary, my love.',
     ];
 
-    public function index(Plans $plans, Sites $sites, PhotoAllowance $allowance, Seasons $seasons): ResponseInterface
+    public function index(ServerRequestInterface $request, Plans $plans, Sites $sites, PhotoAllowance $allowance, Seasons $seasons): ResponseInterface
     {
-        $offered = $seasons->offered(Designs::LAYOUTS); // the seasonal templates only from two weeks before their day
+        // The look follows the season that is on (App\Services\Seasons::theme). Outside production (or with THEME_PREVIEW=true), ?theme=halloween|christmas|valentine|default previews any
+        // of them as if its season were on: its template and its hero chip appear, and the others' do not.
+        $theme = $seasons->theme();
+        $asked = $request->getQueryParams()['theme'] ?? null;
+        if ((config('app.env') !== 'production' || config('saas.theme_preview')) && is_string($asked) && in_array($asked, ['default', 'halloween', 'christmas', 'valentine'], true)) {
+            $theme = $asked;
+            $on = static fn (string $k): bool => $k === $asked;
+        } else {
+            $on = fn (string $k): bool => $seasons->isOpen($k);
+        }
+        $offered = array_filter(Designs::LAYOUTS, static fn (array $l, string $k): bool => empty($l['season']) || $on($k), ARRAY_FILTER_USE_BOTH);
         return Screen::render('landing', [
-            'openSeasons' => array_values(array_filter(array_keys($offered), static fn (string $k): bool => $seasons->isSeasonal($k))),
+            'theme' => $theme,
+            'openSeasons' => array_values(array_filter(array_keys($offered), static fn (string $k): bool => !empty(Designs::LAYOUTS[$k]['season']))),
             'plans' => $plans->paid(),
             'freePhotos' => $allowance->freePhotos(),
             'pack' => $allowance->packOptions()[1],
