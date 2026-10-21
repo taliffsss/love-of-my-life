@@ -226,6 +226,43 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame(13 * 6, substr_count((string) $this->get($url . '?templates=all')->getBody(), 'name="layout"'));
     }
 
+    public function testTheSeasonalTemplatesAreOfferedTwoWeeksBeforeTheirDay(): void
+    {
+        $page = $this->makePage($this->owner, ['layout' => 'classic']);
+        $url = '/dashboard/pages/' . $page->slug;
+
+        $this->seasons('2026-07-01');
+        $html = (string) $this->get($url)->getBody();
+        $this->assertSame(10 * 6, substr_count($html, 'name="layout"'), 'July: only the ten everyday templates in each of the 6 groups');
+        $this->assertStringNotContainsString('value="halloween"', $html);
+
+        $this->seasons('2026-10-20');
+        $html = (string) $this->get($url)->getBody();
+        $this->assertSame(11 * 6, substr_count($html, 'name="layout"'), 'two weeks before Halloween: Halloween joins');
+        $this->assertStringContainsString('value="halloween"', $html);
+        $this->assertStringNotContainsString('value="christmas"', $html);
+    }
+
+    public function testAClosedSeasonalTemplateCannotBeNewlyChosenButAPageKeepsItsOwn(): void
+    {
+        $this->seasons('2026-07-01');
+        $page = $this->makePage($this->owner, ['layout' => 'classic']);
+        $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'christmas', 'theme' => 'rose']);
+        $this->assertSame('classic', $page->fresh()->layout, 'closed: refused');
+        $this->assertStringContainsString('opens on 11 December', (string) $this->get('/dashboard/pages/' . $page->slug)->getBody());
+
+        $this->seasons('2026-12-12');
+        $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'christmas', 'theme' => 'rose']);
+        $this->assertSame('christmas', $page->fresh()->layout, 'open: chosen');
+
+        $this->seasons('2027-03-01'); // long after: the page keeps it, shows it in the picker and can save it again
+        $url = '/dashboard/pages/' . $page->slug;
+        $this->assertStringContainsString('value="christmas"', (string) $this->get($url)->getBody());
+        $this->submit('PUT', $url . '/design', ['layout' => 'christmas', 'theme' => 'midnight']);
+        $this->assertSame('midnight', $page->fresh()->theme);
+        $this->assertSame(200, $this->get('/demo?layout=christmas')->getStatusCode(), 'the demo link keeps working');
+    }
+
     public function testFreeDraftsAreLimited(): void
     {
         for ($i = 0; $i < PagesController::MAX_DRAFTS; $i++) {

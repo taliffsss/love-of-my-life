@@ -6,7 +6,7 @@ answer. People sign up, build a page in the dashboard for free, and publish it w
 
 - **Dashboard:** create pages, write the letter, upload and order photos, pick a YouTube song, set the lock-screen
   question and answer, choose a template and colours with a live preview, share the link or a printable QR code.
-- **13 templates**, each with any of the colour themes (Rose, Midnight, Sunset, Blush): the slideshows Classic,
+- **13 templates** (ten all year; the seasonal Halloween, Christmas and Valentine open two weeks before their day, `config/saas.php` `seasons`, `SEASONS_ALWAYS=true` for all year), each with any of the colour themes (Rose, Midnight, Sunset, Blush): the slideshows Classic,
   Cinematic and Polaroid, and the interactive Envelope, Scratch card, Storybook, Memory game, Timeline, Gift box,
   Starry sky, and the seasonal Halloween (knock on a haunted door), Christmas (shake a snow globe) and Valentine (pluck the petals). A template is a module: an entry in `app/Services/Designs.php`, `public/assets/templates/<key>.css` +
   `<key>.js` and `resources/views/site/templates/<key>.naluz.php`; the contract its script follows is at the top of

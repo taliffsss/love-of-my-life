@@ -26,10 +26,8 @@
       lines: ["Merry Christmas, {n}.", "All I want this year is another one just like the last, with you.", "The best gift was already under my roof: you."]
     }
   };
-  const monthSeason = () => {
-    const m = new Date().getMonth() + 1;
-    return m <= 2 ? "valentine" : m === 10 ? "halloween" : m >= 11 ? "christmas" : "love";
-  };
+  // the season on offer right now (the server lists them: a seasonal template opens two weeks before its day)
+  const openSeason = () => (hero?.dataset.seasons || "").split(",").filter((s) => SEASONS[s])[0] || "love";
 
   if (hero) {
     const who = $("#tryWho"), form = $("#tryForm"), answer = $("#tryAnswer"), screen = $("#phoneScreen");
@@ -117,7 +115,7 @@
       spawn(e.clientX - r.left, e.clientY - r.top);
     });
 
-    setSeason(monthSeason()); // the season that is on right now, so the page always feels current
+    setSeason(openSeason()); // the season that is on right now, so the page always feels current
   }
 
   // ---------- the templates: filters, "in season" and a live demo in a dialog ----------
@@ -128,13 +126,8 @@
       $$("#galleryFilter .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
       for (const card of cards) card.hidden = chip.dataset.filter !== "all" && card.dataset.kind !== chip.dataset.filter;
     }));
-    const month = new Date().getMonth() + 1;
     for (const card of cards) {
-      const months = (card.dataset.months || "").split(",").filter(Boolean).map(Number);
-      if (months.includes(month)) {
-        $(".season-badge", card).hidden = false;
-        gallery.prepend(card); // this season's template comes first
-      }
+      if ($(".season-badge", card)) gallery.prepend(card); // a seasonal template that is on offer comes first
     }
 
     // ---------- the theater: every template on a 3D ring ----------

@@ -37,6 +37,7 @@ abstract class TestCase extends BaseTestCase
         $this->app = new Application(dirname(__DIR__), $this->configOverrides());
         $this->app->boot();
         // cheap argon2 parameters keep the suite fast; production uses config/security.php
+        $this->seasons(always: true); // every test starts with all 13 templates on offer, whatever day it runs on
         $this->app->instance(\Naluz\Security\Hasher::class, new \Naluz\Security\Hasher(['memory_cost' => 1024, 'time_cost' => 1, 'threads' => 1]));
         if ($this->migrate()) {
             if (self::onPostgres()) {
@@ -240,6 +241,14 @@ abstract class TestCase extends BaseTestCase
     protected function ajax(string $method, string $uri, array $data = []): ResponseInterface
     {
         return $this->json($method, $uri, $data, ['X-CSRF-TOKEN' => $this->csrf('/')]);
+    }
+
+    /** The day the seasonal templates think it is (null: now); `always` offers them all year. */
+    protected function seasons(?string $date = null, bool $always = false): void
+    {
+        $this->app->instance(\App\Services\Seasons::class, new \App\Services\Seasons(
+            (array) config('saas.seasons.events'), 14, $always, 'UTC', $date === null ? null : fn () => new \DateTimeImmutable($date),
+        ));
     }
 
     protected function png(): string

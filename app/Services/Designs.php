@@ -91,7 +91,7 @@ final class Designs
             'description' => 'A haunted door under the moon. Knock three times; it creaks open on your photos and your letter.',
             'play' => 'Knock three times.',
             'kind' => 'interactive',
-            'months' => [10],
+            'season' => true,
             'theme' => 'halloween',
         ],
         'christmas' => [
@@ -99,7 +99,7 @@ final class Designs
             'description' => 'A snow globe to shake. The snow swirls, the tree lights up, and the gift inside is your letter.',
             'play' => 'Shake the globe.',
             'kind' => 'interactive',
-            'months' => [11, 12],
+            'season' => true,
             'theme' => 'christmas',
         ],
         'valentine' => [
@@ -107,7 +107,7 @@ final class Designs
             'description' => 'Loves me, loves me not: pluck the petals one by one. The last one always says yes.',
             'play' => 'Pluck every petal.',
             'kind' => 'interactive',
-            'months' => [1, 2],
+            'season' => true,
             'theme' => 'valentine',
         ],
     ];

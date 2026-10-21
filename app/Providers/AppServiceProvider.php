@@ -16,6 +16,7 @@ use App\Services\PhotoAllowance;
 use App\Services\PhotoCatalog;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
+use App\Services\Seasons;
 use App\Services\Sites;
 use App\Services\Subscriptions;
 use App\Services\Social\SocialAuth;
@@ -38,6 +39,12 @@ final class AppServiceProvider extends ServiceProvider
             (string) $c->make(Repository::class)->get('saas.currency', 'PHP'),
             (array) $c->make(Repository::class)->get('saas.periods', Plans::DEFAULT_PERIODS),
             fn (): bool => (bool) $c->make(Repository::class)->get('saas.features.subdomains', false),
+        ));
+        $this->app->singleton(Seasons::class, fn ($c) => new Seasons(
+            (array) $c->make(Repository::class)->get('saas.seasons.events', []),
+            (int) $c->make(Repository::class)->get('saas.seasons.lead_days', 14),
+            (bool) $c->make(Repository::class)->get('saas.seasons.always', false),
+            (string) $c->make(Repository::class)->get('app.timezone', 'UTC'),
         ));
         $this->app->singleton(SocialAuth::class, fn ($c) => new SocialAuth(
             (array) $c->make(Repository::class)->get('social', []),

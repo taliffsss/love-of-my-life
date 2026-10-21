@@ -10,6 +10,7 @@ use App\Services\Designs;
 use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
+use App\Services\Seasons;
 use App\Services\Sites;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,15 +24,17 @@ final class LandingController
         'I do not need anything grand. Just you, and more days like these. Happy monthsary, my love.',
     ];
 
-    public function index(Plans $plans, Sites $sites, PhotoAllowance $allowance): ResponseInterface
+    public function index(Plans $plans, Sites $sites, PhotoAllowance $allowance, Seasons $seasons): ResponseInterface
     {
+        $offered = $seasons->offered(Designs::LAYOUTS); // the seasonal templates only from two weeks before their day
         return Screen::render('landing', [
+            'openSeasons' => array_values(array_filter(array_keys($offered), static fn (string $k): bool => $seasons->isSeasonal($k))),
             'plans' => $plans->paid(),
             'freePhotos' => $allowance->freePhotos(),
             'pack' => $allowance->packOptions()[1],
             'maxPhoto' => PhotoStorage::megabytes((int) config('saas.max_upload_bytes')),
             'structuredData' => $this->structuredData(),
-            'layouts' => Designs::LAYOUTS,
+            'layouts' => $offered,
             'themes' => Designs::pickableThemes(),
             'domain' => $sites->domain(),
             'siteUrl' => rtrim((string) config('app.url'), '/') . '/',

@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.0 (2026-10-21, branch `main-v2`)
+
+- **The seasonal templates appear two weeks before their day.** Halloween (31 Oct), Christmas (25 Dec) and Valentine (14 Feb) are shown on the landing page
+  (grid, theater, hero chips), offered in the design picker and can be newly chosen only from 14 days before until the day itself (`App\Services\Seasons`,
+  `config/saas.php` `seasons`). Outside that window they are hidden and cannot be picked ("Christmas opens on 11 December"). A page that already uses one keeps it,
+  can save it again and keeps working, and the `/demo?layout=` links still open. `SEASONS_ALWAYS=true` shows them all year (for testing).
+- Plan blurbs say "every template" instead of a number, since the count changes with the season.
+- The sample card on the landing page's phone stays inside the phone.
+
 ## 3.4.0 (2026-10-21, branch `main-v2`)
 
 - **Three seasonal templates:** Halloween (knock three times on a haunted door), Christmas (shake a snow globe until the tree lights up) and Valentine

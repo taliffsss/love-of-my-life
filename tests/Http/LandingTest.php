@@ -9,6 +9,23 @@ use Naluz\Tests\TestCase;
 
 final class LandingTest extends TestCase
 {
+    public function testTheLandingPageShowsASeasonOnlyTwoWeeksBeforeItsDay(): void
+    {
+        $this->seasons('2026-07-01');
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('10 templates', $html);
+        $this->assertStringNotContainsString('data-key="halloween"', $html);
+        $this->assertStringNotContainsString('data-season="halloween"', $html, 'no Halloween chip in the hero');
+        $this->assertStringNotContainsString('data-filter="season"', $html);
+
+        $this->seasons('2026-10-20');
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('11 templates', $html);
+        $this->assertStringContainsString('data-key="halloween"', $html);
+        $this->assertStringContainsString('data-season="halloween"', $html);
+        $this->assertStringNotContainsString('data-key="christmas"', $html);
+    }
+
     public function testTheLandingPageSellsThePlansAndLayouts(): void
     {
         $response = $this->get('/');

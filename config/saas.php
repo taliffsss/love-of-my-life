@@ -27,6 +27,14 @@ return [
     // loved one (those are not part of the product layout) and never the admin area (see App\Http\Screen).
     'analytics_id' => (string) env('GA_MEASUREMENT_ID', env('APP_ENV', 'production') === 'production' ? 'G-M62J7X95ED' : ''),
 
+    // The seasonal templates (Halloween, Christmas, Valentine) are offered from `lead_days` before their day until the day itself
+    // (App\Services\Seasons); `events` are [month, day]. SEASONS_ALWAYS=true offers them all year (for testing).
+    'seasons' => [
+        'lead_days' => 14,
+        'always' => filter_var(env('SEASONS_ALWAYS', false), FILTER_VALIDATE_BOOLEAN),
+        'events' => ['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]],
+    ],
+
     // Feature flags. `subdomains`: <name>.<domain> addresses for Sweetheart and Forever pages (claiming a name, serving it, the
     // wildcard DNS and certificate in DEPLOY.md). Off for now: the plans still say which one will include it (`subdomain`), but
     // nothing sells, shows, claims or serves an address until SUBDOMAINS_ENABLED=true (App\Services\Plans::flagged()).
@@ -96,7 +104,7 @@ return [
             'blurb' => 'Your page online, with 12 photos and 5 templates.'],
         'sweetheart' => ['name' => 'Sweetheart', 'prices' => ['month' => 35000, 'year' => 420000], 'photos' => 40, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => true,
-            'blurb' => 'All 13 templates and 40 photos.', 'blurb_subdomain' => 'All 13 templates, 40 photos and an address of its own.'],
+            'blurb' => 'Every template and 40 photos.', 'blurb_subdomain' => 'All 13 templates, 40 photos and an address of its own.'],
         'forever' => ['name' => 'Forever', 'prices' => ['once' => 499900], 'photos' => 60, 'publish' => true,
             'subdomain' => true, 'templates' => 'all', 'popular' => false,
             'blurb' => 'Pay once and it stays online for good: 60 photos and every template.',

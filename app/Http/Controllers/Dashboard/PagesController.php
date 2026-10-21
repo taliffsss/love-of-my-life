@@ -17,6 +17,7 @@ use App\Services\OccasionTemplates;
 use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
+use App\Services\Seasons;
 use App\Services\QrCode;
 use App\Services\Sites;
 use App\Services\Subdomains;
@@ -165,7 +166,7 @@ final class PagesController
         return Screen::back($this->editUrl($page), 'Your page for ' . $recipient . ' is ready to fill in.');
     }
 
-    public function edit(string $slug, ServerRequestInterface $request, IntendedPlan $intended, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance, Subscriptions $subscriptions): ResponseInterface
+    public function edit(string $slug, ServerRequestInterface $request, IntendedPlan $intended, Seasons $seasons, Auth $auth, Sites $sites, Plans $plans, Subdomains $subdomains, PhotoStorage $storage, PhotoAllowance $allowance, Subscriptions $subscriptions): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $subscriptions->syncAuto((int) $auth->id());
@@ -178,14 +179,16 @@ final class PagesController
         // a draft of someone who chose a plan with fewer templates is shown just those (and the page's own), with a way to show all
         $user = $auth->user();
         $planLayouts = $user instanceof User && $page->status() === Page::DRAFT ? $intended->layouts($user->intended_plan) : null;
-        $shownLayouts = Designs::LAYOUTS;
+        // a seasonal template is offered from two weeks before its day (a page that already uses one keeps it)
+        $offered = array_filter(Designs::LAYOUTS, static fn (string $key): bool => $seasons->isOpen($key) || $key === $page->layout, ARRAY_FILTER_USE_KEY);
+        $shownLayouts = $offered;
         if ($planLayouts !== null && ($request->getQueryParams()['templates'] ?? '') !== 'all') {
-            $shownLayouts = array_filter(Designs::LAYOUTS, static fn (string $key): bool => in_array($key, $planLayouts, true) || $key === $page->layout, ARRAY_FILTER_USE_KEY);
+            $shownLayouts = array_filter($offered, static fn (string $key): bool => in_array($key, $planLayouts, true) || $key === $page->layout, ARRAY_FILTER_USE_KEY);
         }
 
         return Screen::render('dashboard.edit', [
             'shownLayouts' => $shownLayouts,
-            'planFilter' => $planLayouts !== null ? ['name' => $intended->name($user->intended_plan), 'count' => count($planLayouts), 'all' => count($shownLayouts) === count(Designs::LAYOUTS)] : null,
+            'planFilter' => $planLayouts !== null ? ['name' => $intended->name($user->intended_plan), 'count' => count($planLayouts), 'all' => count($shownLayouts) === count($offered)] : null,
             'page' => $page,
             'packs' => $allowance->packOptions(),
             // a plan above this page's is on sale (or the page is a draft): the photos box offers to upgrade
@@ -199,7 +202,7 @@ final class PagesController
             'domain' => $subdomains->domain(),
             'plans' => $plans->all(),
             'purchasable' => $plans->purchasable($page),
-            'layouts' => Designs::LAYOUTS,
+            'layouts' => $offered,
             'occasions' => Designs::OCCASIONS,
             'occasionDesigns' => Designs::OCCASION_DESIGNS,
             'templateNotes' => $this->templateNotes($page, $plans),
@@ -316,7 +319,7 @@ final class PagesController
         return Screen::back($this->editUrl($page, 'lock'), $enabled ? 'The lock screen is on.' : 'The lock screen is off: the page opens with one tap.');
     }
 
-    public function updateDesign(string $slug, ServerRequestInterface $request, Auth $auth, Plans $plans): ResponseInterface
+    public function updateDesign(string $slug, ServerRequestInterface $request, Auth $auth, Plans $plans, Seasons $seasons): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         $body = Request::body($request);
@@ -330,6 +333,10 @@ final class PagesController
         }
         if (!isset(Designs::LAYOUTS[$layout])) {
             $errors['layout'] = ['Pick one of the templates.'];
+        } elseif (!$seasons->isOpen($layout) && $layout !== $page->layout) {
+            // a seasonal template can be newly chosen from two weeks before its day; keeping the one a page already has is always fine
+            $opens = $seasons->opensOn($layout);
+            $errors['layout'] = [sprintf('The %s template opens on %s, two weeks before its day.', Designs::LAYOUTS[$layout]['name'], $opens?->format('j F') ?? 'its season')];
         } elseif ($page->status() !== Page::DRAFT && !$plans->allowsTemplate($page->plan, $layout)) {
             // a draft may try any template; a published page only those of its plan
             $errors['layout'] = [sprintf(

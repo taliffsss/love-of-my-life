@@ -38,7 +38,7 @@
     </nav>
   </div>
 </header>
-<div class="hero" id="hero" data-season="love">
+<div class="hero" id="hero" data-season="love" data-seasons="{{ implode(',', $openSeasons) }}">
   <div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
   <div class="container">
     <div>
@@ -50,9 +50,9 @@
         <input class="try-input" id="tryWho" type="text" maxlength="20" autocomplete="off" placeholder="Their name" />
         <div class="chips" role="group" aria-label="Pick an occasion to preview">
           <button type="button" class="chip" data-season="love" aria-pressed="true">💕 Everyday</button>
-          <button type="button" class="chip" data-season="valentine" aria-pressed="false">💘 Valentine’s</button>
-          <button type="button" class="chip" data-season="halloween" aria-pressed="false">🎃 Halloween</button>
-          <button type="button" class="chip" data-season="christmas" aria-pressed="false">🎄 Christmas</button>
+          @if (in_array('valentine', $openSeasons, true))<button type="button" class="chip" data-season="valentine" aria-pressed="false">💘 Valentine’s</button>@endif
+          @if (in_array('halloween', $openSeasons, true))<button type="button" class="chip" data-season="halloween" aria-pressed="false">🎃 Halloween</button>@endif
+          @if (in_array('christmas', $openSeasons, true))<button type="button" class="chip" data-season="christmas" aria-pressed="false">🎄 Christmas</button>@endif
         </div>
       </div>
       <div class="row">
@@ -130,13 +130,13 @@
         <button type="button" class="chip chip-dark" data-filter="all" aria-pressed="true">All {{ count($layouts) }}</button>
         <button type="button" class="chip chip-dark" data-filter="slideshow" aria-pressed="false">Slideshows</button>
         <button type="button" class="chip chip-dark" data-filter="play" aria-pressed="false">Little games</button>
-        <button type="button" class="chip chip-dark" data-filter="season" aria-pressed="false">Seasonal</button>
+        @if ($openSeasons !== [])<button type="button" class="chip chip-dark" data-filter="season" aria-pressed="false">Seasonal</button>@endif
       </div>
       <div class="grid-templates" id="gallery">
         @foreach ($layouts as $key => $layout)
-        @php $seasonal = isset($layout['months']); $kind = $seasonal ? 'season' : ($layout['kind'] === 'slideshow' ? 'slideshow' : 'play'); @endphp
-        <article class="card layout-card" data-kind="{{ $kind }}" data-key="{{ $key }}" data-name="{{ $layout['name'] }}" data-play="{{ $layout['play'] }}" data-about="{{ $layout['description'] }}" @if ($seasonal) data-months="{{ implode(',', $layout['months']) }}" @endif>
-          @if ($seasonal)<span class="season-badge" hidden>In season now</span>@endif
+        @php $seasonal = !empty($layout['season']); $kind = $seasonal ? 'season' : ($layout['kind'] === 'slideshow' ? 'slideshow' : 'play'); @endphp
+        <article class="card layout-card" data-kind="{{ $kind }}" data-key="{{ $key }}" data-name="{{ $layout['name'] }}" data-play="{{ $layout['play'] }}" data-about="{{ $layout['description'] }}">
+          @if ($seasonal)<span class="season-badge">In season now</span>@endif
           <div class="shot"><div class="schem schem-{{ $key }}" aria-hidden="true"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></div></div>
           <div class="body">
             <h3>{{ $layout['name'] }}</h3>
