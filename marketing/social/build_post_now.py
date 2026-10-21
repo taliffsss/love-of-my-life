@@ -4,7 +4,7 @@
 
 Reads the captions from FACEBOOK_POSTS.md and copies the images and videos that post uses (render_social.py and
 reels/render_reels.py make them first). Each folder gets CAPTION-copy-paste.txt; video folders also get captions.srt
-and thumbnail.png. The folder is rebuilt from scratch every run. Edit the captions in FACEBOOK_POSTS.md, not in the output.
+and thumbnail.png, and each video's description is also written next to it as reels/<video>.md. The folder is rebuilt from scratch every run. Edit the captions in FACEBOOK_POSTS.md, not in the output.
 """
 
 from __future__ import annotations
@@ -45,6 +45,7 @@ def main() -> None:
             shutil.copy(REELS / f"{vid}.mp4", target / f"video-{vid}.mp4")
             shutil.copy(REELS / f"{vid}.en_US.srt", target / "captions.srt")
             shutil.copy(REELS / f"{vid}-poster.png", target / "thumbnail.png")
+            (REELS / f"{vid}.md").write_text(caption(section) + "\n")  # the description, next to the video it belongs to
         else:
             line = re.search(r"\*\*Images?(?:, in order)?:\*\*([^\n]*)", section).group(1)
             names = re.findall(r"`([a-z0-9-]+)\.png`", line)

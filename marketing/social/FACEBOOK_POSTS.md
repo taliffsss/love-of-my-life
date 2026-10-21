@@ -98,43 +98,74 @@ and a QR code. Upload as a **Reel** (9:16) or a normal video post; upload the `.
 
 ### Video post 1: `ofw-unlock.mp4` (15.8 s) · day 2, 20:00
 > Miles apart? You're still one link away. ✈️💌
-> Lock a letter with a question only they can answer, and let them open it whenever they miss you.
-> Build it free → loveofmylife.love
 >
-> Malayo ka man, isang link lang ang layo 🥹 Para sa mga OFW at LDR couples.
-> #ofw #ofwlove #ldr #LoveOfMyLife
+> She's asleep where you are. He's just getting off a long shift where he is. And "I miss you" in a chat disappears in a minute.
+>
+> So write it properly. 🥹 Put your photos, your song and everything you can't say over a bad connection on one private page, then lock it with a question only the two of you know: the nickname, the first date, the song.
+>
+> They open it when they wake up. They open it on a hard day. They open it again, and again, whenever they miss you.
+>
+> Not a text they scroll past. A letter they keep. 💌
+>
+> Start free → loveofmylife.love
+>
+> Malayo ka man, isang link lang ang layo 🥹 Gawan mo siya ng sulat na siya lang ang makakabukas, at mababalikan niya tuwing namimiss ka niya. Para sa mga OFW at LDR couples.
+> Tag the one you're missing tonight 👇
+> #ofw #ofwlove #ldr #longdistancerelationship #LoveOfMyLife
 
 ### Video post 2: `scratch-ask.mp4` (15.4 s) · day 4, 19:30
-> Want to ask someone out? Hide the question under a scratch card. 🎟️
-> They scratch, they smile, they answer.
-> Build it free → loveofmylife.love
+> Some questions are too big to say out loud. 🎟️
 >
-> I-scratch ang card para makita ang tanong 💌
-> #scratchcard #monthsary #couplegoals
+> So hide yours under a scratch card. They scratch. Their eyes go wide. They smile before they even finish reading. Then they answer.
+>
+> That's how you ask someone out, or ask them to be yours, in a way they'll tell their friends about. 💌 Pick a design, add your photos and a song, write what's in your heart, and send the link.
+>
+> Start free → loveofmylife.love
+>
+> I-scratch ang card para makita ang tanong 💌 Sweet na paraan para mag-ask out. Sasagutin ka kaya niya? 🥹
+> Tag the person you'd send this to 👇
+> #scratchcard #monthsary #couplegoals #kilig #LoveOfMyLife
 
 ### Video post 3: `monthsary-book.mp4` (15.4 s) · day 7, 18:30 (the evening before a 14th or end-of-month monthsary is ideal)
 > Monthsary tomorrow? Skip the "happy monthsary" text. 💕
-> Turn your photos and words into a little book of you two.
-> Build it free → loveofmylife.love
 >
-> Monthsary na bukas? Gawan mo siya ng munting libro ng kwento niyo.
-> #monthsary #monthsarygift #giftideasph
+> You remember the first hello, the first inside joke, the night you knew. Turn it into a little book of the two of you: your photos, your words, page by page.
+>
+> Then add a new page every monthsary. Same link, same QR, more memories. One day it's a whole story they can open any time. 📖
+>
+> It's the gift that says "I remember." 🥹
+>
+> Start free → loveofmylife.love
+>
+> Monthsary na bukas? Gawan mo siya ng munting libro ng kwento niyo. Dagdagan mo bawat buwan 💕
+> Tag who you're making this for 👇
+> #monthsary #monthsarygift #giftideasph #pinoycouple #LoveOfMyLife
 
 ### Video post 4: `stars-wish.mp4` (15.4 s) · day 10, 19:00
-> Birthday? Anniversary? Make a wish. ✨
-> Light up the stars, one memory in each. Add your photos, your song and your words.
-> Build it free → loveofmylife.love
+> Make a wish. ✨
 >
-> Isang star, isang alaala. Gumawa ng sarili mong langit ng memories 🌌
-> #anniversarygift #birthdaygift #LoveOfMyLife
+> One star for the day you met. One for your first trip. One for the song that is now yours. Light them up one by one, and every star opens a memory only you two share. 🌌
+>
+> A birthday or an anniversary, this is the gift that makes them go quiet, and then smile. Add your photos, your song and your words, and send them their own sky.
+>
+> Start free → loveofmylife.love
+>
+> Isang star, isang alaala. Gumawa ng sarili mong langit ng memories para sa kanya 🌌
+> Which memory would be your first star? Tell us below 👇
+> #anniversarygift #birthdaygift #giftideasph #kilig #LoveOfMyLife
 
 ### Video post 5: `invite-gift.mp4` (15.4 s) · day 12, 12:30
-> Planning a party? Invite them in style. 🎁
-> Weddings, debuts, christenings and baby showers: a wrapped surprise with the details inside.
-> Build it free → loveofmylife.love
+> Your party deserves an invitation they'll want to open. 🎁
 >
-> Kasal, debut, binyag o baby shower: imbitahan sila nang may dating.
-> #weddinginvitation #debut #babyshower #christening
+> Instead of a flat photo in the group chat, send a wrapped surprise. They tap, the gift opens, and the date, the place and everything they need to know are inside. 💌
+>
+> For weddings, debuts, christenings, baby showers and reunions: ten designs to choose from, shared with one link or a QR code on a printed card.
+>
+> Start free → loveofmylife.love
+>
+> Kasal, debut, binyag o baby shower: imbitahan sila nang may dating 🎁
+> Tag the host who needs this 👇
+> #weddinginvitation #debut #babyshower #christening #LoveOfMyLife
 
 ---
 
