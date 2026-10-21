@@ -116,6 +116,16 @@
       <p class="eyebrow">{{ count($layouts) }} templates</p>
       <h2 id="templates-title" style="margin-top:10px">Make it look like the two of you.</h2>
       <p class="sub">Pick a template and a colour theme: every template works with every theme. Most of them are little things to play: break a seal, scratch a card, turn the pages, find the pairs. Switch any time from your dashboard; the link stays the same.</p>
+      <div class="theater" id="theater" hidden>
+        <div class="theater-stage" id="theaterStage" tabindex="0" role="group" aria-roledescription="carousel" aria-label="All {{ count($layouts) }} templates, drag or use the arrow keys"></div>
+        <div class="theater-info" aria-live="polite">
+          <h3 id="theaterName"></h3>
+          <p id="theaterAbout"></p>
+          <p class="play" id="theaterPlay"></p>
+          <div class="row"><button type="button" class="btn btn-ghost btn-sm" id="theaterPrev">&larr; Previous</button><button type="button" class="btn btn-primary btn-sm" id="theaterTry">Try it live</button><button type="button" class="btn btn-ghost btn-sm" id="theaterNext">Next &rarr;</button></div>
+        </div>
+        <div class="theater-dots" id="theaterDots"></div>
+      </div>
       <div class="chips gallery-filter" role="group" aria-label="Filter the templates" id="galleryFilter">
         <button type="button" class="chip chip-dark" data-filter="all" aria-pressed="true">All {{ count($layouts) }}</button>
         <button type="button" class="chip chip-dark" data-filter="slideshow" aria-pressed="false">Slideshows</button>
@@ -125,7 +135,7 @@
       <div class="grid-templates" id="gallery">
         @foreach ($layouts as $key => $layout)
         @php $seasonal = isset($layout['months']); $kind = $seasonal ? 'season' : ($layout['kind'] === 'slideshow' ? 'slideshow' : 'play'); @endphp
-        <article class="card layout-card" data-kind="{{ $kind }}" data-key="{{ $key }}" data-name="{{ $layout['name'] }}" data-play="{{ $layout['play'] }}" @if ($seasonal) data-months="{{ implode(',', $layout['months']) }}" @endif>
+        <article class="card layout-card" data-kind="{{ $kind }}" data-key="{{ $key }}" data-name="{{ $layout['name'] }}" data-play="{{ $layout['play'] }}" data-about="{{ $layout['description'] }}" @if ($seasonal) data-months="{{ implode(',', $layout['months']) }}" @endif>
           @if ($seasonal)<span class="season-badge" hidden>In season now</span>@endif
           <div class="shot"><div class="schem schem-{{ $key }}" aria-hidden="true"><span class="ph"></span><span class="lt"><i></i><i></i><i></i><i></i></span></div></div>
           <div class="body">

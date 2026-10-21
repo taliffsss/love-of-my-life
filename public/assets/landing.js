@@ -137,6 +137,110 @@
       }
     }
 
+    // ---------- the theater: every template on a 3D ring ----------
+    const theater = $("#theater"), stage = $("#theaterStage");
+    if (theater && stage) {
+      const ring = $$(".layout-card", gallery); // this season's template is first
+      const n = ring.length;
+      let pos = 0, target = 0, auto = true, dragging = false, hover = false, timer = 0;
+      const items = ring.map((card, i) => {
+        const fig = document.createElement("figure");
+        fig.className = "cf";
+        fig.append($(".shot", card).cloneNode(true));
+        const cap = document.createElement("figcaption");
+        cap.textContent = card.dataset.name;
+        const small = document.createElement("small");
+        small.textContent = card.dataset.play;
+        cap.appendChild(small);
+        fig.appendChild(cap);
+        fig.addEventListener("click", () => { if (!moved) go(i); });
+        stage.appendChild(fig);
+        return fig;
+      });
+      const dots = $("#theaterDots");
+      ring.forEach((card, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.setAttribute("aria-label", `Show ${card.dataset.name}`);
+        b.addEventListener("click", () => go(i));
+        dots.appendChild(b);
+      });
+      const wrap = (v) => ((v % n) + n) % n;
+      const nearest = () => wrap(Math.round(pos));
+      function paint() {
+        const cur = nearest();
+        items.forEach((fig, i) => {
+          let d = i - pos;
+          d = d - n * Math.round(d / n); // the shortest way round the ring
+          const ad = Math.abs(d);
+          fig.style.setProperty("--d", d.toFixed(3));
+          fig.style.setProperty("--ad", Math.min(ad, 4).toFixed(3));
+          fig.style.zIndex = String(100 - Math.round(ad * 10));
+          fig.style.visibility = ad > 3.4 ? "hidden" : "visible";
+          fig.classList.toggle("on", i === cur);
+          fig.setAttribute("aria-hidden", String(i !== cur));
+        });
+        [...dots.children].forEach((b, i) => (i === cur ? b.setAttribute("aria-current", "true") : b.removeAttribute("aria-current")));
+        const c = ring[cur];
+        $("#theaterName").textContent = c.dataset.name;
+        $("#theaterAbout").textContent = c.dataset.about || "";
+        $("#theaterPlay").textContent = c.dataset.play;
+      }
+      function go(i) {
+        // move by the shortest way round
+        let diff = i - nearest();
+        diff -= n * Math.round(diff / n);
+        target = Math.round(pos) + diff;
+        settle();
+      }
+      let raf = 0;
+      function settle() {
+        cancelAnimationFrame(raf);
+        const tick = () => {
+          pos += (target - pos) * 0.14;
+          if (Math.abs(target - pos) < 0.002) pos = target;
+          paint();
+          if (pos !== target) raf = requestAnimationFrame(tick);
+        };
+        if (reduced) { pos = target; paint(); } else tick();
+      }
+      let startX = 0, startPos = 0, moved = false;
+      stage.addEventListener("pointerdown", (e) => { dragging = true; moved = false; startX = e.clientX; startPos = pos; cancelAnimationFrame(raf); items.forEach((f) => f.classList.add("drag")); });
+      addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        if (Math.abs(dx) > 6) moved = true;
+        pos = startPos - dx / 150;
+        target = pos;
+        paint();
+      });
+      addEventListener("pointerup", () => {
+        if (!dragging) return;
+        dragging = false;
+        items.forEach((f) => f.classList.remove("drag"));
+        target = Math.round(pos);
+        settle();
+        setTimeout(() => (moved = false), 0);
+      });
+      stage.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") { target = Math.round(pos) + 1; settle(); e.preventDefault(); }
+        if (e.key === "ArrowLeft") { target = Math.round(pos) - 1; settle(); e.preventDefault(); }
+      });
+      $("#theaterPrev").addEventListener("click", () => { target = Math.round(pos) - 1; settle(); });
+      $("#theaterNext").addEventListener("click", () => { target = Math.round(pos) + 1; settle(); });
+      $("#theaterTry").addEventListener("click", () => $("a[data-demo]", ring[nearest()]).click());
+      for (const t of [stage, $(".theater-info")]) {
+        t.addEventListener("pointerenter", () => (hover = true));
+        t.addEventListener("pointerleave", () => (hover = false));
+      }
+      let seen = false;
+      new IntersectionObserver(([e]) => (seen = e.isIntersecting)).observe(theater);
+      if (!reduced) timer = setInterval(() => { if (seen && !hover && !dragging && !document.hidden) { target = Math.round(pos) + 1; settle(); } }, 3600);
+      theater.hidden = false;
+      // start on this season's template if there is one (it was moved to the front of the grid above)
+      paint();
+    }
+
     const dlg = $("#demoModal"), frame = $("#demoFrame");
     if (dlg?.showModal) {
       let at = 0, theme = $(".demo-foot [data-theme][aria-pressed='true']")?.dataset.theme || "rose";

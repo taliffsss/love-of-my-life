@@ -1,0 +1,54 @@
+/* Depth: cards that lean towards the pointer with a light that follows it (dashboard, editor, pricing), a phone that turns in 3D around the
+   live preview, 3D entrances, and the landing page's template theater. Decoration only: without the script, or for visitors who prefer
+   reduced motion, every element is flat and works as before. */
+
+[data-depth] { --rx: 0deg; --ry: 0deg; transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .18s ease-out, box-shadow .2s, border-color .2s; will-change: transform; }
+[data-depth]:hover { box-shadow: 0 22px 44px rgba(42, 22, 33, .16); }
+.page-card[data-depth]:hover { transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-3px); }
+.sheen { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; z-index: 3; transition: opacity .25s; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .5), transparent 55%); mix-blend-mode: soft-light; }
+[data-depth]:hover > .sheen { opacity: 1; }
+.page-card { position: relative; }
+.page-card[data-depth] .cover img { transition: transform .25s ease-out; transform: translate(calc(var(--px, 0) * -7px), calc(var(--py, 0) * -5px)) scale(1.08); }
+
+/* a chosen template or design lifts and settles */
+.pop { animation: depthPop .55s var(--ease); }
+@keyframes depthPop { 0% { transform: perspective(700px) translateZ(0) scale(1); } 40% { transform: perspective(700px) translateZ(60px) scale(1.05) rotateX(-6deg); } 100% { transform: perspective(700px) translateZ(0) scale(1); } }
+
+/* 3D entrances: grids of cards flip up one after another */
+.js .template-grid.on .template-card, .page-card, .plan-option { animation: depthIn .6s var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes depthIn { from { opacity: 0; transform: perspective(800px) translateY(18px) rotateX(-16deg); } }
+.usage .meter i { transform-origin: left; animation: meterGrow 1.1s var(--ease) both; }
+@keyframes meterGrow { from { transform: scaleX(0); } }
+
+/* the live preview in a phone that turns with the pointer */
+.preview-pane { perspective: 1100px; }
+.preview-pane .phone { transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .2s ease-out; box-shadow: calc(var(--px, 0) * -26px) 40px 80px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.preview-pane .phone::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .16), transparent 50%); }
+
+/* ---------- the landing page's template theater: every template on a 3D ring ---------- */
+.theater { margin-top: 30px; display: grid; gap: 18px; }
+.theater-stage { position: relative; height: clamp(300px, 46vw, 380px); perspective: 1200px; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; }
+.theater-stage:active { cursor: grabbing; }
+.theater-stage:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; border-radius: var(--radius-lg); }
+.cf { position: absolute; left: 50%; top: 4%; width: min(62vw, 270px); margin-left: calc(min(62vw, 270px) / -2); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 50px rgba(42, 22, 33, .22);
+  transform: translateX(calc(var(--d) * 56%)) translateZ(calc(var(--ad) * -150px)) rotateY(calc(var(--d) * -38deg)); opacity: calc(1 - var(--ad) * .24);
+  transition: transform .5s var(--ease), opacity .5s var(--soft); }
+.cf.drag { transition: none; }
+.cf[aria-hidden="true"] { pointer-events: none; }
+.cf .shot { aspect-ratio: 4 / 3; border-bottom: 1px solid var(--line); }
+.cf figcaption { padding: 10px 14px 12px; font-weight: 600; text-align: center; }
+.cf figcaption small { display: block; font-weight: 400; color: var(--brand); font-size: .8rem; }
+.cf.on { box-shadow: 0 34px 70px rgba(42, 22, 33, .32); }
+.theater-info { display: grid; gap: 6px; justify-items: center; text-align: center; }
+.theater-info p { margin: 0; max-width: 52ch; color: var(--ink-2); }
+.theater-info .row { margin: 4px 0 0; }
+.theater-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.theater-dots button { width: 9px; height: 9px; padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: var(--line-2); transition: background .2s, transform .2s var(--ease); }
+.theater-dots button[aria-current="true"] { background: var(--brand); transform: scale(1.4); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-depth], .page-card[data-depth]:hover { transform: none; }
+  .js .template-grid.on .template-card, .page-card, .plan-option, .pop, .usage .meter i { animation: none; }
+  .preview-pane .phone { transform: none; }
+  .cf { transition: none; }
+}

@@ -13,6 +13,11 @@
   chosen for you), unlock it and the letter is typed out, with emoji drifting and trailing the pointer. The templates can be filtered (slideshows, little games,
   seasonal), this season's comes first with an "In season now" badge, and "Try it" opens the live template in a dialog with theme chips, previous and next.
   A three-question plan finder highlights the plan that fits, and sections reveal as you scroll.
+- **A template theater on the landing page:** all 13 templates on a 3D ring you drag, step through with the arrow keys, buttons or dots (it turns by itself
+  until you touch it), and "Try it live" opens the real template.
+- **The dashboard and editor have depth.** Page cards, template and design cards, the photos box and the plan cards lean towards the pointer with a light
+  that follows it; choosing a template makes it lift and settle; grids flip up one after another; and the live preview sits in a phone that turns in 3D
+  with the pointer. Pointer devices only: phones and visitors who prefer reduced motion get the flat page.
 
 ## 3.3.0 (2026-10-21, branch `main-v2`)
 
