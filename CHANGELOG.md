@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.11.2 (2026-10-22, branch `main-v2`)
+
+- **sitemap.xml lists only indexable pages** (the landing page, Terms and Privacy). It used to list `/demo` and `/register`, which are noindex, an error in Google Search Console. `lastmod` is given only where it is true;
+  the invented `priority` / `changefreq` are gone.
+- **robots.txt** also keeps `/account`, `/email/`, `/forgot-password`, `/reset-password` and `/auth/` out, puts the `Sitemap:` line after a blank line, and blocks everything on any environment that is not production.
+- robots.txt, sitemap.xml and the manifest no longer set a session cookie.
+
 ## 3.11.1 (2026-10-22, branch `main-v2`)
 
 - **Fix: the Docker image build.** v3.11.0 did not build: Alpine had published a newer `musl` than the base image carries, so `apk add postgresql-dev` failed ("musl breaks musl-dev"). The Dockerfile now runs

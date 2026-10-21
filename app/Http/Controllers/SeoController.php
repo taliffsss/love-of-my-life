@@ -15,12 +15,26 @@ final class SeoController
         return rtrim((string) config('app.url'), '/') . '/';
     }
 
+    /**
+     * Only the pages that ask to be indexed (their <meta name="robots"> says "index, follow"): the landing page and the two legal
+     * documents. Sign-up, sign-in and the demo are noindex, and Google reports a noindex URL in a sitemap as an error.
+     * `lastmod` is only given when it is true: the legal documents carry their own date; the landing page has none.
+     *
+     * @return array<string,?string> path => lastmod (Y-m-d)
+     */
+    public static function indexablePages(): array
+    {
+        $legal = (string) config('saas.legal.updated', '');
+        $legal = preg_match('/^\d{4}-\d{2}-\d{2}$/', $legal) === 1 ? $legal : null;
+        return ['' => null, 'terms' => $legal, 'privacy' => $legal];
+    }
+
     public function sitemap(): ResponseInterface
     {
         $esc = static fn (string $s): string => htmlspecialchars($s, ENT_XML1 | ENT_QUOTES, 'UTF-8');
         $urls = '';
-        foreach (['' => '1.0', 'demo' => '0.6', 'register' => '0.5', 'terms' => '0.3', 'privacy' => '0.3'] as $path => $priority) {
-            $urls .= '<url><loc>' . $esc($this->siteUrl() . $path) . '</loc><changefreq>monthly</changefreq><priority>' . $priority . '</priority></url>';
+        foreach (self::indexablePages() as $path => $lastmod) {
+            $urls .= '<url><loc>' . $esc($this->siteUrl() . $path) . '</loc>' . ($lastmod !== null ? '<lastmod>' . $lastmod . '</lastmod>' : '') . '</url>';
         }
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
             . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . $urls . '</urlset>' . "\n";
@@ -32,14 +46,25 @@ final class SeoController
 
     public function robots(): ResponseInterface
     {
-        $body = "User-agent: *\n"
-            . "Allow: /\n"
-            // people's pages, the dashboard and JSON endpoints stay out of search results
-            . "Disallow: /p/\n"
-            . "Disallow: /dashboard\n"
-            . "Disallow: /admin\n"
-            . "Disallow: /api/\n"
-            . 'Sitemap: ' . $this->siteUrl() . "sitemap.xml\n";
+        if (config('app.env') !== 'production') {
+            // a staging or local copy must never be indexed
+            $body = "User-agent: *\nDisallow: /\n";
+        } else {
+            $body = "User-agent: *\n"
+                . "Allow: /\n"
+                // people's pages, accounts and the JSON endpoints stay out of search results; sign-up, sign-in and the demo are left
+                // crawlable on purpose, so a crawler can read their noindex instead of guessing
+                . "Disallow: /p/\n"
+                . "Disallow: /dashboard\n"
+                . "Disallow: /account\n"
+                . "Disallow: /admin\n"
+                . "Disallow: /api/\n"
+                . "Disallow: /email/\n"
+                . "Disallow: /forgot-password\n"
+                . "Disallow: /reset-password\n"
+                . "Disallow: /auth/\n"
+                . "\nSitemap: " . $this->siteUrl() . "sitemap.xml\n";
+        }
 
         return Response::html($body)
             ->withHeader('Content-Type', 'text/plain; charset=utf-8')

@@ -35,6 +35,7 @@ return [
         Middleware\MethodOverride::class,
         // <name>.<saas domain> and custom domains are routed to their page before anything else (see the class)
         \App\Http\Middleware\ResolveSiteHost::class,
+        \App\Http\Middleware\NoCookiesOnSeoFiles::class,
     ],
 
     'middleware_aliases' => [

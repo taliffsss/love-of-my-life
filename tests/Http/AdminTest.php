@@ -165,6 +165,7 @@ final class AdminTest extends TestCase
         $response = $this->get('/admin');
         $this->assertStringContainsString('noindex', $response->getHeaderLine('X-Robots-Tag'));
         $this->assertStringContainsString('no-store', $response->getHeaderLine('Cache-Control'));
+        $this->app->make(\Naluz\Config\Repository::class)->set('app.env', 'production');
         $this->assertStringContainsString('Disallow: /admin', (string) $this->get('/robots.txt')->getBody());
     }
 }

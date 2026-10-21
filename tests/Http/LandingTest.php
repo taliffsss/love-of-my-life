@@ -94,6 +94,7 @@ final class LandingTest extends TestCase
 
     public function testRobotsKeepPeoplesPagesAndTheDashboardOutOfSearch(): void
     {
+        $this->app->make(\Naluz\Config\Repository::class)->set('app.env', 'production'); // other environments block everything
         $robots = (string) $this->get('/robots.txt')->getBody();
         $this->assertStringContainsString("Disallow: /p/\n", $robots);
         $this->assertStringContainsString("Disallow: /dashboard\n", $robots);
@@ -107,6 +108,50 @@ final class LandingTest extends TestCase
 
         $manifest = $this->get('/manifest.webmanifest');
         $this->assertStringStartsWith('application/manifest+json', $manifest->getHeaderLine('Content-Type'));
+    }
+
+    public function testTheSitemapListsExactlyThePagesThatAskToBeIndexed(): void
+    {
+        $xml = simplexml_load_string((string) $this->get('/sitemap.xml')->getBody());
+        $listed = array_map('strval', (array) $xml->xpath('//*[local-name()="loc"]'));
+        $this->assertSame(['https://love.test/', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
+
+        // every listed page really is index, follow; and none of the noindex ones is listed
+        foreach ($listed as $url) {
+            $this->assertStringContainsString('<meta name="robots" content="index, follow"', (string) $this->get(parse_url($url, PHP_URL_PATH) ?: '/')->getBody(), $url);
+        }
+        foreach (['/demo', '/register', '/login'] as $path) {
+            $this->assertStringContainsString('noindex', (string) $this->get($path)->getBody(), $path);
+            $this->assertNotContains('https://love.test' . $path, $listed);
+        }
+        $this->assertStringContainsString('<lastmod>' . config('saas.legal.updated') . '</lastmod>', (string) $this->get('/sitemap.xml')->getBody(), 'the legal documents carry their date');
+        $this->assertStringNotContainsString('<priority>', (string) $this->get('/sitemap.xml')->getBody(), 'no made-up priority or changefreq');
+    }
+
+    public function testRobotsKeepAccountAndAuthPagesOutAndStayOnePerLineWithTheSitemapLast(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('app.env', 'production');
+        $robots = (string) $this->get('/robots.txt')->getBody();
+        foreach (['/dashboard', '/account', '/admin', '/api/', '/email/', '/forgot-password', '/reset-password', '/auth/', '/p/'] as $path) {
+            $this->assertStringContainsString("Disallow: {$path}\n", $robots);
+        }
+        $this->assertStringContainsString("Allow: /\n", $robots);
+        $this->assertStringEndsWith("\nSitemap: https://love.test/sitemap.xml\n", $robots);
+        $this->assertStringNotContainsString("Disallow: /demo", $robots, 'noindex pages stay crawlable so the noindex is read');
+    }
+
+    public function testANonProductionCopyBlocksEverything(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('app.env', 'staging');
+        $this->assertSame("User-agent: *\nDisallow: /\n", (string) $this->get('/robots.txt')->getBody());
+    }
+
+    public function testTheSeoFilesCarryNoSessionCookie(): void
+    {
+        foreach (['/robots.txt', '/sitemap.xml', '/manifest.webmanifest'] as $path) {
+            $this->assertSame('', $this->get($path)->getHeaderLine('Set-Cookie'), $path);
+        }
+        $this->assertNotSame('', $this->get('/')->getHeaderLine('Set-Cookie'), 'other pages still start a session');
     }
 
     public function testPingStaysOpenForHealthChecks(): void
