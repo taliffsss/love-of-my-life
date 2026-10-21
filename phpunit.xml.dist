@@ -13,6 +13,11 @@
     </testsuites>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!-- a developer's .env must not reach the tests: no real mailer (nothing is ever sent), confirmation off unless a test turns it on -->
+        <env name="MAIL_MAILER" value="log"/>
+        <env name="EMAIL_VERIFICATION" value="auto"/>
+        <env name="ADMIN_EMAIL" value=""/>
+        <env name="ADMIN_PASSWORD" value=""/>
     </php>
     <source>
         <include><directory>app</directory></include>

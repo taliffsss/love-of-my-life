@@ -98,7 +98,7 @@ final class PhotosTest extends TestCase
         $this->assertSame(201, $response->getStatusCode());
         $this->assertSame(2, $body['count']);
         $this->assertSame(['used' => 2, 'total' => 12, 'remaining' => 10, 'over' => 0, 'packs_needed' => 0, 'subscribed' => true], $body['usage']);
-        $this->assertMatchesRegularExpression('#^https://cdn\.test/pages/' . $this->page->slug . '/[0-9a-f]{32}\.png$#', $body['url']);
+        $this->assertMatchesRegularExpression('#^https://cdn\.test/users/' . $this->page->user_id . '/photos/[0-9a-f]{32}\.png$#', $body['url']);
         $photo = Photo::query()->where('id', $body['id'])->first();
         $this->assertSame('spaces', $photo->disk);
         $this->assertSame(2, $photo->position, 'new photos go to the end');
@@ -268,8 +268,8 @@ final class PhotosTest extends TestCase
         $this->assertSame(422, $this->ajax('POST', $url, ['order' => [$c->id, $a->id, $theirs->id]])->getStatusCode(), 'someone else\'s photo');
 
         $this->assertSame(200, $this->ajax('POST', $url, ['order' => [$c->id, $a->id, $b->id]])->getStatusCode());
-        $order = Photo::query()->where('page_id', $this->page->id)->orderBy('position')->pluck('url')->all();
-        $this->assertSame(['https://cdn.test/c.jpg', 'https://cdn.test/a.jpg', 'https://cdn.test/b.jpg'], $order);
+        $order = Photo::query()->where('page_id', $this->page->id)->orderBy('position')->pluck('path')->all();
+        $this->assertSame(array_map(fn (string $f): string => 'users/' . $this->page->user_id . '/photos/' . $f, ['c.jpg', 'a.jpg', 'b.jpg']), $order);
         $this->assertSame(1, $theirs->fresh()->position, 'untouched');
     }
 

@@ -22,10 +22,13 @@ FR = C / "frames"
 W, H, FPS = 1080, 1920, 30
 sb = json.load(open(C / "storyboard.json"))
 LOOK = sb.get("look", "default")
-PAL = sb.get("palette", {"top": [54, 14, 44], "bottom": [150, 38, 84], "glow": [120, 40, 70], "glow2": [70, 26, 56], "hearts": [255, 130, 170], "title": [255, 150, 190]})
+PAL = sb.get("palette") or {"top": [54, 14, 44], "bottom": [150, 38, 84], "glow": [120, 40, 70], "glow2": [70, 26, 56], "hearts": [255, 130, 170], "title": [255, 150, 190]}
+LIGHT = bool(PAL.get("light"))  # a bright, candy-pink backdrop with dark-rose titles
+PW = int(sb.get("phone_width", 430))  # width of the app footage
+SLOW = float(sb.get("footage_slowdown", 1.0))  # 1.4 = the footage plays at 70% speed
 def narration_seconds(sid):
     out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(G / f"scene-{sid}.mp3")], capture_output=True, text=True, check=True).stdout
-    return max(5.0, float(out) + 0.3)  # the same padding the skill's render uses
+    return max(sb.get("min_seconds", 5.0), float(out) + sb.get("pad_seconds", 0.3))  # room to breathe after the last word
 
 
 secs = {s["id"]: narration_seconds(s["id"]) for s in sb["scenes"]}
@@ -60,7 +63,7 @@ def backdrop():
     im = ImageChops.add(im, glow)
     vig = Image.new("L", (W, H), 0); ImageDraw.Draw(vig).ellipse((-250, -150, W + 250, H + 150), fill=255)
     vig = vig.filter(ImageFilter.GaussianBlur(220))
-    return Image.composite(im, Image.new("RGB", (W, H), (20, 6, 16)), vig)
+    return Image.composite(im, Image.new("RGB", (W, H), tuple(PAL.get("vignette", (20, 6, 16)))), vig)
 
 
 def heart_sprite(size, color, blur):
@@ -90,9 +93,9 @@ def title_layer(text):
     y = 150
     for ln in lines:
         w = d.textlength(ln, font=f); x = (W - w) / 2
-        gd.text((x, y), ln, font=f, fill=(*PAL["title"], 200))
-        d.text((x + 3, y + 4), ln, font=f, fill=(40, 6, 28, 150))
-        d.text((x, y), ln, font=f, fill=(255, 244, 240, 255))
+        gd.text((x, y), ln, font=f, fill=(255, 255, 255, 230) if LIGHT else (*PAL["title"], 200))
+        d.text((x + 3, y + 4), ln, font=f, fill=(255, 255, 255, 120) if LIGHT else (40, 6, 28, 150))
+        d.text((x, y), ln, font=f, fill=(*PAL["title"], 255) if LIGHT else (255, 244, 240, 255))
         y += 112
     glow = glow.filter(ImageFilter.GaussianBlur(22))
     out = Image.new("RGBA", (W, H), (0, 0, 0, 0)); out.alpha_composite(glow); out.alpha_composite(im)
@@ -127,7 +130,7 @@ def main():
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Handler, directory=str(ROOT)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     base = f"http://127.0.0.1:{server.server_address[1]}/marketing/brand/lettie3d.html"
-    mask = Image.new("L", (430, int(430 * 1688 / 780)), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, mask.width - 1, mask.height - 1), 46, fill=255)
+    mask = Image.new("L", (PW, int(PW * 1688 / 780)), 0); ImageDraw.Draw(mask).rounded_rectangle((0, 0, mask.width - 1, mask.height - 1), 46, fill=255)
     mask.save(G / "mask.png")
     frame = Image.new("RGBA", (mask.width + 20, mask.height + 20), (0, 0, 0, 0))
     ImageDraw.Draw(frame).rounded_rectangle((0, 0, frame.width - 1, frame.height - 1), 56, fill=(255, 236, 238, 255))
@@ -153,14 +156,15 @@ def main():
                 chain += f";[{last}][{idx}:v]overlay=x='{xcoord}':y='{ycoord}':shortest=1[h{k}]"
                 last = f"h{k}"
             n_in = 5
+            PY = sb.get("phone_top", 470)
             if clip:
                 cmd += ["-framerate", str(FPS), "-stream_loop", "-1", "-i", str(SH / clip / "%04d.jpg"), "-loop", "1", "-t", f"{dur}", "-i", str(G / "mask.png"), "-loop", "1", "-t", f"{dur}", "-i", str(G / "frame.png")]
-                chain += f";[{n_in}:v]scale=430:-2,format=rgba[ph];[{n_in+1}:v]format=gray[mk];[ph][mk]alphamerge[phm]"
-                chain += f";[{last}][{n_in+2}:v]overlay=x=610:y='500+10*sin(2*PI*t/3)':shortest=1[w1];[w1][phm]overlay=x=620:y='510+10*sin(2*PI*t/3)':shortest=1[w2]"
+                chain += f";[{n_in}:v]setpts=PTS*{SLOW},scale={PW}:-2,format=rgba[ph];[{n_in+1}:v]format=gray[mk];[ph][mk]alphamerge[phm]"
+                chain += f";[{last}][{n_in+2}:v]overlay=x={W-PW-50}:y='{PY}+6*sin(2*PI*t/4)':shortest=1[w1];[w1][phm]overlay=x={W-PW-40}:y='{PY+10}+6*sin(2*PI*t/4)':shortest=1[w2]"
                 last = "w2"; n_in += 3
             cmd += ["-framerate", str(FPS), "-i", str(FR / sid / "%04d.png")]
-            lw = 980 if clip is None else 760
-            lx = "(W-w)/2" if clip is None else "0"
+            lw = 980 if clip is None else int(sb.get("lettie_with_phone", 560))
+            lx = "(W-w)/2" if clip is None else "-40"
             ly = "H-h-40" if clip is None else "H-h-60"
             chain += f";[{n_in}:v]scale={lw}:-1[l];[{last}][l]overlay=x={lx}:y={ly}:shortest=1[out]"
             cmd += ["-filter_complex", chain, "-map", "[out]", "-t", f"{dur}", "-r", str(FPS), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "18", str(G / f"scene-{sid}.mp4")]

@@ -25,7 +25,7 @@ final class DemoSeeder extends Seeder
         $demo = User::query()->where('email', self::EMAIL)->first();
         if ($demo === null) {
             $demo = new User();
-            $demo->forceFill(['name' => 'Demo', 'email' => self::EMAIL, 'password' => self::PASSWORD, 'is_admin' => false])->save();
+            $demo->forceFill(['name' => 'Demo', 'email' => self::EMAIL, 'password' => self::PASSWORD, 'is_admin' => false, 'email_verified_at' => new \DateTimeImmutable()])->save();
         } else {
             $demo->forceFill(['password' => self::PASSWORD])->save();
         }

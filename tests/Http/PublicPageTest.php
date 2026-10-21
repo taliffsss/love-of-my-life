@@ -73,7 +73,7 @@ final class PublicPageTest extends TestCase
         $this->assertSame(200, $right->getStatusCode());
         $this->assertSame('no-store', $right->getHeaderLine('Cache-Control'));
         $content = $this->decode($right);
-        $this->assertSame(['https://cdn.test/secret-photo.jpg'], $content['photos']);
+        $this->assertSame([$this->photoUrl($page, 'secret-photo.jpg')], $content['photos']);
         $this->assertSame(['A secret paragraph only she should read.'], $content['letter']);
         $this->assertSame('Jinelin', $content['recipient']);
     }
@@ -116,7 +116,7 @@ final class PublicPageTest extends TestCase
         $html = (string) $this->get('/p/' . $page->slug)->getBody();
 
         $this->assertStringContainsString('"mode":"open"', $html);
-        $this->assertStringContainsString('https:\/\/cdn.test\/open.jpg', $html);
+        $this->assertStringContainsString(str_replace('/', '\/', $this->photoUrl($page, 'open.jpg')), $html);
         $this->assertStringContainsString('First paragraph.', $html);
         $this->assertStringContainsString('class="open-btn"', $html);
         $this->assertStringContainsString('"id":"fu9yk7gCTbc"', $html);

@@ -226,14 +226,16 @@ final class OrdersController
     }
 
     /** The same, from the account's list of subscriptions on the dashboard. */
-    public function cancelAccountSubscription(string $id, Auth $auth, Subscriptions $subscriptions): ResponseInterface
+    public function cancelAccountSubscription(string $id, \Psr\Http\Message\ServerRequestInterface $request, Auth $auth, Subscriptions $subscriptions): ResponseInterface
     {
         $subscription = ctype_digit($id) ? Subscription::query()->withoutCache()->useWritePdo()->where('id', (int) $id)->where('user_id', (int) $auth->id())->where('status', Subscription::ACTIVE)->first() : null;
         if (!$subscription instanceof Subscription) {
             throw new HttpException(404, 'No subscription.');
         }
         $page = $subscription->page_id !== null ? Page::query()->where('id', $subscription->page_id)->first() : null;
-        return $this->stop($subscriptions, $subscription, '/dashboard', $page instanceof Page ? $page : null);
+        // the billing page asks to come back to itself
+        $back = (string) (\Naluz\Http\Request::body($request)['back'] ?? '') === '/account/billing' ? '/account/billing' : '/dashboard';
+        return $this->stop($subscriptions, $subscription, $back, $page instanceof Page ? $page : null);
     }
 
     private function stop(Subscriptions $subscriptions, Subscription $subscription, string $backTo, ?Page $page): ResponseInterface

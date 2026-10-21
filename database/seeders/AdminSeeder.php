@@ -36,9 +36,9 @@ final class AdminSeeder extends Seeder
         $admin = User::query()->where('email', $email)->first();
         if ($admin === null) {
             $admin = new User();
-            $admin->forceFill(['name' => 'Administrator', 'email' => $email, 'password' => $password !== '' ? $password : self::DEFAULT_PASSWORD, 'is_admin' => true])->save();
+            $admin->forceFill(['name' => 'Administrator', 'email' => $email, 'password' => $password !== '' ? $password : self::DEFAULT_PASSWORD, 'is_admin' => true, 'email_verified_at' => new \DateTimeImmutable()])->save();
             return;
         }
-        $admin->forceFill(['is_admin' => true] + ($password !== '' ? ['password' => $password] : []))->save();
+        $admin->forceFill(['is_admin' => true, 'email_verified_at' => $admin->email_verified_at ?? new \DateTimeImmutable()] + ($password !== '' ? ['password' => $password] : []))->save();
     }
 }

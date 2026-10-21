@@ -26,6 +26,17 @@ use Naluz\Database\Orm\Relations\HasMany;
  * @property ?string $utm_content
  * @property ?\DateTimeInterface $deleted_at when the account was deleted (null: not deleted)
  * @property string $login_type manual, google or facebook: how the account was made
+ * @property ?\DateTimeInterface $email_verified_at when the e-mail was confirmed (null: not yet)
+ * @property ?string $pending_email an address asked for in the profile, not confirmed yet
+ * @property ?string $phone
+ * @property ?string $address_line1
+ * @property ?string $address_line2
+ * @property ?string $city
+ * @property ?string $region
+ * @property ?string $postal_code
+ * @property ?string $country
+ * @property ?string $avatar_disk the profile photo's disk and key (App\Services\PhotoStorage makes its URL)
+ * @property ?string $avatar_path
  */
 final class User extends Model
 {
@@ -38,12 +49,24 @@ final class User extends Model
     public const STATUSES = [self::ACTIVE, self::DEACTIVATED, self::SUSPENDED];
 
     protected array $fillable = ['name', 'email', 'password'];
-    protected array $hidden = ['password'];
-    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'status_changed_at' => 'datetime', 'tour_seen_at' => 'datetime', 'editor_tour_seen_at' => 'datetime', 'deleted_at' => 'datetime'];
+    protected array $hidden = ['password', 'verify_code_hash', 'reset_code_hash'];
+    protected array $casts = ['password' => 'hashed', 'is_admin' => 'boolean', 'created_at' => 'datetime', 'updated_at' => 'datetime', 'status_changed_at' => 'datetime', 'tour_seen_at' => 'datetime', 'editor_tour_seen_at' => 'datetime', 'deleted_at' => 'datetime', 'email_verified_at' => 'datetime', 'verify_expires_at' => 'datetime', 'verify_sent_at' => 'datetime', 'reset_expires_at' => 'datetime', 'reset_sent_at' => 'datetime', 'verify_attempts' => 'integer', 'reset_attempts' => 'integer'];
 
     public function isActive(): bool
     {
         return $this->status === self::ACTIVE;
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return $this->email_verified_at !== null;
+    }
+
+    /** The profile's postal address as one line ("12 Rose St, Quezon City, Metro Manila 1100, Philippines"), or '' when none is filled in. */
+    public function addressLine(): string
+    {
+        $locality = trim(implode(' ', array_filter([(string) $this->region, (string) $this->postal_code], static fn (string $v): bool => $v !== '')));
+        return implode(', ', array_filter([(string) $this->address_line1, (string) $this->address_line2, (string) $this->city, $locality, (string) $this->country], static fn (string $v): bool => trim($v) !== ''));
     }
 
     /** What a person who cannot sign in is told. */

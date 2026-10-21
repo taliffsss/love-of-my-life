@@ -63,7 +63,7 @@ final class PhotosController
                 'page_id' => $page->id,
                 'disk' => $stored['disk'],
                 'path' => $stored['path'],
-                'url' => $stored['url'],
+                'url' => '', // the key (disk + path) is what is kept; PhotoStorage::photoUrl() makes the address
                 'position' => (int) Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->max('position') + 1,
             ])->save();
         } catch (\Throwable $e) {
@@ -80,7 +80,7 @@ final class PhotosController
 
         return Response::json([
             'id' => $photo->id,
-            'url' => $photo->url,
+            'url' => $stored['url'],
             'count' => $this->pageCount($page->id),
             'usage' => self::usage($usage),
         ], 201);

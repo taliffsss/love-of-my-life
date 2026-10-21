@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BillingController;
 use App\Http\Controllers\Auth\SessionController;
 use App\Http\Controllers\Auth\SocialController;
 use App\Http\Controllers\Dashboard\OrdersController;
@@ -35,10 +39,19 @@ $router->get('/login', [SessionController::class, 'show'])->middleware(['guest',
 $router->post('/login', [SessionController::class, 'store'])->middleware(['throttle:10,1', 'guest']);
 $router->get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
 $router->get('/auth/{provider}/callback', [SocialController::class, 'callback'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
+// confirming an e-mail address with the code mailed to it (a manual sign-up's, or a new address asked for in the profile)
+$router->get('/email/verify', [EmailVerificationController::class, 'notice'])->middleware(['auth', 'noindex'])->name('verification.notice');
+$router->post('/email/verify', [EmailVerificationController::class, 'confirm'])->middleware(['auth', 'throttle:20,1']);
+$router->post('/email/verification-notification', [EmailVerificationController::class, 'resend'])->middleware(['auth', 'throttle:6,1']);
+// forgot password: a code by e-mail, then the code with a new password
+$router->get('/forgot-password', [PasswordResetController::class, 'forgot'])->middleware(['guest', 'noindex'])->name('password.request');
+$router->post('/forgot-password', [PasswordResetController::class, 'send'])->middleware(['throttle:5,1', 'guest']);
+$router->get('/reset-password', [PasswordResetController::class, 'form'])->middleware(['guest', 'noindex'])->name('password.reset');
+$router->post('/reset-password', [PasswordResetController::class, 'reset'])->middleware(['throttle:10,1', 'guest']);
 $router->post('/logout', [SessionController::class, 'destroy'])->middleware(['auth'])->name('logout');
 
 // ── Admin (administrators only; anyone else gets a 404) ──────────────────────────────────────────
-$router->group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'noindex']], static function (Router $router): void {
+$router->group(['prefix' => 'admin', 'middleware' => ['auth', 'verified', 'admin', 'noindex']], static function (Router $router): void {
     $router->get('/', [AdminController::class, 'index'])->name('admin');
     $router->get('/users', [AdminController::class, 'users'])->name('admin.users');
     $router->get('/users/{user}/edit', [UsersController::class, 'edit'])->where('user', '\d+');
@@ -49,9 +62,19 @@ $router->group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'noindex'
     $router->get('/traffic', [AdminController::class, 'traffic'])->name('admin.traffic');
 });
 
+// ── Account (every signed-in account, administrators too): profile and billing ─────────────────
+$router->group(['prefix' => 'account', 'middleware' => ['auth', 'noindex']], static function (Router $router): void {
+    $router->get('/', [AccountController::class, 'show'])->name('account');
+    $router->put('/profile', [AccountController::class, 'update'])->middleware(['throttle:20,1']);
+    $router->put('/password', [AccountController::class, 'password'])->middleware(['throttle:10,1']);
+    $router->post('/avatar', [AccountController::class, 'avatar'])->middleware(['throttle:20,1']);
+    $router->delete('/avatar', [AccountController::class, 'removeAvatar'])->middleware(['throttle:20,1']);
+    $router->get('/billing', [BillingController::class, 'show'])->middleware(['verified'])->name('account.billing');
+});
+
 // ── Dashboard (signed in; every page and order is looked up within the owner's own) ─
 $slug = '[a-z2-9]{4,16}';
-$router->group(['prefix' => 'dashboard', 'middleware' => ['auth', 'noindex']], static function (Router $router) use ($slug): void {
+$router->group(['prefix' => 'dashboard', 'middleware' => ['auth', 'verified', 'noindex']], static function (Router $router) use ($slug): void {
     $router->get('/', [PagesController::class, 'index'])->name('dashboard');
     $router->post('/pages', [PagesController::class, 'store'])->middleware(['throttle:20,1']);
     $router->get('/pages/{slug}', [PagesController::class, 'edit'])->where('slug', $slug);

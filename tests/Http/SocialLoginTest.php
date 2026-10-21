@@ -124,6 +124,7 @@ final class SocialLoginTest extends TestCase
         $user = User::query()->where('email', 'gina@example.com')->first();
         $this->assertInstanceOf(User::class, $user);
         $this->assertSame('google', $user->login_type);
+        $this->assertNotNull($user->email_verified_at, 'the provider confirmed the address, so no code is asked for');
         $this->assertFalse($user->is_admin);
         $this->assertSame('Gina Reyes', $user->name);
         $this->assertSame(1, SocialAccount::query()->where('user_id', $user->id)->count());

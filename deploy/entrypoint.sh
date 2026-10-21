@@ -21,6 +21,12 @@ if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     php naluz migrate
 fi
 
+# The first administrator, from ADMIN_EMAIL and ADMIN_PASSWORD: created only when no account has that e-mail, never changed afterwards.
+# A mistake here (a password under 12 characters) is reported but does not stop the site from starting.
+if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
+    php bin/ensure-admin.php || echo "WARNING: the administrator was not created (see above)." >&2
+fi
+
 chown -R www-data:www-data storage
 chmod -R 775 storage
 

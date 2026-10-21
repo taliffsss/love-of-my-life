@@ -27,6 +27,9 @@ return [
     // loved one (those are not part of the product layout) and never the admin area (see App\Http\Screen).
     'analytics_id' => (string) env('GA_MEASUREMENT_ID', env('APP_ENV', 'production') === 'production' ? 'G-M62J7X95ED' : ''),
 
+    // E-mail confirmation for manual sign-ups (App\Services\EmailVerification): true | false | auto (on when a real mailer is set: MAIL_MAILER=smtp).
+    'email_verification' => env('EMAIL_VERIFICATION', 'auto'),
+
     // The seasonal templates (Halloween, Christmas, Valentine) are offered from `lead_days` before their day until the day itself
     // (App\Services\Seasons); `events` are [month, day]. SEASONS_ALWAYS=true offers them all year (for testing).
     'seasons' => [

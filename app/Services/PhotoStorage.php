@@ -12,8 +12,14 @@ use Naluz\Storage\Uploads;
 use Psr\Http\Message\UploadedFileInterface;
 
 /**
- * Stores page photos on DigitalOcean Spaces when it is configured, otherwise on the local `public` disk
- * (public/storage, for development). Files get random names under <folder>/pages/<slug>/.
+ * Stores uploads on DigitalOcean Spaces when it is configured, otherwise on the local `public` disk (public/storage, for
+ * development). Every account has its own folder in the bucket, named by its id, and files get random names inside it:
+ *
+ *   <folder>/users/<user id>/photos/<random>.<ext>    page photos (shared by all of the account's pages)
+ *   <folder>/users/<user id>/avatar/<random>.<ext>    the profile photo
+ *
+ * The database keeps only the disk and that key (photos.disk/path, users.avatar_disk/avatar_path), never a URL: url() makes
+ * the address at render time (the CDN's, when SPACES_CDN_URL is set), so moving to another CDN or domain needs no data change.
  *
  * Deleting is two steps, so no file outlives its photo: trash() runs inside the transaction that deletes the photo
  * rows and remembers their files (table storage_trash); purge() deletes those files once it has committed. A file
@@ -50,17 +56,43 @@ final class PhotoStorage
         return rtrim(rtrim(number_format($bytes / 1048576, 1, '.', ''), '0'), '.') . ' MB';
     }
 
+    /** A page photo, filed in the folder of the account that owns the page. */
+    public function store(UploadedFileInterface $file, Page $page): array
+    {
+        return $this->storeFor($file, (int) $page->user_id, 'photos');
+    }
+
     /**
-     * @return array{disk:string,path:string,url:string}
+     * @param string $kind the folder inside the account's: photos or avatar
+     * @return array{disk:string,path:string,url:string} `disk` and `path` are what to save; `url` is only for the response
      * @throws \Naluz\Storage\StorageException when the file is not an allowed image or the upload fails
      */
-    public function store(UploadedFileInterface $file, Page $page): array
+    public function storeFor(UploadedFileInterface $file, int $userId, string $kind, ?int $maxBytes = null): array
     {
         $diskName = $this->diskName();
         $disk = $this->storage->disk($diskName);
-        $directory = ($this->folder !== '' ? $this->folder . '/' : '') . 'pages/' . $page->slug;
-        $path = Uploads::store($file, $disk, $directory, Uploads::IMAGES, $this->maxBytes);
+        $directory = ($this->folder !== '' ? $this->folder . '/' : '') . 'users/' . $userId . '/' . $kind;
+        $path = Uploads::store($file, $disk, $directory, Uploads::IMAGES, $maxBytes ?? $this->maxBytes);
         return ['disk' => $diskName, 'path' => $path, 'url' => $disk->url($path)];
+    }
+
+    /** The address of a stored file, from its disk and key (the CDN's when there is one); null when the key is empty. */
+    public function url(?string $disk, ?string $path): ?string
+    {
+        if ($disk === null || $disk === '' || $path === null || $path === '') {
+            return null;
+        }
+        try {
+            return $this->storage->disk($disk)->url($path);
+        } catch (\InvalidArgumentException) {
+            return null; // a disk that is not set up here (spaces keys removed): the caller falls back to the legacy URL
+        }
+    }
+
+    /** What an <img> shows for a photo: its stored file's address, or the URL an imported photo came with. */
+    public function photoUrl(Photo $photo): string
+    {
+        return $this->url($photo->disk, $photo->path) ?? (string) $photo->url;
     }
 
     /** Call inside the transaction that deletes these photos' rows: their files are remembered for purge(). */

@@ -84,7 +84,7 @@
           <div class="thumbs" id="thumbs">
             @foreach ($photos as $i => $photo)
             <figure class="thumb" data-id="{{ $photo->id }}" style="margin:0">
-              <img src="{{ $photo->url }}" alt="Photo {{ $i + 1 }}" loading="lazy" />
+              <img src="{{ $photoUrls[$photo->id] }}" alt="Photo {{ $i + 1 }}" loading="lazy" />
               <span class="n">{{ $i + 1 }}</span>
               <div class="tools">
                 <span class="row" style="gap:4px">

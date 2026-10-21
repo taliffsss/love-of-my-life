@@ -108,7 +108,7 @@ final class SubdomainTest extends TestCase
         $token = $this->csrf('https://jinelin.love.test/');
         $open = $this->json('POST', 'https://jinelin.love.test/unlock', ['answer' => 'Yam'], ['X-CSRF-TOKEN' => $token]);
         $this->assertSame(200, $open->getStatusCode());
-        $this->assertSame(['https://cdn.test/hidden.jpg'], $this->decode($open)['photos']);
+        $this->assertSame([$this->photoUrl($page, 'hidden.jpg')], $this->decode($open)['photos']);
 
         foreach (['/dashboard', '/login', '/register', '/demo', '/p/' . $page->slug, '/api/photos', '/anything'] as $path) {
             $this->assertSame(404, $this->get('https://jinelin.love.test' . $path)->getStatusCode(), "{$path} is not served on a page's own address");

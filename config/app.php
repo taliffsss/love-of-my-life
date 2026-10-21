@@ -44,6 +44,7 @@ return [
         'throttle' => \App\Http\Middleware\RateLimit::class,
         'active' => \App\Http\Middleware\EnsureActiveAccount::class,
         'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        'verified' => \App\Http\Middleware\EnsureEmailVerified::class,
         'noindex' => \App\Http\Middleware\NoIndex::class,
         'traffic' => \App\Http\Middleware\TrackTraffic::class,
         'auth' => Middleware\Authenticate::class,

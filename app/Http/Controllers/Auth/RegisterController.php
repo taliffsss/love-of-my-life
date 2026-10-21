@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Screen;
 use App\Models\User;
+use App\Services\EmailVerification;
 use App\Services\IntendedPlan;
 use App\Services\Seasons;
 use App\Services\Traffic;
@@ -25,7 +26,7 @@ final class RegisterController
         return Screen::render('auth.register', ['chosenPlan' => $intended->name($intended->valid($session->get('intended_plan'))), 'theme' => $seasons->look($request->getQueryParams())]);
     }
 
-    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session, Traffic $traffic): ResponseInterface
+    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session, Traffic $traffic, EmailVerification $verification): ResponseInterface
     {
         $input = Request::body($request);
         $data = [
@@ -56,6 +57,11 @@ final class RegisterController
         $intended->claim($session, $user, $db);
         $traffic->claim($request, $user); // the campaign that brought them is saved with the account // the plan chosen before signing up is saved with the new account
         $auth->login($user);
+        if ($verification->required($user)) {
+            // signed in, but the dashboard waits for the link in their inbox
+            $sent = $verification->send($user);
+            return Screen::back('/email/verify', $sent ? 'Welcome, ' . $user->name . '! Check your inbox to confirm your e-mail.' : 'Welcome! We could not send the confirmation e-mail yet: use the button below to try again.');
+        }
         return Screen::back('/dashboard', 'Welcome, ' . $user->name . '! Create your first page below.');
     }
 }

@@ -17,7 +17,7 @@ final class SeedersTest extends TestCase
         $this->app->make(AdminSeeder::class)->run();
         $this->app->make(AdminSeeder::class)->run();
 
-        $admins = User::query()->where('email', AdminSeeder::DEFAULT_EMAIL)->get()->all();
+        $admins = User::query()->where('email', User::normaliseEmail((string) (env('ADMIN_EMAIL') ?: AdminSeeder::DEFAULT_EMAIL)))->get()->all(); // a developer's .env may set ADMIN_EMAIL
         $this->assertCount(1, $admins);
         $this->assertTrue($admins[0]->is_admin);
     }
@@ -39,5 +39,40 @@ final class SeedersTest extends TestCase
     {
         sort($values);
         return $values;
+    }
+
+    public function testTheBootstrapCreatesTheAdminOnceAndNeverTouchesAnExistingAccount(): void
+    {
+        $boot = $this->app->make(\App\Services\AdminBootstrap::class);
+        $this->assertSame('skipped', $boot->ensure('', ''));
+        $this->assertSame('created', $boot->ensure(' Boss@Example.com ', 'a long enough password'));
+
+        $admin = User::query()->where('email', 'boss@example.com')->first();
+        $this->assertTrue($admin->is_admin);
+        $this->assertNotNull($admin->email_verified_at, 'no code is asked of the administrator');
+
+        $admin->forceFill(['password' => 'changed in the profile'])->save();
+        $hash = $admin->fresh()->getRawAttributes()['password'];
+        $this->assertSame('exists', $boot->ensure('boss@example.com', 'a different password!'));
+        $this->assertSame($hash, $admin->fresh()->getRawAttributes()['password'], 'the next deploy does not reset it');
+
+        $normal = new User();
+        $normal->forceFill(['name' => 'N', 'email' => 'normal@example.com', 'password' => 'x', 'is_admin' => false])->save();
+        $this->assertSame('exists', $boot->ensure('normal@example.com', 'a long enough password'));
+        $this->assertFalse($normal->fresh()->is_admin, 'a normal account is not promoted');
+    }
+
+    public function testTheBootstrapRefusesAWeakPasswordOrABadEmail(): void
+    {
+        $boot = $this->app->make(\App\Services\AdminBootstrap::class);
+        foreach ([['boss@example.com', 'short'], ['not-an-email', 'a long enough password']] as [$email, $password]) {
+            try {
+                $boot->ensure($email, $password);
+                $this->fail('should have been refused');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('12 characters', $e->getMessage());
+            }
+        }
+        $this->assertSame(0, User::query()->count());
     }
 }

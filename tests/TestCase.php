@@ -173,7 +173,7 @@ abstract class TestCase extends BaseTestCase
     protected function makeUser(string $email = 'owner@example.com', string $password = 'correct horse'): User
     {
         $user = new User();
-        $user->forceFill(['name' => 'Owner', 'email' => $email, 'password' => $password, 'is_admin' => false])->save();
+        $user->forceFill(['name' => 'Owner', 'email' => $email, 'password' => $password, 'is_admin' => false, 'email_verified_at' => new \DateTimeImmutable()])->save();
         return $user;
     }
 
@@ -206,9 +206,17 @@ abstract class TestCase extends BaseTestCase
     protected function makePhoto(Page $page, string $url, int $position = 1): Photo
     {
         $photo = new Photo();
-        $photo->forceFill(['page_id' => $page->id, 'disk' => 'spaces', 'path' => 'pages/' . $page->slug . '/' . basename($url), 'url' => $url, 'position' => $position])->save();
-        $this->disk->files['pages/' . $page->slug . '/' . basename($url)] = 'jpeg';
+        // stored the way the app stores it: only the key (users/<owner id>/photos/<file>), no URL
+        $key = 'users/' . $page->user_id . '/photos/' . basename($url);
+        $photo->forceFill(['page_id' => $page->id, 'disk' => 'spaces', 'path' => $key, 'url' => '', 'position' => $position])->save();
+        $this->disk->files[$key] = 'jpeg';
         return $photo;
+    }
+
+    /** The address the app shows for a photo made with makePhoto(), on the test CDN. */
+    protected function photoUrl(Page $page, string $file): string
+    {
+        return 'https://cdn.test/users/' . $page->user_id . '/photos/' . $file;
     }
 
     /** The CSRF token of the current session, read from a page's <meta name="csrf-token">. */
@@ -241,6 +249,24 @@ abstract class TestCase extends BaseTestCase
     protected function ajax(string $method, string $uri, array $data = []): ResponseInterface
     {
         return $this->json($method, $uri, $data, ['X-CSRF-TOKEN' => $this->csrf('/')]);
+    }
+
+    /** Captures every e-mail the app sends (instead of the log) and, unless told not to, turns e-mail confirmation on. */
+    protected function mailbox(bool $confirmation = true): \Naluz\Mail\ArrayTransport
+    {
+        $transport = new \Naluz\Mail\ArrayTransport();
+        $this->app->instance(\Naluz\Mail\Transport::class, $transport);
+        $this->app->instance(\Naluz\Mail\Mailer::class, new \Naluz\Mail\Mailer($transport, $this->app->make(\Naluz\Config\Repository::class), $this->app->make(\Naluz\View\Factory::class)));
+        $this->app->make(\Naluz\Config\Repository::class)->set('saas.email_verification', $confirmation);
+        return $transport;
+    }
+
+    /** The 6-digit code in the last e-mail a mailbox() received. */
+    protected function lastCode(\Naluz\Mail\ArrayTransport $mailbox): string
+    {
+        $this->assertNotSame([], $mailbox->sent, 'an e-mail was sent');
+        $this->assertSame(1, preg_match('/letter-spacing:10px[^>]*>\s*(\d{6})\s*</', (string) end($mailbox->sent)->getHtml(), $m), 'the e-mail carries a 6-digit code');
+        return $m[1];
     }
 
     /** The day the seasonal templates think it is (null: now); `always` offers them all year. */

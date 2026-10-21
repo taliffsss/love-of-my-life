@@ -158,6 +158,7 @@ final class SocialAuth
                 'password' => bin2hex(random_bytes(32)), // never shown or used: provider accounts sign in through the provider
                 'is_admin' => false,
                 'login_type' => $profile->provider,
+                'email_verified_at' => new \DateTimeImmutable(), // the provider confirmed this address
             ])->save();
             $link = new SocialAccount();
             $link->forceFill(['user_id' => $user->id, 'provider' => $profile->provider, 'provider_uid' => $profile->uid])->save();

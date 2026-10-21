@@ -10,12 +10,12 @@
     </div>
   </div>
 
-  <form class="card create-form" method="post" action="/dashboard/pages" novalidate>
+  <form class="card create-form" method="post" action="/dashboard/pages" data-validate novalidate>
     @csrf
     <div class="create-row">
       <div class="field">
         <label for="recipient">Who is the new page for?</label>
-        <input class="input" id="recipient" name="recipient" type="text" maxlength="60" required placeholder="Their name or what you call them" value="{{ $old['recipient'] ?? '' }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
+        <input class="input" id="recipient" name="recipient" type="text" maxlength="60" required data-msg-required="Type who the page is for." placeholder="Their name or what you call them" value="{{ $old['recipient'] ?? '' }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
         @include('partials.errors', ['field' => 'recipient'])
       </div>
       <button class="btn btn-primary btn-lg" type="submit">

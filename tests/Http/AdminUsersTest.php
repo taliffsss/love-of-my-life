@@ -231,7 +231,7 @@ final class AdminUsersTest extends TestCase
         $removal->erase(User::query()->onlyTrashed()->find($this->target->id));
         $this->assertNull(User::query()->withTrashed()->find($this->target->id));
         $this->assertSame(0, Page::query()->withTrashed()->where('user_id', $this->target->id)->count());
-        $this->assertSame(['pages/' . $page->slug . '/a.jpg'], $this->disk->deleted, 'only now are the files deleted');
+        $this->assertSame(['users/' . $this->target->id . '/photos/a.jpg'], $this->disk->deleted, 'only now are the files deleted');
     }
 
     public function testAnAccountWithPaidOrdersOrAnAdministratorIsNotDeleted(): void

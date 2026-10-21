@@ -143,7 +143,8 @@ final class SiteController
     /** What the page shows once it is open. @return array{recipient:string,letter:list<string>,photos:list<string>} */
     public function content(Page $page): array
     {
-        $photos = Photo::query()->where('page_id', $page->id)->orderBy('position')->orderBy('id')->pluck('url')->all();
+        $storage = app(\App\Services\PhotoStorage::class);
+        $photos = array_map(static fn (Photo $p): string => $storage->photoUrl($p), Photo::query()->where('page_id', $page->id)->orderBy('position')->orderBy('id')->get()->all());
         return [
             'recipient' => $page->recipient,
             'letter' => $page->paragraphs(),

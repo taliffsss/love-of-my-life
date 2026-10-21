@@ -9,20 +9,31 @@
     <p class="muted" style="margin-top:6px">{{ $target->email }} · joined {{ \App\Support\Time::show($target->created_at) }} · {{ $pageCount }} {{ $pageCount === 1 ? 'page' : 'pages' }} · signed up with {{ $target->login_type === 'manual' ? 'e-mail' : ucfirst($target->login_type) }}</p>
   </div></div>
 
+  <section class="card section-card" aria-labelledby="profile-title" style="margin-bottom:18px">
+    <div class="section-head"><div><h2 id="profile-title">Profile</h2><p>What the person filled in on their account page.</p></div></div>
+    <div class="section-body">
+      <dl class="facts-list">
+        <div><dt>E-mail</dt><dd>{{ $target->email }} <span class="pill pill-{{ $target->hasVerifiedEmail() ? 'active' : 'expired' }}">{{ $target->hasVerifiedEmail() ? 'Confirmed' : 'Not confirmed' }}</span>@if ($target->pending_email)<span class="small muted" style="display:block">Asked to change to {{ $target->pending_email }}</span>@endif</dd></div>
+        <div><dt>Phone</dt><dd>{{ $target->phone ?: 'Not added' }}</dd></div>
+        <div style="grid-column:1/-1"><dt>Address</dt><dd>{{ $target->addressLine() !== '' ? $target->addressLine() : 'Not added' }}</dd></div>
+      </dl>
+    </div>
+  </section>
+
   <section class="card section-card" aria-labelledby="details-title">
-    <form method="post" action="/admin/users/{{ $target->id }}" novalidate>
+    <form method="post" action="/admin/users/{{ $target->id }}" data-validate novalidate>
       @csrf
       @method('PUT')
       <div class="section-head"><div><h2 id="details-title">Details</h2></div></div>
       <div class="section-body stack" style="--gap:16px">
         <div class="field">
           <label for="name">Name</label>
-          <input class="input" id="name" name="name" maxlength="80" required value="{{ $old['name'] ?? $target->name }}" @if (!empty($errors['name'])) aria-invalid="true" aria-describedby="name-error" @endif />
+          <input class="input" id="name" name="name" maxlength="80" required data-msg-required="Enter a name." value="{{ $old['name'] ?? $target->name }}" @if (!empty($errors['name'])) aria-invalid="true" aria-describedby="name-error" @endif />
           @include('partials.errors', ['field' => 'name'])
         </div>
         <div class="field">
           <label for="email">E-mail</label>
-          <input class="input" id="email" name="email" type="email" maxlength="254" required value="{{ $old['email'] ?? $target->email }}" @if (!empty($errors['email'])) aria-invalid="true" aria-describedby="email-error" @endif />
+          <input class="input" id="email" name="email" type="email" maxlength="254" required data-msg-required="Enter your e-mail address." data-msg-email="Enter a valid e-mail address, like name@example.com." value="{{ $old['email'] ?? $target->email }}" @if (!empty($errors['email'])) aria-invalid="true" aria-describedby="email-error" @endif />
           @include('partials.errors', ['field' => 'email'])
         </div>
         <div class="field">

@@ -9,8 +9,9 @@ use Naluz\Database\Orm\Relations\BelongsTo;
 use Naluz\Database\Orm\SoftDeletes;
 
 /**
- * One photo of a page. `disk`/`path` say where the file is stored (both null for an imported photo that lives
- * elsewhere); `url` is what the page shows. Lower `position` plays first.
+ * One photo of a page. `disk`/`path` are the storage key of its file (users/<owner id>/photos/<random>.<ext>); both are null for
+ * an imported photo that lives elsewhere, and only then is `url` filled in (empty for a stored file: App\Services\PhotoStorage::photoUrl()
+ * makes the address, on the CDN, from the key). Lower `position` plays first.
  *
  * @property int $id
  * @property int $page_id

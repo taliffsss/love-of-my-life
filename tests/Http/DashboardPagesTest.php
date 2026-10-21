@@ -282,7 +282,7 @@ final class DashboardPagesTest extends TestCase
             $this->assertStringContainsString($section, $html);
         }
         $this->assertStringContainsString('First paragraph.' . "\n\n" . 'Second paragraph.', $html, 'the letter is editable as paragraphs');
-        $this->assertStringContainsString('https://cdn.test/a.jpg', $html);
+        $this->assertStringContainsString($this->photoUrl($page, 'a.jpg'), $html);
         $this->assertStringContainsString('1 on this page', $html);
         $this->assertMatchesRegularExpression('#<b id="usage-used">1</b> of <span id="usage-total">6</span> used · <span id="usage-left">5 left</span>#', $html, 'the account\'s photos: used, of, left');
         $this->assertStringContainsString('Included: 6 with the free preview', $html);
@@ -492,7 +492,7 @@ final class DashboardPagesTest extends TestCase
         $this->assertStringContainsString('data-layout="cinematic"', $html);
         $this->assertStringContainsString('data-theme="blush"', $html);
         $this->assertStringContainsString('data-mode="preview"', $html);
-        $this->assertStringContainsString('https:\/\/cdn.test\/a.jpg', $html, 'the preview carries the content');
+        $this->assertStringContainsString(str_replace('/', '\/', $this->photoUrl($page, 'a.jpg')), $html, 'the preview carries the content');
         $this->assertSame('noindex, nofollow', $response->getHeaderLine('X-Robots-Tag'));
         $this->assertSame('classic', $page->fresh()->layout, 'previewing saves nothing');
 

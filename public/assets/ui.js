@@ -145,8 +145,10 @@ for (const btn of $$("[data-copy]")) {
   }
 }
 
-// ---------- sign in and sign up: show or hide the password; the "at least 8 characters" hint ticks itself ----------
-for (const input of $$('.auth-card input[type="password"]')) {
+// ---------- sign in, sign up, reset and profile: an eye icon shows or hides the password; the "at least 8 characters" hint ticks itself ----------
+const EYE = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.9 17.9A10.4 10.4 0 0 1 12 19c-6.4 0-10-7-10-7a18.5 18.5 0 0 1 5.1-5.9M9.9 5.2A9.6 9.6 0 0 1 12 5c6.4 0 10 7 10 7a18.6 18.6 0 0 1-2.2 3.2M1 1l22 22"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+for (const input of $$('.auth-card input[type="password"], .account input[type="password"]')) {
   const wrap = document.createElement("span");
   wrap.className = "pw-wrap";
   input.parentNode.insertBefore(wrap, input);
@@ -154,19 +156,105 @@ for (const input of $$('.auth-card input[type="password"]')) {
   const toggle = document.createElement("button");
   toggle.type = "button";
   toggle.className = "pw-toggle";
-  toggle.textContent = "Show";
+  toggle.innerHTML = EYE;
   toggle.setAttribute("aria-pressed", "false");
   toggle.setAttribute("aria-label", "Show the password");
+  toggle.title = "Show the password";
   toggle.addEventListener("click", () => {
     const show = input.type === "password";
     input.type = show ? "text" : "password";
-    toggle.textContent = show ? "Hide" : "Show";
+    toggle.innerHTML = show ? EYE_OFF : EYE;
     toggle.setAttribute("aria-pressed", String(show));
-    toggle.setAttribute("aria-label", show ? "Hide the password" : "Show the password");
+    const label = show ? "Hide the password" : "Show the password";
+    toggle.setAttribute("aria-label", label);
+    toggle.title = label;
   });
   wrap.appendChild(toggle);
   const hint = input.id === "password" ? $("#password-hint") : null;
   if (hint) input.addEventListener("input", () => hint.classList.toggle("ok", input.value.length >= 8));
+}
+
+// ---------- form validation (forms marked data-validate): each field is checked when it is left and again on submit; the server checks too ----------
+// Reads the field's own attributes: required, type="email", minlength, maxlength, pattern and data-match="#other-field", with
+// data-msg-required / -email / -minlength / -maxlength / -pattern / -match to say it in the form's own words.
+{
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const message = (el, rule, fallback) => el.dataset["msg" + rule[0].toUpperCase() + rule.slice(1)] || fallback;
+  const problem = (el) => {
+    const value = el.value;
+    const text = value.trim();
+    if (el.required && text === "") return message(el, "required", "This field is required.");
+    if (text === "" && !el.dataset.match) return "";
+    if (el.type === "email" && !EMAIL.test(text)) return message(el, "email", "Enter a valid e-mail address.");
+    const min = Number(el.getAttribute("minlength")) || 0;
+    if (min && value.length < min) return message(el, "minlength", "Use at least " + min + " characters.");
+    const max = Number(el.getAttribute("maxlength")) || 0;
+    if (max && value.length > max) return message(el, "maxlength", "Use up to " + max + " characters.");
+    const pattern = el.getAttribute("pattern");
+    if (pattern && text !== "") {
+      try {
+        if (!new RegExp("^(?:" + pattern + ")$").test(value)) return message(el, "pattern", "Check this field.");
+      } catch {
+        /* a pattern the browser's engine cannot read is left to the server */
+      }
+    }
+    if (el.dataset.match) {
+      const other = $(el.dataset.match);
+      if (other && (other.value !== value || (value === "" && el.required))) return value === "" ? message(el, "required", "This field is required.") : message(el, "match", "These do not match.");
+    }
+    return "";
+  };
+  const show = (el, text) => {
+    const field = el.closest(".field") || el.parentElement;
+    let note = document.getElementById(el.id + "-error");
+    if (text) {
+      if (!note) {
+        note = document.createElement("p");
+        note.className = "error";
+        note.id = el.id + "-error";
+        note.setAttribute("role", "alert");
+        (el.closest(".pw-wrap") || el).after(note);
+      }
+      note.textContent = text;
+      note.hidden = false;
+      el.setAttribute("aria-invalid", "true");
+      const described = (el.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+      if (!described.includes(note.id)) el.setAttribute("aria-describedby", [...described, note.id].join(" "));
+    } else {
+      note?.remove();
+      el.removeAttribute("aria-invalid");
+      const described = (el.getAttribute("aria-describedby") || "").split(/\s+/).filter((id) => id && id !== el.id + "-error");
+      if (described.length) el.setAttribute("aria-describedby", described.join(" "));
+      else el.removeAttribute("aria-describedby");
+    }
+    field?.classList.toggle("has-error", !!text);
+  };
+  for (const form of $$("form[data-validate]")) {
+    const fields = () => $$("input:not([type=hidden]):not([type=file]):not([type=checkbox]):not([type=radio]), textarea", form).filter((el) => el.id && !el.disabled);
+    const check = (el) => {
+      const text = problem(el);
+      show(el, text);
+      return text === "";
+    };
+    for (const el of fields()) {
+      el.addEventListener("blur", () => {
+        if (el.value !== "" || el.dataset.touched) check(el);
+      });
+      el.addEventListener("input", () => {
+        el.dataset.touched = "1";
+        if (el.getAttribute("aria-invalid")) check(el);
+        // a confirmation field is re-checked when the field it must match changes
+        for (const other of fields()) if (other.dataset.match === "#" + el.id && other.value !== "") check(other);
+      });
+    }
+    form.addEventListener("submit", (e) => {
+      const bad = fields().filter((el) => !check(el));
+      if (bad.length) {
+        e.preventDefault();
+        bad[0].focus();
+      }
+    });
+  }
 }
 
 // ---------- dialogs ----------
@@ -657,6 +745,97 @@ if (editor) {
   }
 }
 
+
+// ---------- profile photo dropzone: drag and drop or browse, a preview, and the size/type checked before anything uploads ----------
+for (const form of $$("form[data-dropzone]")) {
+  const zone = $(".dropzone", form);
+  const input = $(".dz-input", form);
+  const preview = $(".dz-preview", form);
+  const fileLine = $(".dz-file", form);
+  const error = $(".dz-error", form);
+  const submit = $("[data-dz-submit]", form);
+  const cancel = $("[data-dz-cancel]", form);
+  const max = Number(form.dataset.max) || 10 * 1024 * 1024;
+  const maxLabel = form.dataset.maxLabel || "10 MB";
+  const original = preview.innerHTML;
+  const types = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  const size = (bytes) => (bytes / 1048576 >= 0.1 ? (bytes / 1048576).toFixed(1).replace(/\.0$/, "") + " MB" : Math.max(1, Math.round(bytes / 1024)) + " KB");
+  let url = "";
+
+  const reset = () => {
+    input.value = "";
+    if (url) URL.revokeObjectURL(url);
+    url = "";
+    preview.innerHTML = original;
+    zone.classList.remove("is-picked", "is-bad", "is-over");
+    fileLine.hidden = true;
+    submit.disabled = true;
+    cancel.hidden = true;
+  };
+  const refuse = (message) => {
+    reset();
+    error.textContent = message;
+    error.hidden = false;
+    zone.classList.add("is-bad");
+  };
+  const pick = (file) => {
+    error.hidden = true;
+    if (!file) return reset();
+    if (!types.includes(file.type)) return refuse("Choose a JPG, PNG, WebP or GIF photo.");
+    if (file.size > max) return refuse("This photo is " + size(file.size) + ". A profile photo can be up to " + maxLabel + ".");
+    if (url) URL.revokeObjectURL(url);
+    url = URL.createObjectURL(file);
+    preview.innerHTML = "";
+    const img = document.createElement("img");
+    img.className = "avatar avatar-lg";
+    img.alt = "Preview of your new profile photo";
+    img.width = img.height = 96;
+    img.src = url;
+    preview.append(img);
+    fileLine.textContent = file.name + " · " + size(file.size);
+    fileLine.hidden = false;
+    zone.classList.remove("is-bad");
+    zone.classList.add("is-picked");
+    submit.disabled = false;
+    cancel.hidden = false;
+  };
+
+  input.addEventListener("change", () => pick(input.files?.[0]));
+  cancel.addEventListener("click", () => {
+    error.hidden = true;
+    reset();
+  });
+  for (const type of ["dragenter", "dragover"]) {
+    zone.addEventListener(type, (e) => {
+      e.preventDefault();
+      zone.classList.add("is-over");
+    });
+  }
+  for (const type of ["dragleave", "dragend"]) zone.addEventListener(type, () => zone.classList.remove("is-over"));
+  zone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    zone.classList.remove("is-over");
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    try {
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      input.files = transfer.files; // so the form posts it
+    } catch {
+      return refuse("Your browser could not take the dropped file. Use browse instead.");
+    }
+    pick(file);
+  });
+  form.addEventListener("submit", (e) => {
+    if (!input.files?.length) {
+      e.preventDefault();
+      refuse("Choose a photo first.");
+      return;
+    }
+    submit.disabled = true;
+    submit.textContent = "Uploading…";
+  });
+}
 
 // ---------- forms that ask first (data-confirm) ----------
 for (const form of $$("form[data-confirm]")) {

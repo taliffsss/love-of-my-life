@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.11.0 (2026-10-22, branch `main-v2`)
+
+- **Profile for every account (users and administrators): `/account`.** Name, e-mail, phone number, postal address and a profile photo can all be changed, and a password changed (an account made with
+  Google or Facebook can add one). Changing the e-mail asks for a 6-digit code sent to the new address first. The administrator's user screen shows the same details.
+- **Billing page: `/account/billing`.** Running subscriptions (with Cancel), renewals waiting to be paid, the photo allowance and packs, the billing details receipts use, and the payment history.
+- **E-mail confirmation by one-time code.** A manual sign-up is mailed a 6-digit code and enters it before using the dashboard. Codes live 15 minutes, allow 5 wrong tries, can be re-sent after a minute, and only a keyed hash
+  is stored. Google/Facebook accounts are confirmed by the provider; accounts that exist already are marked confirmed by the migration. It is on when a real mailer is set (`EMAIL_VERIFICATION=auto|true|false`).
+- **Forgot password, also by code:** `/forgot-password` mails a code, `/reset-password` takes it with the new password. It never says whether an account exists.
+- **Mail through Resend SMTP** (`MAIL_*`, or the `EMAIL_*` names): `no-reply@loveofmylife.love`. The release workflow writes `MAIL_*` to the server from the `SAAS_MAIL_PASSWORD` secret (and optional `SAAS_MAIL_*`).
+- **Profile photo dropzone:** drag a photo in or browse, see a preview, and the type and size (10 MB at most) are checked before anything uploads; the server checks them too, with a clear message.
+- **Every form validates as you go:** sign up, sign in, forgot/reset password, the confirmation code, the profile, the password form, the admin user screen and "new page". Fields are checked when left and on submit,
+  with messages in plain words; the server still checks everything. A code that is not 6 digits never uses up one of the 5 tries.
+- **Show/hide password is an eye icon** on every password field, including the profile's.
+- **First administrator on deploy:** the `ADMIN_EMAIL` / `ADMIN_PASSWORD` secrets are written to the server and `bin/ensure-admin.php` (run by the entrypoint) creates that administrator when no account has the e-mail.
+  It never changes an existing account, so a password changed in the profile survives every deploy.
+- **Uploads are filed per account, and the database keeps only the key.** Page photos go to `users/<user id>/photos/<random>.<ext>` and profile photos to `users/<user id>/avatar/...` in the bucket. `photos.path` /
+  `users.avatar_path` hold the key; the address (the CDN's when `SPACES_CDN_URL` is set) is made from it when a page is drawn (`PhotoStorage::url()`), so a CDN change needs no data change. Photos uploaded before this keep
+  working from their old key; imported photos keep their own URL.
+
 ## 3.10.0 (2026-10-22, branch `main-v2`)
 
 - **Lettie is 3D, and she wears the season.** On the sign-in and sign-up pages the mascot is a live 3D character (`public/assets/lettie3d.js`, source in `resources/js/lettie3d.src.js`):

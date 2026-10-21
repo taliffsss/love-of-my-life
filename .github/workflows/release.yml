@@ -11,6 +11,9 @@
 #             SAAS_DOCKERHUB_TOKEN                              (the Docker Hub token used instead of DOCKERHUB_TOKEN for a release of branch main-v2)
 #             SAAS_SPACES_ACCESS_KEY, _SECRET_KEY, _BUCKET, _REGION, _ENDPOINT_URL, _FOLDER, _CDN_URL
 #                                                               (main-v2 only: written to the server's .env.production as SPACES_* on every deploy)
+#             SAAS_MAIL_PASSWORD (+ optional _HOST, _PORT, _ENCRYPTION, _USERNAME, _FROM_ADDRESS, _FROM_NAME)
+#                                                               (main-v2 only: written to the server's .env.production as MAIL_*; defaults are Resend's SMTP)
+#             ADMIN_EMAIL, ADMIN_PASSWORD                       (main-v2 only: written to the server's .env.production; the first administrator is created from them at start, once)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
 #   Variables DOCKER_IMAGE (default taliffsss/loveofmylife; may also be a secret)
 #             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife; secret or variable)
@@ -183,6 +186,8 @@ jobs:
       SAAS_DIR: ${{ secrets.SAAS_DEPLOY_PATH || vars.SAAS_DEPLOY_PATH }}
       HAS_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
       HAS_SAAS_SPACES: ${{ secrets.SAAS_SPACES_ACCESS_KEY != '' }}
+      HAS_SAAS_MAIL: ${{ secrets.SAAS_MAIL_PASSWORD != '' }}
+      HAS_ADMIN: ${{ secrets.ADMIN_EMAIL != '' && secrets.ADMIN_PASSWORD != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -249,6 +254,54 @@ jobs:
             cat .spaces.env.tmp >> .env.production.new
             mv .env.production.new .env.production; rm -f .spaces.env.tmp
             echo 'SPACES_* updated:'; grep -c '^SPACES_' .env.production"
+
+      - name: Apply the SAAS_MAIL_* secrets to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_SAAS_MAIL == 'true' }}
+        env:
+          SAAS_MAIL_PASSWORD: ${{ secrets.SAAS_MAIL_PASSWORD }}
+          SAAS_MAIL_HOST: ${{ secrets.SAAS_MAIL_HOST }}
+          SAAS_MAIL_PORT: ${{ secrets.SAAS_MAIL_PORT }}
+          SAAS_MAIL_ENCRYPTION: ${{ secrets.SAAS_MAIL_ENCRYPTION }}
+          SAAS_MAIL_USERNAME: ${{ secrets.SAAS_MAIL_USERNAME }}
+          SAAS_MAIL_FROM_ADDRESS: ${{ secrets.SAAS_MAIL_FROM_ADDRESS }}
+          SAAS_MAIL_FROM_NAME: ${{ secrets.SAAS_MAIL_FROM_NAME }}
+        run: |
+          # SAAS_MAIL_X on GitHub becomes MAIL_X in deploy/.env.production on the server (Resend's SMTP when not set); older MAIL_ lines are replaced.
+          umask 077
+          : > mail.env
+          printf 'MAIL_MAILER=smtp\n' >> mail.env
+          for k in HOST PORT ENCRYPTION USERNAME FROM_ADDRESS FROM_NAME PASSWORD; do
+            v="SAAS_MAIL_$k"; val="$(printf '%s' "${!v}" | tr -d '\r\n')"
+            case "$k" in
+              HOST) : "${val:=smtp.resend.com}" ;; PORT) : "${val:=465}" ;; ENCRYPTION) : "${val:=ssl}" ;; USERNAME) : "${val:=resend}" ;;
+              FROM_ADDRESS) : "${val:=no-reply@loveofmylife.love}" ;; FROM_NAME) : "${val:=Love of My Life}" ;;
+            esac
+            printf 'MAIL_%s=%s\n' "$k" "$val" >> mail.env
+          done
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes mail.env "$HOST:$DIR/deploy/.mail.env.tmp"
+          rm -f mail.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v '^MAIL_' .env.production > .env.production.new || true
+            cat .mail.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .mail.env.tmp
+            echo 'MAIL_* updated:'; grep -c '^MAIL_' .env.production"
+
+      - name: Apply the ADMIN_* secrets to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_ADMIN == 'true' }}
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          # The container creates the administrator from these when no account has that e-mail yet (bin/ensure-admin.php); it never changes an existing one.
+          umask 077
+          printf 'ADMIN_EMAIL=%s\nADMIN_PASSWORD=%s\n' "$(printf '%s' "$ADMIN_EMAIL" | tr -d '\r\n')" "$(printf '%s' "$ADMIN_PASSWORD" | tr -d '\r\n')" > admin.env
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes admin.env "$HOST:$DIR/deploy/.admin.env.tmp"
+          rm -f admin.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v '^ADMIN_' .env.production > .env.production.new || true
+            cat .admin.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .admin.env.tmp
+            echo 'ADMIN_* updated:'; grep -c '^ADMIN_' .env.production"
 
       - name: Pull the release image and roll out the stack
         run: |

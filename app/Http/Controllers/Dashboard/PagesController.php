@@ -95,10 +95,11 @@ final class PagesController
         $covers = [];
         $counts = [];
         if ($pages !== []) {
+            $storage = app(PhotoStorage::class);
             $photos = Photo::query()->whereIn('page_id', array_map(static fn (Page $p): int => $p->id, $pages))
                 ->orderBy('position')->orderBy('id')->get()->all();
             foreach ($photos as $photo) {
-                $covers[$photo->page_id] ??= $photo->url;
+                $covers[$photo->page_id] ??= $storage->photoUrl($photo);
                 $counts[$photo->page_id] = ($counts[$photo->page_id] ?? 0) + 1;
             }
         }
@@ -196,6 +197,7 @@ final class PagesController
             'subscription' => $subscription,
             'renewal' => $renewal,
             'photos' => $photos,
+            'photoUrls' => array_combine(array_map(static fn (Photo $p): int => $p->id, $photos), array_map(static fn (Photo $p): string => app(PhotoStorage::class)->photoUrl($p), $photos)),
             'orders' => $orders,
             'url' => $sites->url($page),
             'pathUrl' => $sites->pathUrl($page),
