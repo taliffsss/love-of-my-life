@@ -160,13 +160,39 @@ def clip_gift(page: Page, cdp, base: str) -> int:
     return film(page, cdp, "gift", 120, {8: lambda: page.mouse.click(x, y), 80: next_photo})
 
 
+def clip_halloween(page: Page, cdp, base: str) -> int:
+    """Trick or treat: three knocks on the haunted door, which then creaks open on the treats and the letter."""
+    open_demo(page, base, "halloween", "rose")
+    x, y = centre(page, "#hwDoor")
+    knock = lambda: page.mouse.click(x, y)  # noqa: E731
+    page.mouse.move(60, 140)
+    return film(page, cdp, "halloween", 230, {
+        6: lambda: page.mouse.move(330, 260, steps=12),  # the scene leans (3D) as the pointer moves
+        14: knock, 40: knock, 66: knock,
+        120: lambda: page.mouse.move(40, 700, steps=12),
+    })  # fmt: skip
+
+
+def clip_halloween_lock(page: Page, cdp, base: str) -> int:
+    """The Halloween lock screen: a card in 3D that follows the pointer; typing the answer opens it."""
+    open_demo(page, base, "halloween", "rose", unlock=False)
+    page.focus("#pw")
+    type_ = lambda ch: (lambda: page.keyboard.type(ch))  # noqa: E731
+    return film(page, cdp, "halloweenlock", 150, {
+        2: lambda: page.mouse.move(310, 170, steps=6),
+        24: lambda: page.mouse.move(70, 700, steps=10),
+        50: type_("b"), 56: type_("o"), 62: type_("o"),
+        76: lambda: page.keyboard.press("Enter"),
+    }, slow=20)  # fmt: skip
+
+
 STILLS = [
     ("classic", "rose"), ("cinematic", "sunset"), ("polaroid", "blush"), ("envelope", "midnight"),
     ("scratch", "sunset"), ("storybook", "rose"), ("memory", "midnight"), ("timeline", "blush"),
-    ("gift", "rose"), ("stars", "midnight"),
+    ("gift", "rose"), ("stars", "midnight"), ("halloween", "rose"),
 ]  # fmt: skip
 CLIPS = {"lock": clip_lock, "envelope": clip_envelope, "scratch": clip_scratch, "storybook": clip_storybook,
-         "stars": clip_stars, "gift": clip_gift}  # fmt: skip
+         "stars": clip_stars, "gift": clip_gift, "halloween": clip_halloween, "halloweenlock": clip_halloween_lock}  # fmt: skip
 
 
 def main() -> None:

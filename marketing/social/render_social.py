@@ -102,6 +102,9 @@ def check_prices() -> None:
 
 
 GROUPS = [
+    ("Halloween: posts (4:5)", ("hw-",)),
+    ("Halloween: Meta ads (carousel 1:1, feed link, story)", ("ad-hw-",)),
+    ("Halloween: TikTok / Reels photo carousel", ("car-hw-",)),
     ("Profile pictures and covers", ("fb-profile", "tt-profile", "profile-lettie", "fb-cover")),
     ("Facebook: services", ("svc-", "plan-")),
     ("Facebook: audiences", ("ofw-", "couples-", "teen-")),

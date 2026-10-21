@@ -72,6 +72,25 @@
       lines: [["Planning a party? Invite them in style.", 0.9, 4.2], ["A wrapped surprise with the details inside.", 4.6, 8.7], ["Weddings, debuts, christenings and baby showers.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
     },
   };
+  // Halloween (Oct 17-31): trick or treat, narrated like the others; its backdrop floats the season's emoji instead of hearts
+  VIDEOS["halloween-knock"] = {
+    title: "Trick or treat?", duration: 15.4, theme: "t-halloween", glyphs: ["🎃", "🦇", "👻"], groove: [2.6, 12.2], endAt: 12.2,
+    kicker: [["Halloween", 0.5, 4.3]],
+    heads: [["Trick<br>or treat?", 0.7, 4.3], ["Knock three<br>times.", 4.5, 8.7], ["Your treat is<br>inside.", 8.9, 12.0]],
+    phone: { at: 4.3, until: 12.0, clips: [{ name: "halloween", at: 4.3, from: 0, rate: 1 }] },
+    lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+    cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 14), kind: "tap" }, { t: at(4.3, 40), kind: "tap" }, { t: at(4.3, 66), kind: "tap" }, { t: at(4.3, 96), kind: "sparkle" }],
+    lines: [["Trick or treat? Make them a Halloween surprise.", 0.9, 4.2], ["A haunted door. Knock three times.", 4.6, 8.7], ["It creaks open on your photos and your letter.", 9.0, 12.0], ["Love of My Life. Start free.", 12.5, 15.1]],
+  };
+  VIDEOS["halloween-lock"] = {
+    title: "Only they can open it", duration: 15.4, theme: "t-halloween", glyphs: ["🎃", "🦇", "👻"], groove: [2.6, 12.2], endAt: 12.2,
+    kicker: [["Halloween love letter", 0.5, 4.3]],
+    heads: [["Spooky<br>and sweet.", 0.7, 4.3], ["Locked with a<br>question.", 4.5, 8.7], ["Only they can<br>open it.", 8.9, 12.0]],
+    phone: { at: 4.3, until: 12.0, clips: [{ name: "halloweenlock", at: 4.3, from: 0, rate: 0.8 }] },
+    lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+    cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 76, 0.8), kind: "chime" }, { t: at(4.3, 104, 0.8), kind: "sparkle" }],
+    lines: [["Make this Halloween spooky and sweet.", 0.9, 4.2], ["Lock your letter with a question only they know.", 4.6, 8.7], ["Then watch them open it. Boo.", 9.0, 12.0], ["Love of My Life. Start free.", 12.5, 15.1]],
+  };
   const V = VIDEOS[ID];
   if (!V) throw new Error(`unknown video ${ID}`);
   const DURATION = V.duration;
@@ -100,8 +119,9 @@
 
   // ── build ──────────────────────────────────────────────────────────────────
   const glow = add(el("div", "glow"));
-  const hearts = Array.from({ length: 24 }, () => {
-    const h = add(el("div", "bg-heart", "♥"));
+  const GLYPHS = V.glyphs || ["♥"];
+  const hearts = Array.from({ length: 24 }, (_, k) => {
+    const h = add(el("div", "bg-heart", GLYPHS[k % GLYPHS.length]));
     h.style.fontSize = `${14 + rand() * 30}px`;
     return { node: h, x: rand() * W, speed: 30 + rand() * 50, phase: rand() * (H + 200), sway: 10 + rand() * 30, o: 0.18 + rand() * 0.3 };
   });
@@ -121,7 +141,7 @@
   const lettie = add(el("div", ""));
   lettie.id = "lettie";
   const bursts = [V.endAt + 0.3, ...V.cues.filter((c) => c.kind === "sparkle").map((c) => c.t)].map(() => Array.from({ length: 12 }, (_, k) => {
-    const h = add(el("div", "burst-heart", "♥"));
+    const h = add(el("div", "burst-heart", GLYPHS[k % GLYPHS.length]));
     h.style.fontSize = `${22 + (k % 4) * 8}px`;
     return { node: h, a: (Math.PI * 2 * k) / 12 + rand() * 0.4, d: 160 + rand() * 120 };
   }));

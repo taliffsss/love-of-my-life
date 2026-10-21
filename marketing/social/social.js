@@ -36,7 +36,8 @@
         const colours = ["#ff9ec1", "#ffd36e", "#8fd3ff", "#b8f0c4", "#d9b3ff"];
         return `<i style="position:absolute;left:${x}px;top:${y}px;width:${size / 2}px;height:${size}px;border-radius:${r() > 0.5 ? "50%" : "3px"};background:${colours[(r() * 5) | 0]};transform:rotate(${(r() * 180) | 0}deg);opacity:.75"></i>`;
       }
-      const glyph = { heart: "♥", spark: "✦", ring: "◯" }[kind];
+      const spooky = ["🎃", "🦇", "👻", "🕸️", "🕯️"];
+      const glyph = kind === "halloween" ? spooky[(r() * spooky.length) | 0] : { heart: "♥", spark: "✦", ring: "◯" }[kind];
       return `<span style="left:${x}px;top:${y}px;font-size:${size + 8}px;${kind === "spark" ? "color:var(--gold);opacity:.4" : ""}">${glyph}</span>`;
     });
     return `<div class="hearts abs" style="left:0;top:0;width:${w}px;height:${h}px">${items.join("")}</div>`;
@@ -122,6 +123,17 @@
         (kicker ? K(kicker, 30) : "") + H(headline, size, 840, kicker ? 22 : 0) + SPACE +
         (still ? phone(still, 380) : pose ? `<div class="lettie" data-pose="${pose}" style="width:420px;height:420px"></div>` : "") +
         (sub ? SPACE + S(sub, 820, 38) : "") + (end ? GAP(26) + U(34) : "") + SPACE),
+    };
+  }
+
+  // A square (1080 x 1080) card of the Meta carousel ad
+  function adSquare({ theme = "t-halloween", kicker, headline, size = 92, sub, still, pose, end }) {
+    return {
+      size: [1080, 1080], theme,
+      build: () => scatter(1080, 1080, "halloween", 12, 51) + col("70px 80px 60px",
+        (kicker ? K(kicker, 26) : "") + H(headline, size, 880, kicker ? 14 : 0) + SPACE +
+        (still ? phone(still, 300) : pose ? `<div class="lettie" data-pose="${pose}" style="width:300px;height:300px"></div>` : "") +
+        (sub ? SPACE + S(sub, 820, 32) : "") + (end ? GAP(20) + U(32) : "") + SPACE),
     };
   }
 
@@ -212,6 +224,50 @@
     "car-templates-3": slide({ kicker: "3/5 · Scratch", headline: "Scratch the card.", size: 120, still: "scratch" }),
     "car-templates-4": slide({ kicker: "4/5 · Stars", headline: "Light up the stars.", size: 120, still: "stars" }),
     "car-templates-5": slide({ headline: "Which one is theirs?", size: 120, pose: "idle", end: true }),
+
+    // ---- Halloween (offered 17-31 October): pictures for the page, the ad carousel and the stories. Keep the words honest:
+    //      the letter, song and design are free to build; photos come with a plan. ----
+    "hw-hook": { size: [1080, 1350], theme: "t-halloween", build: () => scatter(1080, 1350, "halloween", 12, 31) + col("84px 80px 64px",
+      K("Halloween") + H("Make this Halloween unforgettable.", 108, 900, 20) + SPACE +
+      `<div class="lettie" data-pose="hello" style="width:360px;height:360px"></div>` + SPACE +
+      S("A haunted door they knock on, a letter only they can open.", 860, 34) + GAP(26) + U(30) + GAP(10)) },
+    "hw-door": { size: [1080, 1350], theme: "t-halloween", build: () => scatter(1080, 1350, "halloween", 12, 33) + col("78px 70px 60px",
+      K("Trick or treat") + H("Knock three times.", 112, 900, 18) + GAP(26) + phone("halloween", 380) + GAP(26) +
+      S("A haunted door that creaks open on your photos and your letter.", 860, 32) + SPACE +
+      `<div class="row" style="gap:28px">${logo(36)}<span class="url" style="font-size:26px;padding:12px 24px">${URL_TEXT}</span></div>`) },
+    "hw-lock": { size: [1080, 1350], theme: "t-halloween", build: () => scatter(1080, 1350, "halloween", 12, 35) + col("78px 70px 60px",
+      K("Spooky and sweet") + H("Lock it with a question only they know.", 92, 900, 14) + GAP(20) + phone("halloween", 340) + GAP(20) +
+      chips(["🎃 Halloween template", "3D lock screen", "Your photos and song"]) + SPACE +
+      `<div class="row" style="gap:28px">${logo(36)}<span class="url" style="font-size:26px;padding:12px 24px">${URL_TEXT}</span></div>`) },
+    "hw-steps": steps({ theme: "t-halloween", kicker: "Halloween in 3 steps", headline: "Spooky, sweet, sent.", list: [
+      ["Write the letter", "Your words, your photos and a song."],
+      ["Pick Halloween", "A haunted door, three knocks, a treat inside."],
+      ["Send the link", "They knock. The door opens. Boo."],
+    ] }),
+    "hw-poll": { size: [1080, 1350], theme: "t-halloween", build: () => scatter(1080, 1350, "halloween", 10, 37) + col("78px 70px 60px",
+      K("Be honest") + H("Trick or treat?", 120, 920, 18) + GAP(40) +
+      `<div class="row" style="gap:60px;align-items:flex-start">` +
+      [["🎃", "Trick"], ["🍬", "Treat"]].map(([e, t], i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:18px"><div class="panel" style="width:380px;padding:60px 20px"><div style="font-size:150px;line-height:1">${e}</div></div><div class="row" style="gap:14px"><span class="num" style="width:64px;height:64px;font-size:40px">${i + 1}</span><span class="hand" style="font-size:54px">${t}</span></div></div>`).join("") +
+      `</div>` + SPACE + S("Comment 1 or 2, then tag who you would send a haunted love letter to.", 880, 36) + GAP(20) + logo(34)) },
+
+    // Meta carousel ad: five square cards, swiped in order (1:1 is the format Meta shows without cropping)
+    "ad-hw-1": adSquare({ kicker: "Halloween · 1/5", headline: "Boo! A love letter with a twist.", size: 92, pose: "hello" }),
+    "ad-hw-2": adSquare({ kicker: "2/5", headline: "They knock three times.", size: 96, still: "halloween" }),
+    "ad-hw-3": adSquare({ kicker: "3/5", headline: "The door creaks open.", size: 96, sub: "On your photos, your song and your letter." }),
+    "ad-hw-4": adSquare({ kicker: "4/5", headline: "Locked with a question only they know.", size: 80, still: "halloween" }),
+    "ad-hw-5": adSquare({ headline: "Start free. Send it before the 31st.", size: 88, pose: "love", end: true }),
+    // Single ads: the feed link ad (1.91:1) and the story / reel ad (9:16, words inside the safe zone)
+    "ad-hw-feed": { size: [1200, 628], theme: "t-halloween", build: () => scatter(1200, 628, "halloween", 8, 41) +
+      abs(60, 70, K("Halloween", 24) + H("Trick or treat?<br>Send a haunted love letter.", 64, 620, 14) + S("Knock three times. The door opens on your letter.", 560, 28, 18) + GAP(22) + `<span class="url" style="font-size:26px">${URL_TEXT}</span>`, "text-align:left") +
+      abs(840, 52, phone("halloween", 250, "transform:rotate(4deg)")) },
+    "ad-hw-story": slide({ theme: "t-halloween", kicker: "Halloween", headline: "Knock three times.", size: 128, still: "halloween", sub: "A haunted love letter, free to start.", deco: "halloween", end: true }),
+
+    // TikTok / Reels photo-mode carousel (9:16)
+    "car-hw-1": slide({ theme: "t-halloween", kicker: "Halloween · 1/5", headline: "A spooky-sweet love letter.", size: 112, pose: "hello", deco: "halloween" }),
+    "car-hw-2": slide({ theme: "t-halloween", kicker: "2/5", headline: "They knock three times.", size: 116, still: "halloween", deco: "halloween" }),
+    "car-hw-3": slide({ theme: "t-halloween", kicker: "3/5", headline: "The door creaks open.", size: 116, sub: "Your photos. Your song. Your words.", deco: "halloween" }),
+    "car-hw-4": slide({ theme: "t-halloween", kicker: "4/5", headline: "Lock it with a question.", size: 112, still: "halloween", deco: "halloween" }),
+    "car-hw-5": slide({ theme: "t-halloween", headline: "Send it before the 31st.", size: 112, pose: "love", deco: "halloween", end: true }),
   };
 
   // Lettie's poses: the same parts promo.js animates

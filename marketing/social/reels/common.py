@@ -11,7 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 PROMO = ROOT / "marketing" / "promo"
 OUT = ROOT / "marketing" / "out" / "social" / "reels"
-IDS = ["ofw-unlock", "scratch-ask", "monthsary-book", "stars-wish", "invite-gift"]
+IDS = ["ofw-unlock", "scratch-ask", "monthsary-book", "stars-wish", "invite-gift", "halloween-knock", "halloween-lock"]
+HALLOWEEN_IDS = ["halloween-knock", "halloween-lock"]
 SERVED = (
     "/marketing/social/reels/",
     "/marketing/promo/promo.css",

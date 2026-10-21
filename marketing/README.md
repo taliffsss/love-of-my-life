@@ -9,11 +9,32 @@ None of this is part of the app; `.dockerignore` keeps it out of the image. Ever
 | `promo/` | The 37 s promo video narrated by Lettie (16:9 and 9:16) |
 | `cards/` | Social cards and Lettie stickers |
 | `social/` | The Facebook and TikTok kit: profile pictures, covers, 56 post images, captions, plan, TikTok scripts |
-| `social/reels/` | Five ~15 s Facebook/Reels videos |
+| `social/reels/` | Seven ~15 s Facebook/Reels videos (five everyday, two Halloween) |
+| `social/HALLOWEEN.md` | The Halloween campaign: captions, Meta ad copy, schedule and honesty rules; `build_halloween.py` collects it |
+| `make.sh` | One script that builds any or all of the above |
 | `social/build_post_now.py` | Collects the 10 ready-to-upload Facebook posts into folders |
 | `brand/` | `LETTIE.md` (the mascot) and `build_brand.py` (logo and icons) |
 | `copy/SOCIAL.md` | Earlier posts, ad copy, hashtags, two-week plan, honesty rules |
 | `PRICING.md` | The plans and prices, and why |
+
+## One script for all of it: `make.sh`
+
+```sh
+marketing/make.sh help                    # every target
+marketing/make.sh all                     # everything, in order (the promo takes ~20 min the first time)
+marketing/make.sh halloween               # the whole Halloween campaign (footage, pictures, ads, carousels, reels, folders)
+marketing/make.sh halloween ads           # only part of it: footage | images | ads | carousel | reels | collect
+marketing/make.sh images                  # every post image         marketing/make.sh image hw-door ad-hw-1   # just these
+marketing/make.sh reels                   # every reel               marketing/make.sh reel halloween-knock    # just this one
+marketing/make.sh carousel | ads | cards | voice | collect | promo | footage [clips]
+marketing/make.sh list                    # image names, reel ids and clips you can ask for
+marketing/make.sh --dry-run halloween     # print what would run, run nothing
+```
+
+It starts the app on a throw-away SQLite file when it has to film (port 8095, `MARKETING_PORT` to change) and stops it
+again. The Halloween campaign (17 to 31 October, `social/HALLOWEEN.md`) ends in `out/social/halloween/`: one folder per
+post, reel, ad and carousel, each with its pictures or video and a `CAPTION-copy-paste.txt` (ad primary text, headlines
+and call to action are in it too).
 
 ## Before you start (once)
 

@@ -4,6 +4,7 @@
 #stage.t-gold { --bg: #1b0d10; --bg-2: #3a1a1f; --glow: #5a2a2a; --accent: #f0cfa8; --gold: #f6d98f; }
 #stage.t-party { --bg: #1d0f2a; --bg-2: #3a1a4a; --glow: #5a2a66; --accent: #ff9ec1; --gold: #ffd36e; }
 #stage.t-sunset { --bg: #1d0c08; --bg-2: #3a1810; --glow: #5a2a1c; --accent: #ff9a76; --gold: #ffd39a; }
+#stage.t-halloween { --bg: #130a1c; --bg-2: #2a1245; --glow: #5a2a8a; --accent: #ff9a3d; --gold: #ffd27a; }
 .portrait .headline { font-size: 108px; }
 .portrait .headline.long { font-size: 92px; }
 .deco { color: var(--gold); line-height: 1; }
