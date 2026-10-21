@@ -24,7 +24,10 @@ FROM php:8.3-fpm-alpine AS production
 
 # NaluzPHP needs mbstring, openssl, sodium, fileinfo and curl: all already compiled into the official image.
 # pdo_pgsql and pdo_mysql so DB_CONNECTION=pgsql|mysql work (SQLite is built in); DEPLOY.md promises all three.
-RUN apk add --no-cache nginx supervisor curl libpq \
+# `apk upgrade` first: when Alpine publishes a newer musl than the one in the base image, installing postgresql-dev (which needs the
+# matching musl-dev) fails with "musl ... breaks: musl-dev" (this broke the v3.11.0 image build); upgrading aligns them.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache nginx supervisor curl libpq \
     && apk add --no-cache --virtual .build-deps postgresql-dev \
     && docker-php-ext-install opcache pdo_pgsql pdo_mysql \
     && apk del .build-deps \

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.11.1 (2026-10-22, branch `main-v2`)
+
+- **Fix: the Docker image build.** v3.11.0 did not build: Alpine had published a newer `musl` than the base image carries, so `apk add postgresql-dev` failed ("musl breaks musl-dev"). The Dockerfile now runs
+  `apk upgrade` first. There is no other change from 3.11.0, whose notes follow (it was never deployed).
+
 ## 3.11.0 (2026-10-22, branch `main-v2`)
 
 - **Profile for every account (users and administrators): `/account`.** Name, e-mail, phone number, postal address and a profile photo can all be changed, and a password changed (an account made with
