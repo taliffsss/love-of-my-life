@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Screen;
 use App\Models\User;
 use App\Services\IntendedPlan;
+use App\Services\Seasons;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
 use Naluz\Http\Request;
@@ -18,10 +19,10 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class SessionController
 {
-    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session): ResponseInterface
+    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session, Seasons $seasons): ResponseInterface
     {
         $intended->remember($session, $request->getQueryParams()['plan'] ?? null);
-        return Screen::render('auth.login');
+        return Screen::render('auth.login', ['theme' => $seasons->look($request->getQueryParams())]);
     }
 
     public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session, Hasher $hasher): ResponseInterface

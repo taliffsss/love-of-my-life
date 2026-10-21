@@ -11,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 final class SeasonsTest extends TestCase
 {
-    private function at(string $date, bool $always = false): Seasons
+    private function at(string $date, bool $always = false, bool $preview = true): Seasons
     {
-        return new Seasons(['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]], 14, $always, 'UTC', fn () => new \DateTimeImmutable($date));
+        return new Seasons(['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]], 14, $always, 'UTC', fn () => new \DateTimeImmutable($date), $preview);
     }
 
     /** @return array<string,array{string,string,bool}> */
@@ -70,5 +70,16 @@ final class SeasonsTest extends TestCase
         $this->assertSame('2027-01-31', $this->at('2026-12-26')->opensOn('valentine')->format('Y-m-d'));
         $this->assertSame('2027-10-17', $this->at('2026-11-01')->opensOn('halloween')->format('Y-m-d'));
         $this->assertNull($this->at('2026-10-20')->opensOn('classic'));
+    }
+
+    public function testTheLookIsTodaysThemeAndAPreviewIsOnlyHonouredWhenAllowed(): void
+    {
+        $seasons = $this->at('2026-10-20');
+        $this->assertSame('halloween', $seasons->look([]));
+        $this->assertSame('halloween', $seasons->look(['theme' => ['x']]));
+        $this->assertSame('christmas', $seasons->look(['theme' => 'christmas']));
+        $this->assertSame('halloween', $seasons->look(['theme' => 'nonsense']));
+        $this->assertSame('default', $seasons->look(['theme' => 'default']));
+        $this->assertSame('halloween', $this->at('2026-10-20', false, false)->look(['theme' => 'christmas'])); // production: no previews
     }
 }

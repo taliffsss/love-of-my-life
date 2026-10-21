@@ -16,6 +16,7 @@
 #   promo      the 37 s promo video and the app footage every other step re-uses      marketing/promo/make_promo.sh
 #   footage    film the app only (all clips, or: footage halloween halloweenlock)     marketing/promo/shots.py
 #   cards      older social cards and Lettie stickers                                  marketing/cards/render_cards.py
+#   lettie3d   the 3D Lettie stickers, one set per look (default, Halloween, Christmas, Valentine)  marketing/brand/render_lettie3d.py
 #   images     every post image                                                         marketing/social/render_social.py
 #   ads        the Meta ad pictures: carousel (ad-hw-1..5), feed link, story
 #   carousel   the photo-mode carousels (car-*), TikTok / Reels
@@ -85,6 +86,7 @@ t_footage()  {
   kill "$APP_PID" 2>/dev/null || true; APP_PID=""
 }
 t_cards()    { say "Social cards and Lettie stickers"; need_footage; run "$PW python marketing/cards/render_cards.py $*"; }
+t_lettie3d() { say "3D Lettie stickers${*:+: $*}"; run "$PW python marketing/brand/render_lettie3d.py $*"; }
 t_images()   { say "Post images${*:+: $*}"; need_footage; run "$PW python marketing/social/render_social.py $*"; }
 t_ads()      { say "Meta ad pictures"; t_images ${HALLOWEEN_ADS}; }
 t_carousel() { say "Photo-mode carousels"; t_images ${HALLOWEEN_CAROUSEL} car-ofw-1 car-ofw-2 car-ofw-3 car-ofw-4 car-ofw-5 car-monthsary-1 car-monthsary-2 car-monthsary-3 car-monthsary-4 car-monthsary-5 car-templates-1 car-templates-2 car-templates-3 car-templates-4 car-templates-5; }
@@ -143,6 +145,7 @@ t_all() {
   [ -f "$OUT/promo/shots/shots.json" ] || t_promo
   t_footage halloween halloweenlock stills
   t_cards
+  t_lettie3d
   t_images
   t_reels
   t_collect
@@ -162,6 +165,7 @@ case "$target" in
   promo)     t_promo "$@" ;;
   footage)   t_footage "$@" ;;
   cards)     t_cards "$@" ;;
+  lettie3d)  t_lettie3d "$@" ;;
   images)    t_images "$@" ;;
   image)     [ "$#" -gt 0 ] || { echo "image: name at least one (see: marketing/make.sh list)" >&2; exit 2; }; t_images "$@" ;;
   ads)       t_ads ;;

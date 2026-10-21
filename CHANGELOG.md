@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.10.0 (2026-10-22, branch `main-v2`)
+
+- **Lettie is 3D, and she wears the season.** On the sign-in and sign-up pages the mascot is a live 3D character (`public/assets/lettie3d.js`, source in `resources/js/lettie3d.src.js`):
+  she follows the pointer, blinks, talks while the letter types and hugs a heart when clicked. Her look follows the same windows as the site: default (rose seal), Halloween (witch hat),
+  Christmas (Santa hat) and Valentine's (halo and wings). The flat Lettie stays as the fallback when WebGL is off.
+- `Seasons::look()` picks the theme for the landing page and both auth pages (`?theme=` previews outside production, or with `THEME_PREVIEW=true`).
+- **Marketing:** `marketing/make.sh lettie3d` renders 3D Lettie stickers for every look; `marketing/brand/build_clips.py` builds short vertical clips where her mouth follows the narration
+  (`marketing/brand/halloween-clips.json` holds three Halloween clips). Both are described in `marketing/brand/LETTIE.md`.
+
 ## 3.9.0 (2026-10-21, branch `main-v2`)
 
 - **Four looks for the landing page:** the default (midnight, wax red, gilt), Halloween (purple night, pumpkin), Christmas (pine night, berry red, gold) and Valentine's Day (burgundy night, rose).

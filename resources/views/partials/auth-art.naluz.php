@@ -40,7 +40,7 @@
     </div>
     <div class="art-lettie" data-lettie>
       <p class="art-bubble" data-bubble>{{ $says[$first] }}</p>
-      <button type="button" class="lettie-btn" data-lettie-btn aria-label="Say hi to Lettie, the little love letter">@include('partials.lettie')</button>
+      <button type="button" class="lettie-btn" data-lettie-btn aria-label="Say hi to Lettie, the little love letter"><span class="lettie-stage" data-lettie3d data-theme="{{ $theme ?? 'default' }}">@include('partials.lettie')</span></button>
     </div>
     </div>
     <div class="art-copy">
@@ -48,4 +48,5 @@
       <p class="muted small">{{ $note }}</p>
     </div>
   </div>
+<script src="/assets/lettie3d.js?v={{ (string) @filemtime(base_path('public/assets/lettie3d.js')) }}" defer></script>
 </aside>

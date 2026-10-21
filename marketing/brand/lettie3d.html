@@ -1,0 +1,14 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Lettie 3D</title>
+<style>html,body{margin:0;background:transparent}#l{width:1024px;height:1024px}</style>
+<div id="l" data-lettie3d-manual></div>
+<script src="/public/assets/lettie3d.js"></script>
+<script>
+  // ?theme=default|halloween|christmas|valentine  &pose=hello|idle|love  (sticker pose)
+  const q = new URLSearchParams(location.search);
+  const handle = Lettie3D.mount(document.getElementById('l'), { theme: q.get('theme') || 'default', preserve: true, maxDpr: 1, manual: q.get('manual') === '1' });
+  handle.pose(q.get('pose') || 'idle');
+  window.lettie = handle;
+  window.ready = true;
+</script>

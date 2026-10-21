@@ -3,7 +3,8 @@
 Lettie is the mascot of Love of My Life and the narrator of its promo video. She is a love letter that came to life:
 a cream-coloured envelope with a pink heart seal, rosy cheeks, big shiny eyes and a curl on top that ends in a tiny heart.
 
-- **Master artwork:** [`marketing/promo/lettie.svg`](../promo/lettie.svg), a vector you can scale to any size.
+- **3D:** she is a real 3D model ([`resources/js/lettie3d.src.js`](../../resources/js/lettie3d.src.js), bundled to `public/assets/lettie3d.js`). It runs live on the sign-in and sign-up pages (she follows the pointer, blinks, talks while the letter types, hugs a heart when clicked) and is rendered to stickers with `marketing/make.sh lettie3d`: `out/cards/lettie3d-<look>-<hello|idle|love>.png`, transparent, 1024 px.
+- **Master artwork (flat, also the fallback when WebGL is off):** [`marketing/promo/lettie.svg`](../promo/lettie.svg), a vector you can scale to any size.
 - **Stickers:** transparent PNGs, 1024 px, in `marketing/out/cards/`: `lettie-hello.png` (waving and talking),
   `lettie-idle.png` (listening) and `lettie-love.png` (hugging a big heart, eyes closed and smiling).
 - **Character sheet:** `lettie-sheet.png` shows all three poses.
@@ -37,6 +38,19 @@ She lives on the product's Rose theme background (`#160a14` to `#2a1220`), with 
 **Do:**
 - Let her wave, point at the phone, hop when something opens, and hug a heart at the end.
 - Keep her round and soft. Animate her with gentle bounces on the beat.
+
+**Her four looks.** She changes with the season, the same windows as the site (`Seasons::theme()`: 14 days before the day). Her body and face never change; her clothes, seal colour and the little things floating around her do:
+
+| Look | When | What she wears |
+|---|---|---|
+| Default | the rest of the year | nothing extra; rose seal; floating pink hearts |
+| Halloween | until 31 Oct | purple witch hat with an orange band; orange seal; glowing embers |
+| Christmas | until 25 Dec | red Santa hat with a pom-pom; red seal; snowflakes |
+| Valentine | until 14 Feb | gold halo and small white wings; deep-pink seal; bigger hearts |
+
+**Talking clips.** `marketing/brand/build_clips.py <campaign folder>` builds vertical clips from a storyboard and its narration (her mouth follows the voice, rising hearts, real app footage in a phone frame). `halloween-clips.json` holds the scripts of three Halloween clips; their claims are the ones approved in the mascot-marketing campaign.
+
+To rebuild after editing the model: `npm i --no-save three esbuild`, then `npx esbuild resources/js/lettie3d.src.js --bundle --minify --format=iife --target=es2019 --outfile=public/assets/lettie3d.js`.
 
 **Don't:**
 - Stretch her or recolour her body.

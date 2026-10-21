@@ -252,6 +252,7 @@ abstract class TestCase extends BaseTestCase
             $always,
             'UTC',
             $date === null ? null : fn () => new \DateTimeImmutable($date),
+            true,
         ));
     }
 

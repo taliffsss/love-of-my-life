@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Screen;
 use App\Models\User;
 use App\Services\IntendedPlan;
+use App\Services\Seasons;
 use App\Services\Traffic;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
@@ -18,10 +19,10 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class RegisterController
 {
-    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session): ResponseInterface
+    public function show(ServerRequestInterface $request, IntendedPlan $intended, Store $session, Seasons $seasons): ResponseInterface
     {
         $intended->remember($session, $request->getQueryParams()['plan'] ?? null); // "Start with Sweet" on the pricing section
-        return Screen::render('auth.register', ['chosenPlan' => $intended->name($intended->valid($session->get('intended_plan')))]);
+        return Screen::render('auth.register', ['chosenPlan' => $intended->name($intended->valid($session->get('intended_plan'))), 'theme' => $seasons->look($request->getQueryParams())]);
     }
 
     public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session, Traffic $traffic): ResponseInterface

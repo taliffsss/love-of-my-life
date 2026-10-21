@@ -45,6 +45,8 @@ final class AppServiceProvider extends ServiceProvider
             (int) $c->make(Repository::class)->get('saas.seasons.lead_days', 14),
             (bool) $c->make(Repository::class)->get('saas.seasons.always', false),
             (string) $c->make(Repository::class)->get('app.timezone', 'UTC'),
+            null,
+            $c->make(Repository::class)->get('app.env') !== 'production' || (bool) $c->make(Repository::class)->get('saas.theme_preview', false),
         ));
         $this->app->singleton(SocialAuth::class, fn ($c) => new SocialAuth(
             (array) $c->make(Repository::class)->get('social', []),

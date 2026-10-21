@@ -1,0 +1,21 @@
+{
+  "look": "halloween",
+  "palette": {"top": [30, 12, 48], "bottom": [140, 62, 22], "glow": [150, 70, 20], "glow2": [60, 24, 90], "hearts": [255, 150, 60], "title": [255, 170, 80]},
+  "clips": {
+    "halloween-boo": [
+      {"narration": "Boo! Your love letter has a secret.", "screen_text": "Boo. A letter with a secret.", "footage": null, "pose": "hello", "claims": []},
+      {"narration": "Lock it with a question only they can answer.", "screen_text": "A question only they know", "footage": "halloweenlock", "pose": "idle", "claims": ["feature-1"]},
+      {"narration": "Build it free. Start at loveofmylife dot love.", "screen_text": "Start free at loveofmylife.love", "footage": null, "pose": "love", "claims": []}
+    ],
+    "halloween-door": [
+      {"narration": "This Halloween, send something sweeter than candy.", "screen_text": "Sweeter than candy", "footage": null, "pose": "hello", "claims": []},
+      {"narration": "A haunted door that opens with a knock. Only for a few more days.", "screen_text": "The haunted door", "footage": "halloween", "pose": "idle", "claims": ["feature-4"]},
+      {"narration": "Send a link or a QR code. Nothing to install.", "screen_text": "A link or a QR code", "footage": null, "pose": "love", "claims": ["feature-5"]}
+    ],
+    "halloween-treat": [
+      {"narration": "Trick or treat? Treat them to a letter.", "screen_text": "Treat them to a letter", "footage": null, "pose": "hello", "claims": []},
+      {"narration": "Your photos, your song and your words on one private page.", "screen_text": "Photos. Song. Letter.", "footage": "halloween", "pose": "idle", "claims": ["feature-2"]},
+      {"narration": "Preview it free. Start at loveofmylife dot love.", "screen_text": "Start free at loveofmylife.love", "footage": null, "pose": "love", "claims": []}
+    ]
+  }
+}

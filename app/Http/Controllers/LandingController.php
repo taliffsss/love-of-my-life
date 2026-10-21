@@ -28,14 +28,9 @@ final class LandingController
     {
         // The look follows the season that is on (App\Services\Seasons::theme). Outside production (or with THEME_PREVIEW=true), ?theme=halloween|christmas|valentine|default previews any
         // of them as if its season were on: its template and its hero chip appear, and the others' do not.
-        $theme = $seasons->theme();
-        $asked = $request->getQueryParams()['theme'] ?? null;
-        if ((config('app.env') !== 'production' || config('saas.theme_preview')) && is_string($asked) && in_array($asked, ['default', 'halloween', 'christmas', 'valentine'], true)) {
-            $theme = $asked;
-            $on = static fn (string $k): bool => $k === $asked;
-        } else {
-            $on = fn (string $k): bool => $seasons->isOpen($k);
-        }
+        $theme = $seasons->look($request->getQueryParams());
+        $previewing = $seasons->canPreview() && $theme === ($request->getQueryParams()['theme'] ?? null);
+        $on = $previewing ? static fn (string $k): bool => $k === $theme : fn (string $k): bool => $seasons->isOpen($k);
         $offered = array_filter(Designs::LAYOUTS, static fn (array $l, string $k): bool => empty($l['season']) || $on($k), ARRAY_FILTER_USE_BOTH);
         return Screen::render('landing', [
             'theme' => $theme,

@@ -15,6 +15,7 @@ final class Seasons
     /**
      * @param array<string,array{0:int,1:int}> $events layout key => [month, day] of its day
      * @param ?\Closure():\DateTimeImmutable $clock now, for tests
+     * @param bool $preview whether ?theme= may show a look out of season (outside production, or THEME_PREVIEW=true)
      */
     public function __construct(
         private readonly array $events,
@@ -22,6 +23,7 @@ final class Seasons
         private readonly bool $always = false,
         private readonly string $timezone = 'UTC',
         private readonly ?\Closure $clock = null,
+        private readonly bool $preview = false,
     ) {
     }
 
@@ -59,6 +61,25 @@ final class Seasons
             }
         }
         return 'default';
+    }
+
+    /**
+     * The look a visitor sees: today's theme, or the one in ?theme= when previewing is allowed (outside production, or THEME_PREVIEW=true).
+     *
+     * @param array<string,mixed> $query the request's query parameters
+     */
+    public function look(array $query, ?\DateTimeImmutable $now = null): string
+    {
+        $asked = $query['theme'] ?? null;
+        if (is_string($asked) && $this->canPreview() && in_array($asked, ['default', ...array_keys($this->events)], true)) {
+            return $asked;
+        }
+        return $this->theme($now);
+    }
+
+    public function canPreview(): bool
+    {
+        return $this->preview;
     }
 
     /** The first day a closed seasonal template is offered again: "Halloween opens on 17 Oct". */

@@ -142,4 +142,14 @@ final class AuthTest extends TestCase
         $this->assertSame(429, $this->form('POST', '/login/', ['_token' => $token, 'email' => 'a@example.com', 'password' => 'x'])->getStatusCode(), 'a trailing slash is the same route');
         $this->assertSame(429, $this->form('POST', '/%6Cogin', ['_token' => $token, 'email' => 'a@example.com', 'password' => 'x'])->getStatusCode(), 'so is an encoded letter');
     }
+
+    public function testLettieOnTheSignInAndSignUpPagesWearsTheSeason(): void
+    {
+        $this->seasons('2026-10-20');
+        $this->assertStringContainsString('data-lettie3d data-theme="halloween"', (string) $this->get('/login')->getBody());
+        $this->assertStringContainsString('data-lettie3d data-theme="halloween"', (string) $this->get('/register')->getBody());
+        $this->seasons('2026-07-01');
+        $this->assertStringContainsString('data-lettie3d data-theme="default"', (string) $this->get('/login')->getBody());
+        $this->assertStringContainsString('data-theme="christmas"', (string) $this->get('/login?theme=christmas')->getBody());
+    }
 }
