@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Screen;
 use App\Services\IntendedPlan;
+use App\Services\Traffic;
 use App\Services\Social\SocialAuth;
 use App\Services\Social\SocialLoginException;
 use Naluz\Auth\Auth;
@@ -37,7 +38,7 @@ final class SocialController
         return \Naluz\Http\Response::redirect($social->authorizeUrl($provider, $state, $verifier), 302);
     }
 
-    public function callback(string $provider, ServerRequestInterface $request, SocialAuth $social, Store $session, Auth $auth, Connection $db, IntendedPlan $intended): ResponseInterface
+    public function callback(string $provider, ServerRequestInterface $request, SocialAuth $social, Store $session, Auth $auth, Connection $db, IntendedPlan $intended, Traffic $traffic): ResponseInterface
     {
         $this->ensureEnabled($provider, $social);
         $query = $request->getQueryParams();
@@ -63,6 +64,9 @@ final class SocialController
         }
 
         $intended->claim($session, $user, $db);
+        if ($created) {
+            $traffic->claim($request, $user);
+        }
         $auth->login($user);
         return Screen::back('/dashboard', $created ? 'Welcome, ' . $user->name . '! Create your first page below.' : '');
     }

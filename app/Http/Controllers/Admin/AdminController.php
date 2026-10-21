@@ -24,6 +24,16 @@ final class AdminController
         ]);
     }
 
+    /** Where the visitors came from (UTM tags and referrers) and what they turned into. ?days=7|30|90 */
+    public function traffic(ServerRequestInterface $request, AdminStats $stats, Plans $plans): ResponseInterface
+    {
+        $days = (int) ($request->getQueryParams()['days'] ?? 30);
+        return Screen::render('admin.traffic', [
+            'traffic' => $stats->traffic(in_array($days, [7, 30, 90], true) ? $days : 30),
+            'currency' => $plans->currency(),
+        ]);
+    }
+
     public function users(ServerRequestInterface $request, AdminStats $stats): ResponseInterface
     {
         $query = $request->getQueryParams();

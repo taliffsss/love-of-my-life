@@ -21,17 +21,17 @@ use Naluz\Routing\Router;
 /** @var Router $router */
 
 // ── The product ──────────────────────────────────────────────────────────────
-$router->get('/', [LandingController::class, 'index'])->name('home');
-$router->get('/demo', [LandingController::class, 'demo'])->name('demo');
+$router->get('/', [LandingController::class, 'index'])->middleware(['traffic'])->name('home');
+$router->get('/demo', [LandingController::class, 'demo'])->middleware(['traffic'])->name('demo');
 $router->get('/terms', [LegalController::class, 'terms'])->name('terms');
 $router->get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 $router->get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 $router->get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 $router->get('/manifest.webmanifest', [SeoController::class, 'manifest'])->name('manifest');
 
-$router->get('/register', [RegisterController::class, 'show'])->middleware(['guest'])->name('register');
+$router->get('/register', [RegisterController::class, 'show'])->middleware(['guest', 'traffic'])->name('register');
 $router->post('/register', [RegisterController::class, 'store'])->middleware(['throttle:6,1', 'guest']);
-$router->get('/login', [SessionController::class, 'show'])->middleware(['guest'])->name('login');
+$router->get('/login', [SessionController::class, 'show'])->middleware(['guest', 'traffic'])->name('login');
 $router->post('/login', [SessionController::class, 'store'])->middleware(['throttle:10,1', 'guest']);
 $router->get('/auth/{provider}/redirect', [SocialController::class, 'redirect'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
 $router->get('/auth/{provider}/callback', [SocialController::class, 'callback'])->where('provider', 'google|facebook')->middleware(['throttle:20,1', 'guest', 'noindex']);
@@ -46,6 +46,7 @@ $router->group(['prefix' => 'admin', 'middleware' => ['auth', 'admin', 'noindex'
     $router->post('/users/{user}/status', [UsersController::class, 'status'])->where('user', '\d+')->middleware(['throttle:60,1']);
     $router->delete('/users/{user}', [UsersController::class, 'destroy'])->where('user', '\d+')->middleware(['throttle:30,1']);
     $router->get('/payments', [AdminController::class, 'payments'])->name('admin.payments');
+    $router->get('/traffic', [AdminController::class, 'traffic'])->name('admin.traffic');
 });
 
 // ── Dashboard (signed in; every page and order is looked up within the owner's own) ─

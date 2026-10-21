@@ -51,8 +51,8 @@ return [
         'address' => (string) env('LEGAL_ADDRESS', 'Philippines'),
         'email' => (string) env('LEGAL_CONTACT_EMAIL', 'hello@loveofmylife.love'),
         'dpo' => (string) env('LEGAL_DPO_NAME', ''),
-        'version' => '1.0',
-        'updated' => '2026-10-20',
+        'version' => '1.1',
+        'updated' => '2026-10-21',
     ],
 
     'currency' => 'PHP',

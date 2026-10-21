@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.6.0 (2026-10-21, branch `main-v2`)
+
+- **UTM tracking and a Traffic page for administrators.** Links with `utm_source`, `utm_medium`, `utm_campaign` and `utm_content` are recorded when someone visits the
+  landing page, the demo, sign-in or sign-up (or, without tags, the website that sent them); the first campaign is kept for 30 days and saved on the account when they sign up.
+  **Admin → Traffic** shows visitors, sign-ups, customers and revenue by source, campaign and ad or post, for 7, 30 or 90 days. No IP address or device details are stored; bots and the pages people
+  make for each other are not counted. New tables and columns: `visits`, `users.utm_*` (migration `2026_10_21_000017`). The Privacy Policy (section 6, now version 1.1) describes the two first-party cookies.
+- Marketing: the Halloween captions use tagged links (`marketing/social/utm.py`, `marketing/make.sh links`), plus a step-by-step ads guide, a campaign plan, a brand review, an SEO audit, e-mail sequences and a blog draft.
+
 ## 3.5.0 (2026-10-21, branch `main-v2`)
 
 - **The seasonal templates appear two weeks before their day.** Halloween (31 Oct), Christmas (25 Dec) and Valentine (14 Feb) are shown on the landing page

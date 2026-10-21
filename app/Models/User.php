@@ -19,6 +19,10 @@ use Naluz\Database\Orm\Relations\HasMany;
  * @property ?\DateTimeInterface $tour_seen_at when the dashboard tour was finished or skipped (null: not yet, so it shows)
  * @property ?\DateTimeInterface $editor_tour_seen_at the same for the page editor's tour
  * @property ?string $intended_plan the plan picked on the pricing section before signing up (App\Services\IntendedPlan)
+ * @property ?string $utm_source first-touch campaign tags saved at sign-up (App\Services\Traffic)
+ * @property ?string $utm_medium
+ * @property ?string $utm_campaign
+ * @property ?string $utm_content
  * @property string $login_type manual, google or facebook: how the account was made
  */
 final class User extends Model

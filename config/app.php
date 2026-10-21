@@ -45,6 +45,7 @@ return [
         'active' => \App\Http\Middleware\EnsureActiveAccount::class,
         'admin' => \App\Http\Middleware\EnsureAdmin::class,
         'noindex' => \App\Http\Middleware\NoIndex::class,
+        'traffic' => \App\Http\Middleware\TrackTraffic::class,
         'auth' => Middleware\Authenticate::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'jwt' => Middleware\AuthenticateJwt::class,

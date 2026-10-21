@@ -28,6 +28,8 @@
     <p class="small muted">{{ array_key_first($stats['signups']) }} to {{ array_key_last($stats['signups']) }}</p>
   </section>
 
+  <p class="small muted" style="margin:-4px 0 14px">Where do visitors come from? <a href="/admin/traffic">See the traffic by campaign</a>.</p>
+
   <div class="admin-cols">
     <section class="card admin-card" aria-labelledby="how-title">
       <h2 id="how-title">How people sign up</h2>

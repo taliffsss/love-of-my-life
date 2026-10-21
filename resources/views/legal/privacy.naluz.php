@@ -55,6 +55,7 @@
   <ul>
     <li><strong>Needed to work:</strong> a session cookie (<code>naluz_session</code>, lasts up to two hours of inactivity) that keeps you signed in, and a security token on forms. These cannot be switched off if you want to sign in.</li>
     <li><strong>Analytics:</strong> on the landing page, sign-in, sign-up and dashboard we use Google Analytics 4, which sets cookies (<code>_ga</code>, <code>_ga_*</code>) and tells us in aggregate how the website is used. It is <strong>not</strong> on the pages people make for each other, nor on the admin area.</li>
+    <li><strong>Where visitors come from:</strong> on the landing page, demo, sign-in and sign-up we note which link or website brought you (for example an advertisement) with two first-party cookies: a random visitor id (<code>lom_v</code>, up to 13 months) and the first campaign that brought you (<code>lom_a</code>, 30 days). If you create an account, that campaign is saved with it. We keep no IP address or device details for this, and it is not on the pages people make for each other.</li>
     <li><strong>YouTube:</strong> if a page has a song, YouTube may set its own cookies when the player loads.</li>
     <li><strong>Fonts:</strong> text fonts are loaded from Google Fonts, which sees your IP address.</li>
   </ul>
