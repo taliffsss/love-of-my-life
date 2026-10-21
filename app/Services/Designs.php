@@ -91,18 +91,24 @@ final class Designs
             'description' => 'A haunted door under the moon. Knock three times; it creaks open on your photos and your letter.',
             'play' => 'Knock three times.',
             'kind' => 'interactive',
+            'months' => [10],
+            'theme' => 'halloween',
         ],
         'christmas' => [
             'name' => 'Christmas',
             'description' => 'A snow globe to shake. The snow swirls, the tree lights up, and the gift inside is your letter.',
             'play' => 'Shake the globe.',
             'kind' => 'interactive',
+            'months' => [11, 12],
+            'theme' => 'christmas',
         ],
         'valentine' => [
             'name' => 'Valentine',
             'description' => 'Loves me, loves me not: pluck the petals one by one. The last one always says yes.',
             'play' => 'Pluck every petal.',
             'kind' => 'interactive',
+            'months' => [1, 2],
+            'theme' => 'valentine',
         ],
     ];
 
@@ -112,6 +118,10 @@ final class Designs
         'midnight' => ['name' => 'Midnight', 'colors' => ['#0a0f1f', '#a9b8ff', '#e8d6a8'], 'scheme' => 'dark'],
         'sunset' => ['name' => 'Sunset', 'colors' => ['#1d0c08', '#ff9a76', '#ffd39a'], 'scheme' => 'dark'],
         'blush' => ['name' => 'Blush', 'colors' => ['#fbf0ec', '#c2577a', '#b4874a'], 'scheme' => 'light'],
+        // the colours of the seasonal templates, which always wear them (themeFor); not offered in the colour picker
+        'halloween' => ['name' => 'Halloween', 'colors' => ['#130a1c', '#ff9a3d', '#ffd27a'], 'scheme' => 'dark', 'season' => true],
+        'christmas' => ['name' => 'Christmas', 'colors' => ['#0b1a16', '#ff5a6e', '#ffe08a'], 'scheme' => 'dark', 'season' => true],
+        'valentine' => ['name' => 'Valentine', 'colors' => ['#20060f', '#ff6f8e', '#ffc2cf'], 'scheme' => 'dark', 'season' => true],
     ];
 
     public const OCCASIONS = [
@@ -218,6 +228,18 @@ final class Designs
     public static function theme(?string $key): string
     {
         return isset(self::THEMES[$key]) ? (string) $key : self::DEFAULT_THEME;
+    }
+
+    /** The theme a page shows: a seasonal template always wears its own colours, any other uses the page's choice. */
+    public static function themeFor(string $layout, ?string $theme): string
+    {
+        return self::LAYOUTS[self::layout($layout)]['theme'] ?? self::theme($theme);
+    }
+
+    /** The colour themes someone can pick: all but the seasonal ones. @return array<string,array<string,mixed>> */
+    public static function pickableThemes(): array
+    {
+        return array_filter(self::THEMES, static fn (array $t): bool => empty($t['season']));
     }
 
     /** The partial under resources/views/site/templates/ that holds the template's markup. */

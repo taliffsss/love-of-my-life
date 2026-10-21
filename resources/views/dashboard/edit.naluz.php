@@ -216,6 +216,7 @@
             </fieldset>
             <fieldset style="border:0;margin:0;padding:0">
               <legend class="label" style="margin-bottom:10px">Colours</legend>
+              <p class="small muted" style="margin:-4px 0 10px">Halloween, Christmas and Valentine always wear their own colours.</p>
               <div class="choice-grid">
                 @foreach ($themes as $key => $theme)
                 <label class="choice theme-choice">

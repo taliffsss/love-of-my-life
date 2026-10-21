@@ -203,7 +203,7 @@ final class PagesController
             'occasions' => Designs::OCCASIONS,
             'occasionDesigns' => Designs::OCCASION_DESIGNS,
             'templateNotes' => $this->templateNotes($page, $plans),
-            'themes' => Designs::THEMES,
+            'themes' => Designs::pickableThemes(),
             'maxUploadBytes' => $storage->maxBytes(),
             'storageDisk' => $storage->diskName(),
             'usage' => $allowance->of((int) $auth->id()),
@@ -338,7 +338,7 @@ final class PagesController
                 $plans->names($plans->plansWithTemplate($layout)),
             )];
         }
-        if (!isset(Designs::THEMES[$theme])) {
+        if (!isset(Designs::pickableThemes()[$theme])) {
             $errors['theme'] = ['Pick one of the colour themes.'];
         }
         if ($errors !== []) {
@@ -349,7 +349,7 @@ final class PagesController
         $name = $occasion === '' ? Designs::LAYOUTS[$layout]['name'] : Designs::OCCASION_DESIGNS[$occasion][$layout][0];
         return Screen::back(
             $this->editUrl($page, 'design'),
-            'Design saved: ' . $name . ' in ' . Designs::THEMES[$theme]['name'] . ' colours.',
+            'Design saved: ' . $name . (isset(Designs::LAYOUTS[$layout]['theme']) ? ', in its own colours.' : ' in ' . Designs::THEMES[$theme]['name'] . ' colours.'),
         );
     }
 

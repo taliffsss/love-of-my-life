@@ -28,11 +28,15 @@ let started = false;
 
 // ---------- floating hearts ----------
 const hearts = document.querySelector(".hearts");
+// the seasonal templates float their own emoji instead of hearts (the same pool bursts from a celebration)
+const GLYPHS = { halloween: ["🎃", "🦇", "👻"], christmas: ["❄", "🎄", "⭐"], valentine: ["♥", "🌹", "💘"] };
+const glyphs = GLYPHS[document.body.dataset.layout] || ["♥"];
+const glyph = () => glyphs[Math.floor(Math.random() * glyphs.length)];
 const heartCount = reduced ? 0 : innerWidth < 600 ? 10 : 18;
 for (let i = 0; i < heartCount; i++) {
   const h = document.createElement("span");
   h.className = "heart";
-  h.textContent = "♥";
+  h.textContent = glyph();
   h.style.cssText = `--x:${Math.random() * 96}vw;--s:${10 + Math.random() * 16}px;--d:${16 + Math.random() * 14}s;--delay:${-Math.random() * 30}s;--sway:${12 + Math.random() * 22}px;--o:${0.25 + Math.random() * 0.4}`;
   hearts.appendChild(h);
 }
@@ -315,7 +319,7 @@ function celebrate(from, count = 18) {
   burst.setAttribute("aria-hidden", "true");
   burst.style.cssText = `left:${box.left + box.width / 2}px;top:${box.top + box.height / 2}px`;
   for (let i = 0; i < count; i++) {
-    const h = el("i", "", "♥");
+    const h = el("i", "", glyph());
     const a = (Math.PI * 2 * i) / count + Math.random() * 0.4, d = 70 + Math.random() * 110;
     h.style.cssText = `--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 40}px;--s:${12 + Math.random() * 14}px;--r:${Math.random() * 60 - 30}deg`;
     burst.appendChild(h);
@@ -323,6 +327,26 @@ function celebrate(from, count = 18) {
   document.body.appendChild(burst);
   setTimeout(() => burst.remove(), 1700);
 }
+
+// 3D: tilts `target` towards the pointer (CSS reads --rx --ry in degrees, --px --py from -1 to 1 for parallax layers, --mx --my in %
+// for a light that follows). Eases back to flat when the pointer leaves. Not for visitors who prefer reduced motion.
+function tilt(target, max = 10) {
+  if (reduced || !target) return;
+  let frame = 0, ex = 0, ey = 0;
+  const paint = () => {
+    frame = 0;
+    const px = (ex / innerWidth - 0.5) * 2, py = (ey / innerHeight - 0.5) * 2;
+    target.style.setProperty("--rx", `${(-py * max).toFixed(2)}deg`);
+    target.style.setProperty("--ry", `${(px * max).toFixed(2)}deg`);
+    target.style.setProperty("--px", px.toFixed(3));
+    target.style.setProperty("--py", py.toFixed(3));
+    target.style.setProperty("--mx", `${((px + 1) * 50).toFixed(1)}%`);
+    target.style.setProperty("--my", `${((py + 1) * 50).toFixed(1)}%`);
+  };
+  addEventListener("pointermove", (e) => { ex = e.clientX; ey = e.clientY; if (!frame) frame = requestAnimationFrame(paint); }, { passive: true });
+  document.addEventListener("pointerleave", () => { ex = innerWidth / 2; ey = innerHeight / 2; if (!frame) frame = requestAnimationFrame(paint); });
+}
+if (glyphs.length > 1) tilt(document.getElementById("form"), 9); // the seasonal lock screen is a card in 3D
 
 // Tells screen-reader users what just happened ("A pair!", "Page 3 of 7").
 function announce(text) {
@@ -345,7 +369,7 @@ function swipe(target, onSwipe) {
   target.addEventListener("pointercancel", () => (x0 = null));
 }
 
-const kit = { root: show, reduced, wait, ready, pad, el, photo, placeholder, paragraphs, letterSheet, chapters, prints, lightbox, celebrate, announce, swipe, slideshow };
+const kit = { root: show, reduced, wait, ready, pad, el, photo, placeholder, paragraphs, letterSheet, chapters, prints, lightbox, celebrate, announce, swipe, tilt, slideshow };
 
 // The page opens on the letter and the photos when a template is missing or fails.
 function plain(content) {

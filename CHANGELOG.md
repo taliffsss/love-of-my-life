@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.4.0 (2026-10-21, branch `main-v2`)
+
+- **Three seasonal templates:** Halloween (knock three times on a haunted door), Christmas (shake a snow globe until the tree lights up) and Valentine
+  (loves me, loves me not: pluck the petals). Each is a module like the others (13 templates now; Sweetheart and Forever include them, Sweet is unchanged),
+  with a design for every occasion.
+- **They wear their own season, from the lock screen on.** Each has its own colours (new themes `halloween`, `christmas`, `valentine`, always used by that
+  template and not offered in the colour picker), the lock screen shows the season's emoji instead of the heart, and the floating and bursting emoji are the
+  season's. The lock screen card and the scenes are in 3D: they lean towards the pointer, with layers of depth (petals that cup and fly out, a tilting snow
+  globe, a door that turns, a moon and bats at different distances). Visitors who prefer reduced motion get the flat version.
+- **The landing page is interactive.** The sample phone is real: type a name, pick Everyday, Valentine's, Halloween or Christmas (the season that is on is
+  chosen for you), unlock it and the letter is typed out, with emoji drifting and trailing the pointer. The templates can be filtered (slideshows, little games,
+  seasonal), this season's comes first with an "In season now" badge, and "Try it" opens the live template in a dialog with theme chips, previous and next.
+  A three-question plan finder highlights the plan that fits, and sections reveal as you scroll.
+
 ## 3.3.0 (2026-10-21, branch `main-v2`)
 
 - **The plan you pick on the pricing section follows you.** "Start with Sweet" now goes to `/register?plan=sweet` (or `/dashboard?plan=sweet` when already

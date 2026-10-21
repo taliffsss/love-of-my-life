@@ -425,7 +425,7 @@ final class DashboardPagesTest extends TestCase
     {
         $page = $this->makePage($this->owner);
         foreach (array_keys(Designs::LAYOUTS) as $layout) {
-            foreach (array_keys(Designs::THEMES) as $theme) {
+            foreach (array_keys(Designs::pickableThemes()) as $theme) {
                 $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => $layout, 'theme' => $theme]);
                 $fresh = $page->fresh();
                 $this->assertSame([$layout, $theme], [$fresh->layout, $fresh->theme]);
@@ -437,6 +437,11 @@ final class DashboardPagesTest extends TestCase
             $this->assertStringContainsString($template['play'], $html);
         }
         $this->assertStringContainsString('Template</legend>', $html);
+        $this->assertStringNotContainsString('name="theme" value="halloween"', $html, 'the seasonal colours are not a choice');
+
+        $before = $page->fresh()->theme;
+        $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'classic', 'theme' => 'halloween']);
+        $this->assertSame($before, $page->fresh()->theme, 'a seasonal theme cannot be saved on its own');
     }
 
     public function testThePreviewShowsTheDraftWithAnyDesignBeforeItIsSaved(): void

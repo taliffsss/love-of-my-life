@@ -37,7 +37,7 @@
     @endif
     <link rel="stylesheet" href="/{{ $assets['css'] }}?v={{ $assetVersion }}" />
   </head>
-  <body data-layout="{{ $layout }}" @if ($occasion !== null) data-occasion="{{ $occasion }}" @endif data-theme="{{ $theme }}" data-scheme="{{ $scheme }}" data-mode="{{ $mode }}">
+  <body data-layout="{{ $layout }}" @if ($occasion !== null) data-occasion="{{ $occasion }}" @endif data-theme="{{ $theme }}" @if (!empty(\App\Services\Designs::THEMES[$theme]['season'])) data-season @endif data-scheme="{{ $scheme }}" data-mode="{{ $mode }}">
     <h1 class="sr-only">For {{ $page->recipient }}</h1>
     <div class="hearts" aria-hidden="true"></div>
 

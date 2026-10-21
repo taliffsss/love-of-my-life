@@ -100,7 +100,7 @@ final class SiteController
         $url = $this->sites->url($page);
         // visitors see the templates of the page's plan; the owner's preview and the demo may try any
         $layout = in_array($mode, ['open', 'locked'], true) ? $this->plans->templateFor($page) : Designs::layout($page->layout);
-        $theme = Designs::theme($page->theme);
+        $theme = Designs::themeFor($layout, $page->theme);
         $occasion = Designs::occasion($page->occasion);
         $assets = Designs::assets($layout);
         $assetVersion = (string) max(array_map(

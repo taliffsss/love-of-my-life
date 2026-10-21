@@ -52,6 +52,7 @@
     globe.addEventListener("pointerleave", () => (last = null));
     button.addEventListener("click", () => add(26));
 
+    kit.tilt(root, 14); // the globe turns in 3D as the pointer moves
     return { settle: () => button.focus({ preventScroll: true }) };
   }
 };

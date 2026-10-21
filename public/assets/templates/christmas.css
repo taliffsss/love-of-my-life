@@ -2,15 +2,21 @@
    letter paper and the text follow the colour theme (themes.css). */
 
 body[data-layout="christmas"] .show { background: radial-gradient(80% 60% at 50% 30%, color-mix(in srgb, #1f5a45 30%, var(--bg-2)), var(--bg) 78%); }
-body[data-layout="christmas"] .xm-stage { min-height: 100%; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 84px 18px 48px; }
+body[data-layout="christmas"] .xm-stage { perspective: 1000px; min-height: 100%; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 84px 18px 48px; }
 body[data-layout="christmas"] .xm-stage .eyebrow { margin: 0; }
-body[data-layout="christmas"] .xm-globe { position: relative; width: min(74vw, 330px, 46svh); aspect-ratio: .9; touch-action: none; cursor: grab; }
+body[data-layout="christmas"] .xm-tilt { transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .2s ease-out; }
+body[data-layout="christmas"] .xm-globe { transform-style: preserve-3d; position: relative; width: min(74vw, 330px, 46svh); aspect-ratio: .9; touch-action: none; cursor: grab; }
 body[data-layout="christmas"] .xm-glass {
   position: absolute; inset: 0 0 14% 0; border-radius: 50%; overflow: hidden;
   background: radial-gradient(circle at 32% 24%, rgba(255, 255, 255, .5), transparent 22%), radial-gradient(circle at 50% 60%, #12304a, #0a1a2c 72%);
   box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .22), inset 0 -24px 40px rgba(0, 0, 0, .35), 0 24px 60px rgba(0, 0, 0, .45);
 }
-body[data-layout="christmas"] .xm-base { position: absolute; left: 12%; right: 12%; bottom: 0; height: 18%; border-radius: 10px 10px 18px 18px; background: linear-gradient(160deg, #8a1f2b, #5a0f1a); box-shadow: 0 10px 22px rgba(0, 0, 0, .4); }
+body[data-layout="christmas"] .xm-glass { translate: 0 0 24px; }
+body[data-layout="christmas"] .xm-glass::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at var(--mx, 32%) var(--my, 24%), rgba(255, 255, 255, .5), transparent 24%); }
+body[data-layout="christmas"] .xm-tree { translate: calc(var(--px, 0) * -12px) calc(var(--py, 0) * -6px); }
+body[data-layout="christmas"] .xm-ground { translate: calc(var(--px, 0) * -20px) calc(var(--py, 0) * -8px); }
+body[data-layout="christmas"] .xm-snow { translate: calc(var(--px, 0) * 14px) calc(var(--py, 0) * 8px); }
+body[data-layout="christmas"] .xm-base { translate: 0 0 -34px; position: absolute; left: 12%; right: 12%; bottom: 0; height: 18%; border-radius: 10px 10px 18px 18px; background: linear-gradient(160deg, #8a1f2b, #5a0f1a); box-shadow: 0 10px 22px rgba(0, 0, 0, .4); }
 body[data-layout="christmas"] .xm-ground { position: absolute; left: -10%; right: -10%; bottom: -12%; height: 30%; border-radius: 50%; background: #f4f8ff; }
 body[data-layout="christmas"] .xm-snow { position: absolute; inset: 0; }
 body[data-layout="christmas"] .xm-snow i { position: absolute; top: -6%; left: var(--x); width: var(--s); height: var(--s); border-radius: 50%; background: #fff; opacity: .85; animation: xmFall var(--d) linear infinite; }

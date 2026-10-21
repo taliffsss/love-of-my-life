@@ -178,7 +178,9 @@ final class PublicPageTest extends TestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertStringContainsString('data-layout="' . $layout . '"', $html);
-        $this->assertStringContainsString('data-scheme="light"', $html, 'blush is a light theme');
+        $own = Designs::LAYOUTS[$layout]['theme'] ?? null;
+        $this->assertStringContainsString($own === null ? 'data-theme="blush"' : 'data-theme="' . $own . '"', $html, $own === null ? 'the page\'s theme' : 'a seasonal template wears its own colours');
+        $this->assertStringContainsString($own === null ? 'data-scheme="light"' : 'data-scheme="dark"', $html);
         $this->assertStringContainsString('<link rel="stylesheet" href="/assets/themes.css?v=', $html);
         $this->assertStringContainsString('<link rel="stylesheet" href="/assets/templates/' . $layout . '.css?v=', $html);
         $script = strpos($html, '<script src="/assets/templates/' . $layout . '.js?v=');

@@ -41,6 +41,7 @@
     }
     door.addEventListener("click", knock);
 
+    kit.tilt(root, 12); // the scene shifts in 3D as the pointer moves
     return { settle: () => door.focus({ preventScroll: true }) };
   }
 };

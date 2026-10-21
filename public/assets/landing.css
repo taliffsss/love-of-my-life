@@ -1,0 +1,89 @@
+/* The landing page's interactive parts: the live sample in the hero (name, occasion, unlock), the floating emoji, the template
+   gallery (filters, live demo dialog), the plan finder and the scroll reveals. Without the script the page is the plain page. */
+
+/* ---------- hero: the occasion re-dresses the glow ---------- */
+.hero { --glow-1: rgba(242, 167, 184, .35); --glow-2: rgba(240, 207, 168, .22); --em: #f2a7b8; }
+.hero[data-season="valentine"] { --glow-1: rgba(255, 90, 120, .42); --glow-2: rgba(255, 170, 190, .26); --em: #ff7d96; }
+.hero[data-season="halloween"] { --glow-1: rgba(255, 140, 40, .38); --glow-2: rgba(130, 70, 190, .34); --em: #ff9a3d; }
+.hero[data-season="christmas"] { --glow-1: rgba(60, 170, 110, .36); --glow-2: rgba(230, 70, 80, .26); --em: #7fdca6; }
+.hero::before { background: radial-gradient(40% 35% at 18% 20%, var(--glow-1), transparent 70%), radial-gradient(40% 40% at 85% 80%, var(--glow-2), transparent 70%); transition: opacity .6s; }
+.hero h1 em { color: var(--em); transition: color .5s; }
+.fx-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.fx { position: absolute; top: 0; left: 0; font-size: var(--s, 18px); opacity: 0; will-change: transform, opacity; animation: fxFloat var(--t, 6s) ease-out forwards; }
+@keyframes fxFloat { 0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0); } 12% { opacity: .9; } 100% { opacity: 0; transform: translate3d(var(--dx, 0), var(--dy, -160px), 0) rotate(var(--r, 20deg)); } }
+.hero > .container { z-index: 2; }
+
+.try-controls { display: grid; gap: 8px; margin-top: 22px; max-width: 460px; }
+.try-controls label { font-size: .86rem; color: var(--night-muted); }
+.try-input { height: 46px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .08); color: #fff; font: inherit; }
+.try-input::placeholder { color: rgba(255, 255, 255, .5); }
+.try-input:focus-visible { outline: 2px solid var(--em); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: .86rem; padding: 7px 14px; border-radius: 999px; cursor: pointer; color: var(--night-text); background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .22); transition: background .2s, border-color .2s, transform .15s var(--ease); }
+.chip:hover { background: rgba(255, 255, 255, .16); transform: translateY(-1px); }
+.chip[aria-pressed="true"] { background: #fff; color: var(--night); border-color: #fff; }
+.chip:focus-visible { outline: 2px solid var(--em); outline-offset: 2px; }
+.chip-dark { color: var(--ink-2); background: var(--surface); border-color: var(--line-2); }
+.chip-dark:hover { background: var(--surface-2); }
+.chip-dark[aria-pressed="true"] { color: #fff; background: var(--brand); border-color: var(--brand); }
+
+/* the sample phone becomes real */
+.mock-form { padding: 0 6px 0 4px; }
+.mock-form input { flex: 1; min-width: 0; height: 100%; padding: 0 14px; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; }
+.mock-form input::placeholder { color: rgba(255, 255, 255, .55); }
+.mock-form button { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; cursor: pointer; color: #2a1220; background: linear-gradient(135deg, #f0cfa8, #f2a7b8); font: inherit; transition: transform .15s var(--ease); }
+.mock-form button:hover { transform: scale(1.1); }
+.mock-form:focus-within { border-color: rgba(255, 255, 255, .6); }
+.mock-hint { margin: 10px 0 0; font-size: .72rem; letter-spacing: .2em; text-transform: uppercase; color: rgba(255, 255, 255, .6); animation: mockPulse 2.4s ease-in-out infinite; }
+@keyframes mockPulse { 50% { opacity: .35; } }
+.mock-letter { position: relative; z-index: 1; width: 100%; padding: 22px 18px 18px; border-radius: 22px; color: #3a2230; background: #fffaf3; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, .35); animation: letterIn .7s var(--ease) both; max-height: 100%; overflow: auto; }
+.mock-letter .eyebrow { color: rgba(58, 34, 48, .6); }
+.mock-text { min-height: 7.5em; margin: 8px 0 14px; font-family: var(--font-display); font-size: 1.12rem; line-height: 1.45; text-align: left; }
+.mock-text p { margin: 0 0 .7em; }
+.mock-text .caret::after { content: '|'; margin-left: 1px; animation: mockCaret .8s steps(1) infinite; }
+@keyframes mockCaret { 50% { opacity: 0; } }
+.mock-letter .btn-outline-light { color: #3a2230; border-color: rgba(58, 34, 48, .35); }
+@keyframes letterIn { from { opacity: 0; transform: translateY(18px) scale(.97); } to { opacity: 1; transform: none; } }
+.phone-note { margin: 16px auto 0; max-width: 34ch; text-align: center; font-size: .82rem; color: var(--night-muted); }
+.phone-screen.unlocked::before { backdrop-filter: blur(0); -webkit-backdrop-filter: blur(0); background: rgba(30, 10, 24, .1); transition: backdrop-filter 1s, background 1s; }
+.hero[data-season="valentine"] .phone-screen { background: radial-gradient(70% 50% at 30% 25%, #ff7d96, transparent 70%), radial-gradient(60% 50% at 75% 70%, #ffc2cf, transparent 70%), linear-gradient(160deg, #6a1730, #230912); }
+.hero[data-season="halloween"] .phone-screen { background: radial-gradient(70% 50% at 30% 25%, #ff9a3d, transparent 70%), radial-gradient(60% 50% at 75% 70%, #8a52c7, transparent 70%), linear-gradient(160deg, #3b1a55, #120a1c); }
+.hero[data-season="christmas"] .phone-screen { background: radial-gradient(70% 50% at 30% 25%, #4fbf86, transparent 70%), radial-gradient(60% 50% at 75% 70%, #e64650, transparent 70%), linear-gradient(160deg, #11402e, #0a1a16); }
+
+/* ---------- reveals ---------- */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); transition-delay: var(--d, 0s); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ---------- template gallery ---------- */
+.gallery-filter { margin-top: 24px; }
+.layout-card { position: relative; transition: transform .25s var(--ease), box-shadow .25s; }
+.layout-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); }
+.layout-card[hidden] { display: none; }
+.season-badge { position: absolute; z-index: 2; top: 10px; right: 10px; padding: 4px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600; color: #fff; background: var(--brand); box-shadow: 0 6px 14px rgba(0, 0, 0, .25); animation: mockPulse 2.2s ease-in-out infinite; }
+dialog.demo-modal { width: min(440px, calc(100% - 20px)); max-height: calc(100dvh - 20px); display: none; flex-direction: column; overflow: hidden; }
+dialog.demo-modal[open] { display: flex; }
+.demo-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 14px 16px 10px; }
+.demo-head h2 { font-size: 1.1rem; }
+.demo-frame { flex: 1 1 auto; width: 100%; height: min(68dvh, 640px); border: 0; background: #160a14; }
+.demo-foot { display: grid; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+.demo-foot .row { justify-content: space-between; margin: 0; }
+.dots { display: inline-flex; gap: 2px; vertical-align: middle; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+/* ---------- plan finder ---------- */
+.finder { display: grid; gap: 16px; margin-top: 30px; padding: 22px; }
+.finder-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.finder-head h3 { font-size: 1.05rem; }
+.finder-q { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.finder-q legend { padding: 0; font-size: .92rem; font-weight: 500; margin-bottom: 8px; }
+.finder-result { margin: 0; padding: 14px 16px; border-radius: var(--radius); background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--ink); animation: letterIn .5s var(--ease) both; }
+.plan .fit-badge { position: absolute; top: -12px; right: 24px; padding: 3px 10px; border-radius: 999px; font-size: .74rem; font-weight: 600; color: #fff; background: var(--ink); }
+.plan.fit { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink), var(--shadow-2); animation: planFit .7s var(--ease); }
+@keyframes planFit { 40% { transform: scale(1.03); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .fx { display: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .mock-hint, .season-badge, .plan.fit, .mock-letter, .finder-result { animation: none; }
+  .layout-card, .layout-card:hover { transition: none; transform: none; }
+}

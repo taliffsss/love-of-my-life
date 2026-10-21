@@ -42,6 +42,7 @@
     }
     petals.forEach((petal) => petal.addEventListener("click", () => pluck(petal)));
 
+    kit.tilt(root, 12); // the flower leans in 3D as the pointer moves
     return { settle: () => petals[0].focus({ preventScroll: true }) };
   }
 };

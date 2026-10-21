@@ -32,7 +32,7 @@ final class LandingController
             'maxPhoto' => PhotoStorage::megabytes((int) config('saas.max_upload_bytes')),
             'structuredData' => $this->structuredData(),
             'layouts' => Designs::LAYOUTS,
-            'themes' => Designs::THEMES,
+            'themes' => Designs::pickableThemes(),
             'domain' => $sites->domain(),
             'siteUrl' => rtrim((string) config('app.url'), '/') . '/',
         ]);

@@ -3,6 +3,7 @@
 <div class="xm scroller" id="xm">
   <div class="xm-stage">
     <p class="eyebrow">For {{ $page->recipient }}</p>
+    <div class="xm-tilt">
     <div class="xm-globe" id="xmGlobe" role="img" aria-label="A snow globe with a Christmas tree">
       <div class="xm-glass">
         <div class="xm-snow" id="xmSnow" aria-hidden="true"></div>
@@ -13,6 +14,7 @@
         <div class="xm-ground" aria-hidden="true"></div>
       </div>
       <div class="xm-base" aria-hidden="true"></div>
+    </div>
     </div>
     <div class="xm-meter" aria-hidden="true"><i id="xmFill"></i></div>
     <button type="button" class="pill" id="xmShake">Shake the globe</button>

@@ -97,3 +97,39 @@ body[data-theme="blush"] {
   --ink: #3a1f2b;
   --ph-1: #f7d2d8; --ph-2: #e9a6b8; --ph-3: #f4e1cf; --ph-4: #d6a3b2;
 }
+
+/* Seasonal themes: the colours of the Halloween, Christmas and Valentine templates, which always wear them (App\Services\Designs::themeFor).
+   --glyph is the emoji of the season: it takes the heart's place on the lock screen. */
+body[data-theme="halloween"] {
+  --glyph: "🎃";
+  --bg: #130a1c; --bg-2: #2a1245; --text: #fff0e0; --muted: rgba(255, 240, 224, .64);
+  --accent: #ff9a3d; --accent-deep: #e0701a; --gold: #ffd27a; --on-accent: #2a1204;
+  --panel-a: rgba(36, 16, 56, .94); --panel-b: rgba(18, 8, 28, .97); --panel-line: rgba(255, 255, 255, .1);
+  --gate-a: rgba(20, 8, 32, .62); --gate-b: rgba(120, 50, 170, .42); --vignette: rgba(14, 6, 22, .55);
+  --glow-a: rgba(255, 170, 70, .55); --glow-b: rgba(150, 90, 220, .5); --heart-glow: rgba(255, 154, 61, .55);
+  --card-text: #fff0e0; --field-bg: rgba(255, 255, 255, .09); --field-line: rgba(255, 255, 255, .22);
+  --paper: #fff6e8; --ink: #2b1a10;
+  --ph-1: #ffd27a; --ph-2: #ff9a3d; --ph-3: #c9a0ee; --ph-4: #7a4cb0;
+}
+body[data-theme="christmas"] {
+  --glyph: "🎄";
+  --bg: #0b1a16; --bg-2: #15382c; --text: #f3fff8; --muted: rgba(243, 255, 248, .64);
+  --accent: #ff5a6e; --accent-deep: #d63a4e; --gold: #ffe08a; --on-accent: #3a0a12;
+  --panel-a: rgba(16, 48, 38, .94); --panel-b: rgba(8, 24, 20, .97); --panel-line: rgba(255, 255, 255, .1);
+  --gate-a: rgba(8, 28, 22, .62); --gate-b: rgba(30, 130, 84, .4); --vignette: rgba(6, 18, 14, .55);
+  --glow-a: rgba(255, 224, 138, .5); --glow-b: rgba(255, 90, 110, .45); --heart-glow: rgba(255, 90, 110, .5);
+  --card-text: #f3fff8; --field-bg: rgba(255, 255, 255, .09); --field-line: rgba(255, 255, 255, .22);
+  --paper: #fffaf0; --ink: #2a2a1a;
+  --ph-1: #ffe08a; --ph-2: #ff5a6e; --ph-3: #9ad8b4; --ph-4: #2f8a5c;
+}
+body[data-theme="valentine"] {
+  --glyph: "💘";
+  --bg: #20060f; --bg-2: #4a0f24; --text: #fff0f3; --muted: rgba(255, 240, 243, .64);
+  --accent: #ff6f8e; --accent-deep: #e0365f; --gold: #ffc2cf; --on-accent: #4a0a1c;
+  --panel-a: rgba(64, 14, 34, .94); --panel-b: rgba(32, 6, 16, .97); --panel-line: rgba(255, 255, 255, .1);
+  --gate-a: rgba(40, 8, 20, .62); --gate-b: rgba(190, 40, 80, .42); --vignette: rgba(30, 4, 14, .55);
+  --glow-a: rgba(255, 150, 175, .55); --glow-b: rgba(255, 60, 100, .5); --heart-glow: rgba(255, 111, 142, .55);
+  --card-text: #fff0f3; --field-bg: rgba(255, 255, 255, .09); --field-line: rgba(255, 255, 255, .22);
+  --paper: #fff5f6; --ink: #4a1a26;
+  --ph-1: #ffc2cf; --ph-2: #ff6f8e; --ph-3: #f0b3e0; --ph-4: #b3405f;
+}
