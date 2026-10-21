@@ -2,6 +2,10 @@
 
 ## 3.7.0 (2026-10-21, branch `main-v2`)
 
+- **The dashboard, editor, admin and sign-in follow the same look** (`public/assets/app.css`): a midnight top bar, vellum and paper surfaces, one red for actions, Bricolage Grotesque, pages as letters with varied corners.
+- **The Create page button is now next to the name field**, in the first row of the dashboard form, so it is the first thing you reach; the optional occasion and template choice sits below it. The first-visit tour follows the new order.
+- **Sign in and sign up:** the form is a sheet of paper on vellum beside the sample panel (now in the midnight and wax colours), a show/hide button on password fields, and the "at least 8 characters" hint ticks itself.
+
 - **A new look for the landing page.** One idea: it is a letter that opens. A midnight page, paper for the words and one red (the wax seal) for every action; Bricolage
   Grotesque for what you read and press, Newsreader italic only where a letter speaks. The headline un-blurs once on load (the product's own moment), the sample letter in the
   hero is bigger and sits on stacked paper, a plain strip says what is true (no app, private, editable, free to start), the three steps are a numbered sequence beside a sticky

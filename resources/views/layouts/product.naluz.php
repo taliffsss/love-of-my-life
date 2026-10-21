@@ -18,9 +18,10 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/ui.css?v={{ (string) @filemtime(base_path('public/assets/ui.css')) }}" />
     <link rel="stylesheet" href="/assets/depth.css?v={{ (string) @filemtime(base_path('public/assets/depth.css')) }}" />
+    <link rel="stylesheet" href="/assets/app.css?v={{ (string) @filemtime(base_path('public/assets/app.css')) }}" />
   </head>
   <body class="@yield('bodyClass')">
     @yield('content')

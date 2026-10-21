@@ -12,10 +12,16 @@
 
   <form class="card create-form" method="post" action="/dashboard/pages" novalidate>
     @csrf
-    <div class="field">
-      <label for="recipient">Who is the new page for?</label>
-      <input class="input" id="recipient" name="recipient" type="text" maxlength="60" required placeholder="Their name or what you call them" value="{{ $old['recipient'] ?? '' }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
-      @include('partials.errors', ['field' => 'recipient'])
+    <div class="create-row">
+      <div class="field">
+        <label for="recipient">Who is the new page for?</label>
+        <input class="input" id="recipient" name="recipient" type="text" maxlength="60" required placeholder="Their name or what you call them" value="{{ $old['recipient'] ?? '' }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
+        @include('partials.errors', ['field' => 'recipient'])
+      </div>
+      <button class="btn btn-primary btn-lg" type="submit">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Create page
+      </button>
     </div>
     <fieldset class="occasions" style="flex-basis:100%">
       <legend>Start from an occasion <span class="muted">(optional)</span></legend>
@@ -43,11 +49,7 @@
       @endif
       <p class="small muted">Pick one for a ready-made letter, question, layout and colours. You can change all of it afterwards.</p>
     </fieldset>
-    <button class="btn btn-primary" type="submit">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-      Create page
-    </button>
-  </form>
+      </form>
 
   @foreach ($renewals as $renewal)
   <div class="notice notice-brand" role="status" style="margin-bottom:14px">A subscription renewal is due: <a href="/dashboard/orders/{{ $renewal->reference }}">pay {{ \App\Services\Plans::money($renewal->amount, $renewal->currency) }}</a> ({{ $renewal->reference }}).</div>

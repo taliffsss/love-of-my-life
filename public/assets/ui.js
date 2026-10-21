@@ -145,6 +145,30 @@ for (const btn of $$("[data-copy]")) {
   }
 }
 
+// ---------- sign in and sign up: show or hide the password; the "at least 8 characters" hint ticks itself ----------
+for (const input of $$('.auth-card input[type="password"]')) {
+  const wrap = document.createElement("span");
+  wrap.className = "pw-wrap";
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "pw-toggle";
+  toggle.textContent = "Show";
+  toggle.setAttribute("aria-pressed", "false");
+  toggle.setAttribute("aria-label", "Show the password");
+  toggle.addEventListener("click", () => {
+    const show = input.type === "password";
+    input.type = show ? "text" : "password";
+    toggle.textContent = show ? "Hide" : "Show";
+    toggle.setAttribute("aria-pressed", String(show));
+    toggle.setAttribute("aria-label", show ? "Hide the password" : "Show the password");
+  });
+  wrap.appendChild(toggle);
+  const hint = input.id === "password" ? $("#password-hint") : null;
+  if (hint) input.addEventListener("input", () => hint.classList.toggle("ok", input.value.length >= 8));
+}
+
 // ---------- dialogs ----------
 for (const opener of $$("[data-open]")) {
   const dialog = $(opener.dataset.open);

@@ -1,0 +1,94 @@
+/* The signed-in product (dashboard, editor, orders, admin) in the landing page's language: a midnight bar, vellum and paper surfaces, one red for actions,
+   Bricolage Grotesque for what you read and press. Tokens first, so every page follows; then the dashboard's own pieces. Loaded after ui.css and depth.css. */
+
+:root {
+  --ink: #2a1623; --ink-2: #5d4452; --ink-3: #765d6b;
+  --bg: #f3ebf1; --surface: #fffaf6; --surface-2: #ece1e8; --line: #e2d3dc; --line-2: #cdb9c6;
+  --brand: #c42f4b; --brand-ink: #a22640; --brand-soft: #fbe3e8;
+  --focus: 0 0 0 3px rgba(196, 47, 75, .32);
+  --font-ui: 'Bricolage Grotesque', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --shadow-2: 0 16px 40px rgba(42, 22, 35, .12);
+  --radius-lg: 20px;
+}
+body:not(.lp) { font-size: 16px; font-optical-sizing: auto; }
+
+/* ---------- the bar ---------- */
+.topbar { background: #130a18; border-bottom: 1px solid rgba(255, 255, 255, .08); color: #fff4f8; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.topbar .brand { color: #fff; }
+.topbar nav a:not(.btn) { color: rgba(255, 244, 248, .78); font-weight: 500; }
+.topbar nav a:not(.btn):hover { color: #fff; background: rgba(255, 255, 255, .1); }
+.topbar .who { color: rgba(255, 244, 248, .6); }
+.topbar .btn-ghost { color: #fff4f8; border-color: rgba(255, 255, 255, .22); }
+.topbar .btn-ghost:hover { color: #fff; background: rgba(255, 255, 255, .1); }
+.topbar :focus-visible { box-shadow: 0 0 0 3px rgba(233, 207, 154, .55); }
+
+/* ---------- type and controls ---------- */
+.btn { font-weight: 600; }
+.btn-primary { box-shadow: 0 10px 24px rgba(196, 47, 75, .28); }
+.page-head h1, .section-head h2, .card h2 { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.03em; }
+.page-head h1 { font-size: clamp(2.1rem, 4.4vw, 3.2rem); line-height: 1.02; }
+.stat .n { font-family: var(--font-ui); font-weight: 700; letter-spacing: -.04em; }
+.input, .textarea, .select { border-radius: 12px; border-width: 1.5px; }
+.pill { font-weight: 600; }
+
+/* ---------- the dashboard ---------- */
+.card { border-radius: 20px 20px 20px 8px; box-shadow: 0 1px 2px rgba(42, 22, 35, .05); }
+
+/* creating a page: the name and the button are one row, so the button is the first thing you reach; the occasion is an optional second step below */
+.create-form { display: grid; gap: 22px; padding: 24px; border-radius: 24px 24px 24px 8px; }
+.create-row { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+.create-row .field { flex: 1 1 280px; }
+.create-row .btn-lg { flex: none; min-height: 48px; padding: 0 28px; }
+.create-form .input { min-height: 48px; font-size: 1.05rem; }
+.occasions legend { font-weight: 600; font-size: 1rem; }
+.occasion-tab span { font-weight: 500; }
+.occasion-tab input:checked + span { color: #fff; background: var(--brand); border-color: var(--brand); }
+.template-card { border-radius: 14px; }
+.template-card:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); box-shadow: 0 0 0 1px var(--brand); }
+
+/* a page is a letter: paper, a cover, the name written across it */
+.page-card { border-radius: 22px 22px 22px 6px; background: var(--surface); }
+.page-card .cover { border-radius: 0; }
+.page-card .cover .for { font-family: var(--font-ui); font-style: normal; font-weight: 700; letter-spacing: -.02em; font-size: 1.5rem; }
+.page-card .body { padding: 16px 18px 18px; }
+
+.usage-card, .subs-card { border-radius: 18px 18px 18px 6px; }
+.meter { height: 8px; border-radius: 4px; background: var(--surface-2); }
+.meter i { background: linear-gradient(90deg, var(--brand), #ee5b74); }
+.empty { border-radius: 24px 24px 24px 8px; }
+.empty h2 { font-size: 1.5rem; }
+
+/* the tour and dialogs follow the same red */
+.tour-pop { border-radius: 20px 20px 20px 6px; }
+dialog.modal { border-radius: 22px 22px 22px 8px; }
+
+@media (max-width: 560px) {
+  .create-form { padding: 18px; }
+  .create-row .btn-lg { width: 100%; }
+}
+
+/* ---------- sign in and sign up: the form is a sheet of paper on vellum, beside the sample that changes with the occasion ---------- */
+.auth-main { background: var(--bg); padding: 40px 18px; }
+.auth-card { width: min(440px, 100%); padding: 34px 32px 30px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 26px 26px 26px 8px; box-shadow: 0 24px 60px rgba(42, 22, 35, .12); }
+.auth-card h1, .auth-card h1.display { font-family: var(--font-ui); font-weight: 700; font-size: clamp(2rem, 4vw, 2.6rem); line-height: 1.02; letter-spacing: -.04em; margin: 20px 0 8px; }
+.auth-card > .muted { margin-top: 2px; font-size: 1.02rem; }
+.auth-card .input { min-height: 50px; font-size: 1.02rem; }
+.auth-card .btn-lg { min-height: 54px; font-size: 1.05rem; }
+.auth-card form { margin-top: 22px; }
+.auth-card .field > label { font-weight: 600; }
+.btn-social { min-height: 50px; font-size: 1rem; background: #fff; border-color: var(--line-2); }
+.btn-social:hover { border-color: var(--ink); }
+.social-or span { padding: 0 2px; }
+.auth-art { background: radial-gradient(56% 50% at 14% 18%, rgba(214, 51, 79, .34), transparent 70%), radial-gradient(50% 50% at 86% 86%, rgba(233, 207, 154, .2), transparent 70%), #130a18; }
+.art-tab[aria-selected="true"] { color: #fff; background: var(--brand); border-color: var(--brand); }
+.art-sample .eyebrow { text-transform: none; letter-spacing: 0; font-size: .95rem; color: #e9cf9a; }
+.art-copy blockquote, .art-letter { font-family: 'Newsreader', Georgia, serif; }
+
+/* show / hide the password (ui.js adds the button) */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap .input { padding-right: 78px; }
+.pw-toggle { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); min-height: 34px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font: 600 .85rem 'Bricolage Grotesque', system-ui, sans-serif; cursor: pointer; }
+.pw-toggle:hover { color: var(--ink); background: var(--line); }
+.hint.ok { color: var(--ok); font-weight: 600; }
+.hint.ok::before { content: '✓ '; }
+@media (max-width: 480px) { .auth-card { padding: 26px 20px 24px; border-radius: 22px 22px 22px 6px; } }
