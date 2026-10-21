@@ -11,7 +11,8 @@
   background: var(--lp-ink); color: #fff4f8;
   font-family: 'Bricolage Grotesque', Inter, system-ui, sans-serif; font-size: 17px; line-height: 1.6; font-optical-sizing: auto;
 }
-.lp a, .lp a:hover { color: inherit; }
+.lp a:not(.btn):not(.lp-btn), .lp a:not(.btn):not(.lp-btn):hover { color: inherit; } /* plain links take their surroundings' colour; the buttons keep their own */
+.lp .btn-light, .lp .btn-light:hover { color: var(--lp-ink); background: #fff; }
 .lp a.lp-btn-wax, .lp a.lp-btn-wax:hover, .lp a.lp-btn-ink, .lp a.lp-btn-ink:hover, .lp a.lp-btn-line, .lp a.lp-btn-line:hover { color: #fff; }
 .lp a.lp-btn-paper, .lp a.lp-btn-paper:hover { color: var(--lp-text); }
 .lp-wrap { width: min(1180px, 100% - 40px); margin-inline: auto; }
