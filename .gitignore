@@ -18,3 +18,4 @@
 # marketing renders (videos, frames, PNGs): rebuilt by marketing/promo/make_promo.sh
 /marketing/out/
 /marketing/**/__pycache__/
+.marketing-output/
