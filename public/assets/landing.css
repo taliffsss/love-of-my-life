@@ -87,3 +87,8 @@ dialog.demo-modal[open] { display: flex; }
   .mock-hint, .season-badge, .plan.fit, .mock-letter, .finder-result { animation: none; }
   .layout-card, .layout-card:hover { transition: none; transform: none; }
 }
+
+/* the sample must fit the phone: a grid item with an input inside would otherwise grow to the input's own width */
+.phone-screen { grid-template-columns: minmax(0, 1fr); }
+.mock-card, .mock-letter { min-width: 0; box-sizing: border-box; }
+.mock-form input { width: 100%; }
