@@ -89,7 +89,7 @@
       <input type="hidden" name="return" value="{{ $here }}" />
       <div class="modal-body">
         <h2 id="user-delete-title"></h2>
-        <p class="muted">Their pages, photos and sign-ins are removed for good and the links stop working. Accounts with paid orders cannot be deleted: deactivate those instead. This cannot be undone.</p>
+        <p class="muted">Their pages and photos are hidden and the links stop working, but nothing is erased: <code>php bin/trash.php</code> lists and restores it. Accounts with paid orders cannot be deleted: deactivate those instead.</p>
         <div class="field">
           <label for="confirm-user-delete">Type <strong>delete</strong> to confirm</label>
           <input class="input" id="confirm-user-delete" name="confirm" autocomplete="off" required pattern="delete" />

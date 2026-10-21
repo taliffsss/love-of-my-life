@@ -67,7 +67,7 @@
       @csrf
       @method('DELETE')
       <div class="section-head"><div><h2 id="delete-title">Delete account</h2>
-        <p>Removes the account, its {{ $pageCount }} {{ $pageCount === 1 ? 'page' : 'pages' }}, photos and sign-ins for good. This cannot be undone.@if ($paidOrders > 0) It has {{ $paidOrders }} paid {{ $paidOrders === 1 ? 'order' : 'orders' }}, which must stay on record, so it cannot be deleted: deactivate it instead.@endif</p></div></div>
+        <p>Hides the account, its {{ $pageCount }} {{ $pageCount === 1 ? 'page' : 'pages' }} and photos: they stop working and cannot be signed in to, but nothing is erased. Restore it with <code>php bin/trash.php restore user {{ $target->id }}</code>.@if ($paidOrders > 0) It has {{ $paidOrders }} paid {{ $paidOrders === 1 ? 'order' : 'orders' }}, which must stay on record, so it cannot be deleted: deactivate it instead.@endif</p></div></div>
       @if ($self || $target->is_admin)
       <div class="section-body"><p class="muted">{{ $self ? 'You cannot delete your own account here.' : 'Remove the administrator role before deleting this account.' }}</p></div>
       @elseif ($paidOrders === 0)

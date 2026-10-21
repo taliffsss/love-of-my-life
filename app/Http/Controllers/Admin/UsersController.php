@@ -113,7 +113,7 @@ final class UsersController
 
         $gone = $removal->delete($target);
         logger()->warning('[admin] {admin} deleted user {user} ({pages} pages, {photos} photos)', ['admin' => $auth->id(), 'user' => $target->id] + $gone);
-        return Screen::back('/admin/users', $target->name . ' was deleted' . ($gone['pages'] > 0 ? ' with ' . $gone['pages'] . ' page' . ($gone['pages'] === 1 ? '' : 's') : '') . '.');
+        return Screen::back('/admin/users', $target->name . ' was deleted (hidden, not erased)' . ($gone['pages'] > 0 ? ' with ' . $gone['pages'] . ' page' . ($gone['pages'] === 1 ? '' : 's') : '') . '.');
     }
 
     private function find(string $id): User

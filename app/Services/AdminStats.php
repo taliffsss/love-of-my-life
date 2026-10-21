@@ -38,7 +38,7 @@ final class AdminStats
 
         $byType = ['manual' => 0, 'google' => 0, 'facebook' => 0];
         foreach (array_keys($byType) as $type) {
-            $byType[$type] = $this->db->table('users')->where('login_type', '=', $type)->count();
+            $byType[$type] = $this->db->table('users')->whereNull('deleted_at')->where('login_type', '=', $type)->count();
         }
 
         // signups per day for the last 30 days in the display time zone, oldest first (a day with none shows 0)
@@ -47,7 +47,7 @@ final class AdminStats
         for ($i = self::DAYS - 1; $i >= 0; $i--) {
             $signups[$now->setTimezone($zone)->modify("-{$i} days")->format('Y-m-d')] = 0;
         }
-        foreach ($this->db->table('users')->select('created_at')->where('created_at', '>=', Time::dayStartUtc(self::DAYS - 1, $now))->get() as $row) {
+        foreach ($this->db->table('users')->select('created_at')->whereNull('deleted_at')->where('created_at', '>=', Time::dayStartUtc(self::DAYS - 1, $now))->get() as $row) {
             $day = (new \DateTimeImmutable((string) $row['created_at'], new \DateTimeZone('UTC')))->setTimezone($zone)->format('Y-m-d');
             if (isset($signups[$day])) {
                 $signups[$day]++;
@@ -58,10 +58,10 @@ final class AdminStats
 
         $paid = $this->db->table('orders')->where('status', '=', Order::PAID);
         return [
-            'users' => $this->db->table('users')->count(),
-            'admins' => $this->db->table('users')->where('is_admin', '=', true)->count(),
-            'new7' => $this->db->table('users')->where('created_at', '>=', $since(7))->count(),
-            'new30' => $this->db->table('users')->where('created_at', '>=', $since(30))->count(),
+            'users' => $this->db->table('users')->whereNull('deleted_at')->count(),
+            'admins' => $this->db->table('users')->whereNull('deleted_at')->where('is_admin', '=', true)->count(),
+            'new7' => $this->db->table('users')->whereNull('deleted_at')->where('created_at', '>=', $since(7))->count(),
+            'new30' => $this->db->table('users')->whereNull('deleted_at')->where('created_at', '>=', $since(30))->count(),
             'byType' => $byType,
             'signups' => $signups,
             'pages' => $pageTotal,
@@ -111,7 +111,7 @@ final class AdminStats
             }
         }
 
-        $users = $this->db->table('users')->select('id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content')->where('created_at', '>=', $since)->get()->all();
+        $users = $this->db->table('users')->select('id', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content')->whereNull('deleted_at')->where('created_at', '>=', $since)->get()->all();
         $revenue = [];
         $ids = array_map(static fn (array $u): int => (int) $u['id'], $users);
         if ($ids !== []) {
@@ -213,7 +213,7 @@ final class AdminStats
         $ids = array_map(static fn (User $u): int => $u->id, $users->items->all());
         if ($ids !== []) {
             $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
-            foreach ($this->pagesOf($this->db->table('pages')->select('id', 'user_id', 'plan', 'expires_at', 'published_at')->whereIn('user_id', $ids)->get()->all()) as $p) {
+            foreach ($this->pagesOf($this->db->table('pages')->select('id', 'user_id', 'plan', 'expires_at', 'published_at')->whereNull('deleted_at')->whereIn('user_id', $ids)->get()->all()) as $p) {
                 $info[$p->user_id] ??= ['pages' => 0, 'plans' => []];
                 $info[$p->user_id]['pages']++;
                 if ($p->status($now) === Page::ACTIVE) {
@@ -282,7 +282,7 @@ final class AdminStats
         $emails = [];
         $ids = array_values(array_unique(array_map(static fn (Order $o): int => $o->user_id, $orders->items->all())));
         if ($ids !== []) {
-            foreach (User::query()->whereIn('id', $ids)->get() as $user) {
+            foreach (User::query()->withTrashed()->whereIn('id', $ids)->get() as $user) { // a deleted account's orders keep their e-mail on record
                 $emails[$user->id] = $user->email;
             }
         }
@@ -302,7 +302,7 @@ final class AdminStats
         $byPlan = [];
         $subscribers = [];
         $total = 0;
-        foreach ($this->pagesOf($this->db->table('pages')->select('id', 'user_id', 'plan', 'expires_at', 'published_at')->get()->all()) as $page) {
+        foreach ($this->pagesOf($this->db->table('pages')->select('id', 'user_id', 'plan', 'expires_at', 'published_at')->whereNull('deleted_at')->get()->all()) as $page) {
             $total++;
             $s = $page->status($now);
             $status[$s]++;

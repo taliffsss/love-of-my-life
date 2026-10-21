@@ -180,7 +180,7 @@ final class AdminUsersTest extends TestCase
         $this->assertSame('active', $this->fresh($this->target)->status, 'only the three statuses');
     }
 
-    public function testDeletingRemovesTheAccountItsPagesPhotosAndFiles(): void
+    public function testDeletingIsSoftTheAccountItsPagesAndPhotosAreHiddenAndNothingIsErased(): void
     {
         $page = $this->makePage($this->target);
         $this->makePhoto($page, 'https://cdn.test/a.jpg', 1);
@@ -197,13 +197,41 @@ final class AdminUsersTest extends TestCase
 
         $response = $this->submit('DELETE', $url, ['confirm' => 'delete']);
         $this->assertSame('/admin/users', $response->getHeaderLine('Location'));
-        $this->assertNull(User::query()->withoutCache()->find($this->target->id));
+        $this->assertNull(User::query()->withoutCache()->find($this->target->id), 'hidden');
+        $this->assertNotNull(User::query()->withoutCache()->onlyTrashed()->find($this->target->id), 'but still there');
         $this->assertNull(Page::query()->withoutCache()->find($page->id));
-        $this->assertSame(0, SocialAccount::query()->count());
-        $this->assertSame(0, Order::query()->count());
+        $this->assertNotNull(Page::query()->withoutCache()->onlyTrashed()->find($page->id));
+        $this->assertSame(1, SocialAccount::query()->count(), 'sign-ins stay');
+        $this->assertSame('cancelled', Order::query()->first()->status, 'an unpaid order is cancelled, not erased');
         $this->assertSame([$kept->id], array_map('intval', Photo::query()->pluck('id')->all()));
-        $this->assertSame(['pages/' . $page->slug . '/a.jpg'], $this->disk->deleted);
+        $this->assertSame(2, Photo::query()->withTrashed()->count());
+        $this->assertSame([], $this->disk->deleted, 'no file is deleted');
         $this->assertNotNull(Page::query()->withoutCache()->find($mine->id), 'someone else\'s page is untouched');
+
+        // it can be brought back, with the page and photo that went with it
+        $removal = $this->app->make(\App\Services\AccountRemoval::class);
+        $this->assertSame(['pages' => 1, 'photos' => 1], $removal->restore(User::query()->onlyTrashed()->find($this->target->id)));
+        $this->assertNotNull(User::query()->withoutCache()->find($this->target->id));
+        $this->assertNotNull(Page::query()->withoutCache()->find($page->id));
+        $this->assertSame(2, Photo::query()->count());
+    }
+
+    public function testErasingNeedsAnAlreadyDeletedAccountAndRemovesEverythingForGood(): void
+    {
+        $page = $this->makePage($this->target);
+        $this->makePhoto($page, 'https://cdn.test/a.jpg', 1);
+        $removal = $this->app->make(\App\Services\AccountRemoval::class);
+        try {
+            $removal->erase($this->target);
+            $this->fail('an account that is not deleted cannot be erased');
+        } catch (\DomainException $e) {
+            $this->assertStringContainsString('delete it first', $e->getMessage());
+        }
+        $this->submit('DELETE', '/admin/users/' . $this->target->id, ['confirm' => 'delete']);
+        $removal->erase(User::query()->onlyTrashed()->find($this->target->id));
+        $this->assertNull(User::query()->withTrashed()->find($this->target->id));
+        $this->assertSame(0, Page::query()->withTrashed()->where('user_id', $this->target->id)->count());
+        $this->assertSame(['pages/' . $page->slug . '/a.jpg'], $this->disk->deleted, 'only now are the files deleted');
     }
 
     public function testAnAccountWithPaidOrdersOrAnAdministratorIsNotDeleted(): void

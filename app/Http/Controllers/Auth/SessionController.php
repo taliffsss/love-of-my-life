@@ -10,6 +10,7 @@ use App\Services\IntendedPlan;
 use Naluz\Auth\Auth;
 use Naluz\Database\Connection;
 use Naluz\Http\Request;
+use Naluz\Security\Hasher;
 use Naluz\Session\Store;
 use Naluz\Validation\ValidationException;
 use Psr\Http\Message\ResponseInterface;
@@ -23,13 +24,18 @@ final class SessionController
         return Screen::render('auth.login');
     }
 
-    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session): ResponseInterface
+    public function store(ServerRequestInterface $request, Auth $auth, Connection $db, IntendedPlan $intended, Store $session, Hasher $hasher): ResponseInterface
     {
         $input = Request::body($request);
         $email = User::normaliseEmail((string) ($input['email'] ?? ''));
         $password = (string) ($input['password'] ?? '');
 
         if ($email === '' || $password === '' || !$auth->attempt(['email' => $email, 'password' => $password])) {
+            // a deleted account is hidden, not gone: once the password is right it is told so, instead of "do not match" (which would be false)
+            $deleted = $email === '' ? null : User::query()->onlyTrashed()->where('email', $email)->first();
+            if ($deleted instanceof User && $hasher->check($password, (string) $deleted->getRawAttributes()['password'])) {
+                throw new ValidationException(['email' => [User::DELETED_MESSAGE]], ['email' => $email]);
+            }
             // one message for "no such account" and "wrong password", so the form does not reveal who has an account
             throw new ValidationException(['email' => ['That e-mail and password do not match an account.']], ['email' => $email]);
         }

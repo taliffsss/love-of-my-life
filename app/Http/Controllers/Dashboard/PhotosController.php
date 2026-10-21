@@ -74,7 +74,7 @@ final class PhotosController
         // Two uploads racing past the first check: one that lands beyond the allowance is undone, so it always holds.
         $usage = $allowance->of($userId);
         if ($usage['over'] > 0) {
-            $this->remove($photo, $storage, $db);
+            $this->discardUpload($photo, $storage, $db);
             return $this->full($allowance, $allowance->of($userId));
         }
 
@@ -93,7 +93,7 @@ final class PhotosController
         if (!$model instanceof Photo) {
             throw new HttpException(404, 'Photo not found.');
         }
-        $this->remove($model, $storage, $db);
+        $this->remove($model);
 
         if (Request::expectsJson($request)) {
             return Response::json([
@@ -131,11 +131,17 @@ final class PhotosController
         return Response::json(['order' => $ids]);
     }
 
-    /** Deletes the photo and then its file (unless another photo uses the same file). */
-    private function remove(Photo $photo, PhotoStorage $storage, Connection $db): void
+    /** Deleting a photo is soft: it is hidden and stops counting, its row and its file stay (bin/trash.php restores or erases it). */
+    private function remove(Photo $photo): void
+    {
+        $photo->delete();
+    }
+
+    /** An upload that lost a race for the last place: it was never shown, so it is undone for good, file included. */
+    private function discardUpload(Photo $photo, PhotoStorage $storage, Connection $db): void
     {
         $db->transaction(function () use ($photo, $storage): void {
-            $photo->delete();
+            $photo->forceDelete();
             $storage->trash($photo);
         });
         $storage->purge($photo);

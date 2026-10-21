@@ -127,7 +127,7 @@
       @method('DELETE')
       <div class="modal-body">
         <h2 id="delete-title-{{ $page->slug }}">Delete the page for {{ $page->recipient }}?</h2>
-        <p class="muted">Its letter, address and {{ $counts[$page->id] ?? 0 }} photo{{ ($counts[$page->id] ?? 0) === 1 ? '' : 's' }} are removed and the link stops working. Photos stop counting towards your account. This cannot be undone.</p>
+        <p class="muted">Its letter, address and {{ $counts[$page->id] ?? 0 }} photo{{ ($counts[$page->id] ?? 0) === 1 ? '' : 's' }} are hidden and the link stops working. Photos stop counting towards your account. We keep what you delete so it can be restored if you ask us; to have it erased for good, contact us.</p>
         <div class="field">
           <label for="confirm-{{ $page->slug }}">Type <strong>delete</strong> to confirm</label>
           <input class="input" id="confirm-{{ $page->slug }}" name="confirm" autocomplete="off" required pattern="delete" />

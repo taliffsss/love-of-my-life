@@ -400,7 +400,7 @@
       {{-- Delete ------------------------------------------------------------------------------------------------ --}}
       <section class="card section-card danger-zone" aria-labelledby="delete-title">
         <div class="section-head">
-          <div><h2 id="delete-title">Delete this page</h2><p>The page, its photos and its address are removed for good. Its photos stop counting towards your account.</p></div>
+          <div><h2 id="delete-title">Delete this page</h2><p>The page and its photos are hidden and its link stops working; its photos stop counting towards your account. We keep it so it can be restored if you ask.</p></div>
         </div>
         <div class="section-body">
           <button class="btn btn-secondary" type="button" data-open="#delete-dialog" style="color:var(--danger)">Delete page…</button>
@@ -436,7 +436,7 @@
     @method('DELETE')
     <div class="modal-body">
       <h2 id="delete-dialog-title">Delete the page for {{ $page->recipient }}?</h2>
-      <p class="muted">Its letter{{ $photoCount > 0 ? ', address and ' . $photoCount . ' photo' . ($photoCount === 1 ? '' : 's') : ' and address' }} are removed and the link stops working.@if ($photoCount > 0) The photos are deleted from storage and stop counting towards your account.@endif This cannot be undone.</p>
+      <p class="muted">Its letter{{ $photoCount > 0 ? ', address and ' . $photoCount . ' photo' . ($photoCount === 1 ? '' : 's') : ' and address' }} are hidden and the link stops working.@if ($photoCount > 0) The photos stop counting towards your account.@endif We keep it so it can be restored if you ask us; to have it erased for good, contact us.</p>
       <div class="field">
         <label for="confirm-delete">Type <strong>delete</strong> to confirm</label>
         <input class="input" id="confirm-delete" name="confirm" autocomplete="off" required pattern="delete" />

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Services\Plans;
 use Naluz\Database\Orm\Model;
+use Naluz\Database\Orm\SoftDeletes;
 use Naluz\Database\Orm\Relations\BelongsTo;
 use Naluz\Database\Orm\Relations\HasMany;
 
@@ -39,6 +40,8 @@ use Naluz\Database\Orm\Relations\HasMany;
  */
 final class Page extends Model
 {
+    use SoftDeletes; // a deleted page is hidden and its link stops working; the row stays (bin/trash.php restores it)
+
     public const DRAFT = 'draft';
     public const ACTIVE = 'active';
     public const EXPIRED = 'expired';
@@ -56,6 +59,7 @@ final class Page extends Model
         'published_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

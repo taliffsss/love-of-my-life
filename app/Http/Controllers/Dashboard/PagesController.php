@@ -386,25 +386,24 @@ final class PagesController
         return $response;
     }
 
-    public function destroy(string $slug, ServerRequestInterface $request, Auth $auth, PhotoStorage $storage, Connection $db): ResponseInterface
+    public function destroy(string $slug, ServerRequestInterface $request, Auth $auth, Connection $db): ResponseInterface
     {
         $page = $this->ownedPage($auth, $slug);
         if ((Request::body($request)['confirm'] ?? '') !== 'delete') {
             throw new HttpException(422, 'Confirm that the page should be deleted.');
         }
 
+        // Deleting is soft: the page and its photos get one `deleted_at`, so the link stops working and the photos stop counting, while the rows and
+        // the files stay and bin/trash.php can bring back exactly what went together. Paid orders and photo packs stay as they are.
         $photos = Photo::query()->withoutCache()->useWritePdo()->where('page_id', $page->id)->get()->all();
-        $db->transaction(function () use ($db, $page, $photos, $storage): void {
-            $db->table('photos')->where('page_id', '=', $page->id)->delete();
-            $storage->trash(...$photos);
+        $stamp = gmdate('Y-m-d H:i:s');
+        $db->transaction(function () use ($db, $page, $stamp): void {
+            $db->table('photos')->where('page_id', '=', $page->id)->whereNull('deleted_at')->update(['deleted_at' => $stamp]);
             // paid orders stay on record without their page; photo packs bought from it stay on the account
             $db->table('orders')->where('page_id', '=', $page->id)->update(['page_id' => null]);
             $db->table('subscriptions')->where('page_id', '=', $page->id)->update(['status' => 'ended']);
-            $db->table('pages')->where('id', '=', $page->id)->delete();
+            $db->table('pages')->where('id', '=', $page->id)->update(['deleted_at' => $stamp]);
         });
-        // the files go once the rows are gone: one that cannot be deleted now waits in the trash (bin/empty-trash.php),
-        // and one another photo still uses is kept
-        $storage->purge(...$photos);
 
         $count = count($photos);
         $freed = match (true) {

@@ -273,51 +273,39 @@ final class PhotosTest extends TestCase
         $this->assertSame(1, $theirs->fresh()->position, 'untouched');
     }
 
-    public function testDeletingAPhotoRemovesTheFile(): void
+    public function testDeletingAPhotoIsSoft(): void
     {
         $photo = $this->makePhoto($this->page, 'https://cdn.test/a.jpg');
         $response = $this->json('DELETE', '/dashboard/pages/' . $this->page->slug . '/photos/' . $photo->id, [], ['X-CSRF-TOKEN' => $this->csrf('/')]);
 
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame(0, $this->decode($response)['count']);
-        $this->assertNull($photo->fresh());
-        $this->assertSame(['pages/' . $this->page->slug . '/a.jpg'], $this->disk->deleted);
-        $this->assertSame(0, $this->db()->table('storage_trash')->count(), 'nothing left to retry');
+        $this->assertSame(0, $this->decode($response)['count'], 'hidden from the page');
+        $this->assertSame(0, $this->decode($response)['usage']['used'], 'and it stops counting at once');
+        $this->assertNull(Photo::query()->find($photo->id));
+        $this->assertNotNull($photo->fresh()->getRawAttributes()['deleted_at'], 'the row stays, flagged');
+        $this->assertSame([], $this->disk->deleted, 'and so does the file');
+
+        $photo->fresh()->restore();
+        $this->assertNotNull(Photo::query()->find($photo->id), 'it can be restored');
+        $this->assertSame(1, $this->usage()['used']);
     }
 
-    public function testAFileAnotherPhotoStillUsesIsKept(): void
+    public function testAFailedStorageDeleteWaitsInTheTrashUntilItWorks(): void
     {
-        $mine = $this->makePhoto($this->page, 'https://cdn.test/shared.jpg');
-        $other = $this->makePage($this->owner);
-        $copy = new Photo();
-        $copy->forceFill(['page_id' => $other->id, 'disk' => $mine->disk, 'path' => $mine->path, 'url' => $mine->url, 'position' => 1])->save();
-
-        $this->json('DELETE', '/dashboard/pages/' . $this->page->slug . '/photos/' . $mine->id, [], ['X-CSRF-TOKEN' => $this->csrf('/')]);
-        $this->assertNull($mine->fresh());
-        $this->assertSame([], $this->disk->deleted, 'the other page still shows it');
-        $this->assertArrayHasKey((string) $mine->path, $this->disk->files);
-
-        $this->submit('DELETE', '/dashboard/pages/' . $other->slug, ['confirm' => 'delete']);
-        $this->assertSame([(string) $mine->path], $this->disk->deleted, 'gone with its last photo');
-        $this->assertSame(0, $this->db()->table('storage_trash')->count());
-    }
-
-    public function testAFailedDeleteWaitsInTheTrashUntilItWorks(): void
-    {
+        // the files of an upload that is undone for good (or of an erasure) go through the storage trash, which retries
         $flaky = new FlakyDisk($this->disk);
         $this->app->make(StorageManager::class)->extend('spaces', $flaky);
         $photo = $this->makePhoto($this->page, 'https://cdn.test/a.jpg');
+        $storage = $this->app->make(PhotoStorage::class);
 
         $flaky->down = true;
-        $response = $this->json('DELETE', '/dashboard/pages/' . $this->page->slug . '/photos/' . $photo->id, [], ['X-CSRF-TOKEN' => $this->csrf('/')]);
-        $this->assertSame(200, $response->getStatusCode(), 'the photo is deleted even while storage is down');
-        $this->assertNull($photo->fresh());
-        $this->assertSame(0, $this->decode($response)['usage']['used'], 'and stops counting at once');
+        $photo->forceDelete();
+        $storage->trash($photo);
+        $storage->purge($photo);
         $trash = $this->db()->table('storage_trash')->get()->all();
         $this->assertCount(1, $trash);
         $this->assertSame([(string) $photo->path, 1, 'Spaces is unreachable'], [$trash[0]['path'], (int) $trash[0]['attempts'], $trash[0]['last_error']]);
 
-        $storage = $this->app->make(PhotoStorage::class);
         $this->assertSame(['deleted' => 0, 'shared' => 0, 'failed' => 1], $storage->emptyTrash());
         $flaky->down = false;
         $this->assertSame(['deleted' => 1, 'shared' => 0, 'failed' => 0], $storage->emptyTrash());
@@ -330,7 +318,7 @@ final class PhotosTest extends TestCase
         $photo = new Photo();
         $photo->forceFill(['page_id' => $this->page->id, 'disk' => null, 'path' => null, 'url' => '/photos/01.jpg', 'position' => 1])->save();
         $this->json('DELETE', '/dashboard/pages/' . $this->page->slug . '/photos/' . $photo->id, [], ['X-CSRF-TOKEN' => $this->csrf('/')]);
-        $this->assertNull($photo->fresh());
+        $this->assertNull(Photo::query()->find($photo->id));
         $this->assertSame([], $this->disk->deleted);
         $this->assertSame(0, $this->db()->table('storage_trash')->count());
     }

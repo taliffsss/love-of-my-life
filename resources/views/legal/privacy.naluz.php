@@ -63,8 +63,8 @@
 
   <h2>7. How long we keep it</h2>
   <ul>
-    <li><strong>Your account and content:</strong> until you delete them or ask us to, or until we close an inactive free account after reasonable notice.</li>
-    <li><strong>Deleted photos and pages:</strong> removed from the service straight away; the files are deleted from storage shortly after, and may remain in backups until those expire in the ordinary course.</li>
+    <li><strong>Your account and content:</strong> until you delete them (we then hide them and keep them so they can be restored) or ask us to erase them, or until we close an inactive free account after reasonable notice.</li>
+    <li><strong>Deleted photos and pages:</strong> hidden from the service straight away (the link stops working) but kept, with their files, so that a deletion can be undone if you ask us. To have them erased for good, ask us (section 8): we then delete the data and files, which may remain in backups until those expire in the ordinary course.</li>
     <li><strong>Expired plans:</strong> your content stays so you can renew; it is not shown to visitors.</li>
     <li><strong>Payment and order records:</strong> as long as Philippine tax, accounting and anti-fraud rules require. If you have paid, we deactivate rather than erase your account and remove everything else.</li>
     <li><strong>Technical logs:</strong> short-lived (days to a few weeks), except what we need to investigate abuse or a security incident.</li>

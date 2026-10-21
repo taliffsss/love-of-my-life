@@ -519,7 +519,7 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame('attachment; filename="for-jinelin-qr.svg"', $download->getHeaderLine('Content-Disposition'));
     }
 
-    public function testDeletingAPageRemovesItsPhotosButKeepsItsOrders(): void
+    public function testDeletingAPageIsSoftItHidesThePageAndItsPhotosButKeepsEverything(): void
     {
         $page = $this->makePage($this->owner);
         $this->makePhoto($page, 'https://cdn.test/a.jpg', 1);
@@ -530,17 +530,19 @@ final class DashboardPagesTest extends TestCase
         $kept = $this->makePhoto($other, 'https://cdn.test/kept.jpg');
 
         $this->submit('DELETE', '/dashboard/pages/' . $page->slug, ['confirm' => 'nope']);
-        $this->assertNotNull($page->fresh(), 'not without typing "delete"');
+        $this->assertNull($page->fresh()->getRawAttributes()['deleted_at'], 'not without typing "delete"');
 
         $response = $this->submit('DELETE', '/dashboard/pages/' . $page->slug, ['confirm' => 'delete']);
         $this->assertSame('/dashboard', $response->getHeaderLine('Location'));
-        $this->assertNull($page->fresh());
-        $this->assertSame([$kept->id], array_map('intval', Photo::query()->pluck('id')->all()), 'only the other page\'s photo is left');
-        $this->assertSame(['pages/' . $page->slug . '/a.jpg', 'pages/' . $page->slug . '/b.jpg'], $this->disk->deleted, 'its stored files are deleted');
-        $this->assertSame([(string) $kept->path], array_keys($this->disk->files));
-        $this->assertSame(0, $this->db()->table('storage_trash')->count(), 'nothing left to retry');
+        $this->assertNull(Page::query()->find($page->id), 'hidden');
+        $this->assertNotNull($page->fresh()->getRawAttributes()['deleted_at'], 'but the row stays');
+        $this->assertSame([$kept->id], array_map('intval', Photo::query()->pluck('id')->all()), 'its photos are hidden too: only the other page\'s photo is left');
+        $this->assertSame(3, Photo::query()->withTrashed()->count(), 'all three rows are still there');
+        $this->assertSame([], $this->disk->deleted, 'no file is deleted');
+        $this->assertCount(3, $this->disk->files);
         $this->assertNull($order->fresh()->page_id, 'the order stays on record');
         $this->assertStringContainsString('with its 2 photos, which no longer count towards your account', (string) $this->get('/dashboard')->getBody());
+        $this->assertSame(404, $this->get('/p/' . $page->slug)->getStatusCode(), 'the link stops working');
         $this->assertSame(1, $this->app->make(\App\Services\PhotoAllowance::class)->of($this->owner->id)['used']);
     }
 

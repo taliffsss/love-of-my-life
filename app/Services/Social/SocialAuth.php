@@ -130,12 +130,18 @@ final class SocialAuth
                 $this->refuseAdmin($user);
                 return [$user, false];
             }
+            if (User::query()->withTrashed()->where('id', $identity->user_id)->exists()) {
+                throw new SocialLoginException(User::DELETED_MESSAGE); // deleted, not gone: it is not made again
+            }
         }
 
         $email = User::normaliseEmail($profile->email);
         if ($email === '' || !$profile->emailVerified || filter_var($email, FILTER_VALIDATE_EMAIL) === false || mb_strlen($email) > 254) {
             throw new SocialLoginException(ucfirst($profile->provider) . ' did not share a confirmed e-mail address, so we cannot make an account from it. '
                 . 'Allow the e-mail permission and try again, or create an account with your e-mail instead.');
+        }
+        if (User::query()->onlyTrashed()->where('email', $email)->exists()) {
+            throw new SocialLoginException(User::DELETED_MESSAGE);
         }
         if (User::query()->where('email', $email)->exists()) {
             throw new SocialLoginException('There is already an account with this e-mail. Sign in with its password instead.');

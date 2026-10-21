@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.8.0 (2026-10-21, branch `main-v2`)
+
+- **Deleting is always soft.** Deleting a photo, a page or (as an administrator) an account only hides it: the row gets `deleted_at` and the file stays in storage. A deleted page's link
+  stops working, its photos stop counting towards the account, a deleted account cannot sign in (it is told so once its password is right, also for Google and Facebook) and its pages
+  and photos are hidden with it. Rows deleted together share one timestamp, so restoring an account or a page brings back exactly what went with it. Unpaid orders of a deleted account are
+  cancelled, not erased; paid orders and the account-with-paid-orders rule are unchanged. An upload that loses a race for the last photo place is still undone for good (it was never shown).
+- **Restoring and erasing:** `php bin/trash.php list`, `restore user|page|photo <id>`, and (only for a privacy request, only for something already deleted, with `--yes`) `erase user|page|photo <id>`,
+  the only way anything is removed for good. The delete dialogs and the Privacy Policy (now version 1.2, section 7) say so. New column `deleted_at` on `users`, `pages` and `photos` (migration `2026_10_21_000018`).
+
 ## 3.7.0 (2026-10-21, branch `main-v2`)
 
 - **The dashboard, editor, admin and sign-in follow the same look** (`public/assets/app.css`): a midnight top bar, vellum and paper surfaces, one red for actions, Bricolage Grotesque, pages as letters with varied corners.
