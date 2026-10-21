@@ -121,7 +121,7 @@
   // ---------- the templates: filters, "in season" and a live demo in a dialog ----------
   const gallery = $("#gallery");
   if (gallery) {
-    const cards = $$(".layout-card", gallery);
+    const cards = $$(".lp-row", gallery);
     $$("#galleryFilter .chip").forEach((chip) => chip.addEventListener("click", () => {
       $$("#galleryFilter .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === chip)));
       for (const card of cards) card.hidden = chip.dataset.filter !== "all" && card.dataset.kind !== chip.dataset.filter;
@@ -133,7 +133,7 @@
     // ---------- the theater: every template on a 3D ring ----------
     const theater = $("#theater"), stage = $("#theaterStage");
     if (theater && stage) {
-      const ring = $$(".layout-card", gallery); // this season's template is first
+      const ring = $$(".lp-row", gallery); // this season's template is first
       const n = ring.length;
       let pos = 0, target = 0, auto = true, dragging = false, hover = false, timer = 0;
       const items = ring.map((card, i) => {
@@ -248,7 +248,7 @@
       for (const link of $$("a[data-demo]", gallery)) {
         link.addEventListener("click", (e) => {
           e.preventDefault();
-          at = cards.indexOf(link.closest(".layout-card"));
+          at = cards.indexOf(link.closest(".lp-row"));
           load();
           dlg.showModal();
         });
@@ -271,7 +271,7 @@
   if (finder) {
     const answers = {};
     const result = $("#finderResult"), reset = $("#finderReset");
-    const plans = Object.fromEntries($$(".plan[data-plan]").map((p) => [p.dataset.plan, p]));
+    const plans = Object.fromEntries($$(".lp-plan[data-plan]").map((p) => [p.dataset.plan, p]));
     const pick = () => {
       if (answers.long === "forever") return ["forever", "You want it online for good, and Forever has every template and the most photos."];
       if (answers.photos === "lots") return ["sweetheart", "More than 40 photos fits Sweetheart’s 40 plus a photo pack, kept for good."];
@@ -279,7 +279,7 @@
       return ["sweet", "Up to 12 photos and the classic templates is exactly what Sweet includes."];
     };
     function show() {
-      $$(".plan").forEach((p) => { p.classList.remove("fit"); $(".fit-badge", p).hidden = true; });
+      $$(".lp-plan").forEach((p) => { p.classList.remove("fit"); $(".fit-badge", p).hidden = true; });
       if (!(answers.photos && answers.long && answers.fancy)) { result.hidden = true; return; }
       const [key, why] = pick();
       const card = plans[key];
@@ -297,22 +297,10 @@
     })));
     reset.addEventListener("click", () => {
       for (const k of Object.keys(answers)) delete answers[k];
-      $$(".finder .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
+      $$("#finder .chip").forEach((c) => c.setAttribute("aria-pressed", "false"));
       reset.hidden = true;
       show();
     });
   }
 
-  // ---------- reveal on scroll ----------
-  if (!reduced && "IntersectionObserver" in window) {
-    const targets = $$(".band .eyebrow, .band h2, .band .sub, .step, .layout-card, .plan, .finder, details, .gallery-filter");
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-    }, { rootMargin: "0px 0px -8% 0px" });
-    targets.forEach((el, i) => {
-      el.classList.add("reveal");
-      el.style.setProperty("--d", `${(i % 4) * 0.07}s`);
-      io.observe(el);
-    });
-  }
 })();

@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.7.0 (2026-10-21, branch `main-v2`)
+
+- **A new look for the landing page.** One idea: it is a letter that opens. A midnight page, paper for the words and one red (the wax seal) for every action; Bricolage
+  Grotesque for what you read and press, Newsreader italic only where a letter speaks. The headline un-blurs once on load (the product's own moment), the sample letter in the
+  hero is bigger and sits on stacked paper, a plain strip says what is true (no app, private, editable, free to start), the three steps are a numbered sequence beside a sticky
+  heading, the 13 templates are a 3D ring plus an index you can filter, the plan finder is a sentence you finish ("I will add up to 12 photos, keep it online for good and want every
+  templates"), the featured plan is inverted, the questions sit beside a sticky title, and the page closes on one button. Same content, plans, prices and behaviour; the scroll fades are gone.
+
 ## 3.6.0 (2026-10-21, branch `main-v2`)
 
 - **UTM tracking and a Traffic page for administrators.** Links with `utm_source`, `utm_medium`, `utm_campaign` and `utm_content` are recorded when someone visits the
