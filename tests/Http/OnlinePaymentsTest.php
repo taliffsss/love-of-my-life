@@ -42,8 +42,10 @@ final class OnlinePaymentsTest extends TestCase
     }
 
     /** @param list<GuzzleResponse> $answers */
-    private function usePayMongo(array $answers = [], bool $subscriptions = false): void
+    private function usePayMongo(array $answers = [], bool $subscriptions = false, bool $cards = true, bool $ewallet = true): void
     {
+        $this->app->make(Repository::class)->set('saas.payments.paymongo.ewallet', $ewallet);
+        $this->app->make(Repository::class)->set('saas.payments.paymongo.cards', $cards);
         $this->history = []; // the calls made through this gateway from now on
         $stack = HandlerStack::create(new MockHandler($answers));
         $stack->push(Middleware::history($this->history));
@@ -160,17 +162,19 @@ final class OnlinePaymentsTest extends TestCase
         $this->assertSame('paymongo', $this->app->make(PaymentGateway::class)->name());
     }
 
-    public function testTheOrderPageListsTheFourWaysToPayEachWithItsFormBeneathIt(): void
+    public function testTheOrderPageListsTheFiveWaysToPayEachWithItsFormBeneathIt(): void
     {
         $this->usePayMongo();
         $order = $this->buy();
         $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
 
-        foreach (['GCash', 'PayMaya', 'Credit card', 'Mastercard'] as $label) {
+        foreach (['GCash', 'PayMaya', 'QR Ph', 'Credit card', 'Mastercard'] as $label) {
             $this->assertStringContainsString('<b>' . $label . '</b>', $html);
         }
-        $this->assertSame(4, substr_count($html, 'class="pay-radio"'));
-        $this->assertSame(4, substr_count($html, 'class="pay-panel"'));
+        $this->assertSame(5, substr_count($html, 'class="pay-tile"'), 'one square tile each');
+        $this->assertSame(4, substr_count($html, 'class="pay-panel"'), 'and its form in a dialog, except QR Ph');
+        $this->assertSame(4, substr_count($html, '<dialog class="modal pay-dialog"'));
+        $this->assertSame(1, substr_count($html, '<input type="hidden" name="method" value="qrph" />'), 'QR Ph is one click that starts the payment');
         // e-wallets ask for the mobile number and offer subscribe (selected) or one-time
         $this->assertSame(2, substr_count($html, 'name="phone"'));
         $this->assertSame(2, substr_count($html, 'name="billing" value="subscription" checked'));
@@ -314,6 +318,103 @@ final class OnlinePaymentsTest extends TestCase
         $this->assertStringContainsString('could not start the checkout', (string) $this->get('/dashboard/orders/' . $order->reference)->getBody());
     }
 
+    // ---- QR Ph ----
+
+    private function qrAnswers(string $intent = 'pi_qr'): array
+    {
+        return [
+            $this->answer(['data' => ['id' => $intent, 'attributes' => ['client_key' => $intent . '_ck']]]),
+            $this->answer(['data' => ['id' => 'pm_' . $intent]]),
+            $this->answer(['data' => ['id' => $intent, 'attributes' => ['status' => 'awaiting_next_action', 'next_action' => ['type' => 'consume_qr', 'code' => ['id' => 'qr_1', 'image_url' => 'data:image/png;base64,iVBORw0KGgo=']]]]]),
+        ];
+    }
+
+    public function testCardsAreHiddenUntilTheyAreSwitchedOn(): void
+    {
+        $this->usePayMongo([], false, false);
+        $order = $this->buy();
+        $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
+
+        foreach (['GCash', 'PayMaya', 'QR Ph'] as $label) {
+            $this->assertStringContainsString('<b>' . $label . '</b>', $html);
+        }
+        $this->assertStringNotContainsString('Credit card', $html);
+        $this->assertStringNotContainsString('Mastercard', $html);
+        $this->assertStringNotContainsString('data-card-form', $html);
+        $this->assertSame(404, $this->card($order)->getStatusCode(), 'the card route is closed too, not just hidden');
+        $this->assertSame([], $this->history);
+    }
+
+    public function testGCashAndPayMayaAreHiddenAndRefusedUntilTheyAreSwitchedOn(): void
+    {
+        $this->usePayMongo($this->qrAnswers(), false, false, false);
+        $order = $this->buy();
+        $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
+
+        $this->assertSame(1, substr_count($html, 'class="pay-tile"'), 'QR Ph is the only way to pay');
+        $this->assertStringContainsString('<b>QR Ph</b>', $html);
+        foreach (['GCash', 'PayMaya', 'Credit card', 'Mastercard'] as $label) {
+            $this->assertStringNotContainsString('<b>' . $label . '</b>', $html);
+        }
+        $this->assertStringNotContainsString('name="phone"', $html);
+
+        // the routes are closed too, not just the tiles
+        foreach (['gcash', 'paymaya'] as $method) {
+            $this->pay($order, ['method' => $method, 'phone' => '09171234567']);
+        }
+        $this->assertSame([], $this->history, 'PayMongo is never asked for an e-wallet while it is off');
+        $this->assertNull($this->fresh($order)->method);
+
+        // and QR Ph still works
+        $this->pay($order, ['method' => 'qrph']);
+        $this->assertSame('qrph', $this->fresh($order)->method);
+    }
+
+    public function testAQrPhPaymentNeedsNoNumberIsAlwaysOneTimeAndShowsTheCode(): void
+    {
+        $this->usePayMongo($this->qrAnswers(), false, false);
+        $order = $this->buy();
+
+        $response = $this->pay($order, ['method' => 'qrph']);
+        $this->assertSame('/dashboard/orders/' . $order->reference . '?go=1', $response->getHeaderLine('Location'));
+        $this->assertSame([['POST', '/v1/payment_intents'], ['POST', '/v1/payment_methods'], ['POST', '/v1/payment_intents/pi_qr/attach']], $this->calls());
+        $this->assertSame(['qrph'], json_decode((string) $this->history[0]['request']->getBody(), true)['data']['attributes']['payment_method_allowed']);
+        $this->assertSame('qrph', json_decode((string) $this->history[1]['request']->getBody(), true)['data']['attributes']['type']);
+
+        $fresh = $this->fresh($order);
+        $this->assertSame(['qrph', 'one_time', 'pi_qr'], [$fresh->method, $fresh->billing, $fresh->provider_ref], 'a QR payment never subscribes');
+
+        // the page reads the code back from the payment and shows it to scan
+        $this->usePayMongo([$this->answer(['data' => ['id' => 'pi_qr', 'attributes' => ['status' => 'awaiting_next_action', 'next_action' => ['type' => 'consume_qr', 'code' => ['image_url' => 'data:image/png;base64,iVBORw0KGgo=']]]]])], false, false);
+        $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
+        $this->assertStringContainsString('src="data:image/png;base64,iVBORw0KGgo="', $html);
+        $this->assertStringContainsString('id="qr-dialog"', $html, 'the code opens in a dialog');
+        $this->assertStringContainsString('href="data:image/png;base64,iVBORw0KGgo=" download="QRPh-' . $order->reference . '.png"', $html, 'the code can be saved as an image');
+        $this->assertStringContainsString('Scan QR', $html);
+        $this->assertStringNotContainsString('id="continue-link"', $html, 'there is no wallet to go on to');
+    }
+
+    public function testAQrPhPaymentIsCreditedByTheWebhookLikeAnyOther(): void
+    {
+        $this->usePayMongo($this->qrAnswers('pi_qr2'), false, false);
+        $order = $this->buy();
+        $this->pay($order, ['method' => 'qrph']);
+
+        $this->assertSame(200, $this->paidWebhook('pi_qr2', $order->amount)->getStatusCode());
+        $this->assertSame(Order::PAID, $this->fresh($order)->status);
+    }
+
+    public function testAQrPhPaymentWithoutACodeFailsAndNothingIsKept(): void
+    {
+        $answers = $this->qrAnswers();
+        $answers[2] = $this->answer(['data' => ['id' => 'pi_qr', 'attributes' => ['status' => 'awaiting_next_action', 'next_action' => ['type' => 'consume_qr']]]]);
+        $this->usePayMongo($answers, false, false);
+        $order = $this->buy();
+
+        $this->pay($order, ['method' => 'qrph']);
+        $this->assertSame(0, PaymentAttempt::query()->withoutCache()->where('order_id', $order->id)->count());
+    }
+
     // ---- cards ----
 
     public function testACardPaymentIsStartedWithoutTheCardAndTheBrowserGetsWhatItNeeds(): void
@@ -378,7 +479,7 @@ final class OnlinePaymentsTest extends TestCase
 
         $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
         $this->assertStringContainsString('24 more photos for your account', $html);
-        $this->assertSame(4, substr_count($html, 'class="pay-radio"'), 'GCash, PayMaya and the cards');
+        $this->assertSame(5, substr_count($html, 'class="pay-tile"'), 'GCash, PayMaya, QR Ph and the cards');
         $this->assertStringContainsString('the photos are paid once and are yours for good', $html);
         $this->assertStringNotContainsString('name="billing"', $html, 'nothing to subscribe to');
 
@@ -472,7 +573,7 @@ final class OnlinePaymentsTest extends TestCase
 
         $html = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
         $this->assertStringContainsString('was not completed', $html);
-        $this->assertSame(4, substr_count($html, 'class="pay-radio"'));
+        $this->assertSame(5, substr_count($html, 'class="pay-tile"'));
         $this->assertStringNotContainsString('id="order-wait"', $html);
     }
 

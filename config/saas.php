@@ -78,6 +78,11 @@ return [
             // PayMongo Subscriptions (cards and Maya charged again by PayMongo) must be enabled on the account by PayMongo support first
             'subscriptions' => filter_var(env('PAYMONGO_SUBSCRIPTIONS', false), FILTER_VALIDATE_BOOLEAN),
             // needed with the secret key to take GCash, PayMaya and cards on our own page (PayMongo makes the payment method and attaches it with the public key)
+            // GCash and PayMaya on our own page stay hidden (and their pay route refuses them) until this is true: they need PayMongo's approval first.
+            // QR Ph is always offered.
+            'ewallet' => filter_var(env('PAYMONGO_EWALLET', false), FILTER_VALIDATE_BOOLEAN),
+            // cards (Visa, Mastercard) on our own page are hidden until this is true; the card routes answer 404 meanwhile
+            'cards' => filter_var(env('PAYMONGO_CARDS', false), FILTER_VALIDATE_BOOLEAN),
             'public_key' => (string) env('PAYMONGO_PUBLIC_KEY', ''),
             'webhook_secret' => (string) env('PAYMONGO_WEBHOOK_SECRET', ''),
             'methods' => array_values(array_filter(array_map('trim', explode(',', (string) env('PAYMONGO_METHODS', 'gcash,paymaya,card,grab_pay'))))),
@@ -89,6 +94,13 @@ return [
         ],
         // shown to customers while payments are manual
         'manual_instructions' => env('PAYMENTS_MANUAL_INSTRUCTIONS', 'Send the amount by GCash or Maya and reply with your order reference; your page goes live as soon as we confirm it.'),
+    ],
+
+    // The QA account (QA_EMAIL, made at start by bin/ensure-qa.php) pays at most `amount` centavos per order, whatever the plan or the
+    // number of photo packs, so the live checkout can be tried for ₱1. Only that one account: no e-mail set, no effect.
+    'qa' => [
+        'email' => env('QA_EMAIL', ''),
+        'amount' => 100,
     ],
 
     // How long a payment keeps a page online, in months; null = for good.

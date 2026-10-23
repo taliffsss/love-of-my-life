@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Page;
+use App\Models\User;
 use Naluz\Database\Connection;
 
 /**
@@ -35,7 +36,7 @@ final class Billing
             'page_id' => $page->id,
             'plan' => $plan,
             'period' => $period,
-            'amount' => $price,
+            'amount' => $this->chargeFor($userId, $price),
             'currency' => $this->plans->currency(),
             'status' => Order::PENDING,
             'provider' => $provider,
@@ -62,12 +63,27 @@ final class Billing
             'plan' => Order::PHOTO_PACK,
             'period' => 'once',
             'photos' => $packs * $this->allowance->packPhotos(),
-            'amount' => $packs * $this->allowance->packPrice(),
+            'amount' => $this->chargeFor($userId, $packs * $this->allowance->packPrice()),
             'currency' => $this->plans->currency(),
             'status' => Order::PENDING,
             'provider' => $provider,
         ])->save();
         return $order;
+    }
+
+    /**
+     * What the customer is charged: the price, except for the QA account (QA_EMAIL), which pays at most the testing amount (₱1).
+     * The plan, the period and the photos it buys are unchanged; only the money is.
+     */
+    private function chargeFor(int $userId, int $price): int
+    {
+        $email = User::normaliseEmail((string) config('saas.qa.email', ''));
+        $cap = (int) config('saas.qa.amount', 100);
+        if ($email === '' || $cap < 1 || $price <= $cap) {
+            return $price;
+        }
+        $user = User::query()->withoutCache()->where('id', $userId)->first();
+        return $user instanceof User && $user->email === $email ? $cap : $price;
     }
 
     /**

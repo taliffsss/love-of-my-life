@@ -10,7 +10,7 @@ use GuzzleHttp\ClientInterface;
 
 /**
  * PayMongo (https://developers.paymongo.com), two ways:
- *  - on our own order page (with the public key as well): GCash, PayMaya and cards through payment intents, and cards and
+ *  - on our own order page (with the public key as well): GCash, PayMaya, QR Ph and cards through payment intents, and cards and
  *    Maya as subscriptions PayMongo keeps charging (PAYMONGO_SUBSCRIPTIONS, which PayMongo must enable on the account);
  *  - without the public key, PayMongo's hosted Checkout Session page.
  *
@@ -112,6 +112,30 @@ final class PayMongoGateway extends HostedGateway implements OnlineGateway
         return $this->finish($intentRef, $clientKey, $method, $payer, $returnUrl, $subscriptionRef);
     }
 
+    public function qrImage(string $ref): ?string
+    {
+        try {
+            $intent = $this->request('GET', self::API . '/payment_intents/' . rawurlencode($ref), ['headers' => $this->headers($this->secretKey)]);
+        } catch (PaymentException) {
+            return null;
+        }
+        return self::codeImage($intent);
+    }
+
+    /** The QR image of a payment intent response, as a data: URI (PayMongo sends it as a base64 PNG); null when there is none. @param array<mixed> $intent */
+    private static function codeImage(array $intent): ?string
+    {
+        $attributes = (array) ($intent['data']['attributes'] ?? []);
+        if (($attributes['status'] ?? 'awaiting_next_action') !== 'awaiting_next_action') {
+            return null;
+        }
+        $image = (string) ($attributes['next_action']['code']['image_url'] ?? '');
+        if (str_starts_with($image, 'data:image/png;base64,')) {
+            $image = substr($image, 22);
+        }
+        return $image !== '' && preg_match('~^[A-Za-z0-9+/]+={0,2}$~', $image) === 1 ? 'data:image/png;base64,' . $image : null;
+    }
+
     public function paymentStatus(string $ref): ?array
     {
         try {
@@ -182,6 +206,13 @@ final class PayMongoGateway extends HostedGateway implements OnlineGateway
             'headers' => $this->headers($this->publicKey),
             'body' => json_encode(['data' => ['attributes' => ['payment_method' => $methodRef, 'client_key' => $clientKey, 'return_url' => $returnUrl]]], JSON_THROW_ON_ERROR),
         ]);
+        if ($method === self::QRPH) {
+            // nothing to open: the customer scans the code, which qrImage() reads back from the payment
+            if (self::codeImage($attached) === null) {
+                throw $this->failed();
+            }
+            return ['ref' => $ref, 'redirect_url' => null, 'client_key' => $clientKey, 'subscription_ref' => $subscriptionRef];
+        }
         $url = (string) ($attached['data']['attributes']['next_action']['redirect']['url'] ?? '');
         if (!str_starts_with($url, 'https://')) {
             throw $this->failed();
@@ -246,7 +277,7 @@ final class PayMongoGateway extends HostedGateway implements OnlineGateway
 
     private function assertOnline(string $method): void
     {
-        if (!$this->onlineConfigured() || !in_array($method, [self::GCASH, self::PAYMAYA, self::CARD], true)) {
+        if (!$this->onlineConfigured() || !in_array($method, [self::GCASH, self::PAYMAYA, self::CARD, self::QRPH], true)) {
             throw new PaymentException('Online payment is not available right now. Please try again later.');
         }
     }

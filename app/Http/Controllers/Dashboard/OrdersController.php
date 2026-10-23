@@ -102,6 +102,7 @@ final class OrdersController
     {
         $order = $this->ownedOrder($auth, $reference);
         $page = $order->page_id !== null ? Page::query()->where('id', $order->page_id)->first() : null;
+        $attempt = $this->liveAttempt($order);
         return Screen::render('dashboard.order', [
             'order' => $order,
             'page' => $page instanceof Page ? $page : null,
@@ -109,7 +110,7 @@ final class OrdersController
             'hosted' => $gateway instanceof HostedGateway && !$this->online($gateway) && $order->provider === $gateway->name(),
             'online' => $this->online($gateway) && $order->provider === $gateway->name(),
             'go' => ($request->getQueryParams()['go'] ?? '') === '1', // just started an e-wallet payment: carry on to the wallet
-            'attempt' => $this->liveAttempt($order),
+            'attempt' => $attempt,
             'methods' => Order::METHODS,
             'recurring' => $plans->months((string) $order->period) !== null,
             'renewal' => $order->subscription_id !== null,
@@ -117,6 +118,9 @@ final class OrdersController
             'auto' => $gateway instanceof OnlineGateway
                 ? [Order::GCASH => $gateway->canAutoCharge('gcash'), Order::PAYMAYA => $gateway->canAutoCharge('paymaya'), Order::CARD => $gateway->canAutoCharge('card')]
                 : [],
+            'cards' => (bool) config('saas.payments.paymongo.cards'),
+            'ewallet' => (bool) config('saas.payments.paymongo.ewallet'),
+            'qr' => $this->qrImage($gateway, $attempt),
             'canFakePay' => $gateway instanceof FakeGateway && $order->provider === 'fake' && $order->status === Order::PENDING,
             'instructions' => (string) config('saas.payments.manual_instructions'),
         ]);
@@ -151,10 +155,12 @@ final class OrdersController
         $order = $this->payableOrder($reference, $auth, $gateway);
         $body = Request::body($request);
         $method = (string) ($body['method'] ?? '');
-        if (!in_array($method, [Order::GCASH, Order::PAYMAYA], true)) {
-            throw new ValidationException(['method' => ['Choose GCash or PayMaya, or pay by card.']]);
+        $offered = config('saas.payments.paymongo.ewallet') ? [Order::GCASH, Order::PAYMAYA, Order::QRPH] : [Order::QRPH];
+        if (!in_array($method, $offered, true)) {
+            throw new ValidationException(['method' => [$offered === [Order::QRPH] ? 'Pay with QR Ph.' : 'Choose GCash, PayMaya or QR Ph.']]);
         }
-        $phone = self::mobile((string) ($body['phone'] ?? ''));
+        // a QR Ph code is scanned in any banking app: no mobile number to ask for
+        $phone = $method === Order::QRPH ? '' : self::mobile((string) ($body['phone'] ?? ''));
         if ($phone === null) {
             throw new ValidationException(['phone' => ['Enter your mobile number, like 0917 123 4567.']], ['phone' => (string) ($body['phone'] ?? ''), 'method' => $method]);
         }
@@ -174,6 +180,9 @@ final class OrdersController
      */
     public function card(string $reference, Auth $auth, PaymentGateway $gateway, Plans $plans): ResponseInterface
     {
+        if (!config('saas.payments.paymongo.cards')) {
+            throw new HttpException(404, 'Not Found');
+        }
         $order = $this->payableOrder($reference, $auth, $gateway);
         $billing = $this->billingFor($order, Order::CARD, Order::SUBSCRIPTION, $plans);
         try {
@@ -325,8 +334,20 @@ final class OrdersController
         if ($method === Order::CARD) {
             return Order::SUBSCRIPTION; // a card always subscribes
         }
+        if ($method === Order::QRPH) {
+            return Order::ONE_TIME; // a QR code cannot be charged again by itself: paid once, then a renewal is approved by scanning again
+        }
         // GCash and PayMaya: subscribe unless the customer chose a one-time payment
         return $asked === Order::ONE_TIME ? Order::ONE_TIME : Order::SUBSCRIPTION;
+    }
+
+    /** The QR Ph code to scan while a QR payment is open, else null. */
+    private function qrImage(PaymentGateway $gateway, ?PaymentAttempt $attempt): ?string
+    {
+        if (!$gateway instanceof OnlineGateway || $attempt === null || $attempt->method !== Order::QRPH) {
+            return null;
+        }
+        return $gateway->qrImage($attempt->provider_ref);
     }
 
     /** The newest payment of the order that is still open. */

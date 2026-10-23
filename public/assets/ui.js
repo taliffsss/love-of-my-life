@@ -267,6 +267,16 @@ for (const opener of $$("[data-open]")) {
   });
   for (const closer of $$("[data-close]", dialog)) closer.addEventListener("click", () => dialog.close());
 }
+// a dialog that should be open on arrival (the way to pay a failed form came back to, the QR code just made)
+{
+  // one at a time: a form sent back with a mistake wins over the QR code
+  const due = $$("dialog[data-autoopen]");
+  const dialog = due.find((d) => d.id !== "qr-dialog") || due[0];
+  if (dialog?.showModal && !dialog.open) {
+    dialog.closest("details")?.setAttribute("open", ""); // "Pay another way" is folded after a reload
+    dialog.showModal();
+  }
+}
 
 // ---------- editor ----------
 const editor = $("main[data-page]");

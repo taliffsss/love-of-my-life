@@ -1,16 +1,22 @@
-{{-- The ways to pay: GCash, PayMaya, Credit card and Mastercard. Choosing one opens its form under it (CSS only: the radio
-     before the panel is checked). Needs $order, $recurring (the plan renews), $renewal and $auto (method => the provider charges
+{{-- The ways to pay: QR Ph, and (when $ewallet) GCash and PayMaya, and (when $cards) Credit card and Mastercard. Each is a square tile; choosing one opens its form in a dialog, and QR Ph makes the payment and shows its code at once. Needs $order, $recurring (the plan renews), $renewal and $auto (method => the provider charges
      again by itself). Rules, enforced by OrdersController: a card always subscribes; GCash and PayMaya subscribe unless the
      customer picks one-time; a plan paid once (Forever) is always one-time; a renewal continues its subscription. --}}
 @php
   $money = \App\Services\Plans::money($order->amount, $order->currency);
   $every = ['month' => 'every month', 'year' => 'every year'][(string) $order->period] ?? 'each period';
   $options = [
-    'gcash' => ['label' => 'GCash', 'hint' => 'Pay with your GCash app', 'kind' => 'wallet', 'method' => 'gcash'],
-    'paymaya' => ['label' => 'PayMaya', 'hint' => 'Pay with your Maya app', 'kind' => 'wallet', 'method' => 'paymaya'],
-    'card-credit' => ['label' => 'Credit card', 'hint' => 'Visa and other credit cards', 'kind' => 'card', 'method' => 'card'],
-    'card-mastercard' => ['label' => 'Mastercard', 'hint' => 'Mastercard credit or debit', 'kind' => 'card', 'method' => 'card'],
+    'gcash' => ['label' => 'GCash', 'hint' => 'E-wallet', 'kind' => 'wallet', 'method' => 'gcash'],
+    'paymaya' => ['label' => 'PayMaya', 'hint' => 'E-wallet', 'kind' => 'wallet', 'method' => 'paymaya'],
+    'qrph' => ['label' => 'QR Ph', 'hint' => 'Any bank or e-wallet', 'kind' => 'qr', 'method' => 'qrph'],
+    'card-credit' => ['label' => 'Credit card', 'hint' => 'Credit card', 'kind' => 'card', 'method' => 'card'],
+    'card-mastercard' => ['label' => 'Mastercard', 'hint' => 'Credit or debit', 'kind' => 'card', 'method' => 'card'],
   ];
+  if (empty($ewallet)) {
+    unset($options['gcash'], $options['paymaya']); // GCash and PayMaya are hidden until PAYMONGO_EWALLET=true
+  }
+  if (empty($cards)) {
+    unset($options['card-credit'], $options['card-mastercard']); // cards are hidden until PAYMONGO_CARDS=true
+  }
   $chosen = (string) ($old['method'] ?? '');
   $once = $order->isPhotoPack() ? 'One-time payment: the photos are paid once and are yours for good.' : 'One-time payment: this plan never expires, so there is nothing to renew.';
   // what a subscription means for a way to pay
@@ -20,15 +26,34 @@
       : 'Renews ' . $every . ': you will get a reminder and approve each payment with ' . $name . '. Cancel any time in your account.';
   };
 @endphp
-<div class="pay-methods" role="radiogroup" aria-label="How do you want to pay?">
+<div class="pay-grid" role="group" aria-label="How do you want to pay?">
   @foreach ($options as $id => $opt)
-  <div class="pay-option pay-{{ $opt['kind'] }}">
-    <input class="pay-radio" type="radio" name="pay-method" id="pm-{{ $id }}" value="{{ $id }}" @if ($chosen !== '' && $chosen === $opt['method'] && ($opt['kind'] === 'wallet' || $id === 'card-credit')) checked @endif />
-    <label class="pay-tile" for="pm-{{ $id }}">
-      <span class="pay-logo pay-logo-{{ $id }}" aria-hidden="true">@if ($id === 'card-mastercard')<i></i><i></i>@else{{ $id === 'gcash' ? 'G' : ($id === 'paymaya' ? 'm' : 'VISA') }}@endif</span>
+  @if ($opt['kind'] === 'qr')
+  {{-- QR Ph needs nothing from the customer: choosing it makes the payment and the page opens the code at once --}}
+  <form method="post" action="/dashboard/orders/{{ $order->reference }}/pay">
+    @csrf
+    <input type="hidden" name="method" value="qrph" />
+    <button class="pay-tile" type="submit">
+      @include('partials.pay-logo', ['id' => $id])
       <span class="pay-name"><b>{{ $opt['label'] }}</b><small>{{ $opt['hint'] }}</small></span>
-      <span class="pay-chevron" aria-hidden="true"></span>
-    </label>
+    </button>
+  </form>
+  @else
+  <button class="pay-tile" type="button" data-open="#pay-{{ $id }}" aria-haspopup="dialog">
+    @include('partials.pay-logo', ['id' => $id])
+    <span class="pay-name"><b>{{ $opt['label'] }}</b><small>{{ $opt['hint'] }}</small></span>
+  </button>
+  @endif
+  @endforeach
+</div>
+@foreach (array_filter($options, static fn (array $o): bool => $o['kind'] !== 'qr') as $id => $opt)
+<dialog class="modal pay-dialog" id="pay-{{ $id }}" aria-labelledby="pay-{{ $id }}-title" @if ($chosen !== '' && $chosen === $opt['method'] && ($opt['kind'] !== 'card' || $id === 'card-credit')) data-autoopen @endif>
+  <div class="pay-dialog-head">
+    @include('partials.pay-logo', ['id' => $id])
+    <div class="pay-name"><h2 id="pay-{{ $id }}-title">{{ $opt['label'] }}</h2><small>{{ $opt['hint'] }}</small></div>
+    <button class="icon-btn" type="button" data-close aria-label="Close">&times;</button>
+  </div>
+  <div class="pay-dialog-body">
     <div class="pay-panel">
       @if ($opt['kind'] === 'wallet')
       <form method="post" action="/dashboard/orders/{{ $order->reference }}/pay" class="stack pay-form" novalidate style="--gap:14px">
@@ -76,5 +101,5 @@
       @endif
     </div>
   </div>
-  @endforeach
-</div>
+</dialog>
+@endforeach

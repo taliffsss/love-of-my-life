@@ -32,6 +32,29 @@ final class BillingTest extends TestCase
         return $order;
     }
 
+    public function testTheQaAccountPaysOnePesoForAnythingAndNobodyElseDoes(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('saas.qa.email', ' Owner@Example.com ');
+        $page = $this->makePage($this->owner);
+
+        $plan = $this->billing->createOrder($this->owner->id, $page, 'sweetheart', 'year', 'paymongo');
+        $this->assertSame(['sweetheart', 'year', 100], [$plan->plan, $plan->period, $plan->amount], 'the plan is the real one, only the money changes');
+        $photos = $this->billing->createPhotoOrder($this->owner->id, $page, 3, 'paymongo');
+        $this->assertSame(100, $photos->amount);
+        $this->assertGreaterThan(0, $photos->photos, 'the photos bought are unchanged');
+
+        $other = $this->makeUser('someone@example.com');
+        $this->assertSame(35000, $this->billing->createOrder($other->id, $this->makePage($other), 'sweetheart', 'month', 'paymongo')->amount, 'everyone else pays the price');
+        $this->assertSame(3 * $this->app->make(\App\Services\PhotoAllowance::class)->packPrice(), $this->billing->createPhotoOrder($other->id, null, 3, 'paymongo')->amount);
+    }
+
+    public function testWithoutAQaEmailEveryonePaysThePrice(): void
+    {
+        $this->app->make(\Naluz\Config\Repository::class)->set('saas.qa.email', '');
+        $order = $this->billing->createOrder($this->owner->id, $this->makePage($this->owner), 'sweet', 'month', 'paymongo');
+        $this->assertSame(20000, $order->amount);
+    }
+
     public function testAMonthlyPlanStartsNow(): void
     {
         $page = $this->makePage($this->owner);

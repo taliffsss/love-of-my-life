@@ -26,7 +26,7 @@ use Naluz\Database\Orm\Model;
  * @property string $provider
  * @property ?string $provider_ref
  * @property ?\DateTimeImmutable $paid_at
- * @property ?string $method gcash, paymaya or card
+ * @property ?string $method gcash, paymaya, qrph or card
  * @property string $billing one_time or subscription
  * @property ?int $subscription_id the subscription a renewal order belongs to
  * @property ?string $checkout_url the provider's hosted checkout for a pending order
@@ -43,7 +43,8 @@ final class Order extends Model
     public const GCASH = 'gcash';
     public const PAYMAYA = 'paymaya';
     public const CARD = 'card';
-    public const METHODS = [self::GCASH => 'GCash', self::PAYMAYA => 'PayMaya', self::CARD => 'Credit card'];
+    public const QRPH = 'qrph';
+    public const METHODS = [self::GCASH => 'GCash', self::PAYMAYA => 'PayMaya', self::CARD => 'Credit card', self::QRPH => 'QR Ph'];
 
     public const ONE_TIME = 'one_time';
     public const SUBSCRIPTION = 'subscription';

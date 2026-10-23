@@ -544,27 +544,41 @@ a.stat:hover { box-shadow: var(--shadow-2); }
 .pill-deactivated { color: var(--ink-2); background: var(--surface-2); }
 .pill-suspended { color: var(--danger); background: var(--danger-soft); }
 
-/* ---------- paying: the ways to pay, each opening its form beneath it ---------- */
-.pay-methods { display: grid; gap: 10px; }
-.pay-option { border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
-.pay-radio { position: absolute; opacity: 0; pointer-events: none; }
-.pay-tile { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; }
-.pay-tile:hover { background: var(--surface-2); }
-.pay-radio:focus-visible + .pay-tile { box-shadow: var(--focus); border-radius: var(--radius); }
-.pay-radio:checked + .pay-tile { background: var(--brand-soft); }
-.pay-name { display: grid; flex: 1; line-height: 1.25; }
-.pay-name small { color: var(--ink-3); font-size: .84rem; }
-.pay-chevron { width: 10px; height: 10px; border-right: 2px solid var(--ink-3); border-bottom: 2px solid var(--ink-3); transform: rotate(45deg); transition: transform .2s var(--ease); margin-right: 4px; }
-.pay-radio:checked + .pay-tile .pay-chevron { transform: rotate(-135deg); }
-.pay-panel { display: none; padding: 6px 16px 18px; border-top: 1px solid var(--line); }
-.pay-radio:checked ~ .pay-panel { display: block; }
-.pay-logo { display: grid; place-items: center; flex: 0 0 52px; height: 34px; border-radius: 8px; color: #fff; font-weight: 700; font-size: .8rem; letter-spacing: .04em; }
-.pay-logo-gcash { background: #0b6cf5; font-size: 1.1rem; }
-.pay-logo-paymaya { background: #0a0a0a; color: #3be39a; font-size: 1.2rem; text-transform: lowercase; }
-.pay-logo-card-credit { background: #1a1f71; }
+/* ---------- paying: the ways to pay, square tiles three across; each opens its form (or the QR code) in a dialog ---------- */
+.pay-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pay-grid > form { display: contents; }
+.pay-tile { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 10px; border: 1px solid var(--line-2); border-radius: var(--radius); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; text-align: center; transition: border-color .15s var(--ease), box-shadow .15s var(--ease), transform .15s var(--ease); }
+.pay-tile:hover { border-color: var(--brand); box-shadow: 0 8px 22px rgba(60, 20, 50, .12); transform: translateY(-2px); }
+.pay-tile:focus-visible { outline: none; box-shadow: var(--focus); }
+.pay-name { display: grid; gap: 2px; line-height: 1.2; }
+.pay-name b { font-size: 1rem; }
+.pay-name small { color: var(--ink-3); font-size: .8rem; }
+.pay-logo { display: grid; place-items: center; flex: none; width: 64px; height: 64px; border-radius: 16px; color: #fff; font-weight: 800; font-size: .95rem; letter-spacing: .02em; overflow: hidden; }
+.pay-logo-gcash { background: linear-gradient(145deg, #1a8cff, #0058d6); font-size: 2.1rem; font-family: var(--font-display, inherit); }
+.pay-logo-paymaya { background: #0c0c0c; color: #2ee88a; font-size: 1.15rem; text-transform: lowercase; letter-spacing: -.02em; }
+.pay-logo-qrph { background: #fff; border: 1px solid var(--line-2); padding: 9px; }
+.pay-logo-card-credit { background: #1a1f71; font-style: italic; }
 .pay-logo-card-mastercard { background: #222; gap: 0; }
-.pay-logo-card-mastercard i { width: 18px; height: 18px; border-radius: 50%; background: #eb001b; }
-.pay-logo-card-mastercard i + i { background: #f79e1b; margin-left: -7px; opacity: .92; }
+.pay-logo-card-mastercard i { width: 24px; height: 24px; border-radius: 50%; background: #eb001b; }
+.pay-logo-card-mastercard i + i { background: #f79e1b; margin-left: -9px; opacity: .92; }
+.pay-qr { display: block; width: min(280px, 100%); height: auto; margin: 0 auto; padding: 12px; background: #fff; border: 1px solid var(--line-2); border-radius: 14px; }
+dialog.pay-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow: auto; }
+.pay-dialog-head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.pay-dialog-head .pay-logo { width: 48px; height: 48px; border-radius: 12px; font-size: .8rem; }
+.pay-dialog-head .pay-logo-gcash { font-size: 1.6rem; }
+.pay-dialog-head .pay-logo-qrph { padding: 7px; }
+.pay-dialog-head .pay-name { flex: 1; }
+.pay-dialog-head h2 { margin: 0; font-size: 1.15rem; }
+.pay-dialog-body { padding: 18px 20px 22px; display: grid; gap: 14px; }
+.pay-panel { display: block; }
+@media (max-width: 460px) {
+  .pay-grid { gap: 8px; }
+  .pay-tile { gap: 8px; padding: 6px; }
+  .pay-logo { width: 48px; height: 48px; border-radius: 12px; }
+  .pay-logo-gcash { font-size: 1.6rem; }
+  .pay-name small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .pay-tile { transition: none; } .pay-tile:hover { transform: none; } }
 .pay-form { padding-top: 14px; }
 .pay-field { border: 0; margin: 0; padding: 0; min-width: 0; }
 .pay-field legend { margin-bottom: 10px; }

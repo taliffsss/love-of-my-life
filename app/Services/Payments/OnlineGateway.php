@@ -17,6 +17,7 @@ interface OnlineGateway extends PaymentGateway
     public const GCASH = 'gcash';
     public const PAYMAYA = 'paymaya';
     public const CARD = 'card';
+    public const QRPH = 'qrph';
 
     /** Whether the keys for this are set (secret and public). */
     public function onlineConfigured(): bool;
@@ -45,6 +46,12 @@ interface OnlineGateway extends PaymentGateway
      * @throws PaymentException
      */
     public function startSubscription(Order $order, string $method, array $payer, string $returnUrl): array;
+
+    /**
+     * The QR Ph code of a payment started with the `qrph` method: an image any bank or e-wallet app can scan, as a data: URI.
+     * Null when the payment has none (any other method, or the code has expired).
+     */
+    public function qrImage(string $ref): ?string;
 
     /**
      * What the provider says about a payment (for when its webhook has not arrived).

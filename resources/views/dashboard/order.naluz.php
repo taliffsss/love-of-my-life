@@ -42,7 +42,26 @@
           @if ($attempt !== null)
           <div class="pay-wait" id="order-wait" data-status-url="/dashboard/orders/{{ $order->reference }}/status" data-expires="{{ $attempt->expires_at->getTimestamp() }}" data-go="{{ $go ? '1' : '0' }}">
             <p><strong>Waiting for your payment…</strong> <span class="small muted" id="wait-state" role="status"></span></p>
-            @if ((string) $attempt->redirect_url !== '')
+            @if ($attempt->method === 'qrph')
+            <p>Scan the QR code with your banking or e-wallet app. This page updates by itself.</p>
+            @if ($qr !== null)
+            <button class="btn btn-primary btn-lg" type="button" data-open="#qr-dialog">Show QR code</button>
+            <dialog class="modal pay-dialog" id="qr-dialog" aria-labelledby="qr-title" @if ($go) data-autoopen @endif>
+              <div class="pay-dialog-head">
+                @include('partials.pay-logo', ['id' => 'qrph'])
+                <div class="pay-name"><h2 id="qr-title">Scan to pay {{ \App\Services\Plans::money($order->amount, $order->currency) }}</h2><small>QR Ph · any bank or e-wallet</small></div>
+                <button class="icon-btn" type="button" data-close aria-label="Close">&times;</button>
+              </div>
+              <div class="pay-dialog-body">
+                <img class="pay-qr" src="{{ $qr }}" width="260" height="260" alt="QR Ph code to pay {{ \App\Services\Plans::money($order->amount, $order->currency) }} for order {{ $order->reference }}" />
+                <a class="btn btn-primary btn-lg" href="{{ $qr }}" download="QRPh-{{ $order->reference }}.png">Download QR image</a>
+                <p class="small muted" style="text-align:center"><strong>On this phone?</strong> Download the image, then open your banking or e-wallet app and choose <em>Upload QR</em> (or <em>Scan from gallery</em>). On another device, choose <em>Scan QR</em> and point the camera at this code. The order turns paid by itself once the payment arrives.</p>
+              </div>
+            </dialog>
+            @else
+            <p class="notice notice-warn">The QR code could not be loaded. Choose "Pay another way" and show it again.</p>
+            @endif
+            @elseif ((string) $attempt->redirect_url !== '')
             <p>Approve the payment in {{ $methods[$attempt->method] ?? $attempt->method }}, then come back: this page updates by itself.</p>
             <a class="btn btn-primary btn-lg" id="continue-link" href="{{ $attempt->redirect_url }}" rel="noopener">Continue to {{ $methods[$attempt->method] ?? $attempt->method }}</a>
             @else
