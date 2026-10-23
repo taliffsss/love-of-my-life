@@ -14,10 +14,7 @@ return [
     // Where `php naluz route:cache` writes the compiled route table (ignored while app.debug is true).
     'routes_cache' => null,
     'url' => env('APP_URL', 'http://localhost'),
-    // Always UTC, whatever APP_TIMEZONE says: every date is stored and calculated in UTC and read back as UTC (App\Support\Time shows
-    // them in saas.display_timezone). With another default zone, a stored "05:41" is read as 05:41 local, hours off: a payment that
-    // had 20 minutes left was found expired the moment it was made.
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
     'key' => env('APP_KEY', ''),
     // Keys APP_KEY replaced, comma separated: encrypted data written with them is still read (then php bin/reseal-payments.php).
     'previous_keys' => array_values(array_filter(array_map('trim', explode(',', (string) env('APP_PREVIOUS_KEYS', ''))))),
