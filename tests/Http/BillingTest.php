@@ -32,15 +32,15 @@ final class BillingTest extends TestCase
         return $order;
     }
 
-    public function testTheQaAccountPaysOnePesoForAnythingAndNobodyElseDoes(): void
+    public function testTheQaAccountPaysAtMostTheTestingAmountAndNobodyElseDoes(): void
     {
         $this->app->make(\Naluz\Config\Repository::class)->set('saas.qa.email', ' Owner@Example.com ');
         $page = $this->makePage($this->owner);
 
         $plan = $this->billing->createOrder($this->owner->id, $page, 'sweetheart', 'year', 'paymongo');
-        $this->assertSame(['sweetheart', 'year', 100], [$plan->plan, $plan->period, $plan->amount], 'the plan is the real one, only the money changes');
+        $this->assertSame(['sweetheart', 'year', 10000], [$plan->plan, $plan->period, $plan->amount], 'the plan is the real one, only the money changes');
         $photos = $this->billing->createPhotoOrder($this->owner->id, $page, 3, 'paymongo');
-        $this->assertSame(100, $photos->amount);
+        $this->assertSame(10000, $photos->amount);
         $this->assertGreaterThan(0, $photos->photos, 'the photos bought are unchanged');
 
         $other = $this->makeUser('someone@example.com');

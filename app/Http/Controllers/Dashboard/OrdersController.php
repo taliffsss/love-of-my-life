@@ -150,7 +150,7 @@ final class OrdersController
      * sends them to the order page, which takes them on to approve it in their wallet (a link, and the page follows it by itself).
      * Body: method (gcash or paymaya), phone, billing (subscription or one_time).
      */
-    public function pay(string $reference, ServerRequestInterface $request, Auth $auth, PaymentGateway $gateway, Plans $plans): ResponseInterface
+    public function pay(string $reference, ServerRequestInterface $request, Auth $auth, PaymentGateway $gateway, Plans $plans, Billing $ledger): ResponseInterface
     {
         $order = $this->payableOrder($reference, $auth, $gateway);
         $body = Request::body($request);
@@ -169,7 +169,9 @@ final class OrdersController
         try {
             $this->start($order, $gateway, $method, $billing, $this->payer($auth, $phone));
         } catch (PaymentException $e) {
-            return Screen::back('/dashboard/orders/' . $order->reference, $e->getMessage());
+            // the test account is also told the provider's own reason, so a live-mode refusal can be read off the screen
+            $why = $e->providerDetail !== '' && $ledger->isQaAccount((int) $auth->id()) ? ' [QA: ' . $e->providerDetail . ']' : '';
+            return Screen::back('/dashboard/orders/' . $order->reference, $e->getMessage() . $why);
         }
         return Response::redirect('/dashboard/orders/' . $order->reference . '?go=1', 303);
     }

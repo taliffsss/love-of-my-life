@@ -57,6 +57,18 @@ abstract class HostedGateway implements PaymentGateway
         return $order->isPhotoPack() ? $order->photos . ' more photos' : ucfirst($order->plan) . ' plan';
     }
 
+    /** The provider's own reason for refusing, as "code: detail" (PayMongo and Xendit both answer errors[0] / message); '' when it gave none. */
+    private static function providerError(mixed $data): string
+    {
+        if (!is_array($data)) {
+            return '';
+        }
+        $first = is_array($data['errors'][0] ?? null) ? $data['errors'][0] : $data;
+        $code = (string) ($first['code'] ?? $first['error_code'] ?? '');
+        $detail = (string) ($first['detail'] ?? $first['message'] ?? '');
+        return mb_substr(trim($code . ($code !== '' && $detail !== '' ? ': ' : '') . $detail), 0, 300);
+    }
+
     /** One JSON call to the provider. @return array<string,mixed> @throws PaymentException */
     protected function request(string $method, string $url, array $options): array
     {
@@ -69,8 +81,9 @@ abstract class HostedGateway implements PaymentGateway
         }
         $data = json_decode((string) $response->getBody(), true);
         if ($response->getStatusCode() >= 400 || !is_array($data)) {
-            logger()->error('[payments] {gateway} answered {status}', ['gateway' => $this->name(), 'status' => $response->getStatusCode()]);
-            throw new PaymentException('The payment provider could not start the checkout. Please try again in a moment.');
+            $detail = self::providerError($data);
+            logger()->error('[payments] {gateway} answered {status} {detail}', ['gateway' => $this->name(), 'status' => $response->getStatusCode(), 'detail' => $detail]);
+            throw new PaymentException('The payment provider could not start the checkout. Please try again in a moment.', $detail);
         }
         return $data;
     }

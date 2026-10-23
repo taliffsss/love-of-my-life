@@ -72,18 +72,24 @@ final class Billing
     }
 
     /**
-     * What the customer is charged: the price, except for the QA account (QA_EMAIL), which pays at most the testing amount (₱1).
+     * What the customer is charged: the price, except for the QA account (QA_EMAIL), which pays at most the testing amount (saas.qa.amount).
      * The plan, the period and the photos it buys are unchanged; only the money is.
      */
     private function chargeFor(int $userId, int $price): int
     {
-        $email = User::normaliseEmail((string) config('saas.qa.email', ''));
         $cap = (int) config('saas.qa.amount', 100);
-        if ($email === '' || $cap < 1 || $price <= $cap) {
-            return $price;
+        return $cap >= 1 && $price > $cap && $this->isQaAccount($userId) ? $cap : $price;
+    }
+
+    /** Whether this is the account named by QA_EMAIL (the test account). */
+    public function isQaAccount(int $userId): bool
+    {
+        $email = User::normaliseEmail((string) config('saas.qa.email', ''));
+        if ($email === '') {
+            return false;
         }
         $user = User::query()->withoutCache()->where('id', $userId)->first();
-        return $user instanceof User && $user->email === $email ? $cap : $price;
+        return $user instanceof User && $user->email === $email;
     }
 
     /**

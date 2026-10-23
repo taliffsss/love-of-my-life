@@ -97,10 +97,10 @@ return [
     ],
 
     // The QA account (QA_EMAIL, made at start by bin/ensure-qa.php) pays at most `amount` centavos per order, whatever the plan or the
-    // number of photo packs, so the live checkout can be tried for ₱1. Only that one account: no e-mail set, no effect.
+    // number of photo packs, so the live checkout can be tried for ₱100. Only that one account: no e-mail set, no effect.
     'qa' => [
         'email' => env('QA_EMAIL', ''),
-        'amount' => 100,
+        'amount' => 10000,
     ],
 
     // How long a payment keeps a page online, in months; null = for good.

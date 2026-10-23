@@ -318,6 +318,23 @@ final class OnlinePaymentsTest extends TestCase
         $this->assertStringContainsString('could not start the checkout', (string) $this->get('/dashboard/orders/' . $order->reference)->getBody());
     }
 
+    public function testOnlyTheQaAccountIsToldWhyPayMongoRefused(): void
+    {
+        $refusal = fn () => $this->answer(['errors' => [['code' => 'parameter_invalid', 'detail' => 'qrph is not enabled for this account']]], 400);
+
+        $this->usePayMongo([$refusal()], false, false, false);
+        $order = $this->buy();
+        $this->pay($order, ['method' => 'qrph']);
+        $page = (string) $this->get('/dashboard/orders/' . $order->reference)->getBody();
+        $this->assertStringContainsString('could not start the checkout', $page);
+        $this->assertStringNotContainsString('not enabled for this account', $page, 'a customer never sees the provider\'s wording');
+
+        $this->app->make(Repository::class)->set('saas.qa.email', $this->owner->email);
+        $this->usePayMongo([$refusal()], false, false, false);
+        $this->pay($order, ['method' => 'qrph']);
+        $this->assertStringContainsString('[QA: parameter_invalid: qrph is not enabled for this account]', (string) $this->get('/dashboard/orders/' . $order->reference)->getBody());
+    }
+
     // ---- QR Ph ----
 
     private function qrAnswers(string $intent = 'pi_qr'): array

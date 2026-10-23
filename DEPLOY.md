@@ -177,8 +177,8 @@ The release workflow writes these to the server's `deploy/.env.production` on ev
 
 Cards (Visa, Mastercard) stay hidden unless `PAYMONGO_CARDS=true`. QR Ph is always offered.
 
-**The QA account pays ₱1.** Every order made by the account named in `QA_EMAIL` (plans, renewals, photo packs) is charged at most ₱1.00
-(`saas.qa.amount` in `config/saas.php`, 100 centavos), so the live checkout can be tried for real with almost nothing. The plan, period and
+**The QA account pays at most ₱100.** Every order made by the account named in `QA_EMAIL` (plans, renewals, photo packs) is charged at most ₱100.00
+(`saas.qa.amount` in `config/saas.php`, 10000 centavos), so the live checkout can be tried for real with little money. The plan, period and
 photos bought are the real ones; only the money changes. Nobody else is affected, and with `QA_EMAIL` unset there is no effect. To stop it,
 remove the `QA_EMAIL` secret (and `QA_*` from the server's `.env.production`) and redeploy.
 
