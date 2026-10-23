@@ -22,6 +22,7 @@ final class ErrorReporting
             'profiles_sample_rate' => extension_loaded('excimer') ? (float) ($config['profiles_sample_rate'] ?? 0) : null,
             'enable_logs' => !empty($config['enable_logs']) ?: null,
             'send_default_pii' => false,
+            'logger' => !empty($config['debug']) ? new \Sentry\Logger\DebugStdOutLogger() : null,
             'max_request_body_size' => 'none',
             'before_send' => static fn (\Sentry\Event $event): ?\Sentry\Event => self::scrub($event),
         ], static fn ($v): bool => $v !== null && $v !== ''));

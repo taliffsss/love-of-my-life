@@ -316,7 +316,8 @@ final class OrdersController
                 'ewallet' => (bool) config('saas.payments.paymongo.ewallet'),
                 'cards' => (bool) config('saas.payments.paymongo.cards'),
             ];
-            logger()->info('[checkout] {event} {facts}', ['event' => $event, 'facts' => json_encode($facts, JSON_UNESCAPED_SLASHES)]);
+            // `warning`, not `info`: production runs with LOG_LEVEL=warning, which would drop info lines from the log file
+            logger()->warning('[checkout] {event} {facts}', ['event' => $event, 'facts' => json_encode($facts, JSON_UNESCAPED_SLASHES)]);
         } catch (\Throwable) {
             // tracing must never break a payment
         }
