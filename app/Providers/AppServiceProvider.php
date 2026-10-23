@@ -148,6 +148,10 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $config = $this->app->make(Repository::class);
+        // every date is stored and read as UTC: another zone makes a payment's validity hours off (a new QR Ph payment was found expired at once)
+        if (date_default_timezone_get() !== 'UTC') {
+            logger()->warning('[config] the app runs in {zone}, not UTC: set APP_TIMEZONE=UTC or stored times are read hours off', ['zone' => date_default_timezone_get()]);
+        }
         $sentry = (array) $config->get('sentry', []);
         $started = ErrorReporting::start($sentry);
         // the `sentry_logs` channel always exists: it sends to Sentry when that is on and does nothing otherwise

@@ -458,6 +458,35 @@ final class OnlinePaymentsTest extends TestCase
         $this->assertSame(Order::PAID, $this->fresh($order)->status);
     }
 
+    public function testAQrPhPaymentOfThe100CentavoQaPriceStillBuysTheWholeMonth(): void
+    {
+        $this->app->make(Repository::class)->set('saas.qa.email', $this->owner->email);
+        $this->usePayMongo($this->qrAnswers('pi_month'), false, false, false);
+        $order = $this->buy('sweet', 'month');
+        $this->assertSame(100, $order->amount, 'the QA price');
+        $this->pay($order, ['method' => 'qrph']);
+
+        $before = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $this->assertSame(200, $this->paidWebhook('pi_month', 100)->getStatusCode());
+        $after = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+
+        $paid = $this->fresh($order);
+        $page = $this->freshPage();
+        $this->assertSame(Order::PAID, $paid->status);
+        $this->assertSame('sweet', $page->plan);
+        $this->assertGreaterThanOrEqual($before->getTimestamp(), $paid->paid_at->getTimestamp(), 'paid_at is the payment, in UTC');
+        $this->assertLessThanOrEqual($after->getTimestamp(), $paid->paid_at->getTimestamp());
+        // valid for one calendar month from the payment, and live right now
+        $this->assertSame(
+            \App\Services\Plans::addMonths(\DateTimeImmutable::createFromInterface($paid->paid_at), 1)->getTimestamp(),
+            $page->expires_at->getTimestamp()
+        );
+        $this->assertTrue($page->isLive());
+        $this->assertSame('month', $paid->period);
+        $this->assertSame('one_time', $paid->billing);
+        $this->assertSame(0, Subscription::query()->count());
+    }
+
     public function testAQrPhPaymentWithoutACodeFailsAndNothingIsKept(): void
     {
         $answers = $this->qrAnswers();

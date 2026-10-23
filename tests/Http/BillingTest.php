@@ -55,6 +55,51 @@ final class BillingTest extends TestCase
         $this->assertSame(20000, $order->amount);
     }
 
+    /** @return array<string,array{string,string,string}> paid at, period, expires */
+    public static function validityCases(): array
+    {
+        return [
+            'a month from an ordinary day' => ['2026-10-23 05:21:01', 'month', '2026-11-23 05:21:01'],
+            'a month across the year end' => ['2026-12-31 23:59:59', 'month', '2027-01-31 23:59:59'],
+            'Oct 31 + 1 month is Nov 30' => ['2026-10-31 10:00:00', 'month', '2026-11-30 10:00:00'],
+            'Jan 31 + 1 month, ordinary year' => ['2026-01-31 08:00:00', 'month', '2026-02-28 08:00:00'],
+            'Jan 31 + 1 month, leap year' => ['2028-01-31 08:00:00', 'month', '2028-02-29 08:00:00'],
+            'a year from an ordinary day' => ['2026-10-23 05:21:01', 'year', '2027-10-23 05:21:01'],
+            'Feb 29 + 1 year is Feb 28' => ['2028-02-29 12:00:00', 'year', '2029-02-28 12:00:00'],
+            'a year paid on the last second of a year' => ['2026-12-31 23:59:59', 'year', '2027-12-31 23:59:59'],
+        ];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('validityCases')]
+    public function testAOneTimePaymentIsValidFromTheMomentItIsPaidForExactlyItsPeriod(string $paidAt, string $period, string $expires): void
+    {
+        $paid = new \DateTimeImmutable($paidAt, new \DateTimeZone('UTC'));
+        $page = $this->makePage($this->owner);
+        $order = $this->billing->createOrder($this->owner->id, $page, 'sweet', $period, 'paymongo');
+        $this->assertTrue($this->billing->markPaid($order, 'paymongo', 'pi_x', $paid));
+        $page = $page->fresh();
+
+        $this->assertSame($expires, $page->expires_at->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'), 'valid for the period, counted from the payment');
+        $this->assertSame($paidAt, $order->fresh()->paid_at->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'));
+        $this->assertTrue($page->isLive($paid), 'live the moment it is paid, never already expired');
+        $this->assertTrue($page->isLive($page->expires_at->modify('-1 second')), 'live until the last second');
+        $this->assertFalse($page->isLive($page->expires_at), 'expired exactly at the expiry');
+        $this->assertSame($paidAt, $page->published_at->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'));
+    }
+
+    public function testAnExpiredPageThatIsPaidAgainIsValidFromTheNewPaymentNotFromTheOldExpiry(): void
+    {
+        $page = $this->makePage($this->owner);
+        $this->pay($page, 'sweet', 'month', new \DateTimeImmutable('2026-01-10 00:00:00', new \DateTimeZone('UTC')));
+        $this->assertFalse($page->fresh()->isLive(new \DateTimeImmutable('2026-03-01 00:00:00', new \DateTimeZone('UTC'))), 'lapsed in February');
+
+        $again = new \DateTimeImmutable('2026-03-01 09:30:00', new \DateTimeZone('UTC'));
+        $this->pay($page, 'sweet', 'month', $again);
+        $page = $page->fresh();
+        $this->assertSame('2026-04-01 09:30:00', $page->expires_at->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s'));
+        $this->assertTrue($page->isLive($again));
+    }
+
     public function testAMonthlyPlanStartsNow(): void
     {
         $page = $this->makePage($this->owner);
