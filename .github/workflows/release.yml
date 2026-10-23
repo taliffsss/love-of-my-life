@@ -320,7 +320,16 @@ jobs:
         run: |
           # The container creates a normal test account from these when no account has that e-mail yet (bin/ensure-qa.php); it never changes an existing one.
           umask 077
-          printf 'QA_EMAIL=%s\nQA_PASSWORD=%s\n' "$(printf '%s' "$QA_EMAIL" | tr -d '\r\n')" "$(printf '%s' "$QA_PASSWORD" | tr -d '\r\n')" > qa.env
+          # A secret is the bare value. If it was pasted as "NAME=value", with quotes or with spaces around it, tidy it (and say so in this log) instead of
+          # writing a value the app cannot use. Only the shape is ever printed, never the value.
+          clean() {
+            local name="$1" v; v="$(printf '%s' "$2" | tr -d '\r\n')"
+            v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"
+            case "$v" in "$name="*) echo "::warning::$name was saved as '$name=...': the '$name=' part was removed. Save only the value in GitHub." >&2; v="${v#"$name="}";; esac
+            case "$v" in \"*\") v="${v#\"}"; v="${v%\"}";; \'*\') v="${v#\'}"; v="${v%\'}";; esac
+            printf '%s' "$v"
+          }
+          printf 'QA_EMAIL=%s\nQA_PASSWORD=%s\n' "$(clean QA_EMAIL "$QA_EMAIL")" "$(clean QA_PASSWORD "$QA_PASSWORD")" > qa.env
           scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes qa.env "$HOST:$DIR/deploy/.qa.env.tmp"
           rm -f qa.env
           $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
@@ -342,15 +351,23 @@ jobs:
           # The keys come from secrets, the two switches from variables (anything but "true" is written as false). The values travel in a file
           # (chmod 600), not on a command line. Older PAYMENTS_DRIVER and PAYMONGO_ lines are replaced; PAYMENTS_MANUAL_INSTRUCTIONS is kept.
           umask 077
-          clean() { printf '%s' "$1" | tr -d '\r\n'; }
-          flag() { [ "$(clean "$1")" = "true" ] && echo true || echo false; }
+          # A secret is the bare value. If it was pasted as "NAME=value", with quotes or with spaces around it, tidy it (and say so in this log) instead of
+          # writing a value the app cannot use. Only the shape is ever printed, never the value.
+          clean() {
+            local name="$1" v; v="$(printf '%s' "$2" | tr -d '\r\n')"
+            v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"
+            case "$v" in "$name="*) echo "::warning::$name was saved as '$name=...': the '$name=' part was removed. Save only the value in GitHub." >&2; v="${v#"$name="}";; esac
+            case "$v" in \"*\") v="${v#\"}"; v="${v%\"}";; \'*\') v="${v#\'}"; v="${v%\'}";; esac
+            printf '%s' "$v"
+          }
+          flag() { [ "$(clean "$1" "$2")" = "true" ] && echo true || echo false; }
           {
-            printf 'PAYMENTS_DRIVER=%s\n' "$(v="$(clean "$PAYMENTS_DRIVER")"; echo "${v:-paymongo}")"
-            printf 'PAYMONGO_SECRET_KEY=%s\n' "$(clean "$PAYMONGO_SECRET_KEY")"
-            printf 'PAYMONGO_PUBLIC_KEY=%s\n' "$(clean "$PAYMONGO_PUBLIC_KEY")"
-            printf 'PAYMONGO_WEBHOOK_SECRET=%s\n' "$(clean "$PAYMONGO_WEBHOOK_SECRET")"
-            printf 'PAYMONGO_SUBSCRIPTIONS=%s\n' "$(flag "$PAYMONGO_SUBSCRIPTIONS")"
-            printf 'PAYMONGO_EWALLET=%s\n' "$(flag "$PAYMONGO_EWALLET")"
+            printf 'PAYMENTS_DRIVER=%s\n' "$(v="$(clean PAYMENTS_DRIVER "$PAYMENTS_DRIVER")"; echo "${v:-paymongo}")"
+            printf 'PAYMONGO_SECRET_KEY=%s\n' "$(clean PAYMONGO_SECRET_KEY "$PAYMONGO_SECRET_KEY")"
+            printf 'PAYMONGO_PUBLIC_KEY=%s\n' "$(clean PAYMONGO_PUBLIC_KEY "$PAYMONGO_PUBLIC_KEY")"
+            printf 'PAYMONGO_WEBHOOK_SECRET=%s\n' "$(clean PAYMONGO_WEBHOOK_SECRET "$PAYMONGO_WEBHOOK_SECRET")"
+            printf 'PAYMONGO_SUBSCRIPTIONS=%s\n' "$(flag PAYMONGO_SUBSCRIPTIONS "$PAYMONGO_SUBSCRIPTIONS")"
+            printf 'PAYMONGO_EWALLET=%s\n' "$(flag PAYMONGO_EWALLET "$PAYMONGO_EWALLET")"
           } > paymongo.env
           scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes paymongo.env "$HOST:$DIR/deploy/.paymongo.env.tmp"
           rm -f paymongo.env
@@ -374,13 +391,21 @@ jobs:
           # The DSN (SENTRY_DSN, or SENTRY_NALUZ_DSN) from a secret or variable; the rates and switches from variables. Only what is set is written;
           # older SENTRY_ lines are replaced. LOG_CHANNEL and LOG_STACK (for example stack and single,sentry_logs) are written only when set.
           umask 077
-          clean() { printf '%s' "$1" | tr -d '\r\n'; }
+          # A secret is the bare value. If it was pasted as "NAME=value", with quotes or with spaces around it, tidy it (and say so in this log) instead of
+          # writing a value the app cannot use. Only the shape is ever printed, never the value.
+          clean() {
+            local name="$1" v; v="$(printf '%s' "$2" | tr -d '\r\n')"
+            v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"
+            case "$v" in "$name="*) echo "::warning::$name was saved as '$name=...': the '$name=' part was removed. Save only the value in GitHub." >&2; v="${v#"$name="}";; esac
+            case "$v" in \"*\") v="${v#\"}"; v="${v%\"}";; \'*\') v="${v#\'}"; v="${v%\'}";; esac
+            printf '%s' "$v"
+          }
           : > sentry.env
           for k in SENTRY_DSN SENTRY_NALUZ_DSN SENTRY_TRACES_SAMPLE_RATE SENTRY_PROFILES_SAMPLE_RATE SENTRY_ENABLE_LOGS; do
-            v="$(clean "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
+            v="$(clean "$k" "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
           done
           for k in LOG_CHANNEL LOG_STACK; do
-            v="$(clean "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
+            v="$(clean "$k" "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
           done
           scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes sentry.env "$HOST:$DIR/deploy/.sentry.env.tmp"
           rm -f sentry.env
