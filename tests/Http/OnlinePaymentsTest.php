@@ -411,6 +411,43 @@ final class OnlinePaymentsTest extends TestCase
         $this->assertStringNotContainsString('id="continue-link"', $html, 'there is no wallet to go on to');
     }
 
+    public function testClickingQrPhLeavesATraceOfWhereTheOrderStands(): void
+    {
+        $lines = new class () extends \Psr\Log\AbstractLogger {
+            /** @var list<string> */
+            public array $lines = [];
+
+            public function log($level, string|\Stringable $message, array $context = []): void
+            {
+                $replace = [];
+                foreach ($context as $k => $v) {
+                    $replace['{' . $k . '}'] = is_scalar($v) ? (string) $v : '';
+                }
+                $this->lines[] = strtr((string) $message, $replace);
+            }
+        };
+        $this->app->make(\Naluz\Log\LogManager::class)->extend((string) config('logging.default'), $lines);
+
+        $this->usePayMongo($this->qrAnswers('pi_trace'), false, false, false);
+        $order = $this->buy();
+        $this->get('/dashboard/orders/' . $order->reference);
+        $this->pay($order, ['method' => 'qrph']);
+        $this->get('/dashboard/orders/' . $order->reference . '?go=1');
+
+        $text = implode("\n", array_filter($lines->lines, static fn (string $l): bool => str_contains($l, '[checkout]')));
+        $this->assertStringContainsString('[checkout] order page', $text);
+        $this->assertStringContainsString('"branch":"choose"', $text, 'before the click: the choices are shown');
+        $this->assertStringContainsString('[checkout] pay clicked', $text);
+        $this->assertStringContainsString('"asked":"qrph"', $text);
+        $this->assertStringContainsString('[checkout] pay started', $text);
+        $this->assertStringContainsString('"method":"qrph"', $text);
+        $this->assertStringContainsString('"branch":"waiting"', $text, 'after the click: the page waits for the payment');
+        $this->assertStringContainsString('qrph expires ', $text);
+        foreach (['sk_test_sec', 'pk_test_pub', $this->owner->email, 'pi_trace_ck'] as $private) {
+            $this->assertStringNotContainsString($private, $text, 'the trace never carries keys or personal data');
+        }
+    }
+
     public function testAQrPhPaymentIsCreditedByTheWebhookLikeAnyOther(): void
     {
         $this->usePayMongo($this->qrAnswers('pi_qr2'), false, false);

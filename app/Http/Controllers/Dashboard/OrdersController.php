@@ -103,6 +103,13 @@ final class OrdersController
         $order = $this->ownedOrder($auth, $reference);
         $page = $order->page_id !== null ? Page::query()->where('id', $order->page_id)->first() : null;
         $attempt = $this->liveAttempt($order);
+        if ($order->status === Order::PENDING) {
+            // what the order page decides from (order.naluz.php): `method !== null` with no live attempt is the "That payment was not completed" notice
+            $this->trace('order page', $order, $gateway, [
+                'branch' => !$this->online($gateway) ? 'not-online' : ($attempt !== null ? 'waiting' : ($order->method !== null ? 'not-completed-notice' : 'choose')),
+                'go' => ($request->getQueryParams()['go'] ?? '') === '1',
+            ]);
+        }
         return Screen::render('dashboard.order', [
             'order' => $order,
             'page' => $page instanceof Page ? $page : null,
@@ -155,6 +162,7 @@ final class OrdersController
         $order = $this->payableOrder($reference, $auth, $gateway);
         $body = Request::body($request);
         $method = (string) ($body['method'] ?? '');
+        $this->trace('pay clicked', $order, $gateway, ['asked' => $method, 'fields' => implode(',', array_keys($body))]);
         $offered = config('saas.payments.paymongo.ewallet') ? [Order::GCASH, Order::PAYMAYA, Order::QRPH] : [Order::QRPH];
         if (!in_array($method, $offered, true)) {
             throw new ValidationException(['method' => [$offered === [Order::QRPH] ? 'Pay with QR Ph.' : 'Choose GCash, PayMaya or QR Ph.']]);
@@ -168,7 +176,9 @@ final class OrdersController
 
         try {
             $this->start($order, $gateway, $method, $billing, $this->payer($auth, $phone));
+            $this->trace('pay started', $order->refresh(), $gateway, ['asked' => $method]);
         } catch (PaymentException $e) {
+            $this->trace('pay refused by the provider', $order, $gateway, ['asked' => $method, 'why' => $e->providerDetail !== '' ? $e->providerDetail : $e->getMessage()]);
             // the test account is also told the provider's own reason, so a live-mode refusal can be read off the screen
             $why = $e->providerDetail !== '' && $ledger->isQaAccount((int) $auth->id()) ? ' [QA: ' . $e->providerDetail . ']' : '';
             return Screen::back('/dashboard/orders/' . $order->reference, $e->getMessage() . $why);
@@ -270,9 +280,46 @@ final class OrdersController
     {
         $order = $this->ownedOrder($auth, $reference);
         if ($order->status !== Order::PENDING || !$this->online($gateway) || $order->provider !== $gateway->name()) {
+            $this->trace('pay not allowed (404)', $order, $gateway, [
+                'because' => $order->status !== Order::PENDING ? 'order is not pending' : (!$this->online($gateway) ? 'gateway is not online (needs the secret and public key)' : 'order provider differs from the gateway'),
+            ]);
             throw new HttpException(404, 'Not Found');
         }
         return $order;
+    }
+
+    /**
+     * One line in the log (and in Sentry's logs) about where an order stands, for finding out why a payment does not start. Facts only:
+     * no e-mail, phone, key or card data. Search the log for "[checkout]".
+     *
+     * @param array<string,scalar> $more
+     */
+    private function trace(string $event, Order $order, PaymentGateway $gateway, array $more = []): void
+    {
+        try {
+            $attempts = PaymentAttempt::query()->withoutCache()->useWritePdo()->where('order_id', $order->id)->orderBy('id', 'desc')->get()->all();
+            $newest = $attempts[0] ?? null;
+            $facts = $more + [
+                'order' => $order->reference,
+                'status' => $order->status,
+                'method' => $order->method ?? 'null',
+                'billing' => $order->billing ?? 'null',
+                'amount' => $order->amount,
+                'order_provider' => $order->provider,
+                'gateway' => $gateway->name(),
+                'gateway_online' => $this->online($gateway),
+                'attempts' => count($attempts),
+                'newest_attempt' => $newest instanceof PaymentAttempt
+                    ? $newest->method . ' expires ' . ($newest->expires_at?->format('Y-m-d H:i:s') ?? 'never') . ' UTC, ' . ($newest->expired() ? 'EXPIRED' : 'live')
+                    : 'none',
+                'now' => (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s') . ' UTC',
+                'ewallet' => (bool) config('saas.payments.paymongo.ewallet'),
+                'cards' => (bool) config('saas.payments.paymongo.cards'),
+            ];
+            logger()->info('[checkout] {event} {facts}', ['event' => $event, 'facts' => json_encode($facts, JSON_UNESCAPED_SLASHES)]);
+        } catch (\Throwable) {
+            // tracing must never break a payment
+        }
     }
 
     /**
