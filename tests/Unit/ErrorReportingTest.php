@@ -19,6 +19,20 @@ use Sentry\Stacktrace;
 
 final class ErrorReportingTest extends TestCase
 {
+    public function testTheAppAlwaysRunsInUtcWhateverTheEnvironmentSays(): void
+    {
+        putenv('APP_TIMEZONE=Asia/Manila');
+        $_ENV['APP_TIMEZONE'] = 'Asia/Manila';
+        try {
+            $config = require dirname(__DIR__, 2) . '/config/app.php';
+        } finally {
+            putenv('APP_TIMEZONE');
+            unset($_ENV['APP_TIMEZONE']);
+        }
+        $this->assertSame('UTC', $config['timezone'], 'a stored UTC time must be read back as UTC');
+        $this->assertSame('UTC', date_default_timezone_get());
+    }
+
     public function testWithoutADsnSentryIsNotStarted(): void
     {
         $this->assertFalse(ErrorReporting::start(['dsn' => '']));
