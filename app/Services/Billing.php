@@ -72,7 +72,7 @@ final class Billing
     }
 
     /**
-     * What the customer is charged: the price, except for the QA account (QA_EMAIL), which pays at most the testing amount (saas.qa.amount).
+     * What the customer is charged: the price, except for the QA account (QA_EMAIL), which pays at most the testing amount (saas.qa.amount, ₱1).
      * The plan, the period and the photos it buys are unchanged; only the money is.
      */
     private function chargeFor(int $userId, int $price): int
