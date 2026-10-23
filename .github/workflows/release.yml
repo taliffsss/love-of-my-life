@@ -14,9 +14,13 @@
 #             SAAS_MAIL_PASSWORD (+ optional _HOST, _PORT, _ENCRYPTION, _USERNAME, _FROM_ADDRESS, _FROM_NAME)
 #                                                               (main-v2 only: written to the server's .env.production as MAIL_*; defaults are Resend's SMTP)
 #             ADMIN_EMAIL, ADMIN_PASSWORD                       (main-v2 only: written to the server's .env.production; the first administrator is created from them at start, once)
+#             QA_EMAIL, QA_PASSWORD                             (main-v2 only: a normal test account made the same way as the administrator, once)
+#             PAYMENTS_DRIVER, PAYMONGO_SECRET_KEY, PAYMONGO_PUBLIC_KEY, PAYMONGO_WEBHOOK_SECRET
+#                                                               (main-v2 only: written to the server's .env.production; replaces the old values)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
 #   Variables DOCKER_IMAGE (default taliffsss/loveofmylife; may also be a secret)
 #             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife; secret or variable)
+#             PAYMONGO_SUBSCRIPTIONS, PAYMONGO_EWALLET (main-v2 only, true or false, default false: PayMongo-run subscriptions; GCash and PayMaya on the order page)
 #             SITE_URL     (public address checked after a deploy; default https://loveofmylife.love)
 #             SAAS_DEPLOY_PATH (REQUIRED for a release of branch main-v2: the dir on the server holding that deploy's
 #                           deploy/.env.production; may also be a secret. No default, so v2 can never overwrite the old deploy)
@@ -188,6 +192,8 @@ jobs:
       HAS_SAAS_SPACES: ${{ secrets.SAAS_SPACES_ACCESS_KEY != '' }}
       HAS_SAAS_MAIL: ${{ secrets.SAAS_MAIL_PASSWORD != '' }}
       HAS_ADMIN: ${{ secrets.ADMIN_EMAIL != '' && secrets.ADMIN_PASSWORD != '' }}
+      HAS_QA: ${{ secrets.QA_EMAIL != '' && secrets.QA_PASSWORD != '' }}
+      HAS_PAYMONGO: ${{ secrets.PAYMONGO_SECRET_KEY != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -302,6 +308,54 @@ jobs:
             cat .admin.env.tmp >> .env.production.new
             mv .env.production.new .env.production; rm -f .admin.env.tmp
             echo 'ADMIN_* updated:'; grep -c '^ADMIN_' .env.production"
+
+      - name: Apply the QA_* secrets to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_QA == 'true' }}
+        env:
+          QA_EMAIL: ${{ secrets.QA_EMAIL }}
+          QA_PASSWORD: ${{ secrets.QA_PASSWORD }}
+        run: |
+          # The container creates a normal test account from these when no account has that e-mail yet (bin/ensure-qa.php); it never changes an existing one.
+          umask 077
+          printf 'QA_EMAIL=%s\nQA_PASSWORD=%s\n' "$(printf '%s' "$QA_EMAIL" | tr -d '\r\n')" "$(printf '%s' "$QA_PASSWORD" | tr -d '\r\n')" > qa.env
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes qa.env "$HOST:$DIR/deploy/.qa.env.tmp"
+          rm -f qa.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v '^QA_' .env.production > .env.production.new || true
+            cat .qa.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .qa.env.tmp
+            echo 'QA_* updated:'; grep -c '^QA_' .env.production"
+
+      - name: Apply the PAYMONGO_* settings to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_PAYMONGO == 'true' }}
+        env:
+          PAYMENTS_DRIVER: ${{ secrets.PAYMENTS_DRIVER }}
+          PAYMONGO_SECRET_KEY: ${{ secrets.PAYMONGO_SECRET_KEY }}
+          PAYMONGO_PUBLIC_KEY: ${{ secrets.PAYMONGO_PUBLIC_KEY }}
+          PAYMONGO_WEBHOOK_SECRET: ${{ secrets.PAYMONGO_WEBHOOK_SECRET }}
+          PAYMONGO_SUBSCRIPTIONS: ${{ vars.PAYMONGO_SUBSCRIPTIONS }}
+          PAYMONGO_EWALLET: ${{ vars.PAYMONGO_EWALLET }}
+        run: |
+          # The keys come from secrets, the two switches from variables (anything but "true" is written as false). The values travel in a file
+          # (chmod 600), not on a command line. Older PAYMENTS_DRIVER and PAYMONGO_ lines are replaced; PAYMENTS_MANUAL_INSTRUCTIONS is kept.
+          umask 077
+          clean() { printf '%s' "$1" | tr -d '\r\n'; }
+          flag() { [ "$(clean "$1")" = "true" ] && echo true || echo false; }
+          {
+            printf 'PAYMENTS_DRIVER=%s\n' "$(v="$(clean "$PAYMENTS_DRIVER")"; echo "${v:-paymongo}")"
+            printf 'PAYMONGO_SECRET_KEY=%s\n' "$(clean "$PAYMONGO_SECRET_KEY")"
+            printf 'PAYMONGO_PUBLIC_KEY=%s\n' "$(clean "$PAYMONGO_PUBLIC_KEY")"
+            printf 'PAYMONGO_WEBHOOK_SECRET=%s\n' "$(clean "$PAYMONGO_WEBHOOK_SECRET")"
+            printf 'PAYMONGO_SUBSCRIPTIONS=%s\n' "$(flag "$PAYMONGO_SUBSCRIPTIONS")"
+            printf 'PAYMONGO_EWALLET=%s\n' "$(flag "$PAYMONGO_EWALLET")"
+          } > paymongo.env
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes paymongo.env "$HOST:$DIR/deploy/.paymongo.env.tmp"
+          rm -f paymongo.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v -e '^PAYMENTS_DRIVER=' -e '^PAYMONGO_' .env.production > .env.production.new || true
+            cat .paymongo.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .paymongo.env.tmp
+            echo 'PAYMONGO_* updated:'; grep -c '^PAYMONGO_' .env.production"
 
       - name: Pull the release image and roll out the stack
         run: |

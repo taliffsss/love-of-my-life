@@ -62,6 +62,41 @@ final class SeedersTest extends TestCase
         $this->assertFalse($normal->fresh()->is_admin, 'a normal account is not promoted');
     }
 
+    public function testTheQaBootstrapMakesANormalAccountOnceAndNeverTouchesAnExistingOne(): void
+    {
+        $boot = $this->app->make(\App\Services\QaBootstrap::class);
+        $this->assertSame('skipped', $boot->ensure('', ''));
+        $this->assertSame('created', $boot->ensure(' QA@Example.com ', 'a long enough password'));
+
+        $qa = User::query()->where('email', 'qa@example.com')->first();
+        $this->assertFalse($qa->is_admin, 'a test account is never an administrator');
+        $this->assertNotNull($qa->email_verified_at, 'no code is asked of it');
+
+        $qa->forceFill(['password' => 'changed in the profile'])->save();
+        $hash = $qa->fresh()->getRawAttributes()['password'];
+        $this->assertSame('exists', $boot->ensure('qa@example.com', 'a different password!'));
+        $this->assertSame($hash, $qa->fresh()->getRawAttributes()['password'], 'the next deploy does not reset it');
+
+        $normal = new User();
+        $normal->forceFill(['name' => 'N', 'email' => 'normal@example.com', 'password' => 'x', 'is_admin' => false])->save();
+        $this->assertSame('exists', $boot->ensure('normal@example.com', 'a long enough password'));
+        $this->assertSame(2, User::query()->count());
+    }
+
+    public function testTheQaBootstrapRefusesAWeakPasswordOrABadEmail(): void
+    {
+        $boot = $this->app->make(\App\Services\QaBootstrap::class);
+        foreach ([['qa@example.com', 'short'], ['not-an-email', 'a long enough password']] as [$email, $password]) {
+            try {
+                $boot->ensure($email, $password);
+                $this->fail('should have been refused');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('QA_PASSWORD', $e->getMessage());
+            }
+        }
+        $this->assertSame(0, User::query()->count());
+    }
+
     public function testTheBootstrapRefusesAWeakPasswordOrABadEmail(): void
     {
         $boot = $this->app->make(\App\Services\AdminBootstrap::class);

@@ -27,6 +27,11 @@ if [ -n "${ADMIN_EMAIL:-}" ] && [ -n "${ADMIN_PASSWORD:-}" ]; then
     php bin/ensure-admin.php || echo "WARNING: the administrator was not created (see above)." >&2
 fi
 
+# A normal account for testing, from QA_EMAIL and QA_PASSWORD: the same rules (created once, never changed afterwards, never an administrator).
+if [ -n "${QA_EMAIL:-}" ] && [ -n "${QA_PASSWORD:-}" ]; then
+    php bin/ensure-qa.php || echo "WARNING: the QA account was not created (see above)." >&2
+fi
+
 chown -R www-data:www-data storage
 chmod -R 775 storage
 

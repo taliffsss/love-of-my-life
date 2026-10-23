@@ -164,6 +164,24 @@ Forever, never expires. Monthly plans are paid again each month the same way unt
 changes nothing. Prices and limits are in `config/saas.php`. For testing, `PAYMENTS_DRIVER=fake` adds a "pay (test)"
 button; it refuses to run with `APP_ENV=production`.
 
+### GitHub settings for PayMongo and the QA account (branch main-v2)
+
+The release workflow writes these to the server's `deploy/.env.production` on every deploy, replacing the old values (nothing is kept in the repo):
+
+| Where | Name | Meaning |
+|---|---|---|
+| Secret | `PAYMENTS_DRIVER`, `PAYMONGO_SECRET_KEY`, `PAYMONGO_PUBLIC_KEY`, `PAYMONGO_WEBHOOK_SECRET` | the live keys; the step runs only when the secret key is set |
+| Variable | `PAYMONGO_EWALLET` | `true` adds GCash and PayMaya to the order page once PayMongo approves them; anything else (or unset) = false, so **QR Ph is the only way to pay** |
+| Variable | `PAYMONGO_SUBSCRIPTIONS` | `true` once PayMongo has enabled Subscriptions on the account; anything else (or unset) = false |
+| Secret | `QA_EMAIL`, `QA_PASSWORD` | a normal test account (never an administrator), created once at container start by `bin/ensure-qa.php`, the way `ensure-admin.php` makes the administrator; an existing account is left as it is. 12+ characters |
+
+Cards (Visa, Mastercard) stay hidden unless `PAYMONGO_CARDS=true`. QR Ph is always offered.
+
+**The QA account pays ₱1.** Every order made by the account named in `QA_EMAIL` (plans, renewals, photo packs) is charged at most ₱1.00
+(`saas.qa.amount` in `config/saas.php`, 100 centavos), so the live checkout can be tried for real with almost nothing. The plan, period and
+photos bought are the real ones; only the money changes. Nobody else is affected, and with `QA_EMAIL` unset there is no effect. To stop it,
+remove the `QA_EMAIL` secret (and `QA_*` from the server's `.env.production`) and redeploy.
+
 ### GCash, PayMaya and cards, and subscriptions (PayMongo, the default)
 
 `PAYMENTS_DRIVER=auto` (the default) uses PayMongo as soon as `PAYMONGO_SECRET_KEY` is set. With `PAYMONGO_PUBLIC_KEY` as
