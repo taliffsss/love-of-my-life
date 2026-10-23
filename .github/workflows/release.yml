@@ -17,6 +17,8 @@
 #             QA_EMAIL, QA_PASSWORD                             (main-v2 only: a normal test account made the same way as the administrator, once)
 #             PAYMENTS_DRIVER, PAYMONGO_SECRET_KEY, PAYMONGO_PUBLIC_KEY, PAYMONGO_WEBHOOK_SECRET
 #                                                               (main-v2 only: written to the server's .env.production; replaces the old values)
+#             SENTRY_DSN or SENTRY_NALUZ_DSN                   (main-v2 only, secret or variable: written to the server's .env.production; none = no error reporting)
+#             SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE, SENTRY_ENABLE_LOGS, LOG_CHANNEL, LOG_STACK (optional, secret or variable, written when set)
 #             DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER          (only for the deploy job)
 #   Variables DOCKER_IMAGE (default taliffsss/loveofmylife; may also be a secret)
 #             SAAS_DOCKER_IMAGE (the same, for a release of branch main-v2; default taliffsss/loveofmylife; secret or variable)
@@ -194,6 +196,7 @@ jobs:
       HAS_ADMIN: ${{ secrets.ADMIN_EMAIL != '' && secrets.ADMIN_PASSWORD != '' }}
       HAS_QA: ${{ secrets.QA_EMAIL != '' && secrets.QA_PASSWORD != '' }}
       HAS_PAYMONGO: ${{ secrets.PAYMONGO_SECRET_KEY != '' }}
+      HAS_SENTRY: ${{ secrets.SENTRY_DSN != '' || vars.SENTRY_DSN != '' || secrets.SENTRY_NALUZ_DSN != '' || vars.SENTRY_NALUZ_DSN != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -356,6 +359,36 @@ jobs:
             cat .paymongo.env.tmp >> .env.production.new
             mv .env.production.new .env.production; rm -f .paymongo.env.tmp
             echo 'PAYMONGO_* updated:'; grep -c '^PAYMONGO_' .env.production"
+
+      - name: Apply the SENTRY_* settings to the server's .env.production (main-v2 only)
+        if: ${{ env.V2 == 'true' && env.HAS_SENTRY == 'true' }}
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN || vars.SENTRY_DSN }}
+          SENTRY_NALUZ_DSN: ${{ secrets.SENTRY_NALUZ_DSN || vars.SENTRY_NALUZ_DSN }}
+          SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE || vars.SENTRY_TRACES_SAMPLE_RATE }}
+          SENTRY_PROFILES_SAMPLE_RATE: ${{ secrets.SENTRY_PROFILES_SAMPLE_RATE || vars.SENTRY_PROFILES_SAMPLE_RATE }}
+          SENTRY_ENABLE_LOGS: ${{ secrets.SENTRY_ENABLE_LOGS || vars.SENTRY_ENABLE_LOGS }}
+          LOG_CHANNEL: ${{ secrets.LOG_CHANNEL || vars.LOG_CHANNEL }}
+          LOG_STACK: ${{ secrets.LOG_STACK || vars.LOG_STACK }}
+        run: |
+          # The DSN (SENTRY_DSN, or SENTRY_NALUZ_DSN) from a secret or variable; the rates and switches from variables. Only what is set is written;
+          # older SENTRY_ lines are replaced. LOG_CHANNEL and LOG_STACK (for example stack and single,sentry_logs) are written only when set.
+          umask 077
+          clean() { printf '%s' "$1" | tr -d '\r\n'; }
+          : > sentry.env
+          for k in SENTRY_DSN SENTRY_NALUZ_DSN SENTRY_TRACES_SAMPLE_RATE SENTRY_PROFILES_SAMPLE_RATE SENTRY_ENABLE_LOGS; do
+            v="$(clean "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
+          done
+          for k in LOG_CHANNEL LOG_STACK; do
+            v="$(clean "${!k}")"; [ -n "$v" ] && printf '%s=%s\n' "$k" "$v" >> sentry.env
+          done
+          scp -i "$HOME/.ssh/id_deploy" -o IdentitiesOnly=yes sentry.env "$HOST:$DIR/deploy/.sentry.env.tmp"
+          rm -f sentry.env
+          $SSH "$HOST" "set -euo pipefail; cd '$DIR/deploy'; umask 077
+            grep -v -e '^SENTRY_' -e '^LOG_CHANNEL=' -e '^LOG_STACK=' .env.production > .env.production.new || true
+            cat .sentry.env.tmp >> .env.production.new
+            mv .env.production.new .env.production; rm -f .sentry.env.tmp
+            echo 'SENTRY_* updated:'; grep -c '^SENTRY_' .env.production"
 
       - name: Pull the release image and roll out the stack
         run: |

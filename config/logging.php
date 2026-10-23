@@ -31,6 +31,10 @@ return [
         // several at once — set LOG_CHANNEL=production to use it
         'production' => ['driver' => 'stack', 'channels' => ['daily', 'slack']],
 
+        // LOG_CHANNEL=stack with LOG_STACK=single,sentry_logs writes the file and sends the log to Sentry (SENTRY_ENABLE_LOGS=true; without
+        // it `sentry_logs` is a channel that does nothing, so naming it is always safe)
+        'stack' => ['driver' => 'stack', 'channels' => array_values(array_filter(array_map('trim', explode(',', (string) env('LOG_STACK', 'single')))))],
+
         'null' => ['driver' => 'null'],
 
         // bring your own PSR-3 logger (Monolog, Sentry, …):

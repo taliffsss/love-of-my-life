@@ -16,6 +16,10 @@
         <!-- a developer's .env must not reach the tests: no real mailer (nothing is ever sent), confirmation off unless a test turns it on -->
         <env name="MAIL_MAILER" value="log"/>
         <env name="EMAIL_VERIFICATION" value="auto"/>
+        <env name="SENTRY_DSN" value=""/>
+        <env name="SENTRY_NALUZ_DSN" value=""/>
+        <env name="SENTRY_ENABLE_LOGS" value="false"/>
+        <env name="LOG_CHANNEL" value="null"/>
         <env name="ADMIN_EMAIL" value=""/>
         <env name="ADMIN_PASSWORD" value=""/>
     </php>

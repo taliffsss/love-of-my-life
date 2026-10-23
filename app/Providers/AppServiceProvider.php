@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Services\Billing;
+use App\Support\ErrorReporting;
+use App\Support\ReportingExceptionHandler;
+use App\Support\SentryLogger;
 use App\Services\CarouselStore;
 use App\Services\LetterStore;
 use App\Services\Payments\FakeGateway;
@@ -25,7 +28,13 @@ use App\Services\SpacesFilesystem;
 use App\Services\Subdomains;
 use Naluz\Config\Repository;
 use Naluz\Database\Connection;
+use Naluz\Foundation\ExceptionHandler;
 use Naluz\Foundation\ServiceProvider;
+use Naluz\Session\Store;
+use Naluz\View\Factory;
+use Naluz\Log\LogManager;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Naluz\Security\Hasher;
 use Naluz\Storage\StorageManager;
 
@@ -33,6 +42,13 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // the framework's handler, plus a report of every server error to Sentry (when SENTRY_DSN is set)
+        $this->app->bind(ExceptionHandler::class, fn ($c) => new ReportingExceptionHandler(
+            $c->make(Repository::class),
+            $c->make(LoggerInterface::class),
+            $c->make(Factory::class),
+            $c->make(Store::class),
+        ));
         $this->app->singleton(Hasher::class, fn ($c) => new Hasher((array) $c->make(Repository::class)->get('security.hashing', [])));
         $this->app->singleton(Plans::class, fn ($c) => new Plans(
             (array) $c->make(Repository::class)->get('saas.plans', []),
@@ -132,6 +148,10 @@ final class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $config = $this->app->make(Repository::class);
+        $sentry = (array) $config->get('sentry', []);
+        $started = ErrorReporting::start($sentry);
+        // the `sentry_logs` channel always exists: it sends to Sentry when that is on and does nothing otherwise
+        $this->app->make(LogManager::class)->extend('sentry_logs', $started && !empty($sentry['enable_logs']) ? new SentryLogger() : new NullLogger());
         $spaces = (array) $config->get('filesystems.disks.spaces', []);
 
         // The Spaces disk exists only once the credentials are in .env; until then photos go to the local public disk.
