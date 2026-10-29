@@ -268,6 +268,40 @@
     "car-hw-3": slide({ theme: "t-halloween", kicker: "3/5", headline: "The door creaks open.", size: 116, sub: "Your photos. Your song. Your words.", deco: "halloween" }),
     "car-hw-4": slide({ theme: "t-halloween", kicker: "4/5", headline: "Lock it with a question.", size: 112, still: "halloween", deco: "halloween" }),
     "car-hw-5": slide({ theme: "t-halloween", headline: "Send it before the 31st.", size: 112, pose: "love", deco: "halloween", end: true }),
+
+    // ---- Interactive set (pairs with the interactive reels; see marketing/interactive/INTERACTIVE_CAMPAIGN.md) ----
+    "ix-pick": { size: [1080, 1350], theme: "t-gold", build: () => scatter(1080, 1350, "heart", 10, 21) + col("78px 60px 60px",
+      K("Choose your envelope") + H("Pick a letter.", 120, 940, 18) + GAP(46) +
+      `<div class="row" style="gap:40px;align-items:flex-start">${[["1", "a promise"], ["2", "a memory"], ["3", "a surprise"]].map(([n, l]) => `<div style="display:flex;flex-direction:column;align-items:center;gap:22px;width:270px"><div class="env"><div class="flap"></div><div class="seal">♥</div></div><span class="num" style="width:84px;height:84px;font-size:52px">${n}</span><span class="hand" style="font-size:56px">${l}</span></div>`).join("")}</div>` +
+      GAP(34) + S("Comment 1, 2 or 3 and Lettie will write you back.", 860, 38) + SPACE + U(30) + GAP(10)) },
+    ...Object.fromEntries([["1", "A promise", "I promise to choose you on the busy days too."], ["2", "A memory", "Remember the last time you laughed so hard you forgot the joke? Keep that one close."], ["3", "A surprise", "Someone is thinking about you right now. Tell them first."]].map(([n, k, line]) => [`ix-pick-${n}`, { size: [1080, 1350], theme: "t-gold", build: () => scatter(1080, 1350, "heart", 10, 50 + +n) + col("78px 70px 60px",
+      K(`Your letter: ${n}`) + H(k, 112, 940, 18) + GAP(44) +
+      `<div class="paper ruled" style="width:860px;min-height:430px;padding:56px;display:grid;place-items:center"><div class="headline" style="font-size:70px;line-height:1.12">${line}</div></div>` +
+      GAP(40) + S("Tag who should read this one.", 860, 38) + SPACE + U(30) + GAP(10)) }])),
+    "ix-scratch-1": { size: [1080, 1350], theme: "", build: () => scatter(1080, 1350, "heart", 10, 22) + col("78px 70px 60px",
+      K("Scratch and tag") + H("Scratch to reveal.", 112, 940, 18) + GAP(46) +
+      `<div class="foil" style="width:860px;height:470px;display:grid;place-items:center"><span style="font-size:68px;font-weight:600;letter-spacing:.06em;color:rgba(120,70,10,.6)">SCRATCH HERE</span></div>` +
+      GAP(40) + S("Who is getting your next love letter?", 860, 40) + SPACE + U(30) + GAP(10)) },
+    "ix-scratch-2": { size: [1080, 1350], theme: "", build: () => scatter(1080, 1350, "heart", 10, 23) + col("78px 70px 60px",
+      K("Revealed") + H("Tag them.", 124, 940, 18) + GAP(46) +
+      `<div class="paper" style="position:relative;width:860px;height:470px;display:grid;place-items:center;overflow:hidden"><div style="position:absolute;left:0;top:0;width:260px;height:150px;background:linear-gradient(135deg,#f7d98c,#d9a441);clip-path:polygon(0 0,100% 0,60% 55%,0 100%)"></div><div style="position:absolute;right:0;bottom:0;width:220px;height:130px;background:linear-gradient(135deg,#d9a441,#f7d98c);clip-path:polygon(100% 0,100% 100%,0 100%,45% 45%)"></div><div class="headline" style="font-size:80px;width:640px;line-height:1.1">Tag the person you’d send it to 💌</div></div>` +
+      GAP(40) + S("Then make it for them tonight. Free to build and preview.", 860, 36) + SPACE + U(30) + GAP(10)) },
+    ...Object.fromEntries([["1", "💌", "Envelope", "🎟️", "Scratch card"], ["2", "✨", "Stars", "📖", "Storybook"], ["3", "🎵", "Our song", "📸", "Our photos"], ["4", "🌙", "Midnight", "☀️", "Morning"]].map(([n, e1, l1, e2, l2]) => [`ix-tt-${n}`, { size: [1080, 1350], theme: "t-party", build: () => scatter(1080, 1350, "confetti", 14, 30 + +n) + col("78px 70px 60px",
+      K(`Round ${n} of 4`) + H("This or that?", 116, 940, 18) + GAP(56) +
+      `<div class="row" style="gap:0"><div class="choice"><span class="n">1</span><span class="e">${e1}</span><span class="l">${l1}</span></div><div class="or">or</div><div class="choice"><span class="n">2</span><span class="e">${e2}</span><span class="l">${l2}</span></div></div>` +
+      GAP(44) + S(n === "4" ? "Last one! Swipe for how to answer →" : "Comment 1 or 2. Swipe for the next round →", 860, 36) + SPACE + U(30) + GAP(10)) }])),
+    "ix-tt-5": statement({ theme: "t-party", kicker: "Your turn", headline: "Comment your four.", size: 120, sub: "Like this: 1, 2, 1, 2. Then tag someone to see if you match.", pose: "hello", deco: "confetti", h: 1350 }),
+    "ix-fill-1": { size: [1080, 1350], theme: "t-sunset", build: () => scatter(1080, 1350, "heart", 10, 24) + col("78px 70px 60px",
+      K("Your turn") + H("Finish the sentence.", 112, 940, 18) + GAP(46) +
+      `<div class="paper ruled" style="width:860px;height:480px;padding:60px 56px;text-align:left"><div class="hand" style="font-size:112px;line-height:1.1;color:var(--ink)">Our song is</div><div class="hand" style="font-size:96px;line-height:1.1;margin-top:26px;color:#d9466e">________</div></div>` +
+      GAP(40) + S("Type yours in the comments.", 860, 40) + SPACE + U(30) + GAP(10)) },
+    "ix-fill-2": { size: [1080, 1350], theme: "t-sunset", build: () => scatter(1080, 1350, "heart", 10, 25) + col("78px 70px 60px",
+      K("Need ideas?") + H("“Our song is…”", 120, 940, 18) + GAP(46) +
+      `<div style="display:flex;flex-direction:column;gap:22px;align-items:center">${["the one we sang in the car", "playing at 2 a.m.", "still on repeat"].map((t) => `<span class="pill" style="font-size:44px;padding:20px 40px">${t}</span>`).join("")}</div>` +
+      GAP(44) + S("Now put your song on a page only they can open.", 860, 36) + SPACE + U(30) + GAP(10)) },
+    "ix-quiz-cover": statement({ kicker: "30-second quiz", headline: "How should they open your love letter?", size: 100, sub: "💌 Envelope · 🎟️ Scratch card · 📖 Storybook · ✨ Stars. Which one are you?", pose: "hello", h: 1350 }),
+    ...Object.fromEntries([["envelope", "💌", "The Sealed Envelope", "You say it with care.", "Break the seal.", "t-gold"], ["scratch", "🎟️", "The Scratch Card", "You love a little surprise and a big laugh.", "Scratch, smile, answer.", "t-party"], ["storybook", "📖", "The Storybook", "You remember everything.", "Turn the page.", "t-cream"], ["stars", "✨", "The Night Sky", "You dream out loud.", "Make a wish.", "t-navy"]].map(([k, e, name, line, hand, theme]) => [`ix-quiz-${k}`, { size: [1080, 1350], theme, build: () => scatter(1080, 1350, "spark", 12, 40) + col("78px 70px 60px",
+      K("My love letter style") + `<div style="font-size:150px;line-height:1;margin-top:34px">${e}</div>` + H(name, 108, 940, 22) + GAP(24) + S(line, 860, 40) + GAP(22) + `<div class="hand" style="font-size:78px">${hand}</div>` + GAP(24) + S("Take the quiz and tag who’d get your letter.", 860, 32) + SPACE + U(30) + GAP(10)) }])),
   };
 
   // Lettie's poses: the same parts promo.js animates

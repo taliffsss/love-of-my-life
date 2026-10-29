@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How should they open your love letter?</title>
+    <meta name="description" content="Five quick questions. Lettie tells you which of our ways to open a love letter is the most you." />
+    <!-- A self-contained quiz for the Facebook Page link, Stories and comments. No tracking, no data leaves the page: the answers are
+         counted in the browser and the share card is drawn on a canvas. The only link out is the call to action. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root { --bg: #160a14; --bg-2: #2a1220; --text: #fbeef0; --muted: rgba(251, 238, 240, .72); --accent: #f2a7b8; --deep: #d9466e; --gold: #f0cfa8; --paper: #fffaf3; --ink: #3a2230; }
+      @media (prefers-color-scheme: light) { :root { --bg: #fff3f1; --bg-2: #ffe1e6; --text: #3a2230; --muted: rgba(58, 34, 48, .72); --accent: #d9728c; --deep: #c23a5f; --gold: #a8683d; --paper: #fffdf9; --ink: #3a2230; } }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body { font-family: 'Inter', system-ui, sans-serif; color: var(--text); background: radial-gradient(120% 90% at 30% 0%, var(--bg-2), var(--bg) 70%) fixed; -webkit-font-smoothing: antialiased; }
+      main { max-width: 560px; margin: 0 auto; padding: 28px 20px 56px; min-height: 100vh; display: flex; flex-direction: column; }
+      .brand { display: flex; align-items: center; gap: 10px; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 26px; color: var(--text); }
+      .brand svg { width: 26px; height: 26px; color: var(--deep); }
+      .kicker { margin: 28px 0 10px; font-size: 13px; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); }
+      h1, h2 { margin: 0; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; line-height: 1.04; }
+      h1 { font-size: clamp(44px, 12vw, 64px); }
+      h2 { font-size: clamp(34px, 9vw, 46px); }
+      p.lead { margin: 16px 0 0; font-size: 18px; line-height: 1.5; color: var(--muted); }
+      .lettie { width: 108px; height: 108px; margin-top: 24px; }
+      button { font: inherit; cursor: pointer; }
+      .go, .cta { display: inline-block; margin-top: 28px; padding: 16px 30px; border: 0; border-radius: 999px; font-size: 18px; font-weight: 600; color: #2a1220; text-decoration: none; background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 12px 30px rgba(0, 0, 0, .25); }
+      .ghost { margin-top: 14px; padding: 14px 24px; border-radius: 999px; font-size: 16px; font-weight: 500; color: var(--text); background: transparent; border: 1px solid color-mix(in srgb, var(--text) 30%, transparent); }
+      .bar { height: 6px; margin-top: 22px; border-radius: 3px; background: color-mix(in srgb, var(--text) 14%, transparent); overflow: hidden; }
+      .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width .35s ease; }
+      .count { margin-top: 14px; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+      .answers { display: grid; gap: 12px; margin-top: 26px; }
+      .answers button { text-align: left; padding: 18px 20px; border-radius: 18px; font-size: 18px; line-height: 1.35; color: var(--ink); background: var(--paper); border: 2px solid transparent; box-shadow: 0 10px 26px rgba(0, 0, 0, .18); transition: transform .12s ease, border-color .12s ease; }
+      .answers button:hover, .answers button:focus-visible { border-color: var(--deep); transform: translateY(-2px); outline: none; }
+      .answers button span { margin-right: 10px; }
+      .card { margin-top: 20px; padding: 28px 24px; border-radius: 28px; text-align: center; color: var(--ink); background: var(--paper); box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
+      .card .emoji { font-size: 64px; line-height: 1; }
+      .card .you { margin-top: 10px; font-size: 13px; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--deep); }
+      .card h2 { margin-top: 8px; color: var(--ink); }
+      .card p { margin: 14px 0 0; font-size: 18px; line-height: 1.5; }
+      .card .hand { margin-top: 16px; font-family: 'Caveat', cursive; font-weight: 700; font-size: 30px; color: var(--deep); }
+      .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+      .fine { margin-top: 28px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+      [hidden] { display: none !important; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-8-4.9-8-11.1C4 6.7 6.3 5 8.6 5c1.5 0 2.9.8 3.4 2 .5-1.2 1.9-2 3.4-2C17.7 5 20 6.7 20 9.9 20 16.1 12 21 12 21z"/></svg>Love of My Life</div>
+
+      <section id="intro">
+        <div class="kicker">A 30-second quiz</div>
+        <h1>How should they open your love letter?</h1>
+        <p class="lead">Five questions. Lettie picks the way that is most you: break a seal, scratch a card, turn the pages or light up the stars.</p>
+        <button class="go" id="start" type="button">Start the quiz 💌</button>
+      </section>
+
+      <section id="ask" hidden>
+        <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+        <div class="count" id="count"></div>
+        <h2 id="q"></h2>
+        <div class="answers" id="answers"></div>
+      </section>
+
+      <section id="result" hidden aria-live="polite">
+        <div class="card" id="card">
+          <div class="emoji" id="r-emoji"></div>
+          <div class="you">You are</div>
+          <h2 id="r-name"></h2>
+          <p id="r-text"></p>
+          <div class="hand" id="r-line"></div>
+        </div>
+        <div class="row">
+          <a class="cta" id="cta" href="https://loveofmylife.love/">Make yours, free to build</a>
+          <button class="ghost" id="save" type="button">Save my result</button>
+          <button class="ghost" id="again" type="button">Take it again</button>
+        </div>
+        <p class="fine">Tag the person you would send it to, and tell us your result in the comments. Free to build and preview. Nothing you tap here is stored or sent anywhere.</p>
+      </section>
+    </main>
+
+    <script>
+      // The four ways to open a letter in the product (templates: envelope, scratch, storybook, stars) are the four results.
+      const OUTCOMES = {
+        envelope: { emoji: "💌", name: "The Sealed Envelope", text: "You say it with care. Your letter waits behind a heart seal, and they break it open slowly, savouring every word.", line: "Break the seal.", tpl: "Envelope" },
+        scratch: { emoji: "🎟️", name: "The Scratch Card", text: "You love a little surprise and a big laugh. Your letter hides under gold foil, and they scratch until they find the question.", line: "Scratch, smile, answer.", tpl: "Scratch card" },
+        storybook: { emoji: "📖", name: "The Storybook", text: "You remember everything. Your letter is a little book of the two of you, one photo and one page at a time.", line: "Turn the page.", tpl: "Storybook" },
+        stars: { emoji: "✨", name: "The Night Sky", text: "You dream out loud. Your letter is a sky of stars, with a memory waiting in each one.", line: "Make a wish.", tpl: "Stars" },
+      };
+      const KEYS = ["envelope", "scratch", "storybook", "stars"];
+      const QUESTIONS = [
+        ["Your perfect date?", ["A quiet dinner, just us", "Arcade games and street food", "A long drive with our playlist", "Lying under the stars"]],
+        ["How do you say “I love you” first?", ["A handwritten note", "A silly dare, then a sweet twist", "“Remember when we…”", "“One day we will…”"]],
+        ["Your ideal lazy Sunday?", ["Coffee and slow music", "Board games all day", "Going through old photos", "A rooftop at night"]],
+        ["Your texting style?", ["Long, sweet paragraphs", "Memes and voice notes", "“Remember that time…”", "“Someday we’ll…”"]],
+        ["The gift that melts you?", ["A sealed letter", "A surprise with a prank inside", "A handmade book of us", "A sky of stars for our memories"]],
+      ];
+      const $ = (id) => document.getElementById(id);
+      const URL_CTA = "https://loveofmylife.love/?utm_source=facebook&utm_medium=social&utm_campaign=interactive-2026&utm_content=quiz-";
+      let picks = [];
+
+      const show = (id) => ["intro", "ask", "result"].forEach((s) => ($(s).hidden = s !== id));
+      function ask() {
+        const n = picks.length;
+        $("bar").style.width = `${(n / QUESTIONS.length) * 100}%`;
+        $("count").textContent = `Question ${n + 1} of ${QUESTIONS.length}`;
+        $("q").textContent = QUESTIONS[n][0];
+        $("answers").replaceChildren(...QUESTIONS[n][1].map((text, k) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.innerHTML = `<span>${"ABCD"[k]}</span>`;
+          b.append(text);
+          b.addEventListener("click", () => { picks.push(k); picks.length === QUESTIONS.length ? finish() : ask(); });
+          return b;
+        }));
+        show("ask");
+        $("q").scrollIntoView({ block: "start" });
+      }
+      function winner() {
+        const count = [0, 0, 0, 0];
+        picks.forEach((k) => count[k]++);
+        const best = Math.max(...count);
+        const tied = count.map((c, k) => (c === best ? k : -1)).filter((k) => k >= 0);
+        return KEYS[tied.includes(picks[picks.length - 1]) ? picks[picks.length - 1] : tied[0]]; // a tie goes to your last answer
+      }
+      let result = null;
+      function finish() {
+        const key = winner();
+        result = { key, ...OUTCOMES[key] };
+        $("r-emoji").textContent = result.emoji;
+        $("r-name").textContent = result.name;
+        $("r-text").textContent = result.text;
+        $("r-line").textContent = result.line;
+        $("cta").href = URL_CTA + key;
+        $("bar").style.width = "100%";
+        show("result");
+        $("card").scrollIntoView({ block: "start" });
+      }
+
+      // The share card: 1080x1350 (Facebook 4:5), drawn here so nothing is uploaded.
+      function drawCard() {
+        const c = document.createElement("canvas");
+        c.width = 1080; c.height = 1350;
+        const x = c.getContext("2d");
+        const g = x.createRadialGradient(300, 200, 100, 540, 700, 1200);
+        g.addColorStop(0, "#3a1630"); g.addColorStop(0.5, "#2a1220"); g.addColorStop(1, "#160a14");
+        x.fillStyle = g; x.fillRect(0, 0, 1080, 1350);
+        x.textAlign = "center";
+        const serif = "'Cormorant Garamond', Georgia, serif";
+        x.fillStyle = "#f0cfa8"; x.font = "600 30px Inter, sans-serif"; x.fillText("MY LOVE LETTER STYLE", 540, 150);
+        x.font = "170px serif"; x.fillText(result.emoji, 540, 400);
+        x.fillStyle = "#fbeef0"; x.font = `italic 500 112px ${serif}`;
+        const words = result.name.split(" "), mid = Math.ceil(words.length / 2);
+        x.fillText(words.slice(0, mid).join(" "), 540, 560); x.fillText(words.slice(mid).join(" "), 540, 680);
+        x.fillStyle = "rgba(251,238,240,.78)"; x.font = "400 38px Inter, sans-serif";
+        const lines = []; let cur = "";
+        for (const w of result.text.split(" ")) { if (x.measureText(cur + " " + w).width > 800 && cur) { lines.push(cur); cur = w; } else cur = (cur + " " + w).trim(); }
+        lines.push(cur);
+        lines.forEach((l, i) => x.fillText(l, 540, 790 + i * 56));
+        x.fillStyle = "#f2a7b8"; x.font = "700 70px Caveat, cursive"; x.fillText(result.line, 540, 790 + lines.length * 56 + 90);
+        x.fillStyle = "#fbeef0"; x.font = `italic 500 64px ${serif}`; x.fillText("Love of My Life", 540, 1180);
+        x.fillStyle = "#f0cfa8"; x.font = "600 36px Inter, sans-serif"; x.fillText("loveofmylife.love", 540, 1245);
+        return c;
+      }
+      $("start").addEventListener("click", () => { picks = []; ask(); });
+      $("again").addEventListener("click", () => { picks = []; $("bar").style.width = "0"; ask(); });
+      $("save").addEventListener("click", () => {
+        const a = document.createElement("a");
+        a.download = `my-love-letter-style-${result.key}.png`;
+        a.href = drawCard().toDataURL("image/png");
+        a.click();
+      });
+      window.quiz = { winner, OUTCOMES, QUESTIONS, drawCard: () => drawCard(), setResult: (k) => { result = { key: k, ...OUTCOMES[k] }; } }; // for the check script
+    </script>
+  </body>
+</html>

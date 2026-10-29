@@ -59,3 +59,8 @@ $U --with playwright==1.63.0 --with imageio-ffmpeg --with numpy --with scipy pyt
 ```
 
 Words and timing are in the `VIDEOS` table of `reels/reels.js`; they reuse the promo's filmed clips, music and voice.
+
+## Interactive reels and quiz
+
+Four more reels that ask the viewer to comment, tag, vote or finish a sentence (`pick-a-letter`, `scratch-tag`, `this-or-that`,
+`finish-line`) and a browser quiz. Captions, reply bank, 7-day plan: `marketing/interactive/INTERACTIVE_CAMPAIGN.md`.

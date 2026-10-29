@@ -91,6 +91,48 @@
     cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 76, 0.8), kind: "chime" }, { t: at(4.3, 104, 0.8), kind: "sparkle" }],
     lines: [["Make this Halloween spooky and sweet.", 0.9, 4.2], ["Lock your letter with a question only they know.", 4.6, 8.7], ["Then watch them open it. Boo.", 9.0, 12.0], ["Love of My Life. Start free.", 12.5, 15.1]],
   };
+
+  // Interactive reels: the viewer is asked to DO something in the comments (pick, tag, vote, finish a sentence), so there is
+  // no phone clip; V.scene says when the on-screen game plays and V.kind says which one (SCENES below).
+  const INTERACTIVE = {
+    "pick-a-letter": {
+      title: "Pick a letter", duration: 15.4, theme: "t-gold", groove: [2.6, 12.2], endAt: 12.2, kind: "pick", scene: { at: 4.3, until: 12.1 },
+      note: "Free to build and preview.",
+      kicker: [["Choose your envelope", 0.5, 4.3]],
+      heads: [["Pick a<br>letter.", 0.7, 4.3], ["Comment 1,<br>2 or 3.", 4.5, 8.8], ["I'll write<br>back.", 9.0, 12.0]],
+      lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+      cues: [{ t: 4.4, kind: "whoosh", gain: 0.6 }, { t: 4.7, kind: "pop" }, { t: 4.95, kind: "pop" }, { t: 5.2, kind: "pop" }, { t: 6.6, kind: "tap" }, { t: 7.7, kind: "tap" }, { t: 8.8, kind: "tap" }, { t: 9.4, kind: "sparkle" }],
+      lines: [["Pick a letter. Any letter.", 0.9, 4.2], ["Comment one, two, or three.", 4.6, 8.7], ["And I'll write you back.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+    },
+    "scratch-tag": {
+      title: "Scratch to reveal", duration: 15.4, theme: "", groove: [2.6, 12.2], endAt: 12.2, kind: "scratch", scene: { at: 4.3, until: 12.1 },
+      note: "Free to build and preview.",
+      kicker: [["Scratch and tag", 0.5, 4.3]],
+      heads: [["Scratch<br>to reveal.", 0.7, 4.3], ["Who is it<br>for?", 4.5, 9.2], ["Tag them.", 9.4, 12.0]],
+      lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+      cues: [{ t: 4.4, kind: "whoosh", gain: 0.6 }, { t: 5.2, kind: "paper" }, { t: 6.4, kind: "paper" }, { t: 7.6, kind: "paper" }, { t: 8.8, kind: "paper" }, { t: 9.6, kind: "sparkle" }],
+      lines: [["Scratch the card to reveal.", 0.9, 4.3], ["Someone is getting a love letter.", 4.7, 9.2], ["Tag them in the comments.", 9.5, 12.0], [END_LINE, 12.5, 15.1]],
+    },
+    "this-or-that": {
+      title: "This or that", duration: 15.4, theme: "t-party", groove: [2.6, 12.2], endAt: 12.2, kind: "thisthat", scene: { at: 4.2, until: 12.1 },
+      note: "Free to build and preview.",
+      kicker: [["Love letter edition", 0.5, 4.2]],
+      heads: [["This or<br>that?", 0.7, 4.2], ["Pick one<br>each round.", 4.4, 12.0]],
+      lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+      cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: 6.35, kind: "tap" }, { t: 8.2, kind: "tap" }, { t: 10.05, kind: "tap" }, { t: 11.9, kind: "sparkle" }],
+      lines: [["This or that. Love letter edition.", 0.9, 4.2], ["Four rounds. Pick one each time.", 4.5, 8.9], ["Comment your four, like 1, 2, 1, 2.", 9.2, 12.0], [END_LINE, 12.5, 15.1]],
+    },
+    "finish-line": {
+      title: "Finish the sentence", duration: 15.4, theme: "t-sunset", groove: [2.6, 12.2], endAt: 12.2, kind: "fill", scene: { at: 4.2, until: 12.1 },
+      note: "Free to build and preview.",
+      kicker: [["Your turn", 0.5, 4.2]],
+      heads: [["Finish the<br>sentence.", 0.7, 4.2], ["Fill in the<br>blank.", 4.4, 9.0], ["Say it<br>sweetly.", 9.2, 12.0]],
+      lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+      cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: 7.0, kind: "chime" }, { t: 9.0, kind: "chime" }, { t: 11.2, kind: "sparkle" }],
+      lines: [["Finish the sentence. Our song is…", 0.9, 4.2], ["Here are a few ideas.", 4.6, 8.8], ["Now type yours in the comments.", 9.2, 12.0], [END_LINE, 12.5, 15.1]],
+    },
+  };
+  Object.assign(VIDEOS, INTERACTIVE);
   const V = VIDEOS[ID];
   if (!V) throw new Error(`unknown video ${ID}`);
   const DURATION = V.duration;
@@ -131,6 +173,7 @@
   phone.style.width = `${PW}px`;
   phone.style.height = `${PH}px`;
   const clipImg = phone.querySelector("img");
+  if (!V.phone) V.phone = null; // interactive reels play V.scene instead of a clip
 
   const kickers = V.kicker.map(([t, a, b]) => ({ node: add(el("div", "kicker txt", t)), a, b }));
   const heads = V.heads.map(([t, a, b]) => {
@@ -152,7 +195,147 @@
   const endUrl = add(el("div", "url txt", URL_TEXT));
   const endQr = add(el("div", "card qr-card", `<img alt="" src="${QR}" />`));
   endQr.style.width = "300px";
-  const endNote = add(el("div", "note txt", "Sample page shown. Free to build and preview."));
+  const endNote = add(el("div", "note txt", V.note || "Sample page shown. Free to build and preview."));
+
+
+  // ── interactive scenes: each returns draw(t, v) where v is its fade (0..1) ───────────────────────────────
+  const SCENES = {
+    // three sealed envelopes; a finger picks each in turn, then they all wiggle
+    pick() {
+      const items = [["a promise", 190], ["a memory", 540], ["a surprise", 890]].map(([label, x], i) => {
+        const env = add(el("div", "env", '<div class="flap"></div><div class="seal">♥</div>'));
+        const num = add(el("div", "num txt", String(i + 1)));
+        const name = add(el("div", "env-label txt", label));
+        return { env, num, name, x, i };
+      });
+      const hand = add(el("div", "finger", "👆"));
+      return {
+        draw(t, v) {
+          items.forEach(({ env, num, name, x, i }) => {
+            const pop = back(span(t, 4.4 + i * 0.25, 5.1 + i * 0.25));
+            const mine = 6.2 + i * 1.1; // the finger visits this envelope
+            const lift = Math.sin(Math.PI * span(t, mine - 0.3, mine + 0.8)) * 34;
+            const wiggle = t > 9.1 ? Math.sin(t * 9 + i * 2) * 5 * smooth(span(t, 9.1, 9.5)) : 0;
+            place(env, x, 880 - lift, { s: pop * (1 + lift / 300), r: wiggle + (i - 1) * 2, o: v * span(t, 4.4 + i * 0.25, 4.6 + i * 0.25) });
+            const pulse = 1 + (t > 9.1 ? 0.06 * Math.sin(t * 6 + i) : 0);
+            place(num, x, 1040, { s: pop * pulse, o: v * pop });
+            place(name, x, 1130, { s: 1, o: v * pop });
+          });
+          const idx = clamp(Math.floor((t - 6.2) / 1.1), 0, 2), k = span(t, 5.9, 6.2);
+          const tap = Math.sin(Math.PI * clamp(((t - 6.2) % 1.1) / 0.8)) * 26;
+          place(hand, items[idx].x + 40, 1000 - tap, { s: 1.2, o: v * k * (1 - span(t, 9.0, 9.3)) });
+        },
+      };
+    },
+    // a gold scratch card: the foil is a canvas, erased along a zig-zag as time passes
+    scratch() {
+      const CW = 840, CH = 460;
+      const base = add(el("div", "scratch-base", '<span class="txt scratch-text">Tag the person<br>you\'d send it to 💌</span>'));
+      const foil = add(el("canvas", "scratch-foil"));
+      foil.width = CW; foil.height = CH;
+      const ctx = foil.getContext("2d");
+      const coin = add(el("div", "coin", "🪙"));
+      const pts = [];
+      for (let r = 0; r < 5; r++) {
+        const y = 62 + r * 84, xs = r % 2 ? [800, 40] : [40, 800];
+        for (let k = 0; k <= 16; k++) pts.push([mix(xs[0], xs[1], k / 16), y + Math.sin(k * 1.3 + r) * 12]);
+      }
+      const seg = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]));
+      const total = seg.reduce((a, b) => a + b, 0);
+      return {
+        draw(t, v) {
+          const pin = back(span(t, 4.3, 5.0));
+          const cx = 540, cy = 950;
+          const reveal = ease(span(t, 9.3, 9.8));
+          place(base, cx, cy, { s: pin * (1 + 0.04 * reveal), o: v * span(t, 4.3, 4.6) });
+          const g = ctx.createLinearGradient(0, 0, CW, CH);
+          g.addColorStop(0, "#f7d98c"); g.addColorStop(0.5, "#fff0b8"); g.addColorStop(1, "#d9a441");
+          ctx.globalCompositeOperation = "source-over";
+          ctx.clearRect(0, 0, CW, CH);
+          ctx.fillStyle = g; ctx.fillRect(0, 0, CW, CH);
+          ctx.fillStyle = "rgba(255,255,255,.35)";
+          for (let k = 0; k < 90; k++) ctx.fillRect((k * 197) % CW, (k * 131) % CH, 3, 3);
+          const sweep = mix(-300, CW + 300, (t * 0.35) % 1);
+          const band = ctx.createLinearGradient(sweep - 80, 0, sweep + 80, 0);
+          band.addColorStop(0, "rgba(255,255,255,0)"); band.addColorStop(0.5, "rgba(255,255,255,.55)"); band.addColorStop(1, "rgba(255,255,255,0)");
+          ctx.fillStyle = band; ctx.fillRect(0, 0, CW, CH);
+          ctx.fillStyle = "rgba(120,70,10,.55)"; ctx.font = "600 64px Inter, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText("SCRATCH HERE", CW / 2, CH / 2);
+          const prog = span(t, 5.0, 9.2) * total;
+          let head = pts[0];
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.lineCap = ctx.lineJoin = "round"; ctx.lineWidth = 118;
+          ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+          let run = 0;
+          for (let i = 0; i < seg.length && run < prog; i++) {
+            const f = Math.min(1, (prog - run) / seg[i]);
+            head = [mix(pts[i][0], pts[i + 1][0], f), mix(pts[i][1], pts[i + 1][1], f)];
+            ctx.lineTo(head[0], head[1]);
+            run += seg[i];
+          }
+          ctx.stroke();
+          const fade = 1 - span(t, 9.3, 9.8); // whatever foil is left falls away
+          place(foil, cx, cy, { s: pin, o: v * span(t, 4.3, 4.6) * (reveal >= 1 ? 0 : 1) });
+          foil.style.opacity = String(clamp(v * span(t, 4.3, 4.6) * fade));
+          place(coin, cx - CW / 2 + head[0], cy - CH / 2 + head[1] + 20, { s: 1.25, r: -25 + Math.sin(t * 14) * 8, o: v * span(t, 4.9, 5.2) * (1 - span(t, 9.2, 9.4)) });
+        },
+      };
+    },
+    // two choices per round, a shrinking timer, four rounds
+    thisthat() {
+      const ROUNDS = [["💌", "Envelope", "🎟️", "Scratch card"], ["✨", "Stars", "📖", "Storybook"], ["🎵", "Our song", "📸", "Our photos"], ["🌙", "Midnight", "☀️", "Morning"]];
+      const START = 4.5, LEN = 1.85;
+      const tag = add(el("div", "round txt", ""));
+      const a = add(el("div", "choice", ""));
+      const b = add(el("div", "choice", ""));
+      const or = add(el("div", "or", "or"));
+      const bar = add(el("div", "timer", "<i></i>"));
+      let shownRound = -1;
+      return {
+        draw(t, v) {
+          const r = clamp(Math.floor((t - START) / LEN), 0, ROUNDS.length - 1);
+          if (r !== shownRound) {
+            shownRound = r;
+            const [e1, l1, e2, l2] = ROUNDS[r];
+            a.innerHTML = `<span class="n txt">1</span><span class="e">${e1}</span><span class="l txt">${l1}</span>`;
+            b.innerHTML = `<span class="n txt">2</span><span class="e">${e2}</span><span class="l txt">${l2}</span>`;
+            tag.textContent = `Round ${r + 1} of ${ROUNDS.length}`;
+          }
+          const local = t - (START + r * LEN);
+          const pop = back(span(local, 0, 0.4));
+          const o = v * span(t, START - 0.1, START + 0.2);
+          place(tag, 540, 720, { o });
+          place(a, 290, 930, { s: pop, r: -3 * (1 - pop), o: o * pop });
+          place(b, 790, 930, { s: pop, r: 3 * (1 - pop), o: o * pop });
+          place(or, 540, 930, { s: pop, o: o * pop });
+          place(bar, 540, 1190, { o });
+          bar.firstChild.style.transform = `scaleX(${clamp(1 - local / (LEN - 0.15))})`;
+        },
+      };
+    },
+    // a note card where answers are typed, then wiped, then typed again
+    fill() {
+      const card = add(el("div", "note-card", '<div class="lead txt">Our song is</div><div class="typed txt"></div>'));
+      const typed = card.querySelector(".typed");
+      const ANSWERS = [["the one we sang in the car", 4.7, 7.3], ["playing at 2 a.m.", 7.3, 9.4], ["still on repeat", 9.4, 11.3]];
+      return {
+        draw(t, v) {
+          const pin = back(span(t, 4.2, 4.9));
+          place(card, 540, 950, { s: pin, r: -2 * pin, o: v * span(t, 4.2, 4.5) });
+          let text = "";
+          for (const [ans, a, b] of ANSWERS) {
+            if (t >= a && t < b) {
+              const typing = clamp((t - a - 0.2) / (0.6 * ans.length / 14)); // about 14 letters a second
+              text = ans.slice(0, Math.round(ans.length * typing));
+            }
+          }
+          const blink = Math.floor(t * 2) % 2 === 0 ? "|" : "";
+          typed.textContent = text ? text + blink : (t >= 11.3 ? "________" : "") + blink;
+        },
+      };
+    },
+  };
+  const scene = V.kind ? SCENES[V.kind]() : null;
 
   let svg = null;
   const part = (id) => svg.querySelector(`#${id}`);
@@ -226,10 +409,16 @@
 
     // the phone slides up while the clip plays, and leaves for the end card
     const ph = V.phone;
-    const pin = back(span(t, ph.at - 0.3, ph.at + 0.45)), pout = smooth(span(t, ph.until - 0.25, ph.until + 0.1));
-    place(phone, 540, 1040 + (1 - pin) * 220 + 70 * pout, { s: 1 - 0.12 * pout, o: Math.min(span(t, ph.at - 0.3, ph.at - 0.1), 1 - pout), r: (1 - pin) * 4 });
-    const clip = clipAt(t);
-    const src = `${SHOTS}${clip.name}/${String(clip.frame).padStart(4, "0")}.jpg`;
+    let src = "";
+    if (ph) {
+      const pin = back(span(t, ph.at - 0.3, ph.at + 0.45)), pout = smooth(span(t, ph.until - 0.25, ph.until + 0.1));
+      place(phone, 540, 1040 + (1 - pin) * 220 + 70 * pout, { s: 1 - 0.12 * pout, o: Math.min(span(t, ph.at - 0.3, ph.at - 0.1), 1 - pout), r: (1 - pin) * 4 });
+      const clip = clipAt(t);
+      src = `${SHOTS}${clip.name}/${String(clip.frame).padStart(4, "0")}.jpg`;
+    } else {
+      place(phone, 540, 1040, { o: 0 });
+      scene.draw(t, vis(t, V.scene.at, V.scene.until, 0.4, 0.3));
+    }
 
     kickers.forEach(({ node, a, b }) => { const v = vis(t, a, b); place(node, 540, 235 + (1 - v) * 20, { o: v }); });
     heads.forEach(({ node, a, b }) => { const v = vis(t, a, b); place(node, 540, 300 + (1 - v) * 40, { o: v, anchor: "t" }); });
@@ -257,7 +446,7 @@
     place(endQr, 540, 1345 + (1 - ev(1.4)) * 30, { o: ev(1.4) });
     place(endNote, 540, 1690, { o: ev(1.6) * 0.9 });
 
-    if (src !== shown) {
+    if (src && src !== shown) {
       shown = src;
       clipImg.src = src;
       await clipImg.decode().catch(() => {});

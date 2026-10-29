@@ -30,6 +30,13 @@ PLACEMENTS: dict[str, tuple[str, str, str]] = {
     "ad-carousel": ("facebook", "paid_social", "ad-carousel"),
     "ad-feed": ("facebook", "paid_social", "ad-feed"),
     "ad-story": ("facebook", "paid_social", "ad-story"),
+    # the interactive set (campaign interactive-2026): python3 marketing/social/utm.py interactive-2026
+    "ix-pick": ("facebook", "social", "reel-pick-a-letter"),
+    "ix-scratch": ("facebook", "social", "reel-scratch-tag"),
+    "ix-thisthat": ("facebook", "social", "reel-this-or-that"),
+    "ix-fill": ("facebook", "social", "reel-finish-line"),
+    "ix-quiz": ("facebook", "social", "quiz"),
+    "ix-quiz-story": ("facebook", "social", "quiz-story"),
 }
 
 
@@ -49,7 +56,7 @@ def resolve(text: str, campaign: str = CAMPAIGN) -> str:
 
 
 def table(campaign: str = CAMPAIGN) -> str:
-    rows = [f"| {p} | {s} | {m} | {c} | {link(p, campaign)} |" for p, (s, m, c) in PLACEMENTS.items()]
+    rows = [f"| {p} | {s} | {m} | {c} | {link(p, campaign)} |" for p, (s, m, c) in PLACEMENTS.items() if p.startswith("ix-") == campaign.startswith("interactive")]
     return "| Placement | utm_source | utm_medium | utm_content | Link |\n|---|---|---|---|---|\n" + "\n".join(rows) + "\n"
 
 

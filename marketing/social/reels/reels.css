@@ -8,3 +8,27 @@
 .portrait .headline { font-size: 108px; }
 .portrait .headline.long { font-size: 92px; }
 .deco { color: var(--gold); line-height: 1; }
+
+/* interactive scenes */
+.env { width: 250px; height: 180px; border-radius: 14px; background: linear-gradient(160deg, #fff6ee, #f6d9d0); box-shadow: 0 24px 50px rgba(0, 0, 0, .4); }
+.env .flap { position: absolute; left: 0; top: 0; width: 100%; height: 62%; border-radius: 14px 14px 0 0; background: linear-gradient(#f2c2bf, #e6a6ab); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.env .seal { position: absolute; left: 50%; top: 52%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; line-height: 1; color: #fff; background: radial-gradient(circle at 35% 30%, #f0607e, #b92b4f); box-shadow: 0 6px 14px rgba(0, 0, 0, .35); }
+.num { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-size: 56px; font-weight: 600; color: #2a1220; background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+.env-label { font-family: 'Caveat', cursive; font-weight: 600; font-size: 60px; color: var(--gold); white-space: nowrap; }
+.finger { font-size: 90px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .4)); }
+.scratch-base, .scratch-foil { width: 840px; height: 460px; border-radius: 34px; }
+.scratch-base { display: grid; place-items: center; background: var(--paper); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); }
+.scratch-foil { box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+.scratch-text { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 78px; line-height: 1.1; text-align: center; color: var(--ink); }
+.coin { font-size: 96px; line-height: 1; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .45)); }
+.round { font-size: 30px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
+.choice { width: 420px; height: 420px; border-radius: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative; background: var(--paper); box-shadow: 0 30px 70px rgba(0, 0, 0, .42); }
+.choice .e { font-size: 150px; line-height: 1; }
+.choice .l { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 58px; line-height: 1; color: var(--ink); white-space: nowrap; }
+.choice .n { position: absolute; left: 22px; top: 20px; width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; font-size: 38px; font-weight: 600; color: #fff; background: #d9466e; }
+.or { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 36px; font-weight: 600; color: #2a1220; background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 10px 26px rgba(0, 0, 0, .4); z-index: 3; }
+.timer { width: 760px; height: 16px; border-radius: 8px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.timer i { display: block; height: 100%; border-radius: 8px; transform-origin: left; background: linear-gradient(90deg, var(--accent), var(--gold)); }
+.note-card { width: 860px; height: 500px; border-radius: 28px; padding: 60px 56px; background: var(--paper); box-shadow: 0 30px 80px rgba(0, 0, 0, .45); background-image: repeating-linear-gradient(transparent 0 78px, rgba(217, 114, 140, .22) 78px 80px); }
+.note-card .lead { font-family: 'Caveat', cursive; font-weight: 700; font-size: 104px; line-height: 1.1; color: var(--ink); white-space: nowrap; }
+.note-card .typed { margin-top: 26px; min-height: 90px; font-family: 'Caveat', cursive; font-weight: 600; font-size: 84px; line-height: 1.1; color: #d9466e; white-space: nowrap; }

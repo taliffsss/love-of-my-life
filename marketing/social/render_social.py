@@ -102,6 +102,7 @@ def check_prices() -> None:
 
 
 GROUPS = [
+    ("Interactive set: posts that pair with the interactive reels", ("ix-",)),
     ("Halloween: posts (4:5)", ("hw-",)),
     ("Halloween: Meta ads (carousel 1:1, feed link, story)", ("ad-hw-",)),
     ("Halloween: TikTok / Reels photo carousel", ("car-hw-",)),

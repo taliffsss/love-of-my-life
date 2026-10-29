@@ -11,7 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 PROMO = ROOT / "marketing" / "promo"
 OUT = ROOT / "marketing" / "out" / "social" / "reels"
-IDS = ["ofw-unlock", "scratch-ask", "monthsary-book", "stars-wish", "invite-gift", "halloween-knock", "halloween-lock"]
+IDS = ["ofw-unlock", "scratch-ask", "monthsary-book", "stars-wish", "invite-gift", "halloween-knock", "halloween-lock", "pick-a-letter", "scratch-tag", "this-or-that", "finish-line"]
+INTERACTIVE_IDS = ["pick-a-letter", "scratch-tag", "this-or-that", "finish-line"]
 HALLOWEEN_IDS = ["halloween-knock", "halloween-lock"]
 SERVED = (
     "/marketing/social/reels/",
