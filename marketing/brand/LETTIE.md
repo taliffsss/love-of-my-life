@@ -48,6 +48,17 @@ She lives on the product's Rose theme background (`#160a14` to `#2a1220`), with 
 | Christmas | until 25 Dec | red Santa hat with a pom-pom; red seal; snowflakes |
 | Valentine | until 14 Feb | gold halo and small white wings; deep-pink seal; bigger hearts |
 
+**Invitation looks** (added 2026-10-28, for the invitation campaign in [`../invitation/`](../invitation/)). Not seasonal: they are used whenever the message is about invitations. Same body and face; the seal turns gold, she holds an invitation card with a real QR code, and the hat says the occasion:
+
+| Look | File | Hat |
+|---|---|---|
+| Invitation | `invitation/lettie-invite.svg` | none (gold seal, card, confetti) |
+| Wedding | `invitation/lettie-invite-wedding.svg` | sheer veil, gold ring and gem |
+| Debut and birthday | `invitation/lettie-invite-birthday.svg` | striped party hat |
+| Christening and baby shower | `invitation/lettie-invite-christening.svg` | frilled bonnet, pale blue bow |
+
+Built by `invitation/build_mascot.py` from the master `promo/lettie.svg`; stickers are in `out/invitation/cards/`. The default Lettie is unchanged and still the site's mascot; the 3D model has no invitation look yet.
+
 **Talking clips.** `marketing/brand/build_clips.py <campaign folder>` builds vertical clips from a storyboard and its narration (her mouth follows the voice, rising hearts, real app footage in a phone frame). `halloween-clips.json` holds the scripts of three Halloween clips; their claims are the ones approved in the mascot-marketing campaign.
 
 To rebuild after editing the model: `npm i --no-save three esbuild`, then `npx esbuild resources/js/lettie3d.src.js --bundle --minify --format=iife --target=es2019 --outfile=public/assets/lettie3d.js`.

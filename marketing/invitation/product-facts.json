@@ -1,0 +1,68 @@
+{
+  "campaign": "invitations-2026",
+  "checked": "2026-10-28",
+  "checked_against": "repo main-v2 @ 2fee6c4 (graphify-out built from 4e4be70b, 2026-10-22); invitations first committed in 84c307f on 2026-10-19 and present in tags v3.0.0 and later",
+  "production_note": "https://loveofmylife.love answers 200, but the live landing page does not mention invitations or weddings. Whether the deployed build includes the Invitation occasion was NOT confirmed from here: open the dashboard, pick Invitation and look for 13 templates before any ad goes live.",
+  "features": [
+    {
+      "name": "Invitation templates",
+      "user_benefit": "start from a ready-made invitation (wedding, debut, christening, baby shower, engagement party, save the date, gender reveal, class reunion, wedding program, graduation party) and change the words",
+      "evidence": "app/Services/Designs.php:197-210 (occasion 'invitation', 13 looks); app/Services/OccasionTemplates.php:'invitation' group (wedding, debut, baptism, baby shower, engagement, save the date ... each with [date] [venue] [RSVP date] placeholders); stills in marketing/out/invitation/shots/ made from the real dashboard preview",
+      "publicly_available": "unconfirmed in production",
+      "production_status": "in code and tagged releases; deployment not verified"
+    },
+    {
+      "name": "Photos and message",
+      "user_benefit": "add your own photos and write the details",
+      "evidence": "dashboard edit page (resources/views/dashboard/edit.naluz.php): letter textarea, photo upload (up to 10 MB each); plan photo allowance in config/saas.php (free 6, Sweet 12, Sweetheart 40, Forever 60)",
+      "publicly_available": true,
+      "production_status": "core product, in use"
+    },
+    {
+      "name": "Link and printable QR code",
+      "user_benefit": "share the invitation as a link or print the QR code on a card",
+      "evidence": "app/Services/QrCode.php; dashboard Share section (edit.naluz.php:241-297, 'Download QR (SVG)'); landing page lines 99 and 114",
+      "publicly_available": true,
+      "production_status": "core product"
+    },
+    {
+      "name": "Edit later, same link and QR",
+      "user_benefit": "fix a date or a venue after sharing without reprinting",
+      "evidence": "landing FAQ (resources/views/landing.naluz.php:229): 'The link and the QR code stay the same.'",
+      "publicly_available": true,
+      "production_status": "core product"
+    },
+    {
+      "name": "Free to build and preview",
+      "user_benefit": "try every template before paying",
+      "evidence": "config/saas.php plans.free (templates 'all', publish false); landing page lines 67 and 101",
+      "publicly_available": true,
+      "production_status": "core product"
+    },
+    {
+      "name": "The lock question is optional",
+      "user_benefit": "an invitation can open with one tap on 'Open', no question needed",
+      "evidence": "edit.naluz.php:149-152 ('Off: the page opens with a single tap on Open'); shots.py opens every invitation with one tap",
+      "publicly_available": true,
+      "production_status": "core product"
+    }
+  ],
+  "templates_by_plan": {
+    "free preview (build and preview, only the owner sees it)": "all templates",
+    "Sweet, P200 a month, 12 photos": ["Wedding Invitation (envelope)", "Debut (classic)", "Save the Date (cinematic)", "Engagement Party (polaroid)", "Wedding Program (timeline)"],
+    "Sweetheart, P350 a month, 40 photos, or Forever, P4,999 once, 60 photos": "all, including Christening (storybook), Baby Shower (gift), Gender Reveal (scratch), Class Reunion (memory), Graduation Party (stars)"
+  },
+  "do_not_claim": [
+    "RSVP, guest list, reply counts or reminders: the templates only ask guests to reply by message ('Kindly let us know by [RSVP date]'); nothing in the app collects replies",
+    "'Costs less' or any saving in pesos: no comparison with printing has been measured; say 'no printing' instead",
+    "An address of your own (love-name.domain) for invitations: the subdomains feature flag is off",
+    "Anything about guests not needing an app or a sign-up beyond 'opens in the browser': true by design (public /p/{slug}) but untested on old phones",
+    "Seasonal party templates (Halloween, Christmas, Valentine) outside their windows: Christmas Party opens 11 Dec",
+    "Customer numbers, testimonials, 'most popular', 'best', 'cheapest'"
+  ],
+  "product_observations": [
+    "On invitation pages the heading and closing line still read 'A letter for <name>' and 'The envelope is open: a letter for <name>' (seen in the Wedding Invitation and Debut stills). Fix before paid ads, or make the cards avoid showing those lines.",
+    "The page is addressed to a recipient name, so for an invitation the host names the page after the guests ('Our family and friends') and writes the host's own names in the text.",
+    "FIXED in the working tree on 2026-10-28 (uncommitted, not deployed): /invitations page, sitemap entry and a nav link; invitation pages now say \"An invitation for\" and \"You are invited\". Ads must wait for the deploy."
+  ]
+}

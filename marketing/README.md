@@ -21,6 +21,7 @@ None of this is part of the app; `.dockerignore` keeps it out of the image. Ever
 | `EMAIL_SEQUENCES.md` | Onboarding, upgrade and seasonal e-mail sequences |
 | `social/build_post_now.py` | Collects the 10 ready-to-upload Facebook posts into folders |
 | `brand/` | `LETTIE.md` (the mascot) and `build_brand.py` (logo and icons) |
+| `invitation/` | The invitation campaign: plan, copy, brand review, cards, Lettie's invitation looks (`invitation/README.md`) |
 | `copy/SOCIAL.md` | Earlier posts, ad copy, hashtags, two-week plan, honesty rules |
 | `PRICING.md` | The plans and prices, and why |
 

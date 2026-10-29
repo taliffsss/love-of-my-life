@@ -1,0 +1,12 @@
+{
+  "lang": "en-us",
+  "voice": "af_heart",
+  "note": "Lettie's lines for the 'Invite, don't print' video. `text` is what the captions show; `say` is how Kokoro should pronounce it.",
+  "lines": [
+    {"id": "s1", "text": "Tired of printing invitations?", "say": "Tired of printing invitations?"},
+    {"id": "s2", "text": "Make one online. Add your photos and your message.", "say": "Make one online. Add your photos, and your message."},
+    {"id": "s3", "text": "Weddings, debuts, christenings, and more.", "say": "Weddings, debuts, christenings, and more."},
+    {"id": "s4", "text": "Share the link, or print the QR code on a card.", "say": "Share the link, or print the Q R code on a card."},
+    {"id": "s5", "text": "Less printing. Start free at loveofmylife.love", "say": "Less printing. Start free at love of my life dot love."}
+  ]
+}
