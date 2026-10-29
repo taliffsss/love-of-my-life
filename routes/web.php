@@ -26,6 +26,7 @@ use Naluz\Routing\Router;
 
 // ── The product ──────────────────────────────────────────────────────────────
 $router->get('/', [LandingController::class, 'index'])->middleware(['traffic'])->name('home');
+$router->get('/invitations', [LandingController::class, 'invitations'])->middleware(['traffic'])->name('invitations');
 $router->get('/demo', [LandingController::class, 'demo'])->middleware(['traffic'])->name('demo');
 $router->get('/terms', [LegalController::class, 'terms'])->name('terms');
 $router->get('/privacy', [LegalController::class, 'privacy'])->name('privacy');

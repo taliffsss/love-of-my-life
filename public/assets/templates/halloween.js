@@ -36,7 +36,7 @@
       root.classList.add("open");
       opened.hidden = false;
       root.scrollTop = 0;
-      kit.announce(`The door is open: ${photos.length ? photos.length + " photos and " : ""}a letter for ${recipient || "you"}.`);
+      kit.announce(`The door is open: ${photos.length ? photos.length + " photos and " : ""}${kit.thing(content)} for ${recipient || "you"}.`);
       sheet.focus({ preventScroll: true });
     }
     door.addEventListener("click", knock);

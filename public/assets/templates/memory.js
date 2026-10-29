@@ -95,7 +95,7 @@
       skip.hidden = true;
       for (const c of cards) flip(c, true);
       if (won) {
-        kit.announce(`Every pair found in ${moves} moves! Your letter is open below.`);
+        kit.announce(`Every pair found in ${moves} moves! Your ${kit.invitation(content) ? "invitation" : "letter"} is open below.`);
         kit.celebrate(grid, 28);
         await kit.wait(1100);
       }

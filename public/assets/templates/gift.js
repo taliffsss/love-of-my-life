@@ -81,7 +81,7 @@
       root.classList.add("open");
       opened.hidden = false;
       root.scrollTop = 0;
-      kit.announce(cards.length ? `Unwrapped: ${cards.length} photos and a letter for ${recipient || "you"}.` : `Unwrapped: a letter for ${recipient || "you"}.`);
+      kit.announce(cards.length ? `Unwrapped: ${cards.length} photos and ${kit.thing(content)} for ${recipient || "you"}.` : `Unwrapped: ${kit.thing(content)} for ${recipient || "you"}.`);
       (cards.length > 1 ? nextBtn : sheet).focus({ preventScroll: true });
     }
     box.addEventListener("click", unwrap);

@@ -114,7 +114,7 @@
       draw();
       tally();
       kit.celebrate(field, 30);
-      kit.announce(`Every star is open: the heart is complete. The whole letter is below.`);
+      kit.announce(`Every star is open: the heart is complete. The whole ${kit.invitation(content) ? "invitation" : "letter"} is below.`);
       await kit.wait(1200);
       end.hidden = false;
       await kit.wait(150);

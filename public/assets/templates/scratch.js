@@ -113,7 +113,7 @@
       revealBtn.hidden = true;
       hint.hidden = true;
       kit.celebrate(card, 16);
-      kit.announce(`Revealed. Below it, a letter for ${recipient || "you"}.`);
+      kit.announce(`Revealed. Below it, ${kit.thing(content)} for ${recipient || "you"}.`);
       await kit.wait(900);
       after.hidden = false;
       await kit.wait(250);

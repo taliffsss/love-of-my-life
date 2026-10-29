@@ -25,7 +25,7 @@
     };
     function cover() {
       const s = side("side-cover");
-      s.append(kit.el("p", "eyebrow", "A story for"), kit.el("h2", "", recipient), kit.el("span", "side-orn", "♥"));
+      s.append(kit.el("p", "eyebrow", kit.invitation(content) ? "You are invited" : "A story for"), kit.el("h2", "", recipient), kit.el("span", "side-orn", "♥"));
       return s;
     }
     function restOfPhotos() {

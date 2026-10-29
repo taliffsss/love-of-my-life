@@ -25,7 +25,7 @@
       return li;
     });
 
-    end.append(kit.el("p", "eyebrow", "Always"), kit.el("h3", "", recipient), kit.el("span", "tl-heart", "♥"));
+    end.append(kit.el("p", "eyebrow", kit.invitation(content) ? "See you there" : "Always"), kit.el("h3", "", recipient), kit.el("span", "tl-heart", "♥"));
     if (rest.length) end.appendChild(kit.prints(rest, recipient, total - rest.length, total));
     const top = kit.el("button", "pill ghost", "Back to the top");
     top.type = "button";

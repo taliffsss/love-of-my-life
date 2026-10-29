@@ -13,9 +13,10 @@
   </div>
   @include('site.partials.music')
 </div>
-<aside class="letter" id="letter" aria-label="A letter for {{ $page->recipient }}">
+@php $lead = $page->occasion === 'invitation' ? 'An invitation for' : 'A letter for'; @endphp
+<aside class="letter" id="letter" aria-label="{{ $lead }} {{ $page->recipient }}">
   <div class="letter-head">
-    <p class="eyebrow">A letter for</p>
+    <p class="eyebrow">{{ $lead }}</p>
     <h2 id="letterFor">{{ $page->recipient }}</h2>
   </div>
   <div class="letter-view" id="letterView">

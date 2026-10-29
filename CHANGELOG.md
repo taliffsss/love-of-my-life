@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.13.0 (2026-10-29, branch `main-v2`)
+
+- **`/invitations`: a page for invitations.** Weddings, debuts, christenings, baby showers and more: the hook, three steps, the invitation templates (each says which plan sends it), the plans and an FAQ that says plainly that guests cannot reply in the app. It is in the sitemap and linked from the main page.
+- **`/demo?occasion=invitation`** opens any template as a sample invitation (addressed to "Our family and friends", made-up hosts, one tap to open, no question).
+- **Invitation pages talk about an invitation, not a love letter.** "An invitation for…", "You are invited", "See you there" and the screen-reader announcements follow the page's occasion (`content.occasion`, `kit.invitation` / `kit.thing` in `site.js`). Love-letter pages are unchanged.
+- **Marketing:** the invitation campaign kit in `marketing/invitation/` (plan, copy, brand review, cards, the video, Lettie's four invitation looks), and updates to the social and interactive kits.
+
 ## 3.11.2 (2026-10-22, branch `main-v2`)
 
 - **sitemap.xml lists only indexable pages** (the landing page, Terms and Privacy). It used to list `/demo` and `/register`, which are noindex, an error in Google Search Console. `lastmod` is given only where it is true;

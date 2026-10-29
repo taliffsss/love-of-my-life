@@ -26,7 +26,7 @@
       opened.hidden = false;
       root.scrollTop = 0;
       sheet.focus({ preventScroll: true });
-      kit.announce(`The envelope is open: a letter for ${content.recipient || "you"}.`);
+      kit.announce(`The envelope is open: ${kit.thing(content)} for ${content.recipient || "you"}.`);
     }
     seal.addEventListener("click", openEnvelope);
     scene.addEventListener("click", openEnvelope);

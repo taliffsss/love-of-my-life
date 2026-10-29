@@ -59,7 +59,7 @@
           </div>
           <div class="section-body stack">
             <div class="field">
-              <label for="recipient">Who it is for <span class="muted small">(shown as “A letter for …”)</span></label>
+              <label for="recipient">Who it is for <span class="muted small">(shown as “A letter for …”, or “An invitation for …” on an invitation: name the guests, e.g. “Our family and friends”)</span></label>
               <input class="input" id="recipient" name="recipient" maxlength="60" required value="{{ $old['recipient'] ?? $page->recipient }}" @if (!empty($errors['recipient'])) aria-invalid="true" aria-describedby="recipient-error" @endif />
               @include('partials.errors', ['field' => 'recipient'])
             </div>

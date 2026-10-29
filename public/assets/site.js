@@ -235,12 +235,17 @@ function paragraphs(container, letter) {
   return container;
 }
 
-// The letter as a sheet of paper: "A letter for", the name, the paragraphs.
+// An invitation page (occasion "invitation") talks about an invitation, not a love letter. `thing` is the noun with its article.
+const invitation = (content) => !!content && content.occasion === "invitation";
+const thing = (content) => (invitation(content) ? "an invitation" : "a letter");
+
+// The letter as a sheet of paper: "A letter for" (or "An invitation for"), the name, the paragraphs.
 function letterSheet(content, heading = "A letter for") {
+  const lead = invitation(content) ? "An invitation for" : heading;
   const sheet = el("article", "sheet");
-  sheet.setAttribute("aria-label", `A letter for ${content.recipient || ""}`);
+  sheet.setAttribute("aria-label", `${invitation(content) ? "An invitation" : "A letter"} for ${content.recipient || ""}`);
   const head = el("header", "sheet-head");
-  head.append(el("p", "eyebrow", heading), el("h2", "", content.recipient || ""));
+  head.append(el("p", "eyebrow", lead), el("h2", "", content.recipient || ""));
   sheet.append(head, paragraphs(el("div", "sheet-body"), content.letter));
   return sheet;
 }
@@ -369,7 +374,7 @@ function swipe(target, onSwipe) {
   target.addEventListener("pointercancel", () => (x0 = null));
 }
 
-const kit = { root: show, reduced, wait, ready, pad, el, photo, placeholder, paragraphs, letterSheet, chapters, prints, lightbox, celebrate, announce, swipe, tilt, slideshow };
+const kit = { root: show, reduced, wait, ready, pad, el, photo, placeholder, paragraphs, invitation, thing, letterSheet, chapters, prints, lightbox, celebrate, announce, swipe, tilt, slideshow };
 
 // The page opens on the letter and the photos when a template is missing or fails.
 function plain(content) {

@@ -114,7 +114,7 @@ final class LandingTest extends TestCase
     {
         $xml = simplexml_load_string((string) $this->get('/sitemap.xml')->getBody());
         $listed = array_map('strval', (array) $xml->xpath('//*[local-name()="loc"]'));
-        $this->assertSame(['https://love.test/', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
+        $this->assertSame(['https://love.test/', 'https://love.test/invitations', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
 
         // every listed page really is index, follow; and none of the noindex ones is listed
         foreach ($listed as $url) {
@@ -160,5 +160,37 @@ final class LandingTest extends TestCase
         $this->assertSame(['status' => 'ok', 'framework' => 'NaluzPHP'], $this->decode($response));
         $this->assertSame('noindex, nofollow', $response->getHeaderLine('X-Robots-Tag'));
         $this->assertSame('', $response->getHeaderLine('X-RateLimit-Limit'), 'never rate limited');
+    }
+
+    public function testTheInvitationsPageSellsTheInvitationTemplatesAndMakesNoPromiseItCannotKeep(): void
+    {
+        $response = $this->get('/invitations');
+        $html = (string) $response->getBody();
+
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('<meta name="robots" content="index, follow"', $html);
+        $this->assertStringContainsString('<link rel="canonical" href="https://love.test/invitations"', $html);
+        foreach (['Tired of printing invitations?', 'Wedding Invitation', 'Christening', 'Debut', 'Baby Shower', 'Sweet', 'Sweetheart', 'Forever'] as $text) {
+            $this->assertStringContainsString($text, $html);
+        }
+        // the Wedding Invitation is on Sweet; the Christening needs Sweetheart
+        $this->assertMatchesRegularExpression('/Wedding Invitation<\/h3>\s*<p>[^<]*<\/p>\s*<p class="inv-plan">On Sweet and above/', $html);
+        $this->assertMatchesRegularExpression('/Christening<\/h3>\s*<p>[^<]*<\/p>\s*<p class="inv-plan">On Sweetheart and above/', $html);
+        // nothing here collects replies, so the page says it does not
+        $this->assertStringContainsString('Not yet. The invitation tells guests by when to let you know', $html);
+        $this->assertStringNotContainsStringIgnoringCase('cost less', $html);
+        $this->assertStringContainsString('/demo?layout=envelope&amp;theme=blush&amp;occasion=invitation', $html, 'the hero links to a sample invitation');
+    }
+
+    public function testTheInvitationDemoIsAddressedToTheGuestsAndOpensWithOneTap(): void
+    {
+        $html = (string) $this->get('/demo?layout=classic&occasion=invitation')->getBody();
+        $this->assertStringContainsString('An invitation for', $html);
+        $this->assertStringNotContainsString('A letter for', $html);
+        $this->assertStringContainsString('"occasion":"invitation"', $html);
+        $this->assertStringContainsString('Our family and friends', $html);
+
+        $plain = (string) $this->get('/demo?layout=classic')->getBody();
+        $this->assertStringContainsString('A letter for', $plain, 'the love-letter demo keeps its wording');
     }
 }

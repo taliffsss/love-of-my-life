@@ -30,6 +30,7 @@
     <nav aria-label="Main" class="row">
       <a class="hide-sm" href="#templates">Templates</a>
       <a class="hide-sm" href="#pricing">Pricing</a>
+      <a class="hide-sm" href="/invitations">Invitations</a>
       <a class="hide-sm" href="/demo">Demo</a>
       @if ($user !== null)
       <a class="btn btn-light btn-sm" href="/dashboard">Your pages</a>
