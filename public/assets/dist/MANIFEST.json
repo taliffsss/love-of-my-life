@@ -5,13 +5,13 @@
       "public/assets/depth.css",
       "public/assets/app.css"
     ],
-    "sha256": "3d09203540a156145bba402d947ba6b5fea6b4d5c0665463456d7229c0d5fe4b"
+    "sha256": "4f8c40345dcea0176f356c392cb3d5ea7cdcdade533f51602fb9bbb628ad85da"
   },
   "landing.css": {
     "sources": [
       "public/assets/landing.css"
     ],
-    "sha256": "3503c2e6703967c1996fe5f9cf8fad3c046782d80285717435819b561a0f528b"
+    "sha256": "72daf1417335aeafb5da849f8e6484087d0b9dc9e0c794b4ecb74d3ce37be2ae"
   },
   "invitations.css": {
     "sources": [

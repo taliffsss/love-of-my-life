@@ -47,8 +47,8 @@
   <div class="lp-wrap lp-hero-grid">
     <div class="lp-hero-copy">
       <p class="lp-kicker">Weddings, debuts, christenings and more</p>
-      <h1 class="lp-h1">Tired of printing invitations?</h1>
-      <p class="lp-lead">Make one online. Pick a template, add your photos and your message, then share the link or print the QR code on a card. Guests open it in their browser, with nothing to install.</p>
+      <h1 class="lp-h1">Make your invitation online. No printing.</h1>
+      <p class="lp-lead">Tired of printing invitations? Make one online: pick a template, add your photos and your message, then share the link or print the QR code on a card. Guests open it in their browser, with nothing to install.</p>
       <div class="lp-cta">
         <a class="lp-btn lp-btn-wax" href="/register">Start free: build it first</a>
         <a class="lp-btn lp-btn-line" href="/demo?layout=envelope&amp;theme=blush&amp;occasion=invitation">See a sample invitation</a>
@@ -78,7 +78,7 @@
   <section class="lp-how" aria-labelledby="how">
     <div class="lp-wrap lp-how-grid">
       <div class="lp-how-head">
-        <h2 id="how" class="lp-h2">Three steps, one evening.</h2>
+        <h2 id="how" class="lp-h2">Make an online invitation in three steps.</h2>
         <p class="lp-sub">Build it tonight, send it when the details are final. Nothing goes out until you do.</p>
       </div>
       <ol class="lp-steps">

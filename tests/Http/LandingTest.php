@@ -122,6 +122,27 @@ final class LandingTest extends TestCase
         $this->assertSame(1, substr_count((string) $this->get('/login')->getBody(), 'fonts.googleapis.com/css2'), 'pages without Newsreader still ask once');
     }
 
+    public function testTheHeadingsCarryTheWordsPeopleSearchFor(): void
+    {
+        $home = (string) $this->get('/')->getBody();
+        preg_match('#<h1[^>]*>(.*?)</h1>#s', $home, $h);
+        $this->assertStringContainsString('digital love letter', strtolower(strip_tags($h[1])));
+        $inv = (string) $this->get('/invitations')->getBody();
+        preg_match('#<h1[^>]*>(.*?)</h1>#s', $inv, $h);
+        $this->assertStringContainsString('invitation online', strtolower(strip_tags($h[1])));
+        $this->assertStringNotContainsString('Three steps, one evening', $inv, 'its own H2, not the homepage\'s');
+        $this->assertStringContainsString('three steps', strtolower($inv));
+    }
+
+    public function testTheTryItButtonsAreNamedByTheirVisibleText(): void
+    {
+        preg_match_all('#<a [^>]*data-demo[^>]*aria-label="([^"]*)"[^>]*>Try it</a>#', (string) $this->get('/')->getBody(), $m);
+        $this->assertNotEmpty($m[1]);
+        foreach ($m[1] as $label) {
+            $this->assertStringStartsWith('Try it', $label, 'the accessible name contains the visible text');
+        }
+    }
+
     public function testTheBrandNameLosesStrayQuotesFromTheEnvironment(): void
     {
         $this->assertStringNotContainsString('&quot;Love of My Life', (string) $this->get('/')->getBody(), 'no quoted brand in titles or meta tags');

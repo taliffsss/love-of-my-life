@@ -49,7 +49,7 @@
   <div class="lp-wrap lp-hero-grid">
     <div class="lp-hero-copy">
       <p class="lp-kicker" id="heroEyebrow">For monthsaries, anniversaries and “just because”</p>
-      <h1 class="lp-h1"><span class="ln"><span>A love letter</span></span></span> <span class="ln"><span>they unlock with</span></span></span> <span class="ln"><span>a word only they know.</span></span></h1>
+      <h1 class="lp-h1"><span class="ln"><span>A digital love letter</span></span></span> <span class="ln"><span>they unlock with</span></span></span> <span class="ln"><span>a word only they know.</span></span></h1>
       <p class="lp-lead">Put your photos, your song and a letter on one private page. It opens with a question only they can answer, then the blur lifts, the music starts and your words begin to scroll.</p>
       <div class="lp-composer">
         <label for="tryWho">Try it now: who is it for?</label>
@@ -173,7 +173,7 @@
             <p>{{ $layout['description'] }}</p>
             <p class="play">{{ $layout['play'] }}</p>
           </div>
-          <a class="lp-btn lp-btn-line lp-btn-sm" data-demo href="/demo?layout={{ $key }}" aria-label="Open the {{ strtolower($layout['name']) }} demo">Try it</a>
+          <a class="lp-btn lp-btn-line lp-btn-sm" data-demo href="/demo?layout={{ $key }}" aria-label="Try it: the {{ strtolower($layout['name']) }} demo">Try it</a>
         </article>
         @endforeach
       </div>
