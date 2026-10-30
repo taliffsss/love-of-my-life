@@ -5,7 +5,28 @@
       "public/assets/depth.css",
       "public/assets/app.css"
     ],
-    "sha256": "4f8c40345dcea0176f356c392cb3d5ea7cdcdade533f51602fb9bbb628ad85da"
+    "sha256": "202060410d12a8af800a105403efe70a67f44c209d2190729a64c4f36abc974d"
+  },
+  "public.css": {
+    "sources": [
+      "public/assets/ui.css",
+      "public/assets/depth.css",
+      "public/assets/app.css"
+    ],
+    "without_sections": [
+      "top bar",
+      "forms",
+      "auth",
+      "sign in",
+      "dashboard",
+      "occasion templates",
+      "admin",
+      "paying",
+      "first-visit tour",
+      "the bar",
+      "the dashboard"
+    ],
+    "sha256": "202060410d12a8af800a105403efe70a67f44c209d2190729a64c4f36abc974d"
   },
   "landing.css": {
     "sources": [

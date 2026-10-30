@@ -211,7 +211,7 @@ final class LandingTest extends TestCase
     {
         $xml = simplexml_load_string((string) $this->get('/sitemap.xml')->getBody());
         $listed = array_map('strval', (array) $xml->xpath('//*[local-name()="loc"]'));
-        $this->assertSame(['https://love.test/', 'https://love.test/invitations', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
+        $this->assertSame(['https://love.test/', 'https://love.test/invitations', 'https://love.test/birthday', 'https://love.test/wedding', 'https://love.test/anniversary', 'https://love.test/boyfriend-girlfriend', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
 
         // every listed page really is index, follow; and none of the noindex ones is listed
         foreach ($listed as $url) {

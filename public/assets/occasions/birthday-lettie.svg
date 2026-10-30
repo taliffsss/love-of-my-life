@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="Lettie, a cupcake with a lit candle" data-arm-l="74 252" data-arm-r="326 252">
+  <!-- Lettie as a birthday cupcake: same face, palette and animation parts as promo/lettie.svg; built by marketing/social/week-nov/looks.py -->
+  <defs>
+    <radialGradient id="l-big-heart" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#ff9fb5"/><stop offset=".6" stop-color="#ee6687"/><stop offset="1" stop-color="#c94468"/></radialGradient>
+    <linearGradient id="l-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf3"/><stop offset="1" stop-color="#fde1df"/></linearGradient><linearGradient id="c-wrap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f9a3bb"/><stop offset="1" stop-color="#e0607e"/></linearGradient>
+  </defs>
+  <ellipse id="l-shadow" cx="200" cy="346" rx="104" ry="11" fill="#000" opacity=".16"/>
+  <g id="l-confetti"><path d="M40 128 L43.36 136.64 L52 140 L43.36 143.36 L40 152 L36.64 143.36 L28 140 L36.64 136.64 Z" fill="#e6b85c"/><path d="M364 100 L366.8 107.2 L374 110 L366.8 112.8 L364 120 L361.2 112.8 L354 110 L361.2 107.2 Z" fill="#7ec8e3"/><path d="M30 242 L32.24 247.76 L38 250 L32.24 252.24 L30 258 L27.759999999999998 252.24 L22 250 L27.759999999999998 247.76 Z" fill="#ff7ea1"/><path d="M372 221 L374.52 227.48 L381 230 L374.52 232.52 L372 239 L369.48 232.52 L363 230 L369.48 227.48 Z" fill="#f9de9a"/><circle cx="70" cy="70" r="5" fill="#ff7ea1"/><circle cx="334" cy="60" r="5" fill="#e6b85c"/></g>
+  <g id="l-body">
+    <ellipse cx="160" cy="336" rx="23" ry="9" fill="#f3c2cd"/><ellipse cx="240" cy="336" rx="23" ry="9" fill="#f3c2cd"/>
+    <g id="l-arm-l" transform="translate(74 252) rotate(22)"><ellipse cx="0" cy="20" rx="14" ry="23" fill="url(#l-paper)" stroke="#eab4c0" stroke-width="4"/></g><g id="l-arm-r" transform="translate(326 252) rotate(-22)"><ellipse cx="0" cy="20" rx="14" ry="23" fill="url(#l-paper)" stroke="#eab4c0" stroke-width="4"/></g>
+    <!-- the wrapper -->
+    <path d="M100 292 L300 292 L282 336 Q 200 346 118 336 Z" fill="url(#c-wrap)" stroke="#d9647f" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M132 296 L128 336 M166 296 L164 340 M200 296 L200 342 M234 296 L236 340 M268 296 L272 336" stroke="#fde1df" stroke-width="4" opacity=".7" stroke-linecap="round"/>
+    <!-- the frosting: a big soft swirl -->
+    <path d="M66 300 C 52 236 82 202 118 196 C 108 150 148 118 200 116 C 252 118 292 150 282 196 C 318 202 348 236 334 300 C 316 312 292 302 270 312 C 246 304 226 316 200 310 C 174 316 154 304 130 312 C 108 302 84 312 66 300 Z" fill="url(#l-paper)" stroke="#eab4c0" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M122 196 C 150 214 250 214 278 196" fill="none" stroke="#efc0ca" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M142 156 C 170 172 230 172 258 156" fill="none" stroke="#efc0ca" stroke-width="3.5" stroke-linecap="round"/>
+    <rect x="108" y="226" width="11" height="5" rx="2.5" fill="#ff7ea1" transform="rotate(30 108 226)"/><rect x="140" y="200" width="11" height="5" rx="2.5" fill="#7ec8e3" transform="rotate(-20 140 200)"/><rect x="176" y="150" width="11" height="5" rx="2.5" fill="#e6b85c" transform="rotate(50 176 150)"/><rect x="232" y="144" width="11" height="5" rx="2.5" fill="#ff7ea1" transform="rotate(-35 232 144)"/><rect x="262" y="196" width="11" height="5" rx="2.5" fill="#7ec8e3" transform="rotate(25 262 196)"/><rect x="292" y="232" width="11" height="5" rx="2.5" fill="#e6b85c" transform="rotate(-45 292 232)"/><rect x="96" y="268" width="11" height="5" rx="2.5" fill="#e6b85c" transform="rotate(15 96 268)"/><rect x="306" y="276" width="11" height="5" rx="2.5" fill="#ff7ea1" transform="rotate(60 306 276)"/><rect x="122" y="160" width="11" height="5" rx="2.5" fill="#ff7ea1" transform="rotate(70 122 160)"/><rect x="282" y="160" width="11" height="5" rx="2.5" fill="#e6b85c" transform="rotate(-60 282 160)"/>
+    <!-- one lit candle -->
+    <rect x="193" y="66" width="14" height="54" rx="4" fill="#7ec8e3" stroke="#4fa3c4" stroke-width="2.5"/>
+    <path d="M194 80 L206 74 M194 96 L206 90 M194 112 L206 106" stroke="#fff" stroke-width="3" opacity=".8"/>
+    <path d="M200 20 C 188 36, 188 50, 200 62 C 212 50, 212 36, 200 20 Z" fill="#ffb347"/><path d="M200 36 C 195 44, 195 52, 200 58 C 205 52, 205 44, 200 36 Z" fill="#fff0b8"/>
+    
+    <ellipse cx="124" cy="288" rx="17" ry="9" fill="#f7a1b5" opacity=".6"/>
+    <ellipse cx="276" cy="288" rx="17" ry="9" fill="#f7a1b5" opacity=".6"/>
+    <g id="l-eyes"><g transform="translate(154 262)"><ellipse cx="0" cy="0" rx="14" ry="18" fill="#3a1f2b"/><circle cx="-5" cy="-7" r="5" fill="#fff"/><circle cx="5" cy="6" r="2.4" fill="#fff" opacity=".85"/></g><g transform="translate(246 262)"><ellipse cx="0" cy="0" rx="14" ry="18" fill="#3a1f2b"/><circle cx="-5" cy="-7" r="5" fill="#fff"/><circle cx="5" cy="6" r="2.4" fill="#fff" opacity=".85"/></g></g>
+    <g id="l-eyes-happy" opacity="0" fill="none" stroke="#3a1f2b" stroke-width="5" stroke-linecap="round"><path d="M140 266 Q 154 250 168 266"/><path d="M232 266 Q 246 250 260 266"/></g>
+    <path id="l-mouth-smile" d="M187 287 Q 200 299 213 287" fill="none" stroke="#3a1f2b" stroke-width="4.5" stroke-linecap="round"/>
+    <g id="l-mouth-open" transform="translate(200 288)" opacity="0"><path d="M-12 -1 Q 0 3 12 -1 Q 10 14 0 15 Q -10 14 -12 -1 Z" fill="#8a2c45"/><ellipse cx="0" cy="10" rx="6.5" ry="3.6" fill="#f2849c"/></g>
+    <g id="l-hug" opacity="0" transform="translate(200 338)">
+      <path transform="scale(1.9)" d="M0 15 C -19 3, -25 -8, -17 -16 C -11 -22, -2 -20, 0 -12 C 2 -20, 11 -22, 17 -16 C 25 -8, 19 3, 0 15 Z" fill="url(#l-big-heart)"/>
+      <ellipse cx="-16" cy="-19" rx="8" ry="5" fill="#fff" opacity=".45" transform="rotate(-30 -16 -19)"/>
+    </g>
+  </g>
+</svg>

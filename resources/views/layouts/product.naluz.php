@@ -18,8 +18,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&family=Bricolage+Grotesque:wght@300..800@yield('fontFamilies', '')&display=swap" rel="stylesheet" />
-    {{-- ui.css + depth.css + app.css, merged and minified by bin/build-assets.mjs (the sources stay in public/assets/) --}}
-    <link rel="stylesheet" href="/assets/dist/site.css?v={{ (string) @filemtime(base_path('public/assets/dist/site.css')) }}" />
+    {{-- ui.css + depth.css + app.css, merged and minified by bin/build-assets.mjs (the sources stay in public/assets/). 'public' is the same without the signed-in pages' sections. --}}
+    <link rel="stylesheet" href="/assets/dist/@yield('siteCss', 'site').css?v={{ (string) @filemtime(base_path('public/assets/dist/MANIFEST.json')) }}" />
   </head>
   <body class="@yield('bodyClass')">
     @yield('content')

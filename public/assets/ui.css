@@ -478,11 +478,13 @@ p { margin: 0; }
 .table-wrap { position: relative; overflow-x: auto; } /* relative: the screen-reader-only header cell must not leave the box and widen the page */
 
 .danger-zone { border-color: #f3c9c4; }
+/* ---------- dialogs: the modal (the landing page's demo uses it too) ---------- */
 dialog.modal { width: min(440px, calc(100% - 32px)); padding: 0; border: 0; border-radius: var(--radius-lg); box-shadow: 0 30px 80px rgba(0, 0, 0, .3); color: var(--ink); }
 dialog.modal::backdrop { background: rgba(23, 11, 20, .5); backdrop-filter: blur(3px); }
 dialog.modal .modal-body { padding: 22px; display: grid; gap: 12px; }
 dialog.modal h2 { font-size: 1.2rem; }
 dialog.modal .section-foot { border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+/* ---------- dashboard: the rest ---------- */
 
 .order-card { margin: 40px auto 80px; }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 10px 22px; font-size: .95rem; }

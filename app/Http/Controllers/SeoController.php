@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Services\OccasionPages;
 use Naluz\Http\Response;
 use Psr\Http\Message\ResponseInterface;
 
@@ -16,7 +17,7 @@ final class SeoController
     }
 
     /**
-     * Only the pages that ask to be indexed (their <meta name="robots"> says "index, follow"): the landing page, the invitations page and the two legal
+     * Only the pages that ask to be indexed (their <meta name="robots"> says "index, follow"): the landing page, the invitations page, the four occasion pages and the two legal
      * documents. Sign-up, sign-in and the demo are noindex, and Google reports a noindex URL in a sitemap as an error.
      * `lastmod` is only given when it is true: the legal documents carry their own date; the landing page has none.
      *
@@ -26,7 +27,7 @@ final class SeoController
     {
         $legal = (string) config('saas.legal.updated', '');
         $legal = preg_match('/^\d{4}-\d{2}-\d{2}$/', $legal) === 1 ? $legal : null;
-        return ['' => null, 'invitations' => null, 'terms' => $legal, 'privacy' => $legal];
+        return ['' => null, 'invitations' => null] + array_fill_keys(OccasionPages::slugs(), null) + ['terms' => $legal, 'privacy' => $legal];
     }
 
     public function sitemap(): ResponseInterface

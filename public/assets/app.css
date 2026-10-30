@@ -60,7 +60,9 @@ body:not(.lp) { font-size: 16px; font-optical-sizing: auto; }
 
 /* the tour and dialogs follow the same red */
 .tour-pop { border-radius: 20px 20px 20px 6px; }
+/* ---------- dialogs: the modal ---------- */
 dialog.modal { border-radius: 22px 22px 22px 8px; }
+/* ---------- the dashboard: the rest ---------- */
 
 @media (max-width: 560px) {
   .create-form { padding: 18px; }

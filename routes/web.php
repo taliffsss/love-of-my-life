@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\AccountController;
+use App\Services\OccasionPages;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -27,6 +28,7 @@ use Naluz\Routing\Router;
 // ── The product ──────────────────────────────────────────────────────────────
 $router->get('/', [LandingController::class, 'index'])->middleware(['traffic'])->name('home');
 $router->get('/invitations', [LandingController::class, 'invitations'])->middleware(['traffic'])->name('invitations');
+$router->get('/{occasion}', [LandingController::class, 'occasion'])->where('occasion', implode('|', OccasionPages::slugs()))->middleware(['traffic'])->name('occasion');
 $router->get('/demo', [LandingController::class, 'demo'])->middleware(['traffic'])->name('demo');
 $router->get('/terms', [LegalController::class, 'terms'])->name('terms');
 $router->get('/privacy', [LegalController::class, 'privacy'])->name('privacy');

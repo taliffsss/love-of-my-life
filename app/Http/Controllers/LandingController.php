@@ -7,11 +7,13 @@ namespace App\Http\Controllers;
 use App\Http\Screen;
 use App\Models\Page;
 use App\Services\Designs;
+use App\Services\OccasionPages;
 use App\Services\PhotoAllowance;
 use App\Services\PhotoStorage;
 use App\Services\Plans;
 use App\Services\Seasons;
 use App\Services\Sites;
+use Naluz\Http\HttpException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -87,7 +89,7 @@ final class LandingController
 
     /**
      * The occasions section of the landing page: what each one is called when people search for it, and one honest line about it.
-     * The names come from Designs::OCCASIONS, so a renamed occasion shows up here too; only the invitations have a page of their own.
+     * The names come from Designs::OCCASIONS, so a renamed occasion shows up here too; every occasion links to its own page.
      *
      * @return list<array{key:string,eyebrow:string,title:string,text:string,href:?string}>
      */
@@ -100,9 +102,13 @@ final class LandingController
             'wedding' => ['Wedding vows and story', 'Tell how it happened, page by page, in a little storybook to share with everyone who loves you.'],
             'invitation' => ['Online invitations', 'Weddings, debuts, christenings and baby showers: share a link or print the QR code on a card.'],
         ];
+        $slugs = [];
+        foreach (OccasionPages::PAGES as $slug => $page) {
+            $slugs[$page['occasion']] = '/' . $slug;
+        }
         $out = [];
         foreach ($copy as $key => [$title, $text]) {
-            $out[] = ['key' => $key, 'eyebrow' => (string) (Designs::OCCASIONS[$key]['name'] ?? $key), 'title' => $title, 'text' => $text, 'href' => $key === 'invitation' ? '/invitations' : null];
+            $out[] = ['key' => $key, 'eyebrow' => (string) (Designs::OCCASIONS[$key]['name'] ?? $key), 'title' => $title, 'text' => $text, 'href' => $key === 'invitation' ? '/invitations' : $slugs[$key] ?? null];
         }
         return $out;
     }
@@ -133,6 +139,71 @@ final class LandingController
         $faq[] = ['What happens when a monthly or yearly plan ends?', 'The page rests: visitors see a short note instead of your content, and nothing is deleted. Renew from your dashboard, for a month or a year, and it is back immediately, with the same link. Renewing early adds the time to what is left.'];
         $faq[] = ['How do I pay?', 'Pick a plan in your dashboard. You will see the amount and an order reference to pay by GCash or Maya.'];
         return $faq;
+    }
+
+    /** /birthday, /wedding, /anniversary, /boyfriend-girlfriend: one occasion, its templates, the plans, and a few questions. */
+    public function occasion(string $occasion, Plans $plans, Seasons $seasons, Sites $sites): ResponseInterface
+    {
+        $copy = OccasionPages::PAGES[$occasion] ?? throw new HttpException(404, 'Not Found');
+        $brand = (string) config('saas.brand');
+        $copy['title'] = str_replace('{brand}', $brand, $copy['title']);
+        $templates = [];
+        foreach (Designs::OCCASION_DESIGNS[$copy['occasion']] as $key => [$name, $blurb]) {
+            if (!empty(Designs::LAYOUTS[$key]['season']) && !$seasons->isOpen($key)) {
+                continue; // a seasonal template is only offered in its window
+            }
+            $first = $plans->plansWithTemplate($key)[0] ?? null;
+            $templates[] = ['key' => $key, 'name' => $name, 'blurb' => $blurb, 'plan' => $first === null ? null : (string) $plans->get($first)['name'], 'seasonal' => !empty(Designs::LAYOUTS[$key]['season'])];
+        }
+        $others = [];
+        foreach (OccasionPages::PAGES as $slug => $other) {
+            if ($slug !== $occasion) {
+                $others[] = ['href' => '/' . $slug, 'name' => $other['name']];
+            }
+        }
+        $siteUrl = rtrim((string) config('app.url'), '/') . '/';
+        return Screen::render('occasion', [
+            'theme' => 'default',
+            'slug' => $occasion,
+            'op' => $copy,
+            'templates' => $templates,
+            'others' => $others,
+            'plans' => $plans->paid(),
+            'siteUrl' => $siteUrl,
+            'pageUrl' => $siteUrl . $occasion,
+            'structuredData' => $this->occasionStructuredData($siteUrl, $occasion, $copy),
+            'domain' => $sites->domain(),
+        ]);
+    }
+
+    /** @param array<string,mixed> $copy */
+    private function occasionStructuredData(string $site, string $slug, array $copy): array
+    {
+        $page = $site . $slug;
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebPage',
+                    '@id' => $page . '#webpage',
+                    'url' => $page,
+                    'name' => $copy['h1'],
+                    'description' => $copy['description'],
+                    'inLanguage' => 'en',
+                    'isPartOf' => ['@id' => $site . '#website'],
+                    'primaryImageOfPage' => $site . 'assets/occasions/' . $copy['occasion'] . '-phone.jpg',
+                    'breadcrumb' => ['@id' => $page . '#breadcrumb'],
+                ],
+                [
+                    '@type' => 'BreadcrumbList',
+                    '@id' => $page . '#breadcrumb',
+                    'itemListElement' => [
+                        ['@type' => 'ListItem', 'position' => 1, 'name' => (string) config('saas.brand'), 'item' => $site],
+                        ['@type' => 'ListItem', 'position' => 2, 'name' => $copy['name'], 'item' => $page],
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**

@@ -15,7 +15,7 @@ final class AssetsBuildTest extends TestCase
     public function testEveryBuiltFileIsUpToDateWithItsSources(): void
     {
         $manifest = json_decode((string) file_get_contents(base_path('public/assets/dist/MANIFEST.json')), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame(['site.css', 'landing.css', 'invitations.css', 'ui.js', 'depth.js', 'landing.js'], array_keys($manifest));
+        $this->assertSame(['site.css', 'public.css', 'landing.css', 'invitations.css', 'ui.js', 'depth.js', 'landing.js'], array_keys($manifest));
         foreach ($manifest as $name => $entry) {
             $text = implode("\n", array_map(static fn (string $s): string => (string) file_get_contents(base_path($s)), $entry['sources']));
             $this->assertSame($entry['sha256'], hash('sha256', $text), "{$name} is stale: run `node bin/build-assets.mjs` and commit public/assets/dist/");
@@ -25,11 +25,24 @@ final class AssetsBuildTest extends TestCase
         }
     }
 
+    public function testThePublicBundleLeavesOutTheSignedInPagesCssButKeepsTheDemoWindow(): void
+    {
+        $public = (string) file_get_contents(base_path('public/assets/dist/public.css'));
+        $site = (string) file_get_contents(base_path('public/assets/dist/site.css'));
+        foreach (['.danger-zone', '.tour-pop', '.admin-tabs'] as $dashboardOnly) {
+            $this->assertStringContainsString($dashboardOnly, $site, $dashboardOnly);
+            $this->assertStringNotContainsString($dashboardOnly, $public, $dashboardOnly);
+        }
+        $this->assertStringContainsString('dialog.modal', $public, 'the landing page opens its demo in a modal');
+        $this->assertStringContainsString('.toast', $public, 'a flash message can appear on any page');
+        $this->assertLessThan(strlen($site) * 0.75, strlen($public));
+    }
+
     public function testThePagesLoadTheBuiltFilesAndTheLayoutNoLongerLoadsThreeStylesheets(): void
     {
         foreach (['/', '/invitations', '/login'] as $path) {
             $html = (string) $this->get($path)->getBody();
-            $this->assertMatchesRegularExpression('#href="/assets/dist/site\.css\?v=\d+"#', $html, $path);
+            $this->assertMatchesRegularExpression('#href="/assets/dist/' . ($path === '/login' ? 'site' : 'public') . '\.css\?v=\d+"#', $html, $path);
             $this->assertMatchesRegularExpression('#src="/assets/dist/ui\.js\?v=\d+" defer#', $html, $path);
             foreach (['/assets/ui.css', '/assets/depth.css', '/assets/app.css', '/assets/ui.js'] as $source) {
                 $this->assertStringNotContainsString($source, $html, "{$path}: {$source} comes through dist/");
