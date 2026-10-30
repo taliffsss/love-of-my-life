@@ -63,7 +63,7 @@ jobs:
         run: |
           docker logs lom 2>&1 | grep -q 'Migrated: 2026_10_13_000002_create_pages_table'
           curl -fsS http://127.0.0.1:8080/api/ping | grep -q '"status":"ok"'
-          curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/ | grep -q 'A love letter they'
+          curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/ | grep -q 'Digital love letter with a secret question'
           curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/demo | grep -q '"mode":"demo"'
           curl -fsS -H 'Host: love.example.test' http://127.0.0.1:8080/register | grep -q 'Create your account'
           curl -fsS http://127.0.0.1:8080/assets/site.js | grep -q 'fetch(CONFIG.unlockUrl'
