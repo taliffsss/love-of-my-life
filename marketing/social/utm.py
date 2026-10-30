@@ -37,6 +37,17 @@ PLACEMENTS: dict[str, tuple[str, str, str]] = {
     "ix-fill": ("facebook", "social", "reel-finish-line"),
     "ix-quiz": ("facebook", "social", "quiz"),
     "ix-quiz-story": ("facebook", "social", "quiz-story"),
+    # the week of 31 Oct - 6 Nov 2026 (campaign week-nov-2026): python3 marketing/social/week-nov/collect.py
+    "wk-birthday-img": ("facebook", "social", "wk-birthday-image"),
+    "wk-birthday-reel": ("facebook", "social", "wk-birthday-reel"),
+    "wk-invitation-img": ("facebook", "social", "wk-invitation-image"),
+    "wk-invitation-reel": ("facebook", "social", "wk-invitation-reel"),
+    "wk-wedding-img": ("facebook", "social", "wk-wedding-image"),
+    "wk-wedding-reel": ("facebook", "social", "wk-wedding-reel"),
+    "wk-anniversary-img": ("facebook", "social", "wk-anniversary-image"),
+    "wk-anniversary-reel": ("facebook", "social", "wk-anniversary-reel"),
+    "wk-partner-img": ("facebook", "social", "wk-partner-image"),
+    "wk-partner-reel": ("facebook", "social", "wk-partner-reel"),
 }
 
 
@@ -56,7 +67,7 @@ def resolve(text: str, campaign: str = CAMPAIGN) -> str:
 
 
 def table(campaign: str = CAMPAIGN) -> str:
-    rows = [f"| {p} | {s} | {m} | {c} | {link(p, campaign)} |" for p, (s, m, c) in PLACEMENTS.items() if p.startswith("ix-") == campaign.startswith("interactive")]
+    rows = [f"| {p} | {s} | {m} | {c} | {link(p, campaign)} |" for p, (s, m, c) in PLACEMENTS.items() if (p.startswith("wk-") if campaign.startswith("week") else p.startswith("ix-") == campaign.startswith("interactive") and not p.startswith("wk-"))]
     return "| Placement | utm_source | utm_medium | utm_content | Link |\n|---|---|---|---|---|\n" + "\n".join(rows) + "\n"
 
 

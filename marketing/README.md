@@ -10,6 +10,7 @@ None of this is part of the app; `.dockerignore` keeps it out of the image. Ever
 | `cards/` | Social cards and Lettie stickers |
 | `social/` | The Facebook and TikTok kit: profile pictures, covers, 56 post images, captions, plan, TikTok scripts |
 | `social/reels/` | Seven ~15 s Facebook/Reels videos (five everyday, two Halloween) |
+| `social/week-nov/` | The week of 31 Oct - 6 Nov 2026: five occasions (birthday, invitation, wedding, anniversary, boyfriend/girlfriend), each a picture and a narrated video with its own mascot named Lettie (cupcake, scroll, bell, bottle, heart); `WEEK_PLAN.md` has the calendar and captions |
 | `social/HALLOWEEN.md` | The Halloween campaign: captions, Meta ad copy, schedule and honesty rules; `build_halloween.py` collects it |
 | `make.sh` | One script that builds any or all of the above (`make.sh links` prints the UTM links, `make.sh guides` lists the guides) |
 | `UTM.md` | How links are tagged and where the traffic shows (Admin → Traffic) |

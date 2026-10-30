@@ -20,7 +20,7 @@ import wave
 from pathlib import Path
 
 import numpy as np
-from common import IDS, OUT, serve
+from common import ALL_IDS, IDS, OUT, serve
 from music import RATE, soundtrack, with_voice
 from playwright.sync_api import sync_playwright
 from render import FFMPEG, MIN_VOICE_OVER_BED_DB, loudnorm, write_wav  # the promo's render.py
@@ -165,9 +165,9 @@ def check(path: Path, expected: float) -> list[str]:
 
 def main() -> None:
     ids = sys.argv[1:] or IDS
-    bad = [i for i in ids if i not in IDS]
+    bad = [i for i in ids if i not in ALL_IDS]
     if bad:
-        raise SystemExit(f"unknown video {bad}; choose from {IDS}")
+        raise SystemExit(f"unknown video {bad}; choose from {ALL_IDS}")
     if not (OUT.parents[1] / "promo" / "shots" / "shots.json").exists():
         raise SystemExit("no shots yet: run marketing/promo/make_promo.sh (it films them first)")
     server, base = serve()

@@ -14,8 +14,11 @@ OUT = ROOT / "marketing" / "out" / "social" / "reels"
 IDS = ["ofw-unlock", "scratch-ask", "monthsary-book", "stars-wish", "invite-gift", "halloween-knock", "halloween-lock", "pick-a-letter", "scratch-tag", "this-or-that", "finish-line"]
 INTERACTIVE_IDS = ["pick-a-letter", "scratch-tag", "this-or-that", "finish-line"]
 HALLOWEEN_IDS = ["halloween-knock", "halloween-lock"]
+WEEK_IDS = ["wk-birthday", "wk-invitation", "wk-wedding", "wk-anniversary", "wk-partner"]  # 31 Oct - 6 Nov 2026: marketing/social/week-nov/
+ALL_IDS = IDS + WEEK_IDS
 SERVED = (
     "/marketing/social/reels/",
+    "/marketing/social/week-nov/looks/",
     "/marketing/promo/promo.css",
     "/marketing/promo/lettie.svg",
     "/marketing/out/promo/shots/",

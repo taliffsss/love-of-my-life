@@ -92,6 +92,56 @@
     lines: [["Make this Halloween spooky and sweet.", 0.9, 4.2], ["Lock your letter with a question only they know.", 4.6, 8.7], ["Then watch them open it. Boo.", 9.0, 12.0], ["Love of My Life. Start free.", 12.5, 15.1]],
   };
 
+  // The week of 31 Oct - 6 Nov 2026 (marketing/social/week-nov/): one video per occasion, each narrated by Lettie in that occasion's
+  // outfit (V.look -> week-nov/looks/lettie-<look>.svg; her body and face are the master's), over a clip of the real demo page
+  // dressed as that occasion (week-nov/footage.py). Same timeline shape as the videos above.
+  const week = (id, o) => {
+    VIDEOS[id] = {
+      duration: 15.4, groove: [2.6, 12.2], endAt: 12.2, lettie: { keys: [[0, 540, 1010, 560], [4.0, 160, 1400, 250]], waving: [[0.9, 3.4]] },
+      ...o,
+    };
+  };
+  week("wk-birthday", {
+    title: "Happy birthday", theme: "t-party", look: "birthday", glyphs: ["🎉", "✨", "🎈"], note: "Free to build and preview. This template: Sweetheart or Forever.",
+    kicker: [["Birthday", 0.5, 4.3]],
+    heads: [["Happy<br>birthday!", 0.7, 4.3], ["Open the<br>surprise box.", 4.5, 8.7], ["Your photos and<br>wishes inside.", 8.9, 12.0]],
+    phone: { at: 4.3, until: 12.0, clips: [{ name: "wk-birthday", at: 4.3, from: 0, rate: 0.85 }] },
+    cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 20, 0.85), kind: "pop" }, { t: at(4.3, 60, 0.85), kind: "sparkle" }],
+    lines: [["Happy birthday! Skip the plain text message.", 0.9, 4.2], ["Make a surprise box that opens on your photos.", 4.6, 8.7], ["Add your photos and your birthday wishes.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+  });
+  week("wk-invitation", {
+    title: "You're invited", theme: "t-navy", look: "invitation", note: "Free to build and preview. Send it with a plan.",
+    kicker: [["Invitations", 0.5, 4.3]],
+    heads: [["You're<br>invited.", 0.7, 4.3], ["Tap the seal<br>to open it.", 4.5, 8.7], ["A link or<br>a QR code.", 8.9, 12.0]],
+    phone: { at: 4.3, until: 12.0, clips: [{ name: "wk-invitation", at: 4.3, from: 0, rate: 0.6 }] },
+    cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 8, 0.6), kind: "pop" }, { t: at(4.3, 22, 0.6), kind: "paper" }, { t: at(4.3, 60, 0.6), kind: "sparkle" }],
+    lines: [["You're invited! An invitation with no printing.", 0.9, 4.2], ["Guests tap the seal, and the details open.", 4.6, 8.7], ["Share a link or a QR code. Edit it any time.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+  });
+  week("wk-wedding", {
+    title: "For the day you say I do", theme: "t-wedding", look: "wedding", glyphs: ["♥", "✦"], note: "Free to build and preview. This template: Sweetheart or Forever.",
+    kicker: [["Wedding", 0.5, 4.3]],
+    heads: [["For the day<br>you say I do.", 0.7, 4.3], ["Your story,<br>page by page.", 4.5, 8.7], ["A little book<br>of your love.", 8.9, 12.0]],
+    phone: { at: 4.5, until: 12.0, clips: [{ name: "wk-wedding", at: 4.5, from: 0, rate: 0.75 }] },
+    cues: [{ t: 4.5, kind: "whoosh", gain: 0.6 }, { t: at(4.5, 8, 0.75), kind: "page" }, { t: at(4.5, 46, 0.75), kind: "page" }, { t: at(4.5, 84, 0.75), kind: "page" }],
+    lines: [["For the day you say I do.", 0.9, 4.2], ["Tell how it happened, page by page, in a storybook.", 4.7, 8.7], ["Then share it with everyone who loves you.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+  });
+  week("wk-anniversary", {
+    title: "Another year together", theme: "t-gold", look: "anniversary", glyphs: ["✦", "♥"], note: "Free to build and preview. This template: Sweetheart or Forever.",
+    kicker: [["Anniversary", 0.5, 4.3]],
+    heads: [["Another year<br>together.", 0.7, 4.3], ["A star for every<br>memory.", 4.5, 8.7], ["Light up your<br>love story.", 8.9, 12.0]],
+    phone: { at: 4.3, until: 12.0, clips: [{ name: "wk-anniversary", at: 4.3, from: 0, rate: 0.85 }] },
+    cues: [{ t: 4.3, kind: "whoosh", gain: 0.6 }, { t: at(4.3, 8, 0.85), kind: "chime" }, { t: at(4.3, 52, 0.85), kind: "sparkle" }],
+    lines: [["Another year together? Celebrate it properly.", 0.9, 4.2], ["Light up the stars, one memory in each.", 4.6, 8.7], ["Add your photos, your song and your words.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+  });
+  week("wk-partner", {
+    title: "Sweet on someone", theme: "", look: "partner", note: "Free to build and preview. This template: Sweetheart or Forever.",
+    kicker: [["Boyfriend / Girlfriend", 0.5, 4.3]],
+    heads: [["Sweet on<br>someone?", 0.7, 4.3], ["Scratch to find<br>the question.", 4.5, 8.7], ["They scratch.<br>They smile.", 8.9, 12.0]],
+    phone: { at: 4.5, until: 12.0, clips: [{ name: "wk-partner", at: 4.5, from: 2, rate: 0.8 }] },
+    cues: [{ t: 4.5, kind: "whoosh", gain: 0.6 }, { t: at(4.5, 40, 0.8, 2), kind: "tap" }, { t: at(4.5, 76, 0.8, 2), kind: "sparkle" }],
+    lines: [["Sweet on someone? Tell them properly.", 0.9, 4.2], ["Hide your message under a scratch card.", 4.7, 8.7], ["They scratch, they smile, they feel loved.", 9.0, 12.0], [END_LINE, 12.5, 15.1]],
+  });
+
   // Interactive reels: the viewer is asked to DO something in the comments (pick, tag, vote, finish a sentence), so there is
   // no phone clip; V.scene says when the on-screen game plays and V.kind says which one (SCENES below).
   const INTERACTIVE = {
@@ -374,8 +424,8 @@
       left = mix(left, -34, k);
       right = mix(right, 34, k);
     }
-    part("l-arm-l").setAttribute("transform", `translate(76 238) rotate(${left.toFixed(2)})`);
-    part("l-arm-r").setAttribute("transform", `translate(324 238) rotate(${right.toFixed(2)})`);
+    part("l-arm-l").setAttribute("transform", `translate(${svg.dataset.armL || "76 238"}) rotate(${left.toFixed(2)})`);
+    part("l-arm-r").setAttribute("transform", `translate(${svg.dataset.armR || "324 238"}) rotate(${right.toFixed(2)})`);
     const hugK = love ? smooth(span(t, V.endAt + 0.35, V.endAt + 0.85)) : 0;
     part("l-hug").setAttribute("opacity", hugK.toFixed(3));
     part("l-hug").setAttribute("transform", `translate(200 338) scale(${(0.6 + 0.4 * back(hugK)).toFixed(3)})`);
@@ -481,7 +531,7 @@
 
   const ready = (async () => {
     const [svgText, index, said] = await Promise.all([
-      fetch("/marketing/promo/lettie.svg").then((r) => r.text()),
+      fetch(V.look ? `/marketing/social/week-nov/looks/lettie-${V.look}.svg` : "/marketing/promo/lettie.svg").then((r) => r.text()),
       fetch(`${SHOTS}shots.json`).then((r) => (r.ok ? r.json() : { clips: {} })),
       fetch(`/marketing/out/social/reels/voice/${ID}/voice.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);

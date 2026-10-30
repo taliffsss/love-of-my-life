@@ -59,6 +59,8 @@ She lives on the product's Rose theme background (`#160a14` to `#2a1220`), with 
 
 Built by `invitation/build_mascot.py` from the master `promo/lettie.svg`; stickers are in `out/invitation/cards/`. The default Lettie is unchanged and still the site's mascot; the 3D model has no invitation look yet.
 
+**Occasion mascots** (added 2026-10-30, week of 31 Oct - 6 Nov, [`../social/week-nov/`](../social/week-nov/)). By the owner's decision these are different mascots that keep the name Lettie: a cupcake (`birthday`), a scroll (`invitation`), a wedding bell (`wedding`), a champagne bottle (`anniversary`) and a plush heart in a hoodie (`partner`). They share her face, pink-and-gold palette and animation parts, and each file says where its shoulders are (`data-arm-l/-r`). Built by `social/week-nov/looks.py` into `social/week-nov/looks/lettie-<id>.svg`; the envelope Lettie above stays the product's mascot.
+
 **Talking clips.** `marketing/brand/build_clips.py <campaign folder>` builds vertical clips from a storyboard and its narration (her mouth follows the voice, rising hearts, real app footage in a phone frame). `halloween-clips.json` holds the scripts of three Halloween clips; their claims are the ones approved in the mascot-marketing campaign.
 
 To rebuild after editing the model: `npm i --no-save three esbuild`, then `npx esbuild resources/js/lettie3d.src.js --bundle --minify --format=iife --target=es2019 --outfile=public/assets/lettie3d.js`.
