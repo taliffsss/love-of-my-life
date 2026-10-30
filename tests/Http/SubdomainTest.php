@@ -135,7 +135,7 @@ final class SubdomainTest extends TestCase
     {
         $this->makeLivePage($this->owner, ['subdomain' => 'jinelin']);
         foreach (['https://love.test/', 'https://www.love.test/', 'http://127.0.0.1/', '/'] as $url) {
-            $this->assertStringContainsString('A love letter they', (string) $this->get($url)->getBody(), $url);
+            $this->assertStringContainsString('Digital love letter with a secret question', (string) $this->get($url)->getBody(), $url);
         }
         $this->assertSame(200, $this->get('https://love.test/api/ping')->getStatusCode());
     }
@@ -153,6 +153,6 @@ final class SubdomainTest extends TestCase
 
     public function testAnUnknownHostIsTheProduct(): void
     {
-        $this->assertStringContainsString('A love letter they', (string) $this->get('https://unknown.example.org/')->getBody());
+        $this->assertStringContainsString('Digital love letter with a secret question', (string) $this->get('https://unknown.example.org/')->getBody());
     }
 }

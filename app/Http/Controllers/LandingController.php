@@ -39,14 +39,21 @@ final class LandingController
         $previewing = $seasons->canPreview() && $theme === ($request->getQueryParams()['theme'] ?? null);
         $on = $previewing ? static fn (string $k): bool => $k === $theme : fn (string $k): bool => $seasons->isOpen($k);
         $offered = array_filter(Designs::LAYOUTS, static fn (array $l, string $k): bool => empty($l['season']) || $on($k), ARRAY_FILTER_USE_BOTH);
+        $paid = $plans->paid();
+        $freePhotos = $allowance->freePhotos();
+        $pack = $allowance->packOptions()[1];
+        $maxPhoto = PhotoStorage::megabytes((int) config('saas.max_upload_bytes'));
+        $faq = $this->faq($paid, $freePhotos, $pack, $maxPhoto, $sites->domain());
         return Screen::render('landing', [
             'theme' => $theme,
+            'faq' => $faq,
+            'occasions' => $this->occasions(),
             'openSeasons' => array_values(array_filter(array_keys($offered), static fn (string $k): bool => !empty(Designs::LAYOUTS[$k]['season']))),
-            'plans' => $plans->paid(),
-            'freePhotos' => $allowance->freePhotos(),
-            'pack' => $allowance->packOptions()[1],
-            'maxPhoto' => PhotoStorage::megabytes((int) config('saas.max_upload_bytes')),
-            'structuredData' => $this->structuredData(),
+            'plans' => $paid,
+            'freePhotos' => $freePhotos,
+            'pack' => $pack,
+            'maxPhoto' => $maxPhoto,
+            'structuredData' => $this->structuredData($faq, $paid),
             'layouts' => $offered,
             'themes' => Designs::pickableThemes(),
             'domain' => $sites->domain(),
@@ -72,16 +79,81 @@ final class LandingController
             'plans' => $plans->paid(),
             'siteUrl' => $siteUrl,
             'pageUrl' => $siteUrl . 'invitations',
+            'structuredData' => $this->invitationsStructuredData($siteUrl),
             'freePhotos' => app(PhotoAllowance::class)->freePhotos(),
             'domain' => $sites->domain(),
         ]);
     }
 
-    /** Who the site is, for search engines: the organisation with its logo, and the site itself (schema.org, JSON-LD). */
-    private function structuredData(): array
+    /**
+     * The occasions section of the landing page: what each one is called when people search for it, and one honest line about it.
+     * The names come from Designs::OCCASIONS, so a renamed occasion shows up here too; only the invitations have a page of their own.
+     *
+     * @return list<array{key:string,eyebrow:string,title:string,text:string,href:?string}>
+     */
+    private function occasions(): array
+    {
+        $copy = [
+            'birthday' => ['Birthday surprise', 'A surprise box that opens on your photos and your birthday wishes.'],
+            'anniversary' => ['Anniversary love letter', 'Another year together on one private page: your photos, your song and your words, opened with a question only they can answer.'],
+            'partner' => ['Boyfriend, girlfriend and monthsary', 'A monthsary message, a sweet surprise, or a scratch card that asks "Will you be mine?". Just because counts too.'],
+            'wedding' => ['Wedding vows and story', 'Tell how it happened, page by page, in a little storybook to share with everyone who loves you.'],
+            'invitation' => ['Online invitations', 'Weddings, debuts, christenings and baby showers: share a link or print the QR code on a card.'],
+        ];
+        $out = [];
+        foreach ($copy as $key => [$title, $text]) {
+            $out[] = ['key' => $key, 'eyebrow' => (string) (Designs::OCCASIONS[$key]['name'] ?? $key), 'title' => $title, 'text' => $text, 'href' => $key === 'invitation' ? '/invitations' : null];
+        }
+        return $out;
+    }
+
+    /**
+     * The questions of the landing page's "Good to know" section, as [question, answer] in plain text: the page prints them and
+     * schema.org's FAQPage repeats them, so both always say the same.
+     *
+     * @param array<string,array<string,mixed>> $plans
+     * @param array{photos:int,price:int} $pack
+     * @return list<array{0:string,1:string}>
+     */
+    private function faq(array $plans, int $freePhotos, array $pack, string $maxPhoto, string $domain): array
+    {
+        $names = array_values($plans);
+        $perPlan = '';
+        foreach ($names as $i => $p) {
+            $perPlan .= ($i > 0 ? ($i === count($names) - 1 ? ' and ' : ', ') : '') . $p['name'] . ' ' . $p['photos'];
+        }
+        $faq = [
+            ['Who can see my page?', 'Only people with the link, and if you set a question, only someone who knows the answer. Your photos and letter are not even sent to the browser until the right answer is typed. Pages are hidden from search engines.'],
+            ['Can I change it after I send it?', 'Yes. Change the letter, the photos, the song, the question, the template or the colours whenever you like. The link and the QR code stay the same.'],
+        ];
+        if (config('saas.features.subdomains')) {
+            $faq[] = ['What is the dedicated address?', "With the Sweetheart and Forever plans your page can live at its own address, like yourname.{$domain}. Pick the name in your dashboard and it works right away."];
+        }
+        $faq[] = ['How many photos can I add?', "Photos belong to your account and are shared by all your pages. The free preview includes {$freePhotos}; each live page adds the photos of its plan: {$perPlan}. Every photo counts until you delete it. When you run out, add {$pack['photos']} more for " . Plans::money($pack['price']) . "; they never expire. Each photo can be up to {$maxPhoto} and fits every template without being stretched."];
+        $faq[] = ['What happens when a monthly or yearly plan ends?', 'The page rests: visitors see a short note instead of your content, and nothing is deleted. Renew from your dashboard, for a month or a year, and it is back immediately, with the same link. Renewing early adds the time to what is left.'];
+        $faq[] = ['How do I pay?', 'Pick a plan in your dashboard. You will see the amount and an order reference to pay by GCash or Maya.'];
+        return $faq;
+    }
+
+    /**
+     * Who the site is, for search engines (schema.org, JSON-LD): the organisation with its logo, the site, the product with its
+     * prices (read from the plans, so they cannot drift from the page) and the questions of the FAQ.
+     *
+     * @param list<array{0:string,1:string}> $faq
+     * @param array<string,array<string,mixed>> $plans
+     */
+    private function structuredData(array $faq, array $plans): array
     {
         $site = rtrim((string) config('app.url'), '/') . '/';
         $brand = (string) config('saas.brand');
+        $summary = 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.';
+        $per = ['month' => 'per month', 'year' => 'per year', 'once' => 'one time'];
+        $offers = [];
+        foreach ($plans as $plan) {
+            foreach ((array) ($plan['prices'] ?? []) as $period => $centavos) {
+                $offers[] = ['@type' => 'Offer', 'name' => $plan['name'] . ' plan, ' . ($per[$period] ?? $period), 'price' => number_format($centavos / 100, 2, '.', ''), 'priceCurrency' => 'PHP', 'url' => $site . '#pricing'];
+            }
+        }
         return [
             '@context' => 'https://schema.org',
             '@graph' => [
@@ -99,9 +171,55 @@ final class LandingController
                     '@id' => $site . '#website',
                     'url' => $site,
                     'name' => $brand,
-                    'description' => 'Make a private love page: your photos, your song and a letter, opened with a question only they can answer.',
+                    'description' => $summary,
                     'inLanguage' => 'en',
                     'publisher' => ['@id' => $site . '#organization'],
+                ],
+                [
+                    '@type' => 'WebApplication',
+                    '@id' => $site . '#app',
+                    'name' => $brand,
+                    'url' => $site,
+                    'description' => 'Digital love letters and online invitations for birthdays, weddings, anniversaries and couples: photos, a song and a letter on one private page, shared as a link or a QR code.',
+                    'applicationCategory' => 'LifestyleApplication',
+                    'operatingSystem' => 'Any (web browser)',
+                    'inLanguage' => 'en',
+                    'publisher' => ['@id' => $site . '#organization'],
+                    'offers' => $offers,
+                ],
+                [
+                    '@type' => 'FAQPage',
+                    '@id' => $site . '#faq',
+                    'mainEntity' => array_map(static fn (array $qa): array => ['@type' => 'Question', 'name' => $qa[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $qa[1]]], $faq),
+                ],
+            ],
+        ];
+    }
+
+    private function invitationsStructuredData(string $site): array
+    {
+        $page = $site . 'invitations';
+        return [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'WebPage',
+                    '@id' => $page . '#webpage',
+                    'url' => $page,
+                    'name' => 'Online wedding, debut, christening invitations',
+                    'description' => 'Make your wedding, debut or christening invitation online: pick a template, add photos and your message, then share the link or print the QR code on a card.',
+                    'inLanguage' => 'en',
+                    'isPartOf' => ['@id' => $site . '#website'],
+                    'primaryImageOfPage' => $site . 'assets/invitations/og-invitations.jpg',
+                    'breadcrumb' => ['@id' => $page . '#breadcrumb'],
+                ],
+                [
+                    '@type' => 'BreadcrumbList',
+                    '@id' => $page . '#breadcrumb',
+                    'itemListElement' => [
+                        ['@type' => 'ListItem', 'position' => 1, 'name' => (string) config('saas.brand'), 'item' => $site],
+                        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Invitations', 'item' => $page],
+                    ],
                 ],
             ],
         ];

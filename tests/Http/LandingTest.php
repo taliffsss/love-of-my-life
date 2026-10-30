@@ -92,6 +92,70 @@ final class LandingTest extends TestCase
         }
     }
 
+    public function testTheIndexablePagesHaveTheirOwnTitleAndExactlyOneDescription(): void
+    {
+        $titles = [];
+        foreach (['/' => 'Digital love letter', '/invitations' => 'Online wedding, debut, christening invitations'] as $path => $start) {
+            $html = (string) $this->get($path)->getBody();
+            $this->assertSame(1, substr_count($html, '<meta name="description"'), "{$path}: one description tag, not the layout's default as well");
+            $this->assertMatchesRegularExpression('#<title>' . preg_quote($start, '#') . '#', $html, $path);
+            preg_match('#<title>(.*?)</title>#', $html, $m);
+            $this->assertLessThanOrEqual(65, mb_strlen(html_entity_decode($m[1])), "{$path}: a title that fits the results page");
+            preg_match('#<meta name="description" content="(.*?)"#', $html, $d);
+            $this->assertLessThanOrEqual(160, mb_strlen(html_entity_decode($d[1])), "{$path}: a description that is not cut");
+            $titles[$path] = $m[1];
+            $descriptions[$path] = $d[1];
+        }
+        $this->assertNotSame($descriptions['/'], $descriptions['/invitations']);
+        $this->assertStringContainsString('invitation', $descriptions['/invitations']);
+    }
+
+    public function testTheBrandNameLosesStrayQuotesFromTheEnvironment(): void
+    {
+        $this->assertStringNotContainsString('&quot;Love of My Life', (string) $this->get('/')->getBody(), 'no quoted brand in titles or meta tags');
+        $this->assertSame('Love of My Life', trim((string) '"Love of My Life"', " \t\"'"));
+    }
+
+    public function testTheLandingPageNamesTheOccasionsPeopleSearchFor(): void
+    {
+        $text = strtolower(strip_tags((string) $this->get('/')->getBody()));
+        foreach (['birthday', 'anniversary', 'wedding', 'boyfriend', 'girlfriend', 'monthsary', 'invitation'] as $word) {
+            $this->assertStringContainsString($word, $text, $word);
+        }
+        $this->assertStringContainsString('href="/invitations"', (string) $this->get('/')->getBody(), 'the invitations page is linked from the landing page');
+    }
+
+    public function testTheLandingPageDescribesItselfToSearchEnginesWithTheFaqAndThePrices(): void
+    {
+        $html = (string) $this->get('/')->getBody();
+        preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m);
+        $graph = json_decode(html_entity_decode($m[1]), true, 512, JSON_THROW_ON_ERROR)['@graph'];
+        $types = array_column($graph, '@type');
+        $this->assertSame(['Organization', 'WebSite', 'WebApplication', 'FAQPage'], $types);
+
+        $faq = $graph[3]['mainEntity'];
+        $this->assertSame(substr_count($html, '<summary>'), count($faq), 'the schema repeats every question the page prints');
+        foreach ($faq as $qa) {
+            $this->assertStringContainsString(htmlspecialchars($qa['name'], ENT_NOQUOTES), $html);
+        }
+
+        $offers = $graph[2]['offers'];
+        $this->assertNotEmpty($offers);
+        $sweet = array_values(array_filter($offers, static fn (array $o): bool => str_starts_with($o['name'], 'Sweet plan, per month')))[0];
+        $this->assertSame(number_format(config('saas.plans.sweet.prices.month') / 100, 2, '.', ''), $sweet['price'], 'prices come from the plans');
+        $this->assertSame('PHP', $sweet['priceCurrency']);
+    }
+
+    public function testTheInvitationsPageHasBreadcrumbsAndItsOwnStructuredData(): void
+    {
+        $html = (string) $this->get('/invitations')->getBody();
+        preg_match('#<script type="application/ld\+json">(.*?)</script>#s', $html, $m);
+        $graph = json_decode(html_entity_decode($m[1]), true, 512, JSON_THROW_ON_ERROR)['@graph'];
+        $this->assertSame(['WebPage', 'BreadcrumbList'], array_column($graph, '@type'));
+        $this->assertSame('https://love.test/invitations', $graph[0]['url']);
+        $this->assertSame(2, count($graph[1]['itemListElement']));
+    }
+
     public function testRobotsKeepPeoplesPagesAndTheDashboardOutOfSearch(): void
     {
         $this->app->make(\Naluz\Config\Repository::class)->set('app.env', 'production'); // other environments block everything

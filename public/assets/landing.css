@@ -148,6 +148,18 @@
 .lp-steps h3 { margin: 0; font-size: 1.4rem; letter-spacing: -.02em; }
 .lp-steps p { margin: 8px 0 0; max-width: 46ch; color: var(--lp-soft); }
 
+/* ---------- occasions: the words people search for (birthday, anniversary, wedding, monthsary, invitations) ---------- */
+.lp-occasions { background: var(--lp-ink-2); padding: 96px 0; border-top: 1px solid var(--lp-line-d); }
+.lp-occ-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+@media (min-width: 700px) { .lp-occ-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1060px) { .lp-occ-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.lp-occ { display: grid; align-content: start; gap: 8px; padding: 26px; border: 1px solid var(--lp-line-d); border-radius: 18px; background: rgba(255, 255, 255, .03); }
+.lp-occ-eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--lp-gilt); }
+.lp-occ h3 { margin: 0; font-size: 1.3rem; letter-spacing: -.02em; }
+.lp-occ p { margin: 0; color: var(--lp-mist); }
+.lp-occ-link { justify-self: start; margin-top: 6px; font-weight: 600; text-underline-offset: 4px; }
+.lp a.lp-occ-link:not(.btn):not(.lp-btn), .lp a.lp-occ-link:not(.btn):not(.lp-btn):hover { color: var(--lp-gilt); } /* beats the rule that makes plain links take their surroundings' colour */
+
 /* ---------- templates ---------- */
 .lp-templates { background: var(--lp-ink); padding: 104px 0 96px; }
 .lp-filter { margin: 48px 0 8px; }

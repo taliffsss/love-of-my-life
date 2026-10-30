@@ -8,7 +8,8 @@ $appHost = (string) (parse_url((string) env('APP_URL', 'http://localhost'), PHP_
 
 return [
     // Brand shown in the dashboard, the landing page and e-mails.
-    'brand' => env('APP_NAME', 'Love of My Life'),
+    // quotes around the name in .env would reach titles, schema.org and the manifest literally, so they are trimmed
+    'brand' => trim((string) env('APP_NAME', 'Love of My Life'), " \t\"'"),
 
     // Main domain of the product. With the `subdomains` feature on, Sweetheart and Forever pages can get <name>.<domain>; point a wildcard DNS record (*.domain) and
     // a wildcard certificate at this app and new subdomains work the moment they are claimed (see DEPLOY.md).

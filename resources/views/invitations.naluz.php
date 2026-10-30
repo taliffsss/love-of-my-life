@@ -1,13 +1,14 @@
 @extends('layouts.product')
-@section('title', $brand . ' · Online invitations for weddings, debuts and christenings')
+@section('title', 'Online wedding, debut, christening invitations · ' . $brand)
+@section('description', 'Make your wedding, debut or christening invitation online: pick a template, add photos and your message, then share the link or print the QR code on a card.')
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
 @push('head')
-    <meta name="description" content="Make your wedding, debut or christening invitation online: pick a template, add your photos and your message, then share the link or print the QR code on a card." />
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/landing.css?v={{ (string) @filemtime(base_path('public/assets/landing.css')) }}" />
     <link rel="stylesheet" href="/assets/invitations.css?v={{ (string) @filemtime(base_path('public/assets/invitations.css')) }}" />
     <link rel="canonical" href="{{ $pageUrl }}" />
+    <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="{{ $brand }}" />
     <meta property="og:title" content="{{ $brand }}: invitations, made online" />

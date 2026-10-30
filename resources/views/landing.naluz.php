@@ -1,9 +1,10 @@
 @extends('layouts.product')
-@section('title', $brand . ' · A love letter they unlock with a word only they know')
+@section('title', 'Digital love letter with a secret question · ' . $brand)
+@section('description', 'Make a digital love letter or online invitation: your photos, song and words on one private page, opened with a secret question. Free to build and preview.')
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
 @push('head')
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/assets/landing.css?v={{ (string) @filemtime(base_path('public/assets/landing.css')) }}" />
     <link rel="canonical" href="{{ $siteUrl }}" />
     <meta property="og:type" content="website" />
@@ -117,6 +118,27 @@
     </div>
   </section>
 
+  <section class="lp-occasions" id="occasions" aria-labelledby="occasions-title">
+    <div class="lp-wrap">
+      <div class="lp-section-head">
+        <h2 id="occasions-title" class="lp-h2">A digital love letter for every occasion.</h2>
+        <p class="lp-sub">Birthdays, anniversaries, weddings, monthsaries and invitations: the same private page, dressed for the day. Build it free, send it with a plan.</p>
+      </div>
+      <ul class="lp-occ-grid">
+        @foreach ($occasions as $o)
+        <li class="lp-occ" data-occasion="{{ $o['key'] }}">
+          <span class="lp-occ-eyebrow">{{ $o['eyebrow'] }}</span>
+          <h3>{{ $o['title'] }}</h3>
+          <p>{{ $o['text'] }}</p>
+          @if ($o['href'] !== null)
+          <a class="lp-occ-link" href="{{ $o['href'] }}">See the invitation templates</a>
+          @endif
+        </li>
+        @endforeach
+      </ul>
+    </div>
+  </section>
+
   <section class="lp-templates" id="templates" aria-labelledby="templates-title">
     <div class="lp-wrap">
       <div class="lp-section-head">
@@ -221,32 +243,12 @@
     <div class="lp-wrap lp-faq-grid">
       <h2 id="faq-title" class="lp-h2">Good to know</h2>
       <div class="faq">
+        @foreach ($faq as [$question, $answer])
         <details>
-          <summary>Who can see my page?</summary>
-          <p>Only people with the link, and if you set a question, only someone who knows the answer. Your photos and letter are not even sent to the browser until the right answer is typed. Pages are hidden from search engines.</p>
+          <summary>{{ $question }}</summary>
+          <p>{{ $answer }}</p>
         </details>
-        <details>
-          <summary>Can I change it after I send it?</summary>
-          <p>Yes. Change the letter, the photos, the song, the question, the template or the colours whenever you like. The link and the QR code stay the same.</p>
-        </details>
-        @if (config('saas.features.subdomains'))
-        <details>
-          <summary>What is the dedicated address?</summary>
-          <p>With the Sweetheart and Forever plans your page can live at its own address, like <strong>yourname.{{ $domain }}</strong>. Pick the name in your dashboard and it works right away.</p>
-        </details>
-        @endif
-        <details>
-          <summary>How many photos can I add?</summary>
-          <p>Photos belong to your account and are shared by all your pages. The free preview includes {{ $freePhotos }}; each live page adds the photos of its plan: @foreach (array_values($plans) as $i => $p){{ $i > 0 ? ($i === count($plans) - 1 ? ' and ' : ', ') : '' }}{{ $p['name'] }} {{ $p['photos'] }}@endforeach. Every photo counts until you delete it. When you run out, add {{ $pack['photos'] }} more for {{ \App\Services\Plans::money($pack['price']) }}; they never expire. Each photo can be up to {{ $maxPhoto }} and fits every template without being stretched.</p>
-        </details>
-        <details>
-          <summary>What happens when a monthly or yearly plan ends?</summary>
-          <p>The page rests: visitors see a short note instead of your content, and nothing is deleted. Renew from your dashboard, for a month or a year, and it is back immediately, with the same link. Renewing early adds the time to what is left.</p>
-        </details>
-        <details>
-          <summary>How do I pay?</summary>
-          <p>Pick a plan in your dashboard. You will see the amount and an order reference to pay by GCash or Maya.</p>
-        </details>
+        @endforeach
       </div>
     </div>
   </section>

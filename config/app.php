@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Naluz\Http\Middleware;
 
 return [
-    'name' => env('APP_NAME', 'Love of My Life'),
+    'name' => trim((string) env('APP_NAME', 'Love of My Life'), " \t\"'"),
     'env' => env('APP_ENV', 'production'),
     // Secure by default: debug output must be switched on explicitly.
     'debug' => (bool) env('APP_DEBUG', false),
