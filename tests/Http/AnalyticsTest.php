@@ -12,12 +12,25 @@ final class AnalyticsTest extends TestCase
 {
     private const ID = 'G-M62J7X95ED';
 
+    public function testResourceHintsComeFirstAndTheGoogleTagGetsOnlyADnsPrefetch(): void
+    {
+        $this->analytics(self::ID);
+        $html = (string) $this->get('/')->getBody();
+        $this->assertStringContainsString('<link rel="dns-prefetch" href="https://www.googletagmanager.com" />', $html);
+        $this->assertStringContainsString('<link rel="dns-prefetch" href="https://www.google-analytics.com" />', $html);
+        $this->assertStringNotContainsString('rel="preconnect" href="https://www.googletagmanager.com"', $html, 'it loads late: a connection now would only compete');
+        $this->assertLessThan(strpos($html, 'rel="stylesheet"'), strpos($html, 'rel="preconnect" href="https://fonts.googleapis.com"'), 'before the first stylesheet');
+
+        $this->analytics('');
+        $this->assertStringNotContainsString('dns-prefetch" href="https://www.googletagmanager.com', (string) $this->get('/')->getBody());
+    }
+
     public function testTheTagIsPrintedWhenAnIdIsSet(): void
     {
         $this->analytics(self::ID);
         foreach (['/', '/login', '/register'] as $uri) {
             $html = (string) $this->get($uri)->getBody();
-            $this->assertStringNotContainsString('googletagmanager', $html, "{$uri}: Google's script is fetched after the page has loaded, not in the head");
+            $this->assertStringNotContainsString('googletagmanager.com/gtag', $html, "{$uri}: Google's script is fetched after the page has loaded, not in the head");
             $this->assertMatchesRegularExpression('#<script src="/assets/analytics\.js\?v=\d*" data-id="' . self::ID . '" defer></script>#', $html, $uri);
         }
     }

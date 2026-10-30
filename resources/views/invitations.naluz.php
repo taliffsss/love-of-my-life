@@ -7,6 +7,9 @@
 @section('uiJs', 'ui-public')
 {{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
 @section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
+@push('hints')
+    <link rel="preload" as="image" href="/assets/invitations/lettie-invite.png" fetchpriority="high" />
+@endpush
 @push('head')
     <link rel="canonical" href="{{ $pageUrl }}" />
     <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
@@ -56,7 +59,7 @@
       <p class="lp-fine">Build and preview for free. Choose a plan when you are ready to send it.</p>
     </div>
     <div class="lp-stage inv-stage">
-      <img class="inv-lettie" src="/assets/invitations/lettie-invite.png" width="560" height="415" alt="Lettie, the little love letter, holding an invitation with a QR code" />
+      <img class="inv-lettie" src="/assets/invitations/lettie-invite.png" width="560" height="415" fetchpriority="high" alt="Lettie, the little love letter, holding an invitation with a QR code" />
       <figure class="inv-phone">
         <img src="/assets/invitations/wedding.jpg" width="390" height="844" alt="A wedding invitation opened on a phone: the date, the place and the photos" />
         <figcaption>A real invitation page, with made-up names.</figcaption>

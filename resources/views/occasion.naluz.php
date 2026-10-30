@@ -6,6 +6,9 @@
 @section('siteCss', 'page')
 @section('uiJs', 'ui-public')
 @section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
+@push('hints')
+    <link rel="preload" as="image" href="/assets/occasions/{{ $op['asset'] }}-lettie.svg" fetchpriority="high" />
+@endpush
 @push('head')
     {{-- an occasion page: the landing page's look (landing.css) plus the few pieces /invitations added (invitations.css); wording in App\Services\OccasionPages --}}
     <link rel="canonical" href="{{ $pageUrl }}" />
@@ -55,7 +58,7 @@
       <p class="lp-fine">Build and preview for free. Choose a plan when you are ready to send it.</p>
     </div>
     <div class="lp-stage inv-stage">
-      <img class="inv-lettie" src="/assets/occasions/{{ $op['asset'] }}-lettie.svg" width="400" height="400" alt="{{ $op['mascot_alt'] }}" />
+      <img class="inv-lettie" src="/assets/occasions/{{ $op['asset'] }}-lettie.svg" width="400" height="400" fetchpriority="high" alt="{{ $op['mascot_alt'] }}" />
       <figure class="inv-phone">
         <img src="/assets/occasions/{{ $op['asset'] }}-phone.jpg" width="390" height="844" alt="{{ $op['alt'] }}" />
         <figcaption>A sample page, with made-up content.</figcaption>

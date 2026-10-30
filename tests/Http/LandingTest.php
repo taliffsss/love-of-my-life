@@ -122,6 +122,26 @@ final class LandingTest extends TestCase
         $this->assertSame(1, substr_count((string) $this->get('/login')->getBody(), 'fonts.googleapis.com/css2'), 'pages without Newsreader still ask once');
     }
 
+    public function testTheFontOriginsAreHintedAndTheFirstScreensPictureIsPreloaded(): void
+    {
+        foreach (['/', '/invitations', '/birthday', '/login'] as $path) {
+            $html = (string) $this->get($path)->getBody();
+            foreach (['https://fonts.googleapis.com', 'https://fonts.gstatic.com'] as $origin) {
+                $this->assertStringContainsString('rel="preconnect" href="' . $origin . '"', $html, "{$path} preconnect {$origin}");
+                $this->assertStringContainsString('rel="dns-prefetch" href="' . $origin . '"', $html, "{$path} dns-prefetch {$origin}");
+            }
+            $this->assertSame(1, substr_count($html, 'rel="preconnect"') - 1, "{$path}: preconnect to fonts.gstatic.com is the crossorigin one");
+        }
+        // the largest thing on the invitation and occasion pages is Lettie's picture: it is preloaded, at high priority, from the same URL
+        foreach (['/invitations' => '/assets/invitations/lettie-invite.png', '/birthday' => '/assets/occasions/birthday-lettie.svg', '/monthsary' => '/assets/occasions/partner-lettie.svg'] as $path => $image) {
+            $html = (string) $this->get($path)->getBody();
+            $this->assertStringContainsString('<link rel="preload" as="image" href="' . $image . '" fetchpriority="high" />', $html, $path);
+            $this->assertStringContainsString('src="' . $image . '"', $html, $path);
+            $this->assertLessThan(strpos($html, 'rel="stylesheet"'), strpos($html, 'rel="preload"'), "{$path}: preloaded before the stylesheets");
+        }
+        $this->assertStringNotContainsString('rel="preload"', (string) $this->get('/')->getBody(), 'the homepage has no picture to preload: its largest element is the headline');
+    }
+
     public function testTheHeadingsCarryTheWordsPeopleSearchFor(): void
     {
         $home = (string) $this->get('/')->getBody();
