@@ -3,11 +3,11 @@
 @section('description', 'Make a digital love letter or online invitation: your photos, song and words on one private page, opened with a secret question. Free to build and preview.')
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
-@section('siteCss', 'public')
+@section('siteCss', 'home')
+@section('uiJs', 'ui-public')
 {{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
 @section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('head')
-    <link rel="stylesheet" href="/assets/dist/landing.css?v={{ (string) @filemtime(base_path('public/assets/dist/landing.css')) }}" />
     <link rel="canonical" href="{{ $siteUrl }}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="{{ $brand }}" />

@@ -3,12 +3,11 @@
 @section('description', $op['description'])
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
-@section('siteCss', 'public')
+@section('siteCss', 'page')
+@section('uiJs', 'ui-public')
 @section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('head')
     {{-- an occasion page: the landing page's look (landing.css) plus the few pieces /invitations added (invitations.css); wording in App\Services\OccasionPages --}}
-    <link rel="stylesheet" href="/assets/dist/landing.css?v={{ (string) @filemtime(base_path('public/assets/dist/landing.css')) }}" />
-    <link rel="stylesheet" href="/assets/dist/invitations.css?v={{ (string) @filemtime(base_path('public/assets/dist/invitations.css')) }}" />
     <link rel="canonical" href="{{ $pageUrl }}" />
     <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
     <meta property="og:type" content="website" />

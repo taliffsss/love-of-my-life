@@ -50,7 +50,9 @@ final class AnalyticsTest extends TestCase
         $this->assertStringContainsString("gtag('config', id)", $js);
         $this->assertStringContainsString('dataset.id', $js);
         $this->assertStringContainsString("https://www.googletagmanager.com/gtag/js?id=", $js, 'the script that loads the tag');
-        $this->assertStringContainsString("addEventListener('load'", $js, 'and only once the page has loaded');
+        $this->assertStringContainsString("addEventListener('load', arm", $js, 'and only once the page has loaded');
+        $this->assertStringContainsString("'pointerdown'", $js, 'after the visitor does something');
+        $this->assertStringContainsString('setTimeout(load, 5000)', $js, 'or after five seconds');
     }
 
     public function testTheCspAllowsGoogleOnlyWhileAnalyticsIsOn(): void

@@ -3,12 +3,11 @@
 @section('description', 'Make your wedding, debut or christening invitation online: pick a template, add photos and your message, then share the link or print the QR code on a card.')
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
-@section('siteCss', 'public')
+@section('siteCss', 'page')
+@section('uiJs', 'ui-public')
 {{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
 @section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('head')
-    <link rel="stylesheet" href="/assets/dist/landing.css?v={{ (string) @filemtime(base_path('public/assets/dist/landing.css')) }}" />
-    <link rel="stylesheet" href="/assets/dist/invitations.css?v={{ (string) @filemtime(base_path('public/assets/dist/invitations.css')) }}" />
     <link rel="canonical" href="{{ $pageUrl }}" />
     <script type="application/ld+json">{!! json_for_html($structuredData) !!}</script>
     <meta property="og:type" content="website" />

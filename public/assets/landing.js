@@ -46,7 +46,7 @@
       screen.classList.remove("unlocked");
       answer.value = "";
     }
-    function setSeason(next) {
+    function setSeason(next, first = false) {
       season = next;
       hero.dataset.season = next;
       $$(".chip[data-season]").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.season === next)));
@@ -54,7 +54,9 @@
       $("#mockQuestion").textContent = SEASONS[next].question;
       relock();
       paintNames();
-      burst(10);
+      // the first burst waits for the page's first frame: it measures the phone, and measuring during the load forces an early layout
+      if (first) requestAnimationFrame(() => setTimeout(() => burst(10)));
+      else burst(10);
     }
     async function unlock() {
       const mine = ++run;
@@ -128,7 +130,7 @@
       spawn(e.clientX - r.left, e.clientY - r.top);
     });
 
-    setSeason(openSeason()); // the season that is on right now, so the page always feels current
+    setSeason(openSeason(), true); // the season that is on right now, so the page always feels current
   }
 
   // ---------- the templates: filters, "in season" and a live demo in a dialog ----------

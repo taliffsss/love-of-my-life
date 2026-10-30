@@ -7,8 +7,9 @@
     ],
     "sha256": "202060410d12a8af800a105403efe70a67f44c209d2190729a64c4f36abc974d"
   },
-  "public.css": {
+  "home.css": {
     "sources": [
+      "public/assets/landing.css",
       "public/assets/ui.css",
       "public/assets/depth.css",
       "public/assets/app.css"
@@ -26,25 +27,48 @@
       "the bar",
       "the dashboard"
     ],
-    "sha256": "202060410d12a8af800a105403efe70a67f44c209d2190729a64c4f36abc974d"
+    "sha256": "2572f017c3e461fa8c8981ff37883d9e785ebe69a88a7e9f016437acfff25d60"
   },
-  "landing.css": {
+  "page.css": {
     "sources": [
-      "public/assets/landing.css"
+      "public/assets/landing.css",
+      "public/assets/invitations.css",
+      "public/assets/ui.css",
+      "public/assets/depth.css",
+      "public/assets/app.css"
     ],
-    "sha256": "471928fd432f5e46ad94111483188a436cd22d9ae4015360448957523967cebf"
-  },
-  "invitations.css": {
-    "sources": [
-      "public/assets/invitations.css"
+    "without_sections": [
+      "top bar",
+      "forms",
+      "auth",
+      "sign in",
+      "dashboard",
+      "occasion templates",
+      "admin",
+      "paying",
+      "first-visit tour",
+      "the bar",
+      "the dashboard"
     ],
-    "sha256": "905811b5bbf55c14ebf0a81804cfd4e31e7a851cdb97d6659958ed00dbd57f3c"
+    "sha256": "c44c1dc8786014e278829651512a9255970a6f6f7d0cce8bffe4a2e606f8ee47"
   },
   "ui.js": {
     "sources": [
       "public/assets/ui.js"
     ],
-    "sha256": "f6aaf640bd4e53e2ef0925a7f2ddcf1114c4342a0c6722995cc1e80222a48be8"
+    "sha256": "685dbae729d53431c909f897f2855950bf36a6203d8da5c13497fc71d9b6c47d"
+  },
+  "ui-public.js": {
+    "sources": [
+      "public/assets/ui.js"
+    ],
+    "only_sections": [
+      "status toast",
+      "copy",
+      "landing header",
+      "dialogs"
+    ],
+    "sha256": "685dbae729d53431c909f897f2855950bf36a6203d8da5c13497fc71d9b6c47d"
   },
   "depth.js": {
     "sources": [
@@ -56,6 +80,6 @@
     "sources": [
       "public/assets/landing.js"
     ],
-    "sha256": "76924e3b822743271561786d99d3477bd8bedd3f5071dc134679be10bb6bd34f"
+    "sha256": "154a1f8b2257b8021966839b0d04ae6dd301fea4c3f9c176466c5529b83d0881"
   }
 }

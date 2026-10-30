@@ -33,7 +33,8 @@ for (const btn of $$("[data-copy]")) {
     const sync = () => nav.classList.toggle("on-light", hero.getBoundingClientRect().bottom <= nav.offsetHeight / 2);
     addEventListener("scroll", sync, { passive: true });
     addEventListener("resize", sync);
-    sync();
+    // the first reading waits for the page's first frame: asked during the load it forces the browser to lay the page out early
+    requestAnimationFrame(() => setTimeout(sync));
   }
 }
 

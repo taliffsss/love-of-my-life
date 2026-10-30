@@ -15,7 +15,7 @@ final class AssetsBuildTest extends TestCase
     public function testEveryBuiltFileIsUpToDateWithItsSources(): void
     {
         $manifest = json_decode((string) file_get_contents(base_path('public/assets/dist/MANIFEST.json')), true, 512, JSON_THROW_ON_ERROR);
-        $this->assertSame(['site.css', 'public.css', 'landing.css', 'invitations.css', 'ui.js', 'depth.js', 'landing.js'], array_keys($manifest));
+        $this->assertSame(['site.css', 'home.css', 'page.css', 'ui.js', 'ui-public.js', 'depth.js', 'landing.js'], array_keys($manifest));
         foreach ($manifest as $name => $entry) {
             $text = implode("\n", array_map(static fn (string $s): string => (string) file_get_contents(base_path($s)), $entry['sources']));
             $this->assertSame($entry['sha256'], hash('sha256', $text), "{$name} is stale: run `node bin/build-assets.mjs` and commit public/assets/dist/");
@@ -25,31 +25,43 @@ final class AssetsBuildTest extends TestCase
         }
     }
 
-    public function testThePublicBundleLeavesOutTheSignedInPagesCssButKeepsTheDemoWindow(): void
+    public function testThePublicBundlesLeaveOutTheSignedInPagesCodeButKeepTheDemoWindow(): void
     {
-        $public = (string) file_get_contents(base_path('public/assets/dist/public.css'));
         $site = (string) file_get_contents(base_path('public/assets/dist/site.css'));
-        foreach (['.danger-zone', '.tour-pop', '.admin-tabs'] as $dashboardOnly) {
-            $this->assertStringContainsString($dashboardOnly, $site, $dashboardOnly);
-            $this->assertStringNotContainsString($dashboardOnly, $public, $dashboardOnly);
+        foreach (['home.css', 'page.css'] as $name) {
+            $public = (string) file_get_contents(base_path('public/assets/dist/' . $name));
+            foreach (['.danger-zone', '.tour-pop', '.admin-tabs'] as $dashboardOnly) {
+                $this->assertStringContainsString($dashboardOnly, $site, $dashboardOnly);
+                $this->assertStringNotContainsString($dashboardOnly, $public, "{$name} {$dashboardOnly}");
+            }
+            $this->assertStringContainsString('dialog.modal', $public, 'the landing page opens its demo in a modal');
+            $this->assertStringContainsString('.toast', $public, 'a flash message can appear on any page');
+            $this->assertStringContainsString('.lp-hero', $public, "{$name} carries landing.css");
         }
-        $this->assertStringContainsString('dialog.modal', $public, 'the landing page opens its demo in a modal');
-        $this->assertStringContainsString('.toast', $public, 'a flash message can appear on any page');
-        $this->assertLessThan(strlen($site) * 0.75, strlen($public));
+        $this->assertStringContainsString('.inv-card', (string) file_get_contents(base_path('public/assets/dist/page.css')), 'invitations.css is in page.css');
+        $this->assertStringNotContainsString('.inv-card', (string) file_get_contents(base_path('public/assets/dist/home.css')));
+
+        $ui = (string) file_get_contents(base_path('public/assets/dist/ui.js'));
+        $lean = (string) file_get_contents(base_path('public/assets/dist/ui-public.js'));
+        $this->assertLessThan(strlen($ui) * 0.15, strlen($lean), 'only the helpers, the toast, copy, the landing header and dialogs');
+        $this->assertStringContainsString('on-light', $lean, 'the landing header');
+        $this->assertStringContainsString('data-copy', $lean);
+        $this->assertStringNotContainsString('tour-steps', $lean);
+        $this->assertStringContainsString('tour-steps', $ui);
     }
 
-    public function testThePagesLoadTheBuiltFilesAndTheLayoutNoLongerLoadsThreeStylesheets(): void
+    public function testEachKindOfPageLoadsItsOwnBuiltFilesAndNothingElseOfTheSources(): void
     {
-        foreach (['/', '/invitations', '/login'] as $path) {
+        $expect = ['/' => ['home', 'ui-public'], '/invitations' => ['page', 'ui-public'], '/birthday' => ['page', 'ui-public'], '/long-distance' => ['page', 'ui-public'], '/login' => ['site', 'ui']];
+        foreach ($expect as $path => [$css, $js]) {
             $html = (string) $this->get($path)->getBody();
-            $this->assertMatchesRegularExpression('#href="/assets/dist/' . ($path === '/login' ? 'site' : 'public') . '\.css\?v=\d+"#', $html, $path);
-            $this->assertMatchesRegularExpression('#src="/assets/dist/ui\.js\?v=\d+" defer#', $html, $path);
-            foreach (['/assets/ui.css', '/assets/depth.css', '/assets/app.css', '/assets/ui.js'] as $source) {
-                $this->assertStringNotContainsString($source, $html, "{$path}: {$source} comes through dist/");
+            $this->assertSame(1, preg_match_all('#<link rel="stylesheet" href="/assets/#', $html), "{$path}: one stylesheet of its own");
+            $this->assertMatchesRegularExpression('#href="/assets/dist/' . $css . '\.css\?v=\d+"#', $html, $path);
+            $this->assertMatchesRegularExpression('#src="/assets/dist/' . $js . '\.js\?v=\d+" defer#', $html, $path);
+            foreach (['/assets/ui.css', '/assets/depth.css', '/assets/app.css', '/assets/ui.js', '/assets/landing.css', '/assets/dist/landing.css', '/assets/dist/public.css'] as $source) {
+                $this->assertStringNotContainsString($source, $html, "{$path}: {$source}");
             }
         }
-        $this->assertStringContainsString('/assets/dist/landing.css', (string) $this->get('/')->getBody());
-        $this->assertStringContainsString('/assets/dist/landing.js', (string) $this->get('/')->getBody());
-        $this->assertStringContainsString('/assets/dist/invitations.css', (string) $this->get('/invitations')->getBody());
+        $this->assertMatchesRegularExpression('#src="/assets/dist/landing\.js\?v=\d+" defer#', (string) $this->get('/')->getBody());
     }
 }
