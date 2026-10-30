@@ -10,25 +10,23 @@
     <meta name="robots" content="@yield('robots', 'noindex, nofollow')" />
     @stack('head')
     @if (! empty($analyticsId))
-    <!-- Google tag (gtag.js): the init lives in /assets/analytics.js because the CSP allows no inline scripts -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $analyticsId }}"></script>
-    <script src="/assets/analytics.js?v={{ (string) @filemtime(base_path('public/assets/analytics.js')) }}" data-id="{{ $analyticsId }}"></script>
+    <!-- Google tag (gtag.js): /assets/analytics.js sets it up and loads Google's script once the page has loaded (the CSP allows no inline scripts) -->
+    <script src="/assets/analytics.js?v={{ (string) @filemtime(base_path('public/assets/analytics.js')) }}" data-id="{{ $analyticsId }}" defer></script>
     @endif
     @include('partials.icons')
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/assets/ui.css?v={{ (string) @filemtime(base_path('public/assets/ui.css')) }}" />
-    <link rel="stylesheet" href="/assets/depth.css?v={{ (string) @filemtime(base_path('public/assets/depth.css')) }}" />
-    <link rel="stylesheet" href="/assets/app.css?v={{ (string) @filemtime(base_path('public/assets/app.css')) }}" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Inter:wght@400;500;600&family=Bricolage+Grotesque:wght@300..800@yield('fontFamilies', '')&display=swap" rel="stylesheet" />
+    {{-- ui.css + depth.css + app.css, merged and minified by bin/build-assets.mjs (the sources stay in public/assets/) --}}
+    <link rel="stylesheet" href="/assets/dist/site.css?v={{ (string) @filemtime(base_path('public/assets/dist/site.css')) }}" />
   </head>
   <body class="@yield('bodyClass')">
     @yield('content')
     @if ($flash !== '')
     <div class="toast" role="status" id="toast">{{ $flash }}</div>
     @endif
-    <script src="/assets/ui.js?v={{ (string) @filemtime(base_path('public/assets/ui.js')) }}" defer></script>
-    <script src="/assets/depth.js?v={{ (string) @filemtime(base_path('public/assets/depth.js')) }}" defer></script>
+    <script src="/assets/dist/ui.js?v={{ (string) @filemtime(base_path('public/assets/dist/ui.js')) }}" defer></script>
+    <script src="/assets/dist/depth.js?v={{ (string) @filemtime(base_path('public/assets/dist/depth.js')) }}" defer></script>
   </body>
 </html>

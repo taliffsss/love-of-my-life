@@ -3,9 +3,10 @@
 @section('description', 'Make a digital love letter or online invitation: your photos, song and words on one private page, opened with a secret question. Free to build and preview.')
 @section('bodyClass', 'lp lp-t-' . $theme)
 @section('robots', 'index, follow')
+{{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
+@section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('head')
-    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400..600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/assets/landing.css?v={{ (string) @filemtime(base_path('public/assets/landing.css')) }}" />
+    <link rel="stylesheet" href="/assets/dist/landing.css?v={{ (string) @filemtime(base_path('public/assets/dist/landing.css')) }}" />
     <link rel="canonical" href="{{ $siteUrl }}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="{{ $brand }}" />
@@ -290,5 +291,5 @@
   </div>
 </dialog>
 
-<script src="/assets/landing.js?v={{ (string) @filemtime(base_path('public/assets/landing.js')) }}" defer></script>
+<script src="/assets/dist/landing.js?v={{ (string) @filemtime(base_path('public/assets/dist/landing.js')) }}" defer></script>
 @endsection

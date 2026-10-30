@@ -110,6 +110,18 @@ final class LandingTest extends TestCase
         $this->assertStringContainsString('invitation', $descriptions['/invitations']);
     }
 
+    public function testThePublicPagesAskGoogleFontsOnceAndDoNotBlockOnTheAnalyticsScript(): void
+    {
+        foreach (['/', '/invitations'] as $path) {
+            $html = (string) $this->get($path)->getBody();
+            $this->assertSame(1, substr_count($html, 'fonts.googleapis.com/css2'), "{$path}: one stylesheet request for every font");
+            $this->assertStringContainsString('family=Newsreader:ital,wght@1,400..600&display=swap', $html, $path);
+            $this->assertStringContainsString('family=Bricolage+Grotesque:wght@300..800&amp;family=Newsreader', $html, $path);
+            $this->assertStringNotContainsString('{{--', $html, $path);
+        }
+        $this->assertSame(1, substr_count((string) $this->get('/login')->getBody(), 'fonts.googleapis.com/css2'), 'pages without Newsreader still ask once');
+    }
+
     public function testTheBrandNameLosesStrayQuotesFromTheEnvironment(): void
     {
         $this->assertStringNotContainsString('&quot;Love of My Life', (string) $this->get('/')->getBody(), 'no quoted brand in titles or meta tags');

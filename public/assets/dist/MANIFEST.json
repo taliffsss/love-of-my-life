@@ -1,0 +1,40 @@
+{
+  "site.css": {
+    "sources": [
+      "public/assets/ui.css",
+      "public/assets/depth.css",
+      "public/assets/app.css"
+    ],
+    "sha256": "3d09203540a156145bba402d947ba6b5fea6b4d5c0665463456d7229c0d5fe4b"
+  },
+  "landing.css": {
+    "sources": [
+      "public/assets/landing.css"
+    ],
+    "sha256": "3503c2e6703967c1996fe5f9cf8fad3c046782d80285717435819b561a0f528b"
+  },
+  "invitations.css": {
+    "sources": [
+      "public/assets/invitations.css"
+    ],
+    "sha256": "905811b5bbf55c14ebf0a81804cfd4e31e7a851cdb97d6659958ed00dbd57f3c"
+  },
+  "ui.js": {
+    "sources": [
+      "public/assets/ui.js"
+    ],
+    "sha256": "f6aaf640bd4e53e2ef0925a7f2ddcf1114c4342a0c6722995cc1e80222a48be8"
+  },
+  "depth.js": {
+    "sources": [
+      "public/assets/depth.js"
+    ],
+    "sha256": "3648f1c94ef27015c1653986ddbf1e5ac8b7b01132b6dcd558327d3442df696e"
+  },
+  "landing.js": {
+    "sources": [
+      "public/assets/landing.js"
+    ],
+    "sha256": "76924e3b822743271561786d99d3477bd8bedd3f5071dc134679be10bb6bd34f"
+  }
+}

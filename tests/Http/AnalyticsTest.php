@@ -17,8 +17,8 @@ final class AnalyticsTest extends TestCase
         $this->analytics(self::ID);
         foreach (['/', '/login', '/register'] as $uri) {
             $html = (string) $this->get($uri)->getBody();
-            $this->assertStringContainsString('<script async src="https://www.googletagmanager.com/gtag/js?id=' . self::ID . '"></script>', $html, $uri);
-            $this->assertMatchesRegularExpression('#<script src="/assets/analytics\.js\?v=\d*" data-id="' . self::ID . '"></script>#', $html, $uri);
+            $this->assertStringNotContainsString('googletagmanager', $html, "{$uri}: Google's script is fetched after the page has loaded, not in the head");
+            $this->assertMatchesRegularExpression('#<script src="/assets/analytics\.js\?v=\d*" data-id="' . self::ID . '" defer></script>#', $html, $uri);
         }
     }
 
@@ -49,6 +49,8 @@ final class AnalyticsTest extends TestCase
         $this->assertStringContainsString("gtag('js', new Date())", $js);
         $this->assertStringContainsString("gtag('config', id)", $js);
         $this->assertStringContainsString('dataset.id', $js);
+        $this->assertStringContainsString("https://www.googletagmanager.com/gtag/js?id=", $js, 'the script that loads the tag');
+        $this->assertStringContainsString("addEventListener('load'", $js, 'and only once the page has loaded');
     }
 
     public function testTheCspAllowsGoogleOnlyWhileAnalyticsIsOn(): void
