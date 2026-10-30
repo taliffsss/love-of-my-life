@@ -222,6 +222,9 @@
 .lp-plan.fit { outline: 3px solid var(--lp-wax); outline-offset: 4px; animation: planFit .7s var(--ease); }
 @keyframes planFit { 40% { transform: scale(1.025); } }
 .lp-more { margin: 30px 0 0; color: var(--lp-soft); }
+/* on the dark sections the muted line is the light mist, and its links are underlined so they read as links */
+.lp-occasions .lp-more, .lp-templates .lp-more, .lp-close .lp-more { color: var(--lp-mist); }
+.lp-occasions .lp-more a, .lp-templates .lp-more a, .lp-close .lp-more a { text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---------- questions ---------- */
 .lp-faq { background: var(--lp-ink-2); padding: 100px 0; }

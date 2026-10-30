@@ -138,6 +138,7 @@
         </li>
         @endforeach
       </ul>
+      <p class="lp-more">For couples: @foreach ($audiences as $i => $a){{ $i > 0 ? ' · ' : ' ' }}<a href="{{ $a['href'] }}">{{ $a['name'] }}</a>@endforeach</p>
     </div>
   </section>
 

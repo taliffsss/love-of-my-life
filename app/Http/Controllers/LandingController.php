@@ -50,6 +50,7 @@ final class LandingController
             'theme' => $theme,
             'faq' => $faq,
             'occasions' => $this->occasions(),
+            'audiences' => array_values(array_map(static fn (string $slug): array => ['href' => '/' . $slug, 'name' => OccasionPages::PAGES[$slug]['name']], array_keys(array_filter(OccasionPages::PAGES, static fn (array $p): bool => !empty($p['audience']))))),
             'openSeasons' => array_values(array_filter(array_keys($offered), static fn (string $k): bool => !empty(Designs::LAYOUTS[$k]['season']))),
             'plans' => $paid,
             'freePhotos' => $freePhotos,
@@ -104,7 +105,9 @@ final class LandingController
         ];
         $slugs = [];
         foreach (OccasionPages::PAGES as $slug => $page) {
-            $slugs[$page['occasion']] = '/' . $slug;
+            if (empty($page['audience'])) {
+                $slugs[$page['occasion']] = '/' . $slug;
+            }
         }
         $out = [];
         foreach ($copy as $key => [$title, $text]) {
@@ -147,6 +150,7 @@ final class LandingController
         $copy = OccasionPages::PAGES[$occasion] ?? throw new HttpException(404, 'Not Found');
         $brand = (string) config('saas.brand');
         $copy['title'] = str_replace('{brand}', $brand, $copy['title']);
+        $copy['asset'] ??= $copy['occasion'];
         $templates = [];
         foreach (Designs::OCCASION_DESIGNS[$copy['occasion']] as $key => [$name, $blurb]) {
             if (!empty(Designs::LAYOUTS[$key]['season']) && !$seasons->isOpen($key)) {
@@ -191,7 +195,7 @@ final class LandingController
                     'description' => $copy['description'],
                     'inLanguage' => 'en',
                     'isPartOf' => ['@id' => $site . '#website'],
-                    'primaryImageOfPage' => $site . 'assets/occasions/' . $copy['occasion'] . '-phone.jpg',
+                    'primaryImageOfPage' => $site . 'assets/occasions/' . $copy['asset'] . '-phone.jpg',
                     'breadcrumb' => ['@id' => $page . '#breadcrumb'],
                 ],
                 [

@@ -13,13 +13,13 @@ final class OccasionPagesTest extends TestCase
 {
     public function testEveryOccasionOfTheAppHasAPageExceptInvitationsWhichHasItsOwn(): void
     {
-        $covered = array_column(OccasionPages::PAGES, 'occasion');
+        $covered = array_values(array_unique(array_column(array_filter(OccasionPages::PAGES, static fn (array $p): bool => empty($p['audience'])), 'occasion')));
         sort($covered);
         $expected = array_diff(array_keys(Designs::OCCASIONS), ['invitation']);
         sort($expected);
         $this->assertSame($expected, $covered, 'a new occasion in Designs::OCCASIONS needs its page in OccasionPages');
         foreach (OccasionPages::PAGES as $slug => $copy) {
-            foreach (['assets/occasions/' . $copy['occasion'] . '-lettie.svg', 'assets/occasions/' . $copy['occasion'] . '-phone.jpg'] as $file) {
+            foreach (['assets/occasions/' . ($copy['asset'] ?? $copy['occasion']) . '-lettie.svg', 'assets/occasions/' . ($copy['asset'] ?? $copy['occasion']) . '-phone.jpg'] as $file) {
                 $this->assertFileExists(base_path('public/' . $file), $slug);
             }
         }
@@ -44,8 +44,8 @@ final class OccasionPagesTest extends TestCase
             $titles[] = $t[1];
             $descriptions[] = $d[1];
         }
-        $this->assertCount(4, array_unique($titles));
-        $this->assertCount(4, array_unique($descriptions));
+        $this->assertCount(count(OccasionPages::slugs()), array_unique($titles));
+        $this->assertCount(count(OccasionPages::slugs()), array_unique($descriptions));
     }
 
     public function testEachPageListsItsOccasionsTemplatesWithThePlanThatHasThem(): void
@@ -61,6 +61,20 @@ final class OccasionPagesTest extends TestCase
             }
             $this->assertStringNotContainsString('Haunted Love', $html, 'a seasonal template only inside its window');
             $this->assertMatchesRegularExpression('#On (Sweet|Sweetheart|Forever) and above#', $html, $slug);
+        }
+    }
+
+    public function testTheMonthsaryAndLongDistancePagesHaveTheirOwnIdeasAndTemplates(): void
+    {
+        $monthsary = (string) $this->get('/monthsary')->getBody();
+        $this->assertStringContainsString('What to write in a monthsary message', $monthsary);
+        $this->assertStringContainsString('<h3>Sweet Note</h3>', $monthsary, 'the boyfriend/girlfriend templates');
+        $long = (string) $this->get('/long-distance')->getBody();
+        $this->assertStringContainsString('Miles apart. One link away.', $long);
+        $this->assertStringContainsString('Ideas for the one you miss', $long);
+        $this->assertStringNotContainsString('gcash', strtolower($long), 'nothing promised about paying from abroad');
+        foreach (['/boyfriend-girlfriend', '/birthday'] as $other) {
+            $this->assertStringNotContainsString('id="ideas"', (string) $this->get($other)->getBody(), $other . ' has no ideas section');
         }
     }
 

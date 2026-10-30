@@ -6,7 +6,8 @@ namespace App\Services;
 
 /**
  * The words of the landing pages of the occasions (/birthday, /wedding, /anniversary, /boyfriend-girlfriend), one page per occasion
- * of App\Services\Designs::OCCASIONS, so each can be found by what people search for. The templates, their plans and the prices
+ * of App\Services\Designs::OCCASIONS, and of the audiences that borrow an occasion's templates (/monthsary, /long-distance), so each can be
+ * found by what people search for. The templates, their plans and the prices
  * on each page are read from Designs and the plans; only the wording lives here. /invitations has its own view and controller.
  */
 final class OccasionPages
@@ -106,6 +107,73 @@ final class OccasionPages
                 ['Is it free?', 'Building and previewing are free, and only you can see it. To send it, choose the plan that includes your template.'],
             ],
             'alt' => 'A gold scratch card being scratched on a phone to reveal a message',
+            'mascot_alt' => 'Lettie, a smiling red plush heart in a pink hoodie',
+        ],
+        // Audience pages: they borrow the boyfriend/girlfriend templates and artwork ('asset'), with their own words.
+        'monthsary' => [
+            'occasion' => 'partner',
+            'asset' => 'partner',
+            'audience' => true,
+            'name' => 'Monthsary',
+            'title' => 'Monthsary message and surprise for boyfriend · {brand}',
+            'description' => 'Make a monthsary message they open online: your photos, your song and a letter, locked with a question only they can answer. Free to build and preview.',
+            'kicker' => 'For every month you choose each other',
+            'h1' => 'A monthsary message they will keep.',
+            'lead' => 'Skip the happy monthsary text. Put your photos, your song and a few honest lines on one private page, and send it on the 12th, the 27th or any day your month turns over.',
+            'sample' => ['storybook', 'rose'],
+            'steps_title' => 'Three steps to a monthsary message.',
+            'templates_title' => 'Templates for a monthsary',
+            'steps' => [
+                ['Pick a template', 'A secret letter, a little book of the two of you, a scratch card, a date-night photo wall. Each one comes with sweet wording you can change.'],
+                ['Write what this month meant', 'Add your photos, your song and your message. The ideas below can start you off.'],
+                ['Send it on your monthsary', 'Share the link in a message, or print the QR code on a card. You can edit it later; the link stays the same.'],
+            ],
+            'ideas' => ['What to write in a monthsary message', 'Start with one of these and make it yours.', [
+                'Another month, and I still smile when your name shows up on my phone.',
+                'Thank you for the small things this month: the late replies, the long calls, how you remember what I like.',
+                'If I could go back to our first month, I would choose you again.',
+                'Here is one thing I learned about us this month…',
+                'Happy monthsary, my love. I do not need anything grand, just more days like these.',
+            ]],
+            'faq' => [
+                ['Can I make one every month?', 'Yes. Make a new page each month, or keep editing the same one: the link and the QR code stay the same.'],
+                ['What if we do not do monthsaries?', 'It works for any reason, or none. “Just because” is a good one.'],
+                ['Is it free?', 'Building and previewing are free, and only you can see it. To send it, choose the plan that includes your template.'],
+            ],
+            'alt' => 'A gold scratch card being scratched on a phone to reveal a monthsary message',
+            'mascot_alt' => 'Lettie, a smiling red plush heart in a pink hoodie',
+        ],
+        'long-distance' => [
+            'occasion' => 'partner',
+            'asset' => 'partner',
+            'audience' => true,
+            'name' => 'Long distance and OFW',
+            'title' => 'Long-distance love letter for OFW couples · {brand}',
+            'description' => 'Miss them from miles away? Make a private love letter with your photos and song that opens in any browser, anywhere, with a question only they can answer.',
+            'kicker' => 'For OFWs and long-distance couples',
+            'h1' => 'Miles apart. One link away.',
+            'lead' => 'A love letter that waits for them wherever they are: your photos, your song and your words on one private page. It opens in any phone browser, and only the person who knows your question can read it.',
+            'sample' => ['envelope', 'midnight'],
+            'steps_title' => 'Three steps to reach them from miles away.',
+            'templates_title' => 'Templates for the one you miss',
+            'steps' => [
+                ['Write it and add your photos', 'Type your letter, upload your favourite photos from your phone and paste a YouTube link to your song.'],
+                ['Choose the question', 'Your endearment, your first date, an inside joke. Only the right answer opens the page; everything else stays private.'],
+                ['Send the link when it is morning for them', 'You choose when to send it. Share the link in a message, and change anything later without sending a new one.'],
+            ],
+            'ideas' => ['Ideas for the one you miss', 'Things to put on the page.', [
+                'Tell them what you did today, as if they were sitting beside you.',
+                'Write the first thing you will do when you see each other.',
+                'Add the photo you love most and the one you want to take together next.',
+                'Pick a song you both know and paste the YouTube link.',
+                'Set a question only they can answer, so the letter is waiting just for them.',
+            ]],
+            'faq' => [
+                ['Does it work if they are in another country?', 'Yes. The page opens in a phone or computer browser anywhere with an internet connection. There is nothing for them to install.'],
+                ['Is it only for OFWs?', 'No. It is for anyone who is apart: across the sea, across the country or across the province.'],
+                ['Can I change it after I send it?', 'Yes. Edit the letter, the photos, the song or the question whenever you like. The link and the QR code stay the same.'],
+            ],
+            'alt' => 'A sealed envelope opening on a phone to reveal a love letter',
             'mascot_alt' => 'Lettie, a smiling red plush heart in a pink hoodie',
         ],
     ];

@@ -56,9 +56,9 @@
       <p class="lp-fine">Build and preview for free. Choose a plan when you are ready to send it.</p>
     </div>
     <div class="lp-stage inv-stage">
-      <img class="inv-lettie" src="/assets/occasions/{{ $op['occasion'] }}-lettie.svg" width="400" height="400" alt="{{ $op['mascot_alt'] }}" />
+      <img class="inv-lettie" src="/assets/occasions/{{ $op['asset'] }}-lettie.svg" width="400" height="400" alt="{{ $op['mascot_alt'] }}" />
       <figure class="inv-phone">
-        <img src="/assets/occasions/{{ $op['occasion'] }}-phone.jpg" width="390" height="844" alt="{{ $op['alt'] }}" />
+        <img src="/assets/occasions/{{ $op['asset'] }}-phone.jpg" width="390" height="844" alt="{{ $op['alt'] }}" />
         <figcaption>A sample page, with made-up content.</figcaption>
       </figure>
     </div>
@@ -78,7 +78,7 @@
   <section class="lp-how" aria-labelledby="how">
     <div class="lp-wrap lp-how-grid">
       <div class="lp-how-head">
-        <h2 id="how" class="lp-h2">Three steps for your {{ strtolower($op['name']) }} page.</h2>
+        <h2 id="how" class="lp-h2">{{ $op['steps_title'] ?? 'Three steps for your ' . strtolower($op['name']) . ' page.' }}</h2>
         <p class="lp-sub">Write it tonight, send it when it feels right. Nothing goes out until you do.</p>
       </div>
       <ol class="lp-steps">
@@ -89,10 +89,26 @@
     </div>
   </section>
 
+  @if (! empty($op['ideas']))
+  <section class="lp-templates inv-templates" id="ideas" aria-labelledby="ideas-title">
+    <div class="lp-wrap">
+      <div class="lp-section-head">
+        <h2 id="ideas-title" class="lp-h2">{{ $op['ideas'][0] }}</h2>
+        <p class="lp-sub">{{ $op['ideas'][1] }}</p>
+      </div>
+      <div class="inv-grid">
+        @foreach ($op['ideas'][2] as $idea)
+        <article class="inv-card"><p>{{ $idea }}</p></article>
+        @endforeach
+      </div>
+    </div>
+  </section>
+  @endif
+
   <section class="lp-templates inv-templates" id="templates" aria-labelledby="templates-title">
     <div class="lp-wrap">
       <div class="lp-section-head">
-        <h2 id="templates-title" class="lp-h2">{{ $op['name'] }} templates</h2>
+        <h2 id="templates-title" class="lp-h2">{{ $op['templates_title'] ?? $op['name'] . ' templates' }}</h2>
         <p class="lp-sub">Open a sample to see how it feels. Every template can be tried free; the plan shown is what you need to send it.</p>
       </div>
       <div class="inv-grid">
@@ -105,7 +121,7 @@
         </article>
         @endforeach
       </div>
-      <p class="lp-more">The samples show the template with example content. The {{ strtolower($op['name']) }} look (its typeface and decorations) appears on your own page.</p>
+      <p class="lp-more">The samples show each template with example content. The look of the occasion (its typeface and decorations) appears on your own page.</p>
     </div>
   </section>
 
