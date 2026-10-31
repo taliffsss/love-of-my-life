@@ -31,8 +31,10 @@
 .theater-stage:active { cursor: grabbing; }
 .theater-stage:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; border-radius: var(--radius-lg); }
 .cf { position: absolute; left: 50%; top: 4%; width: min(62vw, 270px); margin-left: calc(min(62vw, 270px) / -2); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 24px 50px rgba(42, 22, 33, .22);
-  transform: translateX(calc(var(--d) * 56%)) translateZ(calc(var(--ad) * -150px)) rotateY(calc(var(--d) * -38deg)); opacity: calc(1 - var(--ad) * .24);
-  transition: transform .5s var(--ease), opacity .5s var(--soft); }
+  transform: translateX(calc(var(--d) * 56%)) translateZ(calc(var(--ad) * -150px)) rotateY(calc(var(--d) * -38deg));
+  transition: transform .5s var(--ease); }
+/* the cards farther from the front fade into the page by a scrim over them, not by opacity: an opacity under the text drags its contrast below 4.5:1 */
+.cf::after { content: ""; position: absolute; inset: 0; background: var(--cf-fade, var(--bg)); opacity: calc(var(--ad) * .24); pointer-events: none; transition: opacity .5s var(--soft); }
 .cf.drag { transition: none; }
 .cf[aria-hidden="true"] { pointer-events: none; }
 .cf .shot { aspect-ratio: 4 / 3; border-bottom: 1px solid var(--line); }

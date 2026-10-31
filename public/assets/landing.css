@@ -187,7 +187,8 @@
 .theater-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
 .lp .cf { border: 0; background: var(--lp-paper); color: var(--lp-text); border-radius: 18px; box-shadow: 0 30px 60px rgba(0, 0, 0, .5); }
 .lp .cf .shot { border-bottom-color: rgba(42, 22, 35, .12); }
-.lp .cf figcaption small { color: var(--lp-wax); }
+.lp .cf { --cf-fade: var(--lp-ink); }
+.lp .cf figcaption small { color: color-mix(in srgb, var(--lp-wax) 75%, #000); }
 .lp .theater-dots button { background-color: rgba(255, 255, 255, .25); }
 .lp .theater-dots button[aria-current="true"] { background-color: var(--lp-wax); }
 
