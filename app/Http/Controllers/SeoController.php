@@ -17,9 +17,9 @@ final class SeoController
     }
 
     /**
-     * Only the pages that ask to be indexed (their <meta name="robots"> says "index, follow"): the landing page, the invitations page, the four occasion pages and the two legal
+     * Only the pages that ask to be indexed (their <meta name="robots"> says "index, follow"): the landing page, the invitations page, the occasion and audience pages and the two legal
      * documents. Sign-up, sign-in and the demo are noindex, and Google reports a noindex URL in a sitemap as an error.
-     * `lastmod` is only given when it is true: the legal documents carry their own date; the landing page has none.
+     * `lastmod` is only given when it is true: the legal documents carry their own date; the other pages share `saas.seo.updated`, the day their words last changed (edit it when you change them).
      *
      * @return array<string,?string> path => lastmod (Y-m-d)
      */
@@ -27,7 +27,9 @@ final class SeoController
     {
         $legal = (string) config('saas.legal.updated', '');
         $legal = preg_match('/^\d{4}-\d{2}-\d{2}$/', $legal) === 1 ? $legal : null;
-        return ['' => null, 'invitations' => null] + array_fill_keys(OccasionPages::slugs(), null) + ['terms' => $legal, 'privacy' => $legal];
+        $content = (string) config('saas.seo.updated', '');
+        $content = preg_match('/^\d{4}-\d{2}-\d{2}$/', $content) === 1 ? $content : null;
+        return ['' => $content, 'invitations' => $content] + array_fill_keys(OccasionPages::slugs(), $content) + ['terms' => $legal, 'privacy' => $legal];
     }
 
     public function sitemap(): ResponseInterface
@@ -68,6 +70,21 @@ final class SeoController
         }
 
         return Response::html($body)
+            ->withHeader('Content-Type', 'text/plain; charset=utf-8')
+            ->withHeader('Cache-Control', 'public, max-age=3600');
+    }
+
+    /** A plain-text summary for AI assistants and crawlers (llmstxt.org): what the site is and its public pages. */
+    public function llms(): ResponseInterface
+    {
+        $brand = (string) config('saas.brand');
+        $lines = ["# {$brand}", '', '> Make a private love page: your photos, your song and a letter, opened with a question only they can answer. Free to build and preview; choose a plan to send it.', '', '## Pages', ''];
+        foreach (OccasionPages::PAGES as $slug => $page) {
+            $lines[] = '- [' . $page['name'] . '](' . $this->siteUrl() . $slug . '): ' . $page['description'];
+        }
+        $lines[] = '- [Invitations](' . $this->siteUrl() . 'invitations): Online invitations for weddings, debuts, christenings and parties.';
+
+        return Response::html(implode("\n", $lines) . "\n")
             ->withHeader('Content-Type', 'text/plain; charset=utf-8')
             ->withHeader('Cache-Control', 'public, max-age=3600');
     }

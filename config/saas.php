@@ -53,6 +53,9 @@ return [
     // registered business that runs the service (the "personal information controller" of the Data Privacy Act), and `email` must be a
     // mailbox that is read (privacy requests, reports, support). `version` and `updated` are printed on both documents: change them
     // whenever the text changes in a way that matters to users.
+    // The day the words of the public pages (landing, occasions, invitations) last changed: the sitemap's <lastmod> for them.
+    'seo' => ['updated' => '2026-10-31'],
+
     'legal' => [
         'operator' => (string) env('LEGAL_OPERATOR_NAME', 'Love of My Life'),
         'address' => (string) env('LEGAL_ADDRESS', 'Philippines'),

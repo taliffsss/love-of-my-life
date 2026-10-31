@@ -33,6 +33,7 @@ $router->get('/demo', [LandingController::class, 'demo'])->middleware(['traffic'
 $router->get('/terms', [LegalController::class, 'terms'])->name('terms');
 $router->get('/privacy', [LegalController::class, 'privacy'])->name('privacy');
 $router->get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+$router->get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 $router->get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 $router->get('/manifest.webmanifest', [SeoController::class, 'manifest'])->name('manifest');
 

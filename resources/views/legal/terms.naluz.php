@@ -2,6 +2,15 @@
 @section('title', 'Terms and Conditions · ' . $brand)
 @section('description', 'The rules for using ' . $brand . ': accounts, plans and payments, what you may put on a page, and what to expect from us.')
 @section('robots', 'index, follow')
+@push('head')
+    <link rel="canonical" href="{{ rtrim((string) config('app.url'), '/') }}/terms" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{ $brand }}" />
+    <meta property="og:title" content="{{ $brand }}" />
+    <meta property="og:url" content="{{ rtrim((string) config('app.url'), '/') }}/terms" />
+    <meta property="og:image" content="{{ rtrim((string) config('app.url'), '/') }}/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+@endpush
 @section('content')
 <header class="container" style="padding-block:22px"><a href="/" aria-label="{{ $brand }}">@include('partials.brand')</a></header>
 <main class="narrow legal">

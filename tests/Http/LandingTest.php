@@ -227,7 +227,7 @@ final class LandingTest extends TestCase
     {
         $xml = simplexml_load_string((string) $this->get('/sitemap.xml')->getBody());
         $listed = array_map('strval', (array) $xml->xpath('//*[local-name()="loc"]'));
-        $this->assertSame(['https://love.test/', 'https://love.test/invitations', 'https://love.test/birthday', 'https://love.test/wedding', 'https://love.test/anniversary', 'https://love.test/boyfriend-girlfriend', 'https://love.test/monthsary', 'https://love.test/long-distance', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
+        $this->assertSame(['https://love.test/', 'https://love.test/invitations', 'https://love.test/birthday', 'https://love.test/wedding', 'https://love.test/anniversary', 'https://love.test/boyfriend-girlfriend', 'https://love.test/monthsary', 'https://love.test/long-distance', 'https://love.test/tagalog-monthsary', 'https://love.test/valentines', 'https://love.test/proposal', 'https://love.test/sorry-letter', 'https://love.test/mothers-day', 'https://love.test/how-to-write-a-love-letter', 'https://love.test/terms', 'https://love.test/privacy'], $listed);
 
         // every listed page really is index, follow; and none of the noindex ones is listed
         foreach ($listed as $url) {
@@ -239,6 +239,28 @@ final class LandingTest extends TestCase
         }
         $this->assertStringContainsString('<lastmod>' . config('saas.legal.updated') . '</lastmod>', (string) $this->get('/sitemap.xml')->getBody(), 'the legal documents carry their date');
         $this->assertStringNotContainsString('<priority>', (string) $this->get('/sitemap.xml')->getBody(), 'no made-up priority or changefreq');
+        $this->assertStringContainsString('<loc>https://love.test/birthday</loc><lastmod>' . config('saas.seo.updated') . '</lastmod>', (string) $this->get('/sitemap.xml')->getBody(), 'the public pages carry the day their words changed');
+    }
+
+    public function testLlmsTxtDescribesTheSiteAndListsItsPublicPages(): void
+    {
+        $response = $this->get('/llms.txt');
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('text/plain', $response->getHeaderLine('Content-Type'));
+        $body = (string) $response->getBody();
+        $this->assertStringStartsWith('# ', $body);
+        foreach (['birthday', 'monthsary', 'tagalog-monthsary', 'valentines', 'invitations'] as $slug) {
+            $this->assertStringContainsString('(https://love.test/' . $slug . ')', $body, $slug);
+        }
+    }
+
+    public function testTheLegalPagesHaveACanonicalAndOpenGraphTags(): void
+    {
+        foreach (['terms', 'privacy'] as $slug) {
+            $html = (string) $this->get('/' . $slug)->getBody();
+            $this->assertStringContainsString('<link rel="canonical" href="https://love.test/' . $slug . '" />', $html, $slug);
+            $this->assertStringContainsString('property="og:url" content="https://love.test/' . $slug . '"', $html, $slug);
+        }
     }
 
     public function testRobotsKeepAccountAndAuthPagesOutAndStayOnePerLineWithTheSitemapLast(): void

@@ -2,6 +2,15 @@
 @section('title', 'Privacy Policy · ' . $brand)
 @section('description', 'What ' . $brand . ' collects, why, who sees it, how long we keep it and how to use your rights under the Data Privacy Act.')
 @section('robots', 'index, follow')
+@push('head')
+    <link rel="canonical" href="{{ rtrim((string) config('app.url'), '/') }}/privacy" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="{{ $brand }}" />
+    <meta property="og:title" content="{{ $brand }}" />
+    <meta property="og:url" content="{{ rtrim((string) config('app.url'), '/') }}/privacy" />
+    <meta property="og:image" content="{{ rtrim((string) config('app.url'), '/') }}/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+@endpush
 @section('content')
 <header class="container" style="padding-block:22px"><a href="/" aria-label="{{ $brand }}">@include('partials.brand')</a></header>
 <main class="narrow legal">

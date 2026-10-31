@@ -67,6 +67,23 @@ services:
         - "traefik.http.routers.loveofmylife-http.middlewares=redirect-to-https@file"
         - "traefik.http.routers.loveofmylife-http.service=loveofmylife"
 
+        # ── www → apex (301) ──────────────────────────────────────────────
+        # www.loveofmylife.love gets its own certificate (HTTP challenge) and sends everyone, on http or https, to the bare domain,
+        # so the search engines see one site. Needs the www DNS record, which exists.
+        - "traefik.http.routers.loveofmylife-www.rule=Host(`www.loveofmylife.love`)"
+        - "traefik.http.routers.loveofmylife-www.entrypoints=websecure"
+        - "traefik.http.routers.loveofmylife-www.tls=true"
+        - "traefik.http.routers.loveofmylife-www.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.loveofmylife-www.middlewares=loveofmylife-www-redirect"
+        - "traefik.http.routers.loveofmylife-www.service=loveofmylife"
+        - "traefik.http.routers.loveofmylife-www-http.rule=Host(`www.loveofmylife.love`)"
+        - "traefik.http.routers.loveofmylife-www-http.entrypoints=web"
+        - "traefik.http.routers.loveofmylife-www-http.middlewares=loveofmylife-www-redirect"
+        - "traefik.http.routers.loveofmylife-www-http.service=loveofmylife"
+        - "traefik.http.middlewares.loveofmylife-www-redirect.redirectregex.regex=^https?://www\\.loveofmylife\\.love/(.*)"
+        - "traefik.http.middlewares.loveofmylife-www-redirect.redirectregex.replacement=https://loveofmylife.love/$${1}"
+        - "traefik.http.middlewares.loveofmylife-www-redirect.redirectregex.permanent=true"
+
         # ── Own addresses: <name>.loveofmylife.love (OFF for now: feature flag SUBDOMAINS_ENABLED) ──────────────────
         # To enable: set SUBDOMAINS_ENABLED=true in .env.production, create the DNS record `*` -> this server, add a DNS-challenge
         # resolver `letsencrypt-dns` to the main Traefik stack (Let's Encrypt issues wildcards only that way, see DEPLOY.md), and
