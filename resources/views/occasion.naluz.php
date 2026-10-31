@@ -5,7 +5,6 @@
 @section('robots', 'index, follow')
 @section('siteCss', 'page')
 @section('uiJs', 'ui-public')
-@section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('hints')
     <link rel="preload" as="image" href="/assets/occasions/{{ $op['asset'] }}-lettie.svg" fetchpriority="high" />
 @endpush

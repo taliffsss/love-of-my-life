@@ -19,7 +19,7 @@ final class AnalyticsTest extends TestCase
         $this->assertStringContainsString('<link rel="dns-prefetch" href="https://www.googletagmanager.com" />', $html);
         $this->assertStringContainsString('<link rel="dns-prefetch" href="https://www.google-analytics.com" />', $html);
         $this->assertStringNotContainsString('rel="preconnect" href="https://www.googletagmanager.com"', $html, 'it loads late: a connection now would only compete');
-        $this->assertLessThan(strpos($html, 'rel="stylesheet"'), strpos($html, 'rel="preconnect" href="https://fonts.googleapis.com"'), 'before the first stylesheet');
+        $this->assertLessThan(strpos($html, 'rel="stylesheet"'), strpos($html, 'rel="preload" as="font"'), 'before the first stylesheet');
 
         $this->analytics('');
         $this->assertStringNotContainsString('dns-prefetch" href="https://www.googletagmanager.com', (string) $this->get('/')->getBody());

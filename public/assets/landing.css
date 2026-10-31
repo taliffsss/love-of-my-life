@@ -172,7 +172,9 @@
 .lp-row p { margin: 3px 0 0; font-size: .92rem; line-height: 1.45; color: var(--lp-mist); }
 .lp-row .play { color: var(--lp-gilt); }
 @media (max-width: 560px) { .lp-row { grid-template-columns: 84px minmax(0, 1fr); } .lp-row .shot { width: 84px; } .lp-row > .lp-btn { grid-column: 2; justify-self: start; } }
-.season-badge { display: inline-block; margin-bottom: 6px; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; color: #fff; background: var(--lp-wax); animation: mockPulse 2.2s ease-in-out infinite; }
+.season-badge { display: inline-block; margin-bottom: 6px; padding: 3px 10px; border-radius: 999px; font-size: .75rem; font-weight: 600; color: #fff; background: color-mix(in srgb, var(--lp-wax) 80%, #000); animation: badgePulse 2.2s ease-in-out infinite; }
+/* the badge pulses with a ring, not with opacity: fading the text under 4.5:1 contrast is what PageSpeed measured */
+@keyframes badgePulse { 50% { box-shadow: 0 0 0 5px var(--lp-wax-shadow); } }
 .lp-swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
 .lp-swatches a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--lp-line-d); font-size: .9rem; text-decoration: none; color: var(--lp-mist); }
 .lp-swatches a:hover { color: #fff; border-color: rgba(255, 255, 255, .5); }

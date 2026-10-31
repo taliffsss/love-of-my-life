@@ -30,11 +30,16 @@ for (const btn of $$("[data-copy]")) {
   const nav = $(".hero-nav");
   const hero = $(".hero");
   if (nav && hero) {
-    const sync = () => nav.classList.toggle("on-light", hero.getBoundingClientRect().bottom <= nav.offsetHeight / 2);
-    addEventListener("scroll", sync, { passive: true });
-    addEventListener("resize", sync);
-    // the first reading waits for the page's first frame: asked during the load it forces the browser to lay the page out early
-    requestAnimationFrame(() => setTimeout(sync));
+    // No geometry is read from script (getBoundingClientRect / offsetHeight force a layout, the "forced reflow" PageSpeed flags): the
+    // browser reports it. The header is over a light section once the hero no longer reaches below the middle of the header, so an
+    // IntersectionObserver whose top edge sits half a header down watches the hero; a ResizeObserver hands over the header's height.
+    let io;
+    new ResizeObserver(([entry]) => {
+      io?.disconnect();
+      const half = Math.round((entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height) / 2);
+      io = new IntersectionObserver(([e]) => nav.classList.toggle("on-light", !e.isIntersecting), { rootMargin: `-${half}px 0px 0px 0px` });
+      io.observe(hero);
+    }).observe(nav);
   }
 }
 

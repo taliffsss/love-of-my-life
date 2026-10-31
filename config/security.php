@@ -21,7 +21,7 @@ $formAction = "'self'" . match ($driver) {
 return [
     // Override or disable (null) any default security header.
     'headers' => [
-        // Fonts come from Google Fonts, the song from YouTube's embed, and uploaded photos from Spaces / its CDN.
+        // The product pages' fonts are self-hosted; the visitor pages (a love page, the expired notice) still use Google Fonts, the song from YouTube's embed, and uploaded photos from Spaces / its CDN.
         'Content-Security-Policy' => implode('; ', [
             "default-src 'self'",
             "base-uri 'self'",
@@ -30,7 +30,7 @@ return [
             "script-src 'self' https://www.youtube.com" . ($analytics ? ' https://www.googletagmanager.com' : ''),
             "style-src 'self' https://fonts.googleapis.com",
             "style-src-attr 'unsafe-inline'",
-            "font-src https://fonts.gstatic.com",
+            "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: blob: https:",
             "media-src 'self'",
             // 'self': the dashboard shows a live preview of the page in an iframe

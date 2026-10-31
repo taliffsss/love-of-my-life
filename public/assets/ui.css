@@ -1,4 +1,11 @@
 /* The product: landing page, sign-in, dashboard. Warm and quiet, so the love pages themselves stay the show. */
+/* Self-hosted fonts (latin subset of the Google Fonts files, public/assets/fonts): the browser no longer opens two more connections to
+   Google before it can draw text. A file is only fetched when a page uses its family; Inter and Bricolage are variable fonts. */
+@font-face { font-family: 'Bricolage Grotesque'; font-style: normal; font-weight: 300 800; font-display: swap; src: url(/assets/fonts/bricolage-grotesque.woff2) format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(/assets/fonts/inter.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 500; font-display: swap; src: url(/assets/fonts/cormorant-garamond-500.woff2) format('woff2'); }
+@font-face { font-family: 'Cormorant Garamond'; font-style: italic; font-weight: 500; font-display: swap; src: url(/assets/fonts/cormorant-garamond-italic-500.woff2) format('woff2'); }
+@font-face { font-family: 'Newsreader'; font-style: italic; font-weight: 400 600; font-display: swap; src: url(/assets/fonts/newsreader-italic.woff2) format('woff2'); }
 :root {
   --ink: #2a1621;
   --ink-2: #5a4350;

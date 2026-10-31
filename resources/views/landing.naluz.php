@@ -6,7 +6,6 @@
 @section('siteCss', 'home')
 @section('uiJs', 'ui-public')
 {{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
-@section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('head')
     <link rel="canonical" href="{{ $siteUrl }}" />
     <meta property="og:type" content="website" />

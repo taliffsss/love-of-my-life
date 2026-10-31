@@ -45,7 +45,8 @@
 .theater-dots { display: flex; gap: 0; flex-wrap: wrap; justify-content: center; }
 /* the dot is 9px, the button around it 24px (the least a finger can hit reliably): the padding is transparent, the colour stops at the content box */
 .theater-dots button { width: 24px; height: 24px; padding: 7.5px; border: 0; border-radius: 50%; background-clip: content-box; cursor: pointer; background-color: var(--line-2); transition: background-color .2s, transform .2s var(--ease); }
-.theater-dots button[aria-current="true"] { background-color: var(--brand); transform: scale(1.4); }
+/* the current dot is bigger by padding, not by scale(): a scaled button overlaps its neighbours' 24px targets */
+.theater-dots button[aria-current="true"] { background-color: var(--brand); padding: 6px; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-depth], .page-card[data-depth]:hover { transform: none; }

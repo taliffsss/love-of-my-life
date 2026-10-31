@@ -6,7 +6,6 @@
 @section('siteCss', 'page')
 @section('uiJs', 'ui-public')
 {{-- one Google Fonts request for the page: the layout's families plus Newsreader (its italic, without the optical-size axis: 64 KB instead of 147 KB) --}}
-@section('fontFamilies', '&family=Newsreader:ital,wght@1,400..600')
 @push('hints')
     <link rel="preload" as="image" href="/assets/invitations/lettie-invite.png" fetchpriority="high" />
 @endpush
