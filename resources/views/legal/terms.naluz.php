@@ -115,7 +115,7 @@
 <footer class="footer">
   <div class="container">
     @include('partials.brand')
-    <span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with love in the Philippines.</span>
+    <span><a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with love in the Philippines. · Powered by RRM DevCore</span>
   </div>
 </footer>
 @endsection
