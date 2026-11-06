@@ -190,7 +190,7 @@
 <footer class="lp-footer">
   <div class="lp-wrap">
     @include('partials.brand')
-    <span><a href="/">Love pages</a> · <a href="/invitations">Invitations</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with love in the Philippines.</span>
+    <span><a href="/">Love pages</a> · <a href="/invitations">Invitations</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with love in the Philippines. · Powered by RRM DevCore</span>
   </div>
 </footer>
 @endsection
