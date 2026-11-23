@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#fbf7f4" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fbf7f4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#170b14" media="(prefers-color-scheme: dark)" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     {{-- Resource hints first, so the browser starts on them before it reads the rest of the head. The fonts are self-hosted (@font-face is in
          ui.css), so there is no Google Fonts stylesheet to wait for: the one font every first screen needs (Bricolage Grotesque) is preloaded and
