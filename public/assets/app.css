@@ -9,6 +9,37 @@
   --font-ui: 'Bricolage Grotesque', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --shadow-2: 0 16px 40px rgba(42, 22, 35, .12);
   --radius-lg: 20px;
+  --brand-fill: #c42f4b; --brand-fill-hover: #a22640;
+}
+/* Dark appearance for the signed-in product (dashboard, editor, auth, admin). The landing pages (body.lp) keep their own occasion palettes and
+   the love pages theme themselves, so .lp is pinned back to the light tokens (its demo dialog is a light surface). */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #f6e9ee; --ink-2: #d5bfc9; --ink-3: #b49aa7;
+    --bg: #170b14; --surface: #221220; --surface-2: #2c1a28; --surface-2-soft: #1d0f1a;
+    --line: #3a2535; --line-2: #4d3446;
+    --brand: #e0809b; --brand-ink: #f0a3b7; --brand-soft: #3a1a28;
+    --gold: #d9a45f; --gold-text: #d9a45f;
+    --ok: #5fcf94; --ok-soft: #12301f; --warn: #f0b35a; --warn-soft: #33260d; --danger: #ff8a80; --danger-soft: #3a1512; --danger-fill: #b42318;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .4); --shadow-2: 0 12px 34px rgba(0, 0, 0, .45);
+    --focus: 0 0 0 3px rgba(224, 128, 155, .45);
+  }
+  body.lp {
+    color-scheme: light;
+    --ink: #2a1623; --ink-2: #5d4452; --ink-3: #765d6b; --bg: #f3ebf1; --surface: #fffaf6; --surface-2: #ece1e8; --surface-2-soft: #fdfaf8;
+    --line: #e2d3dc; --line-2: #cdb9c6; --brand: #c42f4b; --brand-ink: #a22640; --brand-soft: #fbe3e8; --gold: #a8742f; --gold-text: #8a5a1c;
+    --ok: #1f7a4d; --ok-soft: #e3f3e9; --warn: #8f5300; --warn-soft: #fcefd8; --danger: #b42318; --danger-soft: #fde8e6; --danger-fill: #b42318;
+    --shadow-1: 0 1px 2px rgba(42, 22, 33, .06), 0 1px 1px rgba(42, 22, 33, .04); --shadow-2: 0 12px 34px rgba(42, 22, 33, .09); --focus: 0 0 0 3px rgba(196, 47, 75, .32);
+  }
+  .qr-box, .pay-qr { color: #2a1621; }
+}
+/* Increase Contrast: darker secondary text and firmer borders, in both appearances. */
+@media (prefers-contrast: more) {
+  :root { --ink-2: #3d2a36; --ink-3: #5f4a58; --line: #c9b6ad; --line-2: #8f7a85; --gold-text: #6e4610; }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root { --ink-2: #efdce4; --ink-3: #dcc7d2; --line: #6a4d61; --line-2: #9b7a90; --gold-text: #f0c07a; }
 }
 body:not(.lp) { font-size: 16px; font-optical-sizing: auto; }
 
@@ -42,7 +73,7 @@ body:not(.lp) { font-size: 16px; font-optical-sizing: auto; }
 .create-form .input { min-height: 48px; font-size: 1.05rem; }
 .occasions legend { font-weight: 600; font-size: 1rem; }
 .occasion-tab span { font-weight: 500; }
-.occasion-tab input:checked + span { color: #fff; background: var(--brand); border-color: var(--brand); }
+.occasion-tab input:checked + span { color: #fff; background: var(--brand-fill); border-color: var(--brand-fill); }
 .template-card { border-radius: 14px; }
 .template-card:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); box-shadow: 0 0 0 1px var(--brand); }
 
@@ -78,11 +109,11 @@ dialog.modal { border-radius: 22px 22px 22px 8px; }
 .auth-card .btn-lg { min-height: 54px; font-size: 1.05rem; }
 .auth-card form { margin-top: 22px; }
 .auth-card .field > label { font-weight: 600; }
-.btn-social { min-height: 50px; font-size: 1rem; background: #fff; border-color: var(--line-2); }
+.btn-social { min-height: 50px; font-size: 1rem; background: var(--surface); border-color: var(--line-2); }
 .btn-social:hover { border-color: var(--ink); }
 .social-or span { padding: 0 2px; }
 .auth-art { background: radial-gradient(56% 50% at 14% 18%, rgba(214, 51, 79, .34), transparent 70%), radial-gradient(50% 50% at 86% 86%, rgba(233, 207, 154, .2), transparent 70%), #130a18; }
-.art-tab[aria-selected="true"] { color: #fff; background: var(--brand); border-color: var(--brand); }
+.art-tab[aria-selected="true"] { color: #fff; background: var(--brand-fill); border-color: var(--brand-fill); }
 .art-sample .eyebrow { text-transform: none; letter-spacing: 0; font-size: .95rem; color: #e9cf9a; }
 .art-copy blockquote, .art-letter { font-family: 'Newsreader', Georgia, serif; }
 

@@ -116,7 +116,7 @@ body[data-scheme="light"] .show.locked { filter: blur(70px) brightness(1.02) sat
 .nowplaying.paused { opacity: .6; }
 @keyframes npIn { from { opacity: 0; transform: translate3d(-14px, 0, 0); } }
 .np-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.np-label { font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+.np-label { font-size: .72rem; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
 body[data-scheme="light"] .np-label { color: #f4d9b0; }
 .np-title { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-by { font-family: 'Inter', system-ui, sans-serif; font-style: normal; font-size: .72rem; letter-spacing: .04em; color: rgba(255, 255, 255, .7); }
