@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased (branch `feat/logo-heart-flap`)
+
+- **New logo: "Heart Flap".** A heart with a keyhole tucked into an envelope replaces the glossy keyhole heart: header and footer, favicons, app icons, Safari/Windows icons and the share image. The name is now set in Bricolage
+  Grotesque as outlines. The kit and the usage guide are in `marketing/brand/redesign-2026-11/`; `marketing/brand/build_brand.py` builds the site's files from it.
+
 ## 3.13.0 (2026-10-29, branch `main-v2`)
 
 - **`/invitations`: a page for invitations.** Weddings, debuts, christenings, baby showers and more: the hook, three steps, the invitation templates (each says which plan sends it), the plans and an FAQ that says plainly that guests cannot reply in the app. It is in the sitemap and linked from the main page.

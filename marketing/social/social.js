@@ -10,7 +10,8 @@
   const RINGS = '<svg viewBox="0 0 64 40" width="64" height="40" fill="none" stroke="currentColor" stroke-width="3"><circle cx="22" cy="22" r="14"/><circle cx="42" cy="22" r="14"/><path d="M22 4l4 4-4 4-4-4z" fill="currentColor"/></svg>';
   const SPARK = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1c.8 6.2 4.8 10.2 11 11-6.2.8-10.2 4.8-11 11-.8-6.2-4.8-10.2-11-11 6.2-.8 10.2-4.8 11-11z"/></svg>';
   const PLANE = '<svg viewBox="0 0 48 48" fill="currentColor"><path d="M44 6 4 21l13 5 5 13 5-9 10 7zM19 25l17-13-12 16z"/></svg>';
-  const logo = (size = 42) => `<div class="logo" style="font-size:${size}px">${HEART}<span>Love of My Life</span></div>`;
+  // The real logo files; social.html shows the one that suits the card's theme.
+  const logo = (size = 42) => `<div class="logo">${["on-dark:logo-dark", "on-light:logo"].map((v) => v.split(":")).map(([c, f]) => `<img class="${c}" src="/public/${f}.svg" alt="" style="height:${Math.round(size * 1.2)}px" />`).join("")}</div>`;
   const phone = (key, w, style = "") => `<div class="phone" style="width:${w}px;height:${Math.round((w - 24) / 0.4621 + 24)}px;${style}"><div class="screen"><img src="${STILLS}${key}.jpg" alt="" /><span class="island"></span></div></div>`;
   const abs = (x, y, html, style = "") => `<div class="abs" style="left:${x}px;top:${y}px;${style}">${html}</div>`;
   const lettie = (x, y, size, pose) => abs(x, y, `<div class="lettie" data-pose="${pose}" style="width:${size}px;height:${size}px"></div>`);

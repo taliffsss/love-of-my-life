@@ -5,7 +5,7 @@
       "public/assets/depth.css",
       "public/assets/app.css"
     ],
-    "sha256": "e990254becd5503f555445aeef9d4ebb59b33519a49d9bf2eefa6352c41bb43a"
+    "sha256": "b5e66ea55b1293e8bf231b0db0a071086e335ca4ffe589b4ccd13aee0ff57040"
   },
   "home.css": {
     "sources": [
@@ -27,7 +27,7 @@
       "the bar",
       "the dashboard"
     ],
-    "sha256": "99c4437e80bc5b1927dcfd2287ec72f4cc59e9554c654467e2ec2f133ec40637"
+    "sha256": "fb14f86808f277b235500ba79247700fb74e538a7b86dd8f12baf2cc2d7c7aff"
   },
   "page.css": {
     "sources": [
@@ -50,7 +50,7 @@
       "the bar",
       "the dashboard"
     ],
-    "sha256": "2c73c9e6083eb9ec0c8d6dcdf0b66b523f0677ab39a7a08c4d96d62c0d52dda0"
+    "sha256": "7ab9a358fcfa70db3c5af266ba1b0d0e46bea3bc6d2151d59a331ba5185c6ab4"
   },
   "ui.js": {
     "sources": [

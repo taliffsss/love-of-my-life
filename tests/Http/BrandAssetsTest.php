@@ -66,7 +66,7 @@ final class BrandAssetsTest extends TestCase
         $this->assertSame(0, $corner($this->path('icons/icon-maskable-512.png')), 'maskable: the background reaches the corners');
         $this->assertSame(0, $corner($this->path('apple-touch-icon.png')), 'iOS fills a transparent corner with black');
         $this->assertSame(127, $corner($this->path('icons/icon-512.png')), 'the "any" icon has rounded, transparent corners');
-        $this->assertSame(127, $corner($this->path('icons/favicon-32.png')), 'a favicon is the heart alone');
+        $this->assertSame(127, $corner($this->path('icons/favicon-32.png')), 'a favicon is the mark alone');
     }
 
     public function testTheSvgsAreWellFormedAndTheLogoCarriesItsName(): void
@@ -81,6 +81,7 @@ final class BrandAssetsTest extends TestCase
         $light = (string) file_get_contents($this->path('logo.svg'));
         $dark = (string) file_get_contents($this->path('logo-dark.svg'));
         $this->assertStringContainsString('fill="#2a1621"', $light, 'dark words for a light background');
+        $this->assertStringContainsString('fill="#c42f4b"', $light, 'the crimson heart');
         $this->assertStringContainsString('fill="#fbeef0"', $dark, 'light words for a dark background');
         $this->assertStringNotContainsString('<text', $light, 'the words are outlines: no font needed anywhere');
     }
@@ -130,10 +131,24 @@ final class BrandAssetsTest extends TestCase
         $this->assertSame($graph['Organization']['@id'], $graph['WebSite']['publisher']['@id']);
     }
 
-    public function testTheBrandMarkInThePagesIsTheHeartWithAKeyhole(): void
+    public function testTheBrandInThePagesIsTheHeartFlapLogo(): void
     {
         $html = (string) $this->get('/')->getBody();
-        $this->assertStringContainsString('viewBox="6 7 52 50"', $html);
-        $this->assertStringNotContainsString('M12 21s-8-4.900', $html, 'the old plain heart is gone');
+        $this->assertStringContainsString('<svg class="brand-logo" viewBox="24 22 ', $html);
+        // narrow phone headers crop the logo to its symbol
+        $this->assertStringContainsString('preserveAspectRatio="xMinYMid slice"', $html);
+        $this->assertStringContainsString('<path class="brand-heart"', $html);
+        $this->assertStringContainsString('aria-label="Love of My Life: home"', $html);
+        $this->assertStringNotContainsString('M32 57C32 57', $html, 'the old keyhole heart is gone');
+    }
+
+    public function testTheHeaderLogoIsTheSameDrawingAsTheLogoFile(): void
+    {
+        $partial = (string) file_get_contents(base_path('resources/views/partials/brand.naluz.php'));
+        preg_match_all('/ d="([^"]+)"/', (string) file_get_contents($this->path('logo.svg')), $file);
+        $this->assertCount(3, $file[1], 'heart, pocket and words');
+        foreach ($file[1] as $d) {
+            $this->assertStringContainsString($d, $partial, 'run marketing/brand/build_brand.py');
+        }
     }
 }
