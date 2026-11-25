@@ -26,7 +26,7 @@
       lines: ["Merry Christmas, {n}.", "All I want this year is another one just like the last, with you.", "The best gift was already under my roof: you."]
     }
   };
-  // the season on offer right now (the server lists them: a seasonal template opens two weeks before its day)
+  // the season on offer right now (the server lists them: a seasonal template opens some weeks before its day)
   const openSeason = () => (hero?.dataset.seasons || "").split(",").filter((s) => SEASONS[s])[0] || "love";
 
   if (hero) {

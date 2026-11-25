@@ -57,7 +57,7 @@
     "'Costs less' or any saving in pesos: no comparison with printing has been measured; say 'no printing' instead",
     "An address of your own (love-name.domain) for invitations: the subdomains feature flag is off",
     "Anything about guests not needing an app or a sign-up beyond 'opens in the browser': true by design (public /p/{slug}) but untested on old phones",
-    "Seasonal party templates (Halloween, Christmas, Valentine) outside their windows: Christmas Party opens 11 Dec",
+    "Seasonal party templates (Halloween, Christmas, Valentine) outside their windows: Christmas Party opens 25 Nov",
     "Customer numbers, testimonials, 'most popular', 'best', 'cheapest'"
   ],
   "product_observations": [

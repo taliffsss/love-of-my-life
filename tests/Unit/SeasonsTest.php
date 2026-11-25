@@ -13,7 +13,7 @@ final class SeasonsTest extends TestCase
 {
     private function at(string $date, bool $always = false, bool $preview = true): Seasons
     {
-        return new Seasons(['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]], 14, $always, 'UTC', fn () => new \DateTimeImmutable($date), $preview);
+        return new Seasons(['halloween' => [10, 31], 'christmas' => [12, 25, 30], 'valentine' => [2, 14]], 14, $always, 'UTC', fn () => new \DateTimeImmutable($date), $preview);
     }
 
     /** @return array<string,array{string,string,bool}> */
@@ -24,8 +24,9 @@ final class SeasonsTest extends TestCase
             'halloween, 14 days before' => ['halloween', '2026-10-17', true],
             'halloween, the day' => ['halloween', '2026-10-31 23:59', true],
             'halloween, the day after' => ['halloween', '2026-11-01', false],
-            'christmas opens 11 Dec' => ['christmas', '2026-12-11', true],
-            'christmas, 10 Dec' => ['christmas', '2026-12-10', false],
+            'christmas opens 25 Nov, its own 30 days' => ['christmas', '2026-11-25', true],
+            'christmas, 24 Nov' => ['christmas', '2026-11-24', false],
+            'christmas, the day' => ['christmas', '2026-12-25 23:59', true],
             'christmas, Boxing Day' => ['christmas', '2026-12-26', false],
             'valentine opens 31 Jan' => ['valentine', '2027-01-31', true],
             'valentine, 30 Jan' => ['valentine', '2027-01-30', false],
@@ -35,7 +36,7 @@ final class SeasonsTest extends TestCase
     }
 
     #[DataProvider('windows')]
-    public function testASeasonalTemplateIsOfferedFromTwoWeeksBeforeItsDay(string $layout, string $date, bool $open): void
+    public function testASeasonalTemplateIsOfferedFromItsLeadDaysBeforeItsDay(string $layout, string $date, bool $open): void
     {
         $this->assertSame($open, $this->at($date)->isOpen($layout));
     }
@@ -55,8 +56,8 @@ final class SeasonsTest extends TestCase
     {
         $this->assertSame('halloween', $this->at('2026-10-20')->theme());
         $this->assertSame('default', $this->at('2026-11-01')->theme(), 'after Halloween: back to the default look');
-        $this->assertSame('default', $this->at('2026-12-10')->theme());
-        $this->assertSame('christmas', $this->at('2026-12-11')->theme());
+        $this->assertSame('default', $this->at('2026-11-24')->theme());
+        $this->assertSame('christmas', $this->at('2026-11-25')->theme());
         $this->assertSame('christmas', $this->at('2026-12-25')->theme());
         $this->assertSame('default', $this->at('2026-12-26')->theme());
         $this->assertSame('valentine', $this->at('2027-02-14')->theme());
@@ -66,9 +67,10 @@ final class SeasonsTest extends TestCase
 
     public function testItSaysWhenAClosedTemplateOpens(): void
     {
-        $this->assertSame('2026-12-11', $this->at('2026-10-20')->opensOn('christmas')->format('Y-m-d'));
+        $this->assertSame('2026-11-25', $this->at('2026-10-20')->opensOn('christmas')->format('Y-m-d'));
         $this->assertSame('2027-01-31', $this->at('2026-12-26')->opensOn('valentine')->format('Y-m-d'));
         $this->assertSame('2027-10-17', $this->at('2026-11-01')->opensOn('halloween')->format('Y-m-d'));
+        $this->assertSame('2027-11-25', $this->at('2026-12-26')->opensOn('christmas')->format('Y-m-d'));
         $this->assertNull($this->at('2026-10-20')->opensOn('classic'));
     }
 

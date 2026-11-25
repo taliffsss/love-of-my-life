@@ -4,6 +4,8 @@
 
 - **New logo: "Heart Flap".** A heart with a keyhole tucked into an envelope replaces the glossy keyhole heart: header and footer, favicons, app icons, Safari/Windows icons and the share image. The name is now set in Bricolage
   Grotesque as outlines. The kit and the usage guide are in `marketing/brand/redesign-2026-11/`; `marketing/brand/build_brand.py` builds the site's files from it.
+- **The Christmas season opens on 25 November** (30 days ahead, until 25 December) instead of 11 December: the landing look, Lettie and the Christmas template. Halloween and Valentine keep their two weeks. An event in
+  `config/saas.php` `seasons.events` may now give its own number of lead days.
 
 ## 3.13.0 (2026-10-29, branch `main-v2`)
 

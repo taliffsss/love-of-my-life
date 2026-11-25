@@ -39,7 +39,7 @@ She lives on the product's Rose theme background (`#160a14` to `#2a1220`), with 
 - Let her wave, point at the phone, hop when something opens, and hug a heart at the end.
 - Keep her round and soft. Animate her with gentle bounces on the beat.
 
-**Her four looks.** She changes with the season, the same windows as the site (`Seasons::theme()`: 14 days before the day). Her body and face never change; her clothes, seal colour and the little things floating around her do:
+**Her four looks.** She changes with the season, the same windows as the site (`Seasons::theme()`: 14 days before the day, Christmas from 25 November). Her body and face never change; her clothes, seal colour and the little things floating around her do:
 
 | Look | When | What she wears |
 |---|---|---|

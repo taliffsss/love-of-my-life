@@ -6,14 +6,14 @@ namespace App\Services;
 
 /**
  * When the seasonal templates (Designs::LAYOUTS entries with `season`: Halloween, Christmas, Valentine) are offered: from `lead_days`
- * (two weeks) before their day until the day itself. Outside that window they are not shown on the landing page or in the design
+ * (two weeks) before their day until the day itself; an event may name its own number of days (Christmas does). Outside that window they are not shown on the landing page or in the design
  * picker and cannot be newly chosen; a page that already uses one keeps it and keeps working, and the /demo links still open.
  * `always` (SEASONS_ALWAYS=true) offers all of them all year, for testing.
  */
 final class Seasons
 {
     /**
-     * @param array<string,array{0:int,1:int}> $events layout key => [month, day] of its day
+     * @param array<string,array{0:int,1:int,2?:int}> $events layout key => [month, day] of its day, then its own lead days if not $leadDays
      * @param ?\Closure():\DateTimeImmutable $clock now, for tests
      * @param bool $preview whether ?theme= may show a look out of season (outside production, or THEME_PREVIEW=true)
      */
@@ -37,7 +37,7 @@ final class Seasons
         return isset($this->events[$layout]);
     }
 
-    /** Whether the template is on offer now: every everyday template always, a seasonal one two weeks before its day. */
+    /** Whether the template is on offer now: every everyday template always, a seasonal one from its lead days before its day. */
     public function isOpen(string $layout, ?\DateTimeImmutable $now = null): bool
     {
         if (!$this->isSeasonal($layout) || $this->always) {
@@ -45,7 +45,7 @@ final class Seasons
         }
         $today = ($now ?? $this->now())->setTime(0, 0);
         $day = $this->day($layout, (int) $today->format('Y'));
-        return $today >= $day->modify("-{$this->leadDays} days") && $today <= $day;
+        return $today >= $this->opening($layout, $day) && $today <= $day;
     }
 
     /**
@@ -90,8 +90,8 @@ final class Seasons
         }
         $today = ($now ?? $this->now())->setTime(0, 0);
         $year = (int) $today->format('Y');
-        $opens = $this->day($layout, $year)->modify("-{$this->leadDays} days");
-        return $opens > $today ? $opens : $this->day($layout, $year + 1)->modify("-{$this->leadDays} days");
+        $opens = $this->opening($layout, $this->day($layout, $year));
+        return $opens > $today ? $opens : $this->opening($layout, $this->day($layout, $year + 1));
     }
 
     /**
@@ -104,6 +104,13 @@ final class Seasons
     {
         $now ??= $this->now();
         return array_filter($layouts, fn (string $key): bool => $this->isOpen($key, $now), ARRAY_FILTER_USE_KEY);
+    }
+
+    /** The first day the template is offered for the given day of its event. */
+    private function opening(string $layout, \DateTimeImmutable $day): \DateTimeImmutable
+    {
+        $lead = $this->events[$layout][2] ?? $this->leadDays;
+        return $day->modify("-{$lead} days");
     }
 
     private function day(string $layout, int $year): \DateTimeImmutable
