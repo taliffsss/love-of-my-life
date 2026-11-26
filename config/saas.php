@@ -32,11 +32,12 @@ return [
     'email_verification' => env('EMAIL_VERIFICATION', 'auto'),
 
     // The seasonal templates (Halloween, Christmas, Valentine) are offered from `lead_days` before their day until the day itself
-    // (App\Services\Seasons); `events` are [month, day]. SEASONS_ALWAYS=true offers them all year (for testing).
+    // (App\Services\Seasons); `events` are [month, day], with a third number where one has its own lead days: Christmas opens
+    // 30 days ahead, on 25 November. SEASONS_ALWAYS=true offers them all year (for testing).
     'seasons' => [
         'lead_days' => 14,
         'always' => filter_var(env('SEASONS_ALWAYS', false), FILTER_VALIDATE_BOOLEAN),
-        'events' => ['halloween' => [10, 31], 'christmas' => [12, 25], 'valentine' => [2, 14]],
+        'events' => ['halloween' => [10, 31], 'christmas' => [12, 25, 30], 'valentine' => [2, 14]],
     ],
 
     // THEME_PREVIEW=true lets ?theme=halloween|christmas|valentine|default preview a look of the landing page even in production (never needed there).

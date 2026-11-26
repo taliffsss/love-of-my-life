@@ -1,0 +1,25 @@
+{
+  "brand": "Love of My Life",
+  "tagline": "A love letter they unlock with a word only they know.",
+  "brief": "A love-page maker: photos, a song and a letter that only your person can open. The identity should feel warm, sweet and personal, with a small secret in it, and belong to the same family as Lettie the mascot.",
+  "adjectives": ["warm", "sweet", "personal", "a little secret"],
+  "criteria": "Success: reads as a love letter, ties to Lettie, holds up at 16 px, works in one colour.",
+  "industry": "saas",
+  "mockups": ["website", "app-icon", "social", "sticker", "box", "tote"],
+  "nav": ["Templates", "Prices", "Sign in"],
+  "brand_color": "#c42f4b",
+  "tile_color": "#2a1621",
+  "greyscale": false,
+  "final": true,
+  "concepts": [
+    {"name": "Heart Flap", "symbol": "kit/svg/symbol/lom-symbol-color.svg", "lockup": "kit/svg/horizontal/lom-horizontal-color.svg",
+     "stacked": "kit/svg/stacked/lom-stacked-color.svg", "avatar": "kit/svg/symbol-small/lom-symbol-small-color.svg",
+     "symbol_on_tile": "kit/svg/symbol/lom-symbol-color-dark.svg", "lockup_on_tile": "kit/svg/horizontal/lom-horizontal-color-dark.svg",
+     "stacked_on_tile": "kit/svg/stacked/lom-stacked-color-dark.svg", "symbol_on_dark": "kit/svg/symbol/lom-symbol-color-dark.svg",
+     "lockup_on_dark": "kit/svg/horizontal/lom-horizontal-color-dark.svg", "stacked_on_dark": "kit/svg/stacked/lom-stacked-color-dark.svg",
+     "idea": "A heart with a keyhole, tucked into an envelope: a love letter only they can open.",
+     "rationale": ["The gap between heart and pocket is the envelope flap", "The keyhole is the secret word", "Same envelope and heart as Lettie", "Flat, two colours, real cut-outs"]}
+  ],
+  "recommendation": "Heart Flap with keyhole.",
+  "next_steps": ["Trademark and reverse-image search", "Switch the site over: icons, header mark, share image", "Re-render social profile pictures and covers"]
+}

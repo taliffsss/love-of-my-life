@@ -34,8 +34,9 @@
       .sub { font-size: 34px; line-height: 1.38; color: var(--muted); }
       .hand { font-family: 'Caveat', cursive; font-weight: 700; color: var(--gold); }
       .url { display: inline-block; padding: 16px 30px; border-radius: 999px; font-size: 32px; font-weight: 600; color: var(--btn-ink); background: linear-gradient(135deg, var(--gold), var(--accent)); box-shadow: 0 16px 40px rgba(0, 0, 0, .28); }
-      .logo { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-weight: 500; font-size: 42px; }
-      .logo svg { width: 1.05em; height: 1.05em; color: var(--heart); }
+      .logo { display: flex; align-items: center; justify-content: center; }
+      .logo .on-light, .t-ivory .logo .on-dark, .t-cream .logo .on-dark { display: none; }
+      .t-ivory .logo .on-light, .t-cream .logo .on-light { display: block; }
       .phone { border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #3a2434, #120810); box-shadow: 0 0 0 2px rgba(255, 255, 255, .08) inset, 0 34px 80px rgba(0, 0, 0, .45); flex: none; }
       .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: #000; }
       .phone img { display: block; width: 100%; height: 100%; object-fit: cover; }

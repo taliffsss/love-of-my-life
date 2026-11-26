@@ -45,7 +45,7 @@ body:not(.lp) { font-size: 16px; font-optical-sizing: auto; }
 
 /* ---------- the bar ---------- */
 .topbar { background: #130a18; border-bottom: 1px solid rgba(255, 255, 255, .08); color: #fff4f8; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.topbar .brand { color: #fff; }
+.topbar .brand { color: #fbeef0; --logo-heart: #ee5b74; }
 .topbar nav a:not(.btn) { color: rgba(255, 244, 248, .78); font-weight: 500; }
 .topbar nav a:not(.btn):hover { color: #fff; background: rgba(255, 255, 255, .1); }
 .topbar .who { color: rgba(255, 244, 248, .6); }

@@ -180,7 +180,7 @@ final class PagesController
         // a draft of someone who chose a plan with fewer templates is shown just those (and the page's own), with a way to show all
         $user = $auth->user();
         $planLayouts = $user instanceof User && $page->status() === Page::DRAFT ? $intended->layouts($user->intended_plan) : null;
-        // a seasonal template is offered from two weeks before its day (a page that already uses one keeps it)
+        // a seasonal template is offered only in its season (a page that already uses one keeps it)
         $offered = array_filter(Designs::LAYOUTS, static fn (string $key): bool => $seasons->isOpen($key) || $key === $page->layout, ARRAY_FILTER_USE_KEY);
         $shownLayouts = $offered;
         if ($planLayouts !== null && ($request->getQueryParams()['templates'] ?? '') !== 'all') {
@@ -336,9 +336,9 @@ final class PagesController
         if (!isset(Designs::LAYOUTS[$layout])) {
             $errors['layout'] = ['Pick one of the templates.'];
         } elseif (!$seasons->isOpen($layout) && $layout !== $page->layout) {
-            // a seasonal template can be newly chosen from two weeks before its day; keeping the one a page already has is always fine
+            // a seasonal template can be newly chosen only in its season; keeping the one a page already has is always fine
             $opens = $seasons->opensOn($layout);
-            $errors['layout'] = [sprintf('The %s template opens on %s, two weeks before its day.', Designs::LAYOUTS[$layout]['name'], $opens?->format('j F') ?? 'its season')];
+            $errors['layout'] = [sprintf('The %s template opens on %s.', Designs::LAYOUTS[$layout]['name'], $opens?->format('j F') ?? 'its season')];
         } elseif ($page->status() !== Page::DRAFT && !$plans->allowsTemplate($page->plan, $layout)) {
             // a draft may try any template; a published page only those of its plan
             $errors['layout'] = [sprintf(

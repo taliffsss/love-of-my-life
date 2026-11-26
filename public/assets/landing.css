@@ -249,7 +249,7 @@
 .lp-close .lp-btn { margin-top: 32px; }
 .lp-footer { background: var(--lp-ink); border-top: 1px solid var(--lp-line-d); padding: 40px 0 52px; color: var(--lp-mist); font-size: .92rem; }
 .lp-footer .lp-wrap { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
-.lp-footer .brand { color: #fff; }
+.lp-footer .brand { color: #fbeef0; --logo-heart: #ee5b74; }
 
 /* ---------- the live demo dialog ---------- */
 dialog.demo-modal { width: min(440px, calc(100% - 20px)); max-height: calc(100dvh - 20px); display: none; flex-direction: column; overflow: hidden; font-family: Inter, system-ui, sans-serif; }

@@ -6,6 +6,6 @@
 <link rel="icon" href="/icons/favicon-32.png?v={{ $iconVersion }}" type="image/png" sizes="32x32" />
 <link rel="icon" href="/icons/favicon-16.png?v={{ $iconVersion }}" type="image/png" sizes="16x16" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v={{ $iconVersion }}" sizes="180x180" />
-<link rel="mask-icon" href="/safari-pinned-tab.svg?v={{ $iconVersion }}" color="#b0456a" />
+<link rel="mask-icon" href="/safari-pinned-tab.svg?v={{ $iconVersion }}" color="#c42f4b" />
 <meta name="msapplication-TileColor" content="#1a0d17" />
 <meta name="msapplication-config" content="/browserconfig.xml" />

@@ -226,7 +226,7 @@ final class DashboardPagesTest extends TestCase
         $this->assertSame(13 * 6, substr_count((string) $this->get($url . '?templates=all')->getBody(), 'name="layout"'));
     }
 
-    public function testTheSeasonalTemplatesAreOfferedTwoWeeksBeforeTheirDay(): void
+    public function testTheSeasonalTemplatesAreOfferedBeforeTheirDay(): void
     {
         $page = $this->makePage($this->owner, ['layout' => 'classic']);
         $url = '/dashboard/pages/' . $page->slug;
@@ -249,7 +249,7 @@ final class DashboardPagesTest extends TestCase
         $page = $this->makePage($this->owner, ['layout' => 'classic']);
         $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'christmas', 'theme' => 'rose']);
         $this->assertSame('classic', $page->fresh()->layout, 'closed: refused');
-        $this->assertStringContainsString('opens on 11 December', (string) $this->get('/dashboard/pages/' . $page->slug)->getBody());
+        $this->assertStringContainsString('opens on 25 November', (string) $this->get('/dashboard/pages/' . $page->slug)->getBody());
 
         $this->seasons('2026-12-12');
         $this->submit('PUT', '/dashboard/pages/' . $page->slug . '/design', ['layout' => 'christmas', 'theme' => 'rose']);
