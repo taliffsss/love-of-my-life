@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.19.1 (2026-11-28, branch `main-v2`)
+
+- **The production image runs PHP 8.5.13** (was 8.3). OPcache is built into PHP 8.5, and Composer in the build is 2.9. CI also tests PHP 8.5.
+- Fixed two PHP 8.5 deprecation notices for a page with no template or theme chosen.
+- **Tests run on local PostgreSQL by default** (`lovable_test`) and refuse any other host; `TEST_DB_CONNECTION=sqlite` keeps the in-memory run.
+
 ## Unreleased (branch `feat/seo-christmas`)
 
 - **`/christmas`: a Christmas landing page** with its own wording, message ideas, questions and eight templates. It stays up all year; the snow globe is listed only from 25 November to Christmas Day.
