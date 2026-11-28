@@ -62,9 +62,12 @@ payments, moving the original site into the product).
 ## Develop
 
 ```sh
-composer check     # coding standard + tests (in-memory SQLite)
+createdb lovable_test   # once: the tests' throw-away PostgreSQL database; every test wipes it
+composer check          # coding standard + tests (local PostgreSQL)
 
-# the same suite on PostgreSQL, in a throw-away database (any name ending in _test; it is wiped by every test)
-createdb lovable_test
-TEST_DB_CONNECTION=pgsql TEST_DB_HOST=localhost TEST_DB_USERNAME=$USER vendor/bin/phpunit
+TEST_DB_CONNECTION=sqlite vendor/bin/phpunit   # the same suite on in-memory SQLite
 ```
+
+The tests never use the application's `DB_*` settings. They refuse any host but this machine and any database whose name
+does not end in `_test`. Other values: `TEST_DB_HOST`, `TEST_DB_PORT`, `TEST_DB_DATABASE`, `TEST_DB_USERNAME`
+(default: your system user) and `TEST_DB_PASSWORD`.

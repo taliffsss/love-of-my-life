@@ -216,7 +216,7 @@ final class Designs
 
     public static function layout(?string $key): string
     {
-        return isset(self::LAYOUTS[$key]) ? (string) $key : self::DEFAULT_LAYOUT;
+        return $key !== null && isset(self::LAYOUTS[$key]) ? $key : self::DEFAULT_LAYOUT;
     }
 
     /** The occasion key, or null when the page has none (or an unknown one). */
@@ -227,7 +227,7 @@ final class Designs
 
     public static function theme(?string $key): string
     {
-        return isset(self::THEMES[$key]) ? (string) $key : self::DEFAULT_THEME;
+        return $key !== null && isset(self::THEMES[$key]) ? $key : self::DEFAULT_THEME;
     }
 
     /** The theme a page shows: a seasonal template always wears its own colours, any other uses the page's choice. */

@@ -50,36 +50,48 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * The suite runs on in-memory SQLite. `TEST_DB_CONNECTION=pgsql vendor/bin/phpunit` runs it on PostgreSQL instead,
-     * against TEST_DB_DATABASE (default lovable_test) on TEST_DB_HOST/PORT/USERNAME/PASSWORD. Every test drops all its
-     * tables, so the database name must end in _test: the suite refuses to touch anything else (e.g. the dev database).
+     * The suite runs on local PostgreSQL, against TEST_DB_DATABASE (default lovable_test) on TEST_DB_HOST/PORT/USERNAME/PASSWORD
+     * (defaults: 127.0.0.1, 5432, your system user, no password). `TEST_DB_CONNECTION=sqlite` runs it on in-memory SQLite instead.
+     * The application's DB_* settings are never used.
      */
     protected static function onPostgres(): bool
     {
-        return getenv('TEST_DB_CONNECTION') === 'pgsql';
+        return getenv('TEST_DB_CONNECTION') !== 'sqlite';
     }
 
-    /** @return array<string,mixed> */
-    private function postgresOverrides(): array
+    /**
+     * Every test drops all its tables, so the suite refuses to touch anything but a database on this machine whose name ends in _test.
+     *
+     * @return array<string,mixed>
+     */
+    protected static function postgresOverrides(): array
     {
+        $host = (string) (getenv('TEST_DB_HOST') ?: '127.0.0.1');
+        if (!in_array($host, ['127.0.0.1', 'localhost', '::1'], true)) {
+            throw new \RuntimeException("Refusing to run the tests on host [{$host}]: every test drops its tables. Use PostgreSQL on this machine.");
+        }
         $database = (string) (getenv('TEST_DB_DATABASE') ?: 'lovable_test');
-        if (!str_ends_with($database, '_test')) {
+        if (preg_match('/\A[A-Za-z0-9_]+_test\z/', $database) !== 1) {
             throw new \RuntimeException("Refusing to run the tests on [{$database}]: every test drops its tables. Use a database whose name ends in _test.");
         }
         return [
             'database.default' => 'pgsql',
-            'database.connections.pgsql.host' => (string) (getenv('TEST_DB_HOST') ?: '127.0.0.1'),
-            'database.connections.pgsql.port' => (string) (getenv('TEST_DB_PORT') ?: '5432'),
-            'database.connections.pgsql.database' => $database,
-            'database.connections.pgsql.username' => (string) (getenv('TEST_DB_USERNAME') ?: 'postgres'),
-            'database.connections.pgsql.password' => (string) (getenv('TEST_DB_PASSWORD') ?: ''),
+            // the whole connection is replaced: DB_READ_HOST or DB_WRITE_HOST from a .env must not send a test elsewhere
+            'database.connections.pgsql' => [
+                'driver' => 'pgsql',
+                'host' => $host,
+                'port' => (int) (getenv('TEST_DB_PORT') ?: 5432),
+                'database' => $database,
+                'username' => (string) (getenv('TEST_DB_USERNAME') ?: (getenv('USER') ?: 'postgres')),
+                'password' => (string) (getenv('TEST_DB_PASSWORD') ?: ''),
+            ],
         ];
     }
 
     /** @return array<string,mixed> */
     protected function configOverrides(): array
     {
-        return (self::onPostgres() ? $this->postgresOverrides() : []) + [
+        return (self::onPostgres() ? self::postgresOverrides() : []) + [
             'app.debug' => false,
             'app.key' => 'base64:' . base64_encode(str_repeat('k', 32)),
             'app.cache' => 'array',
