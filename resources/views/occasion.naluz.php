@@ -1,4 +1,7 @@
 @extends('layouts.product')
+{{-- every sentence of this view goes through $say, so a page in another language (OccasionPages `lang` and `ui`) is wholly in it --}}
+@php $say = static fn (string $text, array $with = []): string => strtr($op['ui'][$text] ?? $text, $with); @endphp
+@section('lang', $op['lang'] ?? 'en')
 @section('title', $op['title'])
 @section('description', $op['description'])
 @section('bodyClass', 'lp lp-t-' . $theme)
@@ -6,7 +9,7 @@
 @section('siteCss', 'page')
 @section('uiJs', 'ui-public')
 @push('hints')
-    <link rel="preload" as="image" href="/assets/occasions/{{ $op['asset'] }}-lettie.svg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/assets/occasions/{{ $op['mascot'] ?? $op['asset'] }}-lettie.svg" fetchpriority="high" />
 @endpush
 @push('head')
     {{-- an occasion page: the landing page's look (landing.css) plus the few pieces /invitations added (invitations.css); wording in App\Services\OccasionPages --}}
@@ -31,14 +34,14 @@
     @include('partials.brand')
     <span class="spacer"></span>
     <nav aria-label="Main" class="row">
-      <a class="hide-sm" href="#templates">Templates</a>
-      <a class="hide-sm" href="#plans">Plans</a>
-      <a class="hide-sm" href="/">Love pages</a>
+      <a class="hide-sm" href="#templates">{{ $say('Templates') }}</a>
+      <a class="hide-sm" href="#plans">{{ $say('Plans') }}</a>
+      <a class="hide-sm" href="/">{{ $say('Love pages') }}</a>
       @if ($user !== null)
-      <a class="btn btn-light btn-sm" href="/dashboard">Your pages</a>
+      <a class="btn btn-light btn-sm" href="/dashboard">{{ $say('Your pages') }}</a>
       @else
-      <a href="/login">Sign in</a>
-      <a class="btn btn-light btn-sm" href="/register">Start free</a>
+      <a href="/login">{{ $say('Sign in') }}</a>
+      <a class="btn btn-light btn-sm" href="/register">{{ $say('Start free') }}</a>
       @endif
     </nav>
   </div>
@@ -51,28 +54,28 @@
       <h1 class="lp-h1">{{ $op['h1'] }}</h1>
       <p class="lp-lead">{{ $op['lead'] }}</p>
       <div class="lp-cta">
-        <a class="lp-btn lp-btn-wax" href="/register">Start free: build it first</a>
-        <a class="lp-btn lp-btn-line" href="/demo?layout={{ $op['sample'][0] }}&amp;theme={{ $op['sample'][1] }}">See a sample</a>
+        <a class="lp-btn lp-btn-wax" href="/register">{{ $say('Start free: build it first') }}</a>
+        <a class="lp-btn lp-btn-line" href="/demo?layout={{ $op['sample'][0] }}&amp;theme={{ $op['sample'][1] }}">{{ $say('See a sample') }}</a>
       </div>
-      <p class="lp-fine">Build and preview for free. Choose a plan when you are ready to send it.</p>
+      <p class="lp-fine">{{ $say('Build and preview for free. Choose a plan when you are ready to send it.') }}</p>
     </div>
     <div class="lp-stage inv-stage">
-      <img class="inv-lettie" src="/assets/occasions/{{ $op['asset'] }}-lettie.svg" width="400" height="400" fetchpriority="high" alt="{{ $op['mascot_alt'] }}" />
+      <img class="inv-lettie" src="/assets/occasions/{{ $op['mascot'] ?? $op['asset'] }}-lettie.svg" width="400" height="400" fetchpriority="high" alt="{{ $op['mascot_alt'] }}" />
       <figure class="inv-phone">
         <img src="/assets/occasions/{{ $op['asset'] }}-phone.jpg" width="390" height="844" alt="{{ $op['alt'] }}" />
-        <figcaption>A sample page, with made-up content.</figcaption>
+        <figcaption>{{ $say('A sample page, with made-up content.') }}</figcaption>
       </figure>
     </div>
   </div>
 </div>
 
 <main>
-  <section class="lp-facts" aria-label="What to know">
+  <section class="lp-facts" aria-label="{{ $say('What to know') }}">
     <ul class="lp-wrap">
-      <li><b>No app to install</b><span>They open a link in any browser.</span></li>
-      <li><b>Private by default</b><span>A link or a QR code, locked with your question if you like.</span></li>
-      <li><b>Yours to change</b><span>Edit it after you send; the link and the QR code stay the same.</span></li>
-      <li><b>Free to start</b><span>Build and preview before you choose a plan.</span></li>
+      <li><b>{{ $say('No app to install') }}</b><span>{{ $say('They open a link in any browser.') }}</span></li>
+      <li><b>{{ $say('Private by default') }}</b><span>{{ $say('A link or a QR code, locked with your question if you like.') }}</span></li>
+      <li><b>{{ $say('Yours to change') }}</b><span>{{ $say('Edit it after you send; the link and the QR code stay the same.') }}</span></li>
+      <li><b>{{ $say('Free to start') }}</b><span>{{ $say('Build and preview before you choose a plan.') }}</span></li>
     </ul>
   </section>
 
@@ -80,7 +83,7 @@
     <div class="lp-wrap lp-how-grid">
       <div class="lp-how-head">
         <h2 id="how" class="lp-h2">{{ $op['steps_title'] ?? 'Three steps for your ' . strtolower($op['name']) . ' page.' }}</h2>
-        <p class="lp-sub">Write it tonight, send it when it feels right. Nothing goes out until you do.</p>
+        <p class="lp-sub">{{ $say('Write it tonight, send it when it feels right. Nothing goes out until you do.') }}</p>
       </div>
       <ol class="lp-steps">
         @foreach ($op['steps'] as $i => [$stepTitle, $stepText])
@@ -110,56 +113,56 @@
     <div class="lp-wrap">
       <div class="lp-section-head">
         <h2 id="templates-title" class="lp-h2">{{ $op['templates_title'] ?? $op['name'] . ' templates' }}</h2>
-        <p class="lp-sub">Open a sample to see how it feels. Every template can be tried free; the plan shown is what you need to send it.</p>
+        <p class="lp-sub">{{ $say('Open a sample to see how it feels. Every template can be tried free; the plan shown is what you need to send it.') }}</p>
       </div>
       <div class="inv-grid">
         @foreach ($templates as $t)
         <article class="inv-card">
           <h3>{{ $t['name'] }}</h3>
           <p>{{ $t['blurb'] }}</p>
-          <p class="inv-plan">@if ($t['seasonal'])In season now · @endif{{ $t['plan'] === null ? 'Not on a plan yet' : 'On ' . $t['plan'] . ' and above' }}</p>
-          <a class="lp-btn lp-btn-line lp-btn-sm" href="/demo?layout={{ $t['key'] }}" aria-label="Try the {{ strtolower($t['name']) }} template">Try the template</a>
+          <p class="inv-plan">@if ($t['seasonal']){{ $say('In season now') }} · @endif{{ $t['plan'] === null ? $say('Not on a plan yet') : $say('On :plan and above', [':plan' => $t['plan']]) }}</p>
+          <a class="lp-btn lp-btn-line lp-btn-sm" href="/demo?layout={{ $t['key'] }}" aria-label="{{ $say('Try the :name template', [':name' => strtolower($t['name'])]) }}">{{ $say('Try the template') }}</a>
         </article>
         @endforeach
       </div>
-      <p class="lp-more">The samples show each template with example content. The look of the occasion (its typeface and decorations) appears on your own page.</p>
+      <p class="lp-more">{{ $say('The samples show each template with example content. The look of the occasion (its typeface and decorations) appears on your own page.') }}</p>
     </div>
   </section>
 
   <section class="lp-pricing inv-plans" id="plans" aria-labelledby="plans-title">
     <div class="lp-wrap">
       <div class="lp-section-head">
-        <h2 id="plans-title" class="lp-h2">Free to build. Choose a plan to send it.</h2>
-        <p class="lp-sub">Build the page and preview it for free; only you can see it. When it is ready, pick the plan that has your template.</p>
+        <h2 id="plans-title" class="lp-h2">{{ $say('Free to build. Choose a plan to send it.') }}</h2>
+        <p class="lp-sub">{{ $say('Build the page and preview it for free; only you can see it. When it is ready, pick the plan that has your template.') }}</p>
       </div>
       <div class="lp-plans">
         @foreach ($plans as $key => $plan)
         @php $monthly = $plan['prices']['month'] ?? null; $once = $plan['prices']['once'] ?? null; @endphp
         <article class="lp-plan {{ $plan['popular'] ? 'featured' : '' }}">
-          @if ($plan['popular'])<span class="lp-tag">Most popular</span>@endif
+          @if ($plan['popular'])<span class="lp-tag">{{ $say('Most popular') }}</span>@endif
           <h3>{{ $plan['name'] }}</h3>
           @if ($monthly !== null)
-          <p class="lp-price">{{ \App\Services\Plans::money((int) $monthly) }} <small>a month</small></p>
+          <p class="lp-price">{{ \App\Services\Plans::money((int) $monthly) }} <small>{{ $say('a month') }}</small></p>
           @elseif ($once !== null)
-          <p class="lp-price">{{ \App\Services\Plans::money((int) $once) }} <small>once</small></p>
-          <p class="lp-or">No renewals: it stays online for good.</p>
+          <p class="lp-price">{{ \App\Services\Plans::money((int) $once) }} <small>{{ $say('once') }}</small></p>
+          <p class="lp-or">{{ $say('No renewals: it stays online for good.') }}</p>
           @endif
-          <p class="lp-blurb">{{ $plan['blurb'] }}</p>
+          <p class="lp-blurb">{{ $say($plan['blurb']) }}</p>
           <ul>
-            <li>{{ $plan['photos'] }} photos included</li>
-            <li>Link and printable QR code</li>
+            <li>{{ $say(':count photos included', [':count' => (string) $plan['photos']]) }}</li>
+            <li>{{ $say('Link and printable QR code') }}</li>
           </ul>
-          <a class="lp-btn {{ $plan['popular'] ? 'lp-btn-wax' : 'lp-btn-ink' }}" href="{{ $user !== null ? '/dashboard' : '/register' }}?plan={{ $key }}">Start with {{ $plan['name'] }}</a>
+          <a class="lp-btn {{ $plan['popular'] ? 'lp-btn-wax' : 'lp-btn-ink' }}" href="{{ $user !== null ? '/dashboard' : '/register' }}?plan={{ $key }}">{{ $say('Start with :plan', [':plan' => $plan['name']]) }}</a>
         </article>
         @endforeach
       </div>
-      <p class="lp-more">The full list of what each plan includes is on the <a href="/#pricing">main page</a>.</p>
+      <p class="lp-more">{{ $say('The full list of what each plan includes is on the') }} <a href="/#pricing">{{ $say('main page') }}</a>.</p>
     </div>
   </section>
 
   <section class="lp-faq" aria-labelledby="faq-title">
     <div class="lp-wrap lp-faq-grid">
-      <h2 id="faq-title" class="lp-h2">Good to know</h2>
+      <h2 id="faq-title" class="lp-h2">{{ $say('Good to know') }}</h2>
       <div class="faq">
         @foreach ($op['faq'] as [$question, $answer])
         <details>
@@ -168,8 +171,8 @@
         </details>
         @endforeach
         <details>
-          <summary>Do they need an app or an account?</summary>
-          <p>No. They open the link, or scan the QR code, in their phone’s browser.</p>
+          <summary>{{ $say('Do they need an app or an account?') }}</summary>
+          <p>{{ $say('No. They open the link, or scan the QR code, in their phone’s browser.') }}</p>
         </details>
       </div>
     </div>
@@ -177,12 +180,12 @@
 
   <section class="lp-close" aria-labelledby="close-title">
     <div class="lp-wrap">
-      <h2 id="close-title" class="lp-h2">Make it tonight.</h2>
-      <p class="lp-sub">Your photos, your song and your words, on one private page. Free to build and preview.</p>
-      <a class="lp-btn lp-btn-wax lp-btn-lg" href="/register">Start free: build it first</a>
-      <p class="lp-more">More occasions:
+      <h2 id="close-title" class="lp-h2">{{ $say('Make it tonight.') }}</h2>
+      <p class="lp-sub">{{ $say('Your photos, your song and your words, on one private page. Free to build and preview.') }}</p>
+      <a class="lp-btn lp-btn-wax lp-btn-lg" href="/register">{{ $say('Start free: build it first') }}</a>
+      <p class="lp-more">{{ $say('More occasions:') }}
         @foreach ($others as $i => $o){{ $i > 0 ? ' · ' : ' ' }}<a href="{{ $o['href'] }}">{{ $o['name'] }}</a>@endforeach
-        · <a href="/invitations">Invitations</a>@if (! empty($op['see_also'])) · <a href="{{ $op['see_also'][0] }}">{{ $op['see_also'][1] }}</a>@endif</p>
+        · <a href="/invitations">{{ $say('Invitations') }}</a>@if (! empty($op['see_also'])) · <a href="{{ $op['see_also'][0] }}">{{ $op['see_also'][1] }}</a>@endif</p>
     </div>
   </section>
 </main>
@@ -190,7 +193,7 @@
 <footer class="lp-footer">
   <div class="lp-wrap">
     @include('partials.brand')
-    <span><a href="/">Love pages</a> · <a href="/invitations">Invitations</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · Made with love in the Philippines. · Powered by RRM DevCore</span>
+    <span><a href="/">{{ $say('Love pages') }}</a> · <a href="/invitations">{{ $say('Invitations') }}</a> · <a href="/terms">{{ $say('Terms') }}</a> · <a href="/privacy">{{ $say('Privacy') }}</a> · {{ $say('Made with love in the Philippines.') }} · Powered by RRM DevCore</span>
   </div>
 </footer>
 @endsection

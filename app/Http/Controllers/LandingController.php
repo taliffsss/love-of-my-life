@@ -152,7 +152,7 @@ final class LandingController
         $copy['title'] = str_replace('{brand}', $brand, $copy['title']);
         $copy['asset'] ??= $copy['occasion'];
         $templates = [];
-        foreach (Designs::OCCASION_DESIGNS[$copy['occasion']] as $key => [$name, $blurb]) {
+        foreach ($copy['templates'] ?? Designs::OCCASION_DESIGNS[$copy['occasion']] as $key => [$name, $blurb]) {
             if (!empty(Designs::LAYOUTS[$key]['season']) && !$seasons->isOpen($key)) {
                 continue; // a seasonal template is only offered in its window
             }
@@ -193,7 +193,7 @@ final class LandingController
                     'url' => $page,
                     'name' => $copy['h1'],
                     'description' => $copy['description'],
-                    'inLanguage' => 'en',
+                    'inLanguage' => $copy['lang'] ?? 'en',
                     'isPartOf' => ['@id' => $site . '#website'],
                     'primaryImageOfPage' => $site . 'assets/occasions/' . $copy['asset'] . '-phone.jpg',
                     'breadcrumb' => ['@id' => $page . '#breadcrumb'],

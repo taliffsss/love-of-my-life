@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased (branch `feat/seo-christmas`)
+
+- **`/christmas`: a Christmas landing page** with its own wording, message ideas, questions and eight templates. It stays up all year; the snow globe is listed only from 25 November to Christmas Day.
+- **`/tagalog-monthsary` is declared and written in Filipino** (`lang="fil"`), including the headings, buttons, template descriptions and plan text.
+- **`/mothers-day` lists its own templates** instead of the birthday ones.
+- **`/monthsary` is titled "Monthsary message for your boyfriend or girlfriend"**, and the partner page's description no longer competes for "monthsary".
+- The sitemap's `lastmod` for the public pages is 28 November 2026.
+
 ## Unreleased (branch `feat/logo-heart-flap`)
 
 - **New logo: "Heart Flap".** A heart with a keyhole tucked into an envelope replaces the glossy keyhole heart: header and footer, favicons, app icons, Safari/Windows icons and the share image. The name is now set in Bricolage
